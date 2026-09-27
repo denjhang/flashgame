@@ -490,10 +490,12 @@ const CANCEL_HINT = [1, 2].map(i => {
 // 建造区判定: 原版用 carte.surfaceForBuild(768) 的 shape hitTest
 //   (DefineSprite_834/frame_1/PlaceObject2_822_226 on(press):
 //    `if (surfaceForBuild.hitTest(x,y,true)) {...允许建...}`)
-// 【未完成·如实记录】尝试用 768 遮罩位图(1838x1730)复现该判定失败:
-//   PlaceObject2 矩阵解出 translate=(166.1,391.5)/scale=1, 但按世界坐标(含 y 翻转、
-//   多种原点组合)采样均无法与路点吻合; 遮罩几何基准另有来源, 未破解。
-//   故仍用道路缓冲近似 (逻辑与遮罩意图一致: 道路/水/建筑不可建)。
+// 【未完成·如实记录, 见 PROGRESS 第 N+12 轮】尝试用 768 遮罩位图(1838x1730)复现该判定:
+//   已穷尽: 结构解码(767 bounds 1838x1730) + SVG transform 权威值(322.9,1803.45)
+//   + 离线穷举 17 种坐标组合 + 图像互相关对齐(最优 offset 时 mask 内 94% 为草地)。
+//   但全部方案下"路点上仍有 16-28% 被判可建"(理想 0%) → 说明遮罩语义不是"道路禁建",
+//   而是更细的"可建平地"(含地形/建筑等多重限制), 无法用路点距离或草地图层近似复现。
+//   → H5 保留 45px 道路缓冲近似 (行为与遮罩意图一致: 道路上不可建), 属设计取舍, 非还原完成。
 function roadBlocked(wx, wy) {
   for (const rn in ROUTES) {
     const r = ROUTES[rn];
