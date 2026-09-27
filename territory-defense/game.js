@@ -527,6 +527,16 @@ const SU37 = {
   SCALE: 0.4946,    // 原版 PlaceObject2 矩阵 scaleX/Y (SWF 二进制权威解码)
 };
 const SU37_IMG_SRC = 'assets/su37/DefineSprite_793/1.png';
+// ---------------- Su37 瞄准区标记 (原版 zoneBombardement chid 785) ----------------
+// 权威依据: deobf/data/dump_tree.json line 956 name="zoneBombardement" chid="785" dpt="17"
+// FFDec SVG 导出: 154.3x154.3 画布, 内容在 sprite 局部 (-77.15,-77.15)..(77.15,77.15)
+//   779 半透明绿底 + 780/781 白色框 + 782 文本 "ready" + 784 4 角准星 + 中心十字
+// 原版行为: Su37 选边 (su37Start) 后 zoneBombardement._visible=true 并跟随鼠标;
+//          点击地图后置 false, 飞机从所选边飞入。
+const ZONE_IMG_SRC = 'assets/zone/1.png';
+const ZONE_IMG = new Image();
+ZONE_IMG.src = ZONE_IMG_SRC;
+const ZONE_ORIGIN = { x: -77.15, y: -77.15 };   // 154.3/2, 画布左上角 → 中心
 function su37Img() {
   if (!SU37.img) { SU37.img = new Image(); SU37.img.src = SU37_IMG_SRC; }
   return SU37.img;
@@ -1543,19 +1553,25 @@ function draw() {
   }
   // Su37 空袭 (飞行中的战机, 在迷雾之前绘制)
   su37Draw();
-  // Su37 瞄准提示 (原版 zoneBombardement: 光标区标记)
+  // Su37 瞄准提示 (原版 zoneBombardement chid 785: 跟随鼠标的 4 角准星 + 中心十字 + "ready" 文本)
   if (G.su37Aiming) {
     const sx = w2sX(G.mx), sy = w2sY(G.my);
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,90,60,.85)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(sx, sy, SU37.IMPACT * zoom, 0, 7); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(sx - 14, sy); ctx.lineTo(sx + 14, sy);
-    ctx.moveTo(sx, sy - 14); ctx.lineTo(sx, sy + 14);
-    ctx.stroke();
-    ctx.fillStyle = '#ff9'; ctx.font = '12px monospace';
-    ctx.fillText('点击目标投放炸弹', sx + 18, sy - 8);
-    ctx.restore();
+    if (ZONE_IMG.complete && ZONE_IMG.naturalWidth) {
+      ctx.drawImage(ZONE_IMG, sx + ZONE_ORIGIN.x * zoom, sy + ZONE_ORIGIN.y * zoom,
+                    154.3 * zoom, 154.3 * zoom);
+    } else {
+      // 资源未到位时回退到原 CSS 近似 (不影响玩法)
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,90,60,.85)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(sx, sy, SU37.IMPACT * zoom, 0, 7); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(sx - 14, sy); ctx.lineTo(sx + 14, sy);
+      ctx.moveTo(sx, sy - 14); ctx.lineTo(sx, sy + 14);
+      ctx.stroke();
+      ctx.fillStyle = '#ff9'; ctx.font = '12px monospace';
+      ctx.fillText('点击目标投放炸弹', sx + 18, sy - 8);
+      ctx.restore();
+    }
   }
   // 建造预览光标 (原版 carte.viseurConstruction: 跟随鼠标, 帧号反映可建状态)
   if (G.shopSel && !G.su37Aiming) {

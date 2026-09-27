@@ -1,5 +1,67 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+19 轮成果（2026-09-28, H5 领土防御·补原版 Su37 瞄准区标记 zoneBombardement chid785）
+
+**本轮补上 N+11 已记录"未做"的真实缺口：用原版真实 SWF 素材替换侧栏按钮触发后
+的"瞄准圈 CSS 近似"。**
+
+### 1. 【缺口发现】原版的 Su37 瞄准区标记是独立 sprite，H5 此前用 CSS 圆+十字+中文近似
+
+N+11 已知原版有 `zoneBombardement`（chid 785, dpt 17, name="zoneBombardement"，
+`deobf/data/dump_tree.json:956`），但**该 sprite 不在 ExportAssets 表中**（导出名表 `exports.txt`
+最末 chid 568/637/639 后无 785），所以长期当作"内部引用"被忽略。
+H5 此前用一段 CSS 代码画一个红色圆圈+十字+中文"点击目标投放炸弹"作近似。
+
+### 2. FFDec 导出与画布原点（与 173/86 同一套方法论）
+
+```
+ffdec-cli -selectid 785 -format sprite:png -export sprite /tmp/_zbtest TCS.swf
+ffdec-cli -selectid 785 -format sprite:svg -export sprite /tmp/_zb_svg TCS.swf
+```
+
+PNG 导出：1 帧，**154.3×154.3** 画布（4 个角准星 + 中心十字 + 半透明绿底 + "ready" 文本）。
+SVG 导出权威解码：外层 transform `matrix(1,0,0,1, 77.15, 77.15)`（= 154.3/2 居中），子件:
+- 779 = 153×153 半透明绿底（fill="#ff00ff" alpha 0.498, 4 角被 784 mask 遮住）
+- 781 (sub-sprite 2.3034×) → 780 = 67×67 白色内框
+- 782 = 文本 "ready" Courier New (5 字符)
+- 784 = 4 角准星 + 中心十字 (101×101)
+
+**画布原点**: `ZONE_ORIGIN = { x: -77.15, y: -77.15 }`（与 173/86 同一推导：sprite 中心在 (0,0)）
+
+### 3. H5 接入
+
+- `assets/zone/1.png`：154.3×154.3 半透明绿底 + 4 角准星 + 中心十字 + "ready" 文本
+- `ZONE_IMG`、`ZONE_ORIGIN` 常量
+- 替换原 `ctx.arc + 十字 + fillText('点击目标投放炸弹')` CSS 近似为 `ctx.drawImage(ZONE_IMG, ...)`
+  （保留 CSS 回退分支以防资源加载失败）
+- 生命周期：原版 `_visible = false` ↔ H5 `G.su37Aiming = false` —— 已在 `su37Launch` 内
+  设置（H5 上一轮 N+3 已实现，未变）
+
+### 4. 真机验证
+
+- 资源：`assets/zone/1.png` 154.3×154.3（FFDec 导出）
+- 注入 `G.unlocker.su37=true; su37Start() → G.su37Aiming=true, side=bas` 后
+  强制 `draw()` + screenshot：**画面正中偏左可见绿色 4 角准星 + 中心十字**（与 785
+  真实素材一致；CSS 红色圆圈已消失）
+- 模拟点击 `su37Launch(G.mx,G.my)`：`G.su37Aiming true→false`，`SU37.plane=true`
+  —— zone 消失，飞机从所选边生成
+- 冒烟测试新增断言通过：
+  ```
+  瞄准区: img=assets/zone/1.png origin=(-77.15,-77.15) 154.3px (原版 785, FFDec 导出)
+  瞄准区 785 资源已接入=true
+  ```
+
+### 5. 本轮如实说明
+
+- **原版 zone 是 154.3px 见方**（中心 77px 半径），与 `SU37.IMPACT=260`（实际炸弹
+  溅射半径）**不重合**：zone 标记的是"瞄准点附近的小区域提示"，而 `impact` 是
+  实际伤害范围。CSS 近似错误地按 `IMPACT=260` 画了大圆，本轮按原版大小修正。
+- 785 没有导出名（不在 ExportAssets 表），所以**代码里也没有字符串引用**，纯靠
+  帧库的 `name="zoneBombardement"` + `PlaceObject2` 矩阵挂接到 834 主菜单 sprite。
+  H5 沿用上一轮 `G.su37Aiming` 状态机即可，不需新字段。
+- 本轮未做：markFlame 差异化（N+18 标记的剩余"如实未做"项）；
+  8.8%/合成 alpha 平均差 8.5/255 等遗留量化误差（按之前看板如实保留）。
+
 ## 第 N+18 轮成果（2026-09-28, H5 领土防御·补原版命中火花特效 createEclat/etincelle）
 
 **本轮补上一处此前完全缺失、且每场战斗都会大量出现的效果。**

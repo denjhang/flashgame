@@ -68,6 +68,12 @@ const dmg = hp0.map((h, i) => h - hp1[i]);
 console.log("Su37: start=%s aiming=%s 边=%s 起飞=%s 起飞后available=%s",
   okStart, aiming, p0 && p0.side, planeAfter, availAfterLaunch);
 console.log("Su37 投弹: 3 敌HP损伤=%j 爆炸特效=%d", dmg, G.effects.length);
+// 瞄准区标记 (原版 zoneBombardement chid 785, 替代 CSS 近似)
+console.log("瞄准区: img=%s origin=(%s,%s) 154.3px (原版 785, FFDec 导出)",
+  ZONE_IMG && ZONE_IMG.src, ZONE_ORIGIN.x, ZONE_ORIGIN.y);
+const zbOk = ZONE_IMG && ZONE_IMG.src.endsWith('/zone/1.png')
+  && ZONE_ORIGIN.x === -77.15 && ZONE_ORIGIN.y === -77.15;
+console.log("瞄准区 785 资源已接入=%s", zbOk);
 // 冷却: 从 COOL_FRAMES 起逐帧跑到恢复
 SU37.available = false; SU37.cool = SU37.COOL_FRAMES;
 let f = 0; while (!SU37.available && f++ < 200) su37Update();
