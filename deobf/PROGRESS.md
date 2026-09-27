@@ -269,6 +269,23 @@ python3 deobf/resolve_constants.py
     只露边缘一丝立体感（**这是原版真实行为，非 bug**）
 - 本轮未做（队列下推）：G 选中圈 471、H BGM 对号证据、I 单位去背景+车头校正
 
+## 第 N+6 轮成果（2026-09-28, H5 领土防御·选中视觉）
+
+- **修正任务描述的关键错误**：`471` **不是**选中圈图形，而是 DefineSound `selectionUnite`（音效，早已接入）。
+  真正的选中视觉是两个 sprite：**778 = carte.viseurUnit（红色四角准星）**、**775 = carte.cerclePortee（绿色射程圈）**
+  - 778 有 9 帧但**只有前 4 帧有内容**（后 5 帧 bbox=None 空帧）—— 任务描述"4 帧"的由来；
+    60x60 固定尺寸，不随射程缩放
+  - 775 单帧 100x100 圆形绿线
+- **权威用法**（frame_6/PlaceObject2_6_321 enterFrame + load 反编译）：
+  - `afficheUnit != "null"` 时：`cerclePortee._x/_y = 选中单位._x/_y`；
+    **`cerclePortee._width = distanceOfFire * 2`**（宽度=射程直径）；`cerclePortee._height = _width`
+  - `viseurUnit._x` 同步跟随
+  - `unshowInfoOnUnit()`: 两者 `_x = -500`（移出画面隐藏）
+- **H5 接入**：选中塔时绘制 775（缩放到 `w[1]*2*zoom` 直径）+ 778（固定 60px，按 G.frame/6 轮播 4 帧）
+- 真机验证：近景截图确认红色四角准星出现在塔周；全图模式确认绿色射程圈（m60 射程 350 → 屏幕直径 273px，
+  与 `350*2*0.39` 吻合）
+- 本轮未做（队列下推）：H BGM 三段对号证据、I 单位去背景 + 车头方向校正
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

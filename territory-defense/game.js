@@ -129,6 +129,22 @@ for (const k in UNIT_SHADOW) {
 const SHADOW_ALPHA = 0.352;   // 原版 colorTransform alpha mult
 const SHADOW_OFFSET = 4;      // 原版 ombre._x/_y = _x/_y + 4
 
+// ---------------- 选中视觉 (原版 carte.viseurUnit 778 + carte.cerclePortee 775) ----------------
+// 反编译依据 (frame_6/PlaceObject2_6_321 enterFrame + load):
+//   afficheUnit != "null" 时: cerclePortee 移到选中单位 (x,y), _width = distanceOfFire * 2 (直径)
+//   viseurUnit 同样跟随; unshowInfoOnUnit() 时两者 _x = -500 (移出画面)
+//   471 是音效 selectionUnite (非视觉!); 778=红色四角准星(前4帧有内容), 775=绿色射程圈
+const SEL_CROSS = [1, 2, 3, 4].map(i => {
+  const im = new Image();
+  im.src = 'assets/selection/DefineSprite_778/' + i + '.png';
+  return im;
+});
+const SEL_RANGE = (() => {
+  const im = new Image();
+  im.src = 'assets/selection/DefineSprite_775/1.png';
+  return im;
+})();
+
 // ---------------- 原版炮塔外观 (86 帧库 shape→PNG) + 爆炸动画 + BGM ----------------
 const TURRET_IMG = {};
 // 权威对号 deobf/data/turret_frames.json (DefineSprite 86 帧标签→shape):
@@ -922,10 +938,21 @@ function draw() {
       ctx.fillStyle = '#4f4'; ctx.fillRect(-10, -16, 20 * t.hp / t.maxHp, 3);
     }
     ctx.restore();
-    // 射程圈 (选中)
+    // 选中视觉 (原版 cerclePortee 射程圈 + viseurUnit 四角准星)
     if (t === G.selected && t.w) {
-      ctx.strokeStyle = 'rgba(255,255,150,.4)';
-      ctx.beginPath(); ctx.arc(sx, sy, t.w[1] * zoom, 0, 7); ctx.stroke();
+      // 绿色射程圈: 原版 _width = distanceOfFire * 2 (直径), 图 100x100 → 缩放 直径/100
+      if (SEL_RANGE.complete && SEL_RANGE.naturalWidth) {
+        const dia = t.w[1] * 2 * zoom;
+        ctx.drawImage(SEL_RANGE, sx - dia / 2, sy - dia / 2, dia, dia);
+      } else {
+        ctx.strokeStyle = 'rgba(120,255,120,.45)';
+        ctx.beginPath(); ctx.arc(sx, sy, t.w[1] * zoom, 0, 7); ctx.stroke();
+      }
+      // 红色四角准星 (原版 viseurUnit 778, 60x60, 固定大小不随射程)
+      const ci = SEL_CROSS[Math.floor(G.frame / 6) % SEL_CROSS.length];
+      if (ci.complete && ci.naturalWidth) {
+        ctx.drawImage(ci, sx - 30 * zoom, sy - 30 * zoom, 60 * zoom, 60 * zoom);
+      }
       ctx.fillStyle = '#ff8'; ctx.font = '11px monospace';
       const msg = t.aa ? '[对空OK] S卖 R修' : `按U升级对空 $${t.aaUpgradeCost()}`;
       ctx.fillText(msg, sx - 30, sy + 30);
