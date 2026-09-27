@@ -127,6 +127,50 @@ try {
   window.addEventListener('keydown', startBgm);   // 浏览器自动播放策略: 首次交互启动
 } catch (e) { /* 无 Audio 环境(无头)忽略 */ }
 
+// ---------------- 音效 (原版 soundsFx; 轮换池避免重叠切断) ----------------
+const SFX_FILES = {
+  boutonScroll: '450_boutonScroll.mp3', creationUnite: '452_creationUnite.mp3',
+  selectionUnite: '471_selectionUnite.mp3', cannot: '451_cannot.mp3',
+  m60: '464_m60.wav', gatling: '463_gatling.mp3', c75mm: '446_c75mm.mp3',
+  c105mm1: '447_c105mm1.mp3', c105mm2: '448_c105mm2.mp3', c125mm: '449_c125mm.mp3',
+  crotale: '453_crotale.mp3', mlrs: '465_mlrs.mp3',
+  explosion1: '454_explosion1.mp3', explosion2: '455_explosion2.mp3',
+  explosion3: '456_explosion3.mp3', explosionLarge: '461_explosionLarge.mp3',
+  explosionMlrs: '462_explosionMlrs.mp3', ricochet1: '467_ricochet1.mp3',
+};
+const SFX_POOL = {};
+function playSfx(name, vol = 0.4) {
+  try {
+    if (!SFX_POOL[name]) {
+      SFX_POOL[name] = [0, 1, 2].map(() => {
+        const a = new Audio('assets/sounds/' + SFX_FILES[name]);
+        a.volume = vol;
+        return a;
+      });
+      SFX_POOL[name]._i = 0;
+    }
+    const pool = SFX_POOL[name];
+    pool._i = (pool._i + 1) % pool.length;
+    const a = pool[pool._i];
+    a.currentTime = 0;
+    a.volume = vol;
+    a.play().catch(() => {});
+  } catch (e) { /* 无头环境 */ }
+}
+function weaponSfx(turretId) {
+  const map = { m60:'m60', gatling:'gatling', canon75:'c75mm', canon105:'c105mm1',
+    canon105D:'c105mm2', canon125:'c125mm', crotale:'crotale', MLRS:'mlrs' };
+  if (map[turretId]) playSfx(map[turretId], 0.25);
+}
+function explosionSfx(power) {
+  if (power >= 200) playSfx('explosionLarge', 0.5);
+  else if (power >= 100) playSfx('explosionMlrs', 0.45);
+  else playSfx('explosion' + (1 + Math.floor(Math.random() * 3)), 0.4);
+}
+// 波次来袭横幅
+let banner = null;   // {text, until}
+function showBanner(text) { banner = { text, until: Date.now() + 3200 }; }
+
 // ---------------- 游戏状态 ----------------
 const G = {
   euros: 850, interest: 6, score: 0,
@@ -289,7 +333,9 @@ function shellHit(s) {
       if (u.hp <= 0 && !u.dead) {
         u.dead = true;
         G.euros += u.bounty;
+        G.score += u.bounty;
         boom(u.x, u.y, 8);
+        explosionSfx(60);   // 原版: 死亡随机 explosion1-6
       }
     }
   } else {
@@ -324,6 +370,9 @@ function startWave() {
     delay += 40;                            // 原版 20px 间隔 ≈ 出车间隔
   }
   G.waveActive = true;
+  const dirNames = { parcourt1: '南方公路', parcourt2: '西侧小路', parcourt3: '北面空降', parcourt4: '海上航线' };
+  const dirs = [...new Set(G.spawnQueue.map(s => s.route))];
+  showBanner('第 ' + G.wave + ' / 44 波来袭 — ' + dirs.map(d => dirNames[d]).join(' + '));
   hud();
 }
 
@@ -562,6 +611,17 @@ function draw() {
   // ---- 小地图 + INFO 面板 (迷雾之上, 原版右上角 minimap 152px) ----
   drawMinimap();
   drawInfoPanel();
+
+  // ---- 波次来袭横幅 ----
+  if (banner && Date.now() < banner.until) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, H / 2 - 34, W, 56);
+    ctx.fillStyle = '#ffd';
+    ctx.font = 'bold 26px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(banner.text, W / 2, H / 2 + 6);
+    ctx.textAlign = 'left';
+  }
 }
 
 // ---- 小地图: 右上角 152x141, 敌(红,限可见)/塔(绿)/视野(淡圈)/视口框 ----
