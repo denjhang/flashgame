@@ -270,6 +270,31 @@ console.log("--- idle 自转 ---");
   console.log("A/B 表无重叠=%s 重叠=%j (radar 不得同时进两表)", overlap.length === 0, overlap);
   console.log("塔底盘: shape53 = DefineShape3 填充 RGBA(255,255,255,0) → alpha=0 不可见, 不渲染 (已核实)");
 }
+// ---- 命中火花 (原版 master_weapons.createEclat → etincelle chid564) ----
+console.log("--- 命中火花 ---");
+{
+  console.log("素材: %d 帧 %s, 原点 (%s,%s), 时长 %d 帧 (7帧@24fps→30fps)",
+    SPARK_FRAMES.length, JSON.stringify({ w: 53, h: 4 }),
+    SPARK_ORIGIN.x, SPARK_ORIGIN.y, SPARK_TICKS);
+  // 数量规则: 威力>8 → 3 个; 否则 1 个 (原版 createEclat 调用次数)
+  G.sparks.length = 0; createEclat(0, 0, 20);
+  const strong = G.sparks.length;
+  G.sparks.length = 0; createEclat(0, 0, 8);
+  const edge = G.sparks.length;         // 8 不 >8 → 1
+  G.sparks.length = 0; createEclat(0, 0, 3);
+  const weak = G.sparks.length;
+  console.log("威力20→%d 个, 威力8→%d 个, 威力3→%d 个 (期望 3/1/1)", strong, edge, weak);
+  console.log("数量规则正确=%s", strong === 3 && edge === 1 && weak === 1);
+  // 抖动范围 ±8px, 随机旋转
+  G.sparks.length = 0; createEclat(1000, 1000, 30);
+  const dx = G.sparks.map(s => Math.abs(s.x - 1000)).concat(G.sparks.map(s => Math.abs(s.y - 1000)));
+  const rotOk = G.sparks.every(s => s.rot >= 0 && s.rot < Math.PI * 2);
+  console.log("抖动 |d|max=%s (应≤8) 旋转范围合法=%s", Math.max(...dx).toFixed(1), rotOk);
+  // 生命周期: SPARK_TICKS 帧后消失
+  G.sparks.length = 0; createEclat(0, 0, 20);
+  let f = 0; while (G.sparks.length > 0 && f++ < 50) { for (const sp of G.sparks) sp.life--; G.sparks = G.sparks.filter(sp => sp.life > 0); }
+  console.log("火花存活 %d 帧 (期望 %d) 一致=%s", f, SPARK_TICKS, f === SPARK_TICKS);
+}
 // 炮管叠加表 + 开火时长 (上一轮 fireT 恒为 0 的 bug 已修)
 console.log("--- 炮管开火叠加 ---");
 {

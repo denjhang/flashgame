@@ -149,6 +149,24 @@ const SEL_RANGE = (() => {
   im.src = 'assets/selection/DefineSprite_775/1.png';
   return im;
 })();
+// ---------------- 命中火花 (原版 master_weapons.createEclat → etincelle, chid 564) ----------------
+// 权威依据 deobf/pcode_as/frame_6__PlaceObject2_6_327 (命中循环) + ..._6_335 createEclat:
+//   每次命中敌人: createEclat(单位位置 + (unitEtat偏移)/4)   ← 1 个
+//   若威力 > 8:   再 createEclat ×2                          ← 共 3 个
+//   createEclat: attachMovie("etincelle"+i) (chid 564, 7 帧)
+//                _rotation = random()*360; _x/_y = 目标 ± (random()*16 - 8)
+//   etincelle 素材: 53x4 画布, 7 帧逐帧淡出 (亮黄→白→灰), 火花自右向左飞散
+const SPARK_FRAMES = [1,2,3,4,5,6,7].map(i => {
+  const im = new Image();
+  im.src = 'assets/spark/' + i + '.png';
+  return im;
+});
+const SPARK_FPS = 24;                        // SWF 帧率
+const SPARK_TICKS = Math.round(SPARK_FRAMES.length / SPARK_FPS * 30);   // 7帧@24fps → 30fps
+// 火花画布原点: FFDec SVG 导出该 placement 的内容变换为 matrix(1,0,0,1, 51.8, 2.3),
+//   即"火花发源点"在 sprite 局部 (0,0) → 画布左上角在局部 (-51.8, -2.3)
+//   (frame1 内容 bbox x[50,52] 中心 51 ≈ 51.8, 交叉证实)
+const SPARK_ORIGIN = { x: -51.8, y: -2.3 };
 
 // ---------------- 爆炸动画 + BGM ----------------
 // 注: 旧的 86 库单帧方案 (TURRET_SRC/TURRET_IMG) 已删除 —— 经 FFDec 导出核实,
@@ -870,7 +888,7 @@ function showBanner(text) { banner = { text, until: Date.now() + 3200 }; }
 const G = {
   euros: 850, interest: 6, score: 0,
   wave: 0,                 // 已开始的波数 (1..44)
-  units: [], turrets: [], shells: [], effects: [],
+  units: [], turrets: [], shells: [], effects: [], sparks: [],
   spawnQueue: [],          // 本波待生成 [unitType, weapon, route, delayTicks]
   spawnTimer: 0,
   waveActive: false, interWave: 120,
@@ -1038,6 +1056,7 @@ function shellHit(s) {
   const mult = (u) => (u.aa ? ANTI_AIR_MULT : 1);
   if (s.side === 'ally') {
     // 溅射三段 (原版 fireOnEnnemi: 中心全额/中环半伤/外环20%)
+    const damaged = new Set();
     for (const [rr, pm] of SPLIT) {
       for (const u of victims) {
         if (u.hp <= 0) continue;
@@ -1045,9 +1064,13 @@ function shellHit(s) {
         if (d <= range * rr) {
           if (u.aa) u.hp -= power * pm * ANTI_AIR_MULT;
           else u.hp -= power * pm;
+          damaged.add(u);
         }
       }
     }
+    // 原版命中循环: 每个受击单位 createEclat(单位位置 + (unitEtat偏移)/4) —— 车体中部
+    // (unitEtat 在 428 内 t=(0,-60) scale y=2 → 偏移/4 ≈ 车体中心偏上约 8px)
+    for (const u of damaged) createEclat(u.x, u.y - 8, power);
     // 击杀赏金
     for (const u of victims) {
       if (u.hp <= 0 && !u.dead) {
@@ -1092,6 +1115,20 @@ function boom(x, y, r) {
 function boomTyped(x, y, r, type) {
   const n = (EXPLOSION_TYPED[type] || EXPLOSION_TYPED.small).length;
   G.effects.push({ x, y, r, life: n, life0: n, type: type || 'small' });
+}
+// 命中火花 (原版 createEclat): 单颗 etincelle, 带随机旋转 ±8px 抖动
+function spawnSpark(x, y) {
+  G.sparks.push({
+    x: x + (Math.random() * 16 - 8),
+    y: y + (Math.random() * 16 - 8),
+    rot: Math.random() * Math.PI * 2,
+    life: SPARK_TICKS,
+  });
+}
+// createEclat 包装: 命中必出 1 个; 威力 > 8 再出 2 个 (共 3 个)
+function createEclat(x, y, power) {
+  spawnSpark(x, y);
+  if (power > 8) { spawnSpark(x, y); spawnSpark(x, y); }
 }
 
 // ---------------- 波次调度 (startMission) ----------------
@@ -1250,6 +1287,8 @@ function tick() {
   G.shells = G.shells.filter(s => !s.hit);
   for (const e of G.effects) e.life--;
   G.effects = G.effects.filter(e => e.life > 0);
+  for (const sp of G.sparks) sp.life--;
+  G.sparks = G.sparks.filter(sp => sp.life > 0);
 
   // 炮塔全毁不算输 (原版只有基地被突破才输)
   draw();
@@ -1486,6 +1525,20 @@ function draw() {
     } else {
       ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / e.life0})`;
       ctx.beginPath(); ctx.arc(sx, sy, e.r * (e.life0 - e.life) / 3 * zoom, 0, 7); ctx.stroke();
+    }
+  }
+  // 命中火花 (原版 etincelle): 7 帧淡出, 随机朝向, 位置已含 ±8px 抖动
+  for (const sp of G.sparks) {
+    if (!isVisible(sp.x, sp.y)) continue;
+    const sx = w2sX(sp.x), sy = w2sY(sp.y);
+    const fi = Math.min(SPARK_FRAMES.length - 1,
+      Math.floor((SPARK_TICKS - sp.life) / SPARK_TICKS * SPARK_FRAMES.length));
+    const im = SPARK_FRAMES[fi];
+    if (im && im.complete && im.naturalWidth) {
+      ctx.save();
+      ctx.translate(sx, sy); ctx.rotate(sp.rot); ctx.scale(zoom, zoom);
+      ctx.drawImage(im, SPARK_ORIGIN.x, SPARK_ORIGIN.y);
+      ctx.restore();
     }
   }
   // Su37 空袭 (飞行中的战机, 在迷雾之前绘制)

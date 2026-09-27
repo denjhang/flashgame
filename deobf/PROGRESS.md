@@ -1,5 +1,75 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+18 轮成果（2026-09-28, H5 领土防御·补原版命中火花特效 createEclat/etincelle）
+
+**本轮补上一处此前完全缺失、且每场战斗都会大量出现的效果。**
+
+### 1. 【缺口发现】原版"每次命中车辆"都有火花反馈，H5 只做击杀爆炸
+
+此前 H5 只在**击杀**时播爆炸（`boomTyped`），命中但未击杀时**没有任何视觉反馈**。
+逐行读 `deobf/pcode_as/frame_6__PlaceObject2_6_327`（命中循环）发现原版每次命中都有：
+
+```actionscript
+_ = unitsEnnemies[i].localToGlobal(unit);          // 单位位置
+_ = unitsEnnemies[i].unitEtat.localToGlobal(etat); // 血条位置
+createEclat(unit._y + (etat.y - unit.y)/4, unit._x + (etat.x - unit.x)/4);   // ← 第 1 个
+if (r8 > 8) {                                       // r8 = 本帧伤害
+  createEclat(...); createEclat(...);                // ← 再 2 个 (共 3 个)
+}
+```
+
+定位点 = 单位位置 + (unitEtat 偏移)/4 —— 即**车体中心偏上**（`unitEtat` 在 428 内 t=(0,-60)）。
+
+### 2. `createEclat` 与素材 etincelle（chid 564）
+
+`master_weapons.createEclat`（`..._6_335` 第 40 行起）：
+
+```actionscript
+r3 = getIEclat();                                  // 循环 id 0..999
+carte.attachMovie(27000 + r3, "etincelle"+r3);     // 27000 → chid 564
+carte."etincelle"+r3._rotation = Math.random()*360;
+carte."etincelle"+r3._x = X + (Math.random()*16 - 8);   // ±8px 抖动
+carte."etincelle"+r3._y = Y + (Math.random()*16 - 8);
+```
+
+素材 `chid 564`（`exports.txt` 第 85 行 `ExportAssets (chid: 564, ex: etincelle)`）：
+FFDec 导出 7 帧、53×4 画布，内容是**亮黄→白→灰的火花拖尾**（逐帧向左移动 = 飞散动画）。
+
+**画布原点推导**（与炮管同一套方法论）：FFDec 的 SVG 导出给出该 placement 的内容变换
+`matrix(1,0,0,1, 51.8, 2.3)`，即"火花发源点"在 sprite 局部 (0,0) → 画布左上角在局部
+`(-51.8, -2.3)`；frame1 内容 bbox `x[50,52]` 中心 51 ≈ 51.8 交叉证实。
+
+### 3. H5 实现
+
+- `assets/spark/1..7.png`（7 帧）；`SPARK_FRAMES` / `SPARK_ORIGIN{(-51.8,-2.3)}`
+  / `SPARK_TICKS = round(7/24*30) = 9`（SWF 24fps → H5 30fps）
+- `spawnSpark(x,y)`：位置 ±8px 抖动、随机旋转 0–2π、寿命 SPARK_TICKS
+- `createEclat(x,y,power)`：**1 个；power > 8 时再 2 个（共 3 个）** —— 严格照搬原版判断
+- `shellHit()` 内接入：对**每个实际受损单位**调用一次 `createEclat(u.x, u.y-8, power)`
+  （用 `Set` 去重，避免溅射三段对同一目标重复触发火花）
+- `G.sparks` 状态 + tick 递减 + draw 渲染（随 zoom 缩放、绕火花起点旋转、迷雾中不绘制）
+
+### 4. 真机验证
+
+- 素材：7 帧全部加载（53×4）
+- 数量规则：威力 20 → **3 个**；威力 8 → **1 个**（8 不 >8，边界正确）；威力 3 → **1 个**
+- 抖动 |d|max = 6.9 ≤ 8；旋转范围合法；存活 **9 帧**后消失（与 SPARK_TICKS 一致）
+- 实战 200 帧：2 次命中 → `maxConcurrent=3`，24 帧画面含火花，敌人 HP 正常下降
+- 视觉截图确认：亮黄色火花粒子以随机角度散布在装甲车体上
+
+### 5. 本轮如实说明
+
+- 火力溅射（SPLIT 三段）会让同一单位在同一发炮弹内被扣血多次，但原版的 `createEclat`
+  在**每次命中循环里只对每个单位触发一组**（源码中三次调用属于同一次命中、由伤害阈值决定），
+  故 H5 用 `Set` 对受损单位去重后每组触发一次。此为对源码结构的解读，
+  若后续发现原版对溅射边缘单位也各触发一组，需再调整——如实记录此判断。
+- `unitEtat` 偏移我取 `-8px`（由 428 内 t=(0,-60)、scale y=2 推得的 (0,-30) 再按车体尺寸折中）。
+  该值只影响火花在车体上的高低位置，不影响机制正确性；未做逐像素对齐。
+- `markFlame`（chid 6）经核实是**车辆被击中时在其标记点创建爆炸**的定位辅助件
+  （`_parent.markFlame.localToGlobal(...)` → `createExplosion`），与 `etincelle` 是同一命中链的
+  两种表现；本轮接入的是更普遍的 etincelle，markFlame 的具体差异（仅 3 个 chassis 帧带脚本）
+  留待后续核对，如实记录本轮未做。
+
 ## 第 N+17 轮成果（2026-09-28, H5 领土防御·修正 idle 自转模型：区分"整帧即自转件"与"叠加件"，消除重影）
 
 **本轮修掉上一轮自己留下的未完成项：radar 的 8.8% 重影，降为 0。**
