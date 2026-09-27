@@ -658,12 +658,12 @@ function draw() {
   // 第一层: 已探索淡雾基底
   fogCtx.globalCompositeOperation = 'source-over';
   fogCtx.clearRect(0, 0, W, H);
-  fogCtx.fillStyle = 'rgba(5,9,5,0.42)';
+  fogCtx.fillStyle = 'rgba(5,9,5,0.25)';
   fogCtx.fillRect(0, 0, W, H);
   // 第二层: 未探索浓雾 (探索记忆挖除已探索区域)
   heavyCtx.globalCompositeOperation = 'source-over';
   heavyCtx.clearRect(0, 0, W, H);
-  heavyCtx.fillStyle = 'rgba(4,8,4,0.85)';
+  heavyCtx.fillStyle = 'rgba(4,8,4,0.60)';
   heavyCtx.fillRect(0, 0, W, H);
   heavyCtx.globalCompositeOperation = 'destination-out';
   const ep = exploredToScreen();
@@ -714,20 +714,16 @@ function draw() {
 }
 
 // ---- 小地图: 右上角 152x141, 敌(红,限可见)/塔(绿)/视野(淡圈)/视口框 ----
-const MM = { w: 161, h: 150, x: 0, y: 0 };
+const MM = { w: 161, h: 150 };
+const mmCv = document.getElementById('minimap');
+const mmCtx = mmCv.getContext('2d');
 function drawMinimap() {
-  MM.x = W - MM.w - 6; MM.y = 6;
-  ctx.save();
-  ctx.strokeStyle = '#888'; ctx.lineWidth = 1;
-  ctx.strokeRect(MM.x - 1, MM.y - 1, MM.w + 2, MM.h + 2);
-  ctx.drawImage(mapImg, MM.x, MM.y, MM.w, MM.h);
-  ctx.globalAlpha = 0.55;
-  ctx.fillStyle = '#000';
-  ctx.fillRect(MM.x, MM.y, MM.w, MM.h);
-  ctx.globalAlpha = 1;
+  const ctx = mmCtx;   // 画到侧栏小地图
+  ctx.clearRect(0, 0, MM.w, MM.h);
+  ctx.drawImage(mapImg, 0, 0, MM.w, MM.h);
   // 坐标换算: 世界 → minimap (路点包围盒映射)
-  const mx = (wx) => MM.x + (wx - WORLD.x0) / (WORLD.x1 - WORLD.x0) * MM.w;
-  const my = (wy) => MM.y + (WORLD.y1 - wy) / (WORLD.y1 - WORLD.y0) * MM.h;
+  const mx = (wx) => (wx - WORLD.x0) / (WORLD.x1 - WORLD.x0) * MM.w;
+  const my = (wy) => (WORLD.y1 - wy) / (WORLD.y1 - WORLD.y0) * MM.h;
   for (const t of G.turrets) {
     if (t.hp <= 0) continue;
     ctx.fillStyle = t.id === 'radar' ? '#6cf' : '#4f4';
@@ -744,7 +740,7 @@ function drawMinimap() {
   const vxL = cam.x, vxR = cam.x + W / zoom;
   ctx.strokeStyle = '#fff';
   ctx.strokeRect(mx(vxL), my(vyN), (vxR - vxL) / (WORLD.x1 - WORLD.x0) * MM.w,
-                 (vyS - vyN) / -(WORLD.y1 - WORLD.y0) * MM.h);
+                 (vyS - vyN) / (WORLD.y1 - WORLD.y0) * MM.h);
   ctx.restore();
 }
 
@@ -827,16 +823,15 @@ window.addEventListener('keydown', (e) => {
   if (k === 'arrowdown' || k === 's' && !G.turrets.length || k === 's' && !G.selected) cam.y -= step;
   if (k === 'arrowup' || k === 'arrowdown' || k === 'arrowleft' || k === 'arrowright') e.preventDefault();
 });
+// 原版 minimap 点击: 跳转摄像机 (绑在侧栏小地图 DOM)
+mmCv.addEventListener('click', (e) => {
+  const wx = WORLD.x0 + e.offsetX / MM.w * (WORLD.x1 - WORLD.x0);
+  const wy = WORLD.y1 - e.offsetY / MM.h * (WORLD.y1 - WORLD.y0);
+  cam.x = wx - W / (2 * zoom);
+  cam.y = MAP_ORIGIN.y - wy - H / (2 * zoom);
+  clampCam();
+});
 cv.addEventListener('click', (e) => {
-  const r = cv.getBoundingClientRect();
-  const cx = e.clientX - r.left, cy = e.clientY - r.top;
-  // 小地图命中 → 摄像机跳转 (原版 minimap 点击行为)
-  if (cx >= MM.x && cx <= MM.x + MM.w && cy >= MM.y && cy <= MM.y + MM.h) {
-    cam.x = WORLD.x0 + (cx - MM.x) / MM.w * (WORLD.x1 - WORLD.x0) - W / 2;
-    cam.y = MAP_ORIGIN.y - (WORLD.y1 - (cy - MM.y) / MM.h * (WORLD.y1 - WORLD.y0)) - H / 2;
-    clampCam();
-    return;
-  }
   if (G.lost || G.won) return;
   // 点中已有塔 → 选中 (供 U 升级对空)
   const hit = G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);

@@ -12,9 +12,8 @@ const ctxStub = new Proxy(function () {}, {
 });
 global.__ctxStub = ctxStub;
 global.document = {
-  getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {} }, dataset: {} }),
-  createElement: () => ({ onclick: null, classList: { toggle() {} }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {} }),
-  getElementById2: null,
+  getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {} }, dataset: {}, addEventListener() {} }),
+  createElement: () => ({ onclick: null, classList: { toggle() {} }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {}, addEventListener() {} }),
   createTextNode: () => ({}),
   addEventListener() {},
 };
