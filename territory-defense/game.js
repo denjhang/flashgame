@@ -77,13 +77,47 @@ const UNIT_IMG = {};
 const UNIT_BMP = {
   camion1: 402, camion2: 404, camion3: 406, jeep: 409, bradley: 411, amx10: 413,
   abrams: 415, t90: 417, camionBlinde: 419, navire: 422, Yamato: 424,
-  // tigre 直升机原版为矢量绘制, 暂用配色块
+  tigre: 'tigre',   // 直升机 (原版矢量 chid157 渲染图)
 };
 for (const k in UNIT_BMP) {
   const im = new Image();
   im.src = 'assets/units/' + UNIT_BMP[k] + '.png';
   UNIT_IMG[k] = im;
 }
+
+// ---------------- 原版炮塔外观 (86 帧库 shape→PNG) + 爆炸动画 + BGM ----------------
+const TURRET_IMG = {};
+const TURRET_SRC = {
+  gatling: 'assets/turrets/56.png', canon75: 'assets/turrets/57.png',
+  canon105: 'assets/turrets/58.png', canon105D: 'assets/turrets/59.png',
+  crotale: 'assets/turrets/62.png', canon125: 'assets/turrets/65.png',
+  radar: 'assets/turrets/60.png', MLRS: 'assets/turrets/66.png',
+  pluton: 'assets/turrets/68.png', MTHEL: 'assets/turrets/84.png',
+};
+for (const k in TURRET_SRC) {
+  const im = new Image();
+  im.src = TURRET_SRC[k];
+  TURRET_IMG[k] = im;
+}
+const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
+  const im = new Image();
+  im.src = 'assets/explosion/' + i + '.png';
+  return im;
+});
+// BGM (原版 musics 循环: hellMarch 候选 1157)
+let bgmAudio = null;
+try {
+  bgmAudio = new Audio('assets/music/bgm_main.mp3');
+  bgmAudio.loop = true;
+  bgmAudio.volume = 0.5;
+  const startBgm = () => {
+    bgmAudio.play().catch(() => {});
+    window.removeEventListener('pointerdown', startBgm);
+    window.removeEventListener('keydown', startBgm);
+  };
+  window.addEventListener('pointerdown', startBgm);
+  window.addEventListener('keydown', startBgm);   // 浏览器自动播放策略: 首次交互启动
+} catch (e) { /* 无 Audio 环境(无头)忽略 */ }
 
 // ---------------- 游戏状态 ----------------
 const G = {
@@ -395,14 +429,43 @@ function draw() {
       ctx.arc(sx, sy, 40 + ph * 70, 0, 7);
       ctx.stroke();
     }
-    ctx.save(); ctx.translate(sx, sy); ctx.rotate(-t.rot);   // 世界 y 翻转 → 旋转取反
-    ctx.fillStyle = '#464'; ctx.fillRect(-10, -10, 20, 20);
-    ctx.rotate(0);
-    ctx.fillStyle = t.id.startsWith('crotale') ? '#aaf' : '#ba6';
-    // 炮管指向: 屏幕角 = -世界角
-    ctx.save(); ctx.rotate(-t.rot);
-    ctx.fillRect(0, -3, 18, 6);
-    ctx.restore();
+    ctx.save(); ctx.translate(sx, sy);
+    // 底座 (固定)
+    ctx.fillStyle = '#3a4a3a';
+    ctx.fillRect(-11, -11, 22, 22);
+    // 原版炮塔外观: radar/MLRS/pluton/MTHEL 整图 (不旋转); 其余炮管图随 rot 旋转
+    if (t.id === 'radar') {
+      const ph = (Date.now() / 900) % 1;
+      ctx.strokeStyle = `rgba(120,220,255,${0.5 * (1 - ph)})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 40 + ph * 70, 0, 7);
+      ctx.stroke();
+      const im = TURRET_IMG.radar;
+      if (im && im.complete && im.naturalWidth)
+        ctx.drawImage(im, -im.naturalWidth / 4, -im.naturalHeight / 4,
+                      im.naturalWidth / 2, im.naturalHeight / 2);
+    } else if (TURRET_IMG[t.id] && TURRET_IMG[t.id].complete && TURRET_IMG[t.id].naturalWidth) {
+      const im = TURRET_IMG[t.id];
+      const big = (t.id === 'MLRS' || t.id === 'pluton' || t.id === 'MTHEL');
+      if (big) {
+        const s = 0.35;
+        ctx.drawImage(im, -im.naturalWidth * s / 2, -im.naturalHeight * s / 2,
+                      im.naturalWidth * s, im.naturalHeight * s);
+      } else {
+        // 炮管图 (17x81, 原图朝上): 旋转 = -rot - π/2
+        ctx.save();
+        ctx.rotate(-t.rot - Math.PI / 2);
+        ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + 12,
+                      im.naturalWidth, im.naturalHeight);
+        ctx.restore();
+      }
+    } else {
+      // m60 / 缺图兜底: 画炮管线条
+      ctx.save(); ctx.rotate(-t.rot);
+      ctx.fillStyle = t.id.startsWith('crotale') ? '#aaf' : '#ba6';
+      ctx.fillRect(0, -3, 18, 6);
+      ctx.restore();
+    }
     ctx.restore();
     // 对空标记 (蓝色小点)
     if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(sx + 6, sy - 14, 4, 4); }
@@ -446,8 +509,15 @@ function draw() {
   }
   for (const e of G.effects) {
     const sx = w2sX(e.x), sy = w2sY(e.y);
-    ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / 14})`;
-    ctx.beginPath(); ctx.arc(sx, sy, e.r * (14 - e.life) / 3, 0, 7); ctx.stroke();
+    const fi = Math.min(3, Math.floor((14 - e.life) / 14 * 4));
+    const im = EXPLOSION_FRAMES[fi];
+    if (im && im.complete && im.naturalWidth) {
+      const s = Math.max(0.4, e.r / 30);
+      ctx.drawImage(im, sx - 105 * s, sy - 108 * s, 210 * s, 217 * s);
+    } else {
+      ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / 14})`;
+      ctx.beginPath(); ctx.arc(sx, sy, e.r * (14 - e.life) / 3, 0, 7); ctx.stroke();
+    }
   }
   // 建造预览
   if (G.shopSel) {
@@ -529,6 +599,17 @@ cv.addEventListener('click', () => {
   // 只能在草地 (简化: 全场可建, 不与现有塔重叠)
   for (const t of G.turrets)
     if (Math.hypot(t.x - G.mx, t.y - G.my) < 26) return;
+  // 原版 surfaceForBuild 规则: 敌军道路上不可建
+  for (const rn in ROUTES) {
+    const r = ROUTES[rn];
+    for (let i = 0; i < r.length - 1; i++) {
+      const ax = r[i][0], ay = r[i][1], bx = r[i+1][0], by = r[i+1][1];
+      const L2 = (bx-ax)*(bx-ax) + (by-ay)*(by-ay);
+      let t2 = ((G.mx-ax)*(bx-ax) + (G.my-ay)*(by-ay)) / L2;
+      t2 = Math.max(0, Math.min(1, t2));
+      if (Math.hypot(G.mx - (ax + (bx-ax)*t2), G.my - (ay + (by-ay)*t2)) < 45) return;
+    }
+  }
   G.euros -= s.cost;
   G.turrets.push(new Turret(G.shopSel, G.mx, G.my));
   boom(G.mx, G.my, 6);
@@ -549,6 +630,9 @@ window.addEventListener('keydown', (e) => {
     if (sel && !sel.aa) {
       if (sel.upgradeAA()) boom(sel.x, sel.y, 10);
     }
+  }
+  if (e.key === 'm' || e.key === 'M') {
+    if (bgmAudio) bgmAudio.muted = !bgmAudio.muted;
   }
   if (e.key === ' ') { G.shopSel = null; e.preventDefault(); buildShop(); }
 });

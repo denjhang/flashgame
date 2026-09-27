@@ -12,12 +12,12 @@
 | 路线顺序 | ✅ 4 条与源码核对一致 | data.js ROUTES |
 | 单位素材对号 | ✅ 12 种 (426 帧库: camion1=402...Yamato=424) | sprites.json + territory-defense/assets/units/ |
 | 声音映射 | ✅ 37 soundFx + 3 BGM + 17 环境音 | sounds.json |
-| 炮塔素材对号 | 🔶 部分 (86 帧库: radar=61位图60 / MLRS=67位图66 / pluton=68 / MTHEL=84; 其余为矢量绘制无位图) | turret_frames.json |
-| BGM 文件确认 | 🔶 候选 1081/1082/1083/1084/1107/1124/1157.mp3 (无 export 名, 待试听) | sounds.json bgm |
-| tigre 直升机图 | ❌ 原版为矢量绘制(421 无位图), H5 暂用色块 | — |
+| 炮塔素材对号 | ✅ 10/11 有原版图 (56-85.png), m60 机枪塔用炮管线条兜底 | turrets/ (86 帧库: radar=61位图60 / MLRS=67位图66 / pluton=68 / MTHEL=84; 其余为矢量绘制无位图) | turret_frames.json |
+| BGM 接入 | ✅ bgm_main.mp3(=1157, hellMarch候选) 循环播放, M 键静音; 原始文件待试听最终确认 | assets/music/ |
+| tigre 直升机图 | ✅ chid157 矢量渲染图 tigre.png 已接入 | assets/units/ |
 | UI 素材对号 | ❌ 建造菜单(1025帧库)/INFO面板/小地图未接入 | — |
-| 爆炸特效接入 | ❌ chid 279 explosion 已知, 未接入 H5 | — |
-| 建造区规则 | ❌ 原版浅色草地可建(surfaceForBuild), H5 全场可建 | — |
+| 爆炸特效接入 | ✅ 279 的 4 帧动画 (210×217) 按效果半径缩放播放 | assets/explosion/ |
+| 建造区规则 | ✅ 道路中心线 45px 内禁建 (surfaceForBuild 的几何实现) | game.js |
 | 浏览器视觉验证 | ❌ 无头逻辑已验证, 浏览器效果未看 | — |
 
 ## 第 7 轮成果（2026-09-27）
@@ -31,6 +31,15 @@
 - **炮塔外观库定位**：86=玩家炮塔库、173=敌方武器塔库 22 帧（全部对齐 typeData 名）、1025=建造菜单按钮库
 - **smoke_test 修复**：draw/hud stub 开关 + 450 帧（根治无头卡死），迷雾/对空升级/经济闭环全绿
 - 已推送 GitHub（91dba0d）
+
+## 第 8 轮成果（2026-09-27）
+
+- 炮塔原版外观接入（86 帧库 shape PNG：炮管旋转 / radar·MLRS·pluton·MTHEL 整图）
+- 爆炸 4 帧动画接入（按效果半径缩放）
+- BGM 循环播放（浏览器自动播放策略：首次交互启动，M 键静音）
+- tigre 直升机渲染图接入（chid157）
+- 建造区规则：敌军道路中心线 45px 内禁建
+- smoke_test 全绿（Audio stub 补齐）
 
 ## 遗留（下一轮从看板 ❌ 项继续）
 

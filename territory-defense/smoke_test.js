@@ -18,6 +18,7 @@ global.document = {
 };
 global.window = { addEventListener() {} };
 global.Image = class { constructor() { this.src = ""; } };
+global.Audio = class { constructor() {} play() { return { catch() {} }; } };
 
 let src = fs.readFileSync("./data.js", "utf-8") + "\n" + fs.readFileSync("./game.js", "utf-8");
 const cvCode = 'const cv = { width: 960, height: 480, addEventListener() {}, getBoundingClientRect() { return { left: 0, top: 0 }; } };';
