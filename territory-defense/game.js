@@ -196,12 +196,28 @@ function partImg(path) {
 function gunFramePath(id, f) {
   return 'eturrets_spr/DefineSprite_' + id + '/' + f + '.png';
 }
-// 玩家武器 → 同型敌武器塔外观 (86 塔库无 m60 帧, m60 用 173 库 "m60" 帧 = 88底座+92机枪)
+// 玩家武器 → 173 库武器 ID (玩家 86 库的 sprite 88 实际是 173 库 m60 帧底座; 玩家塔炮管与 173 库底层 sprite 同源)
+//   gatling86=56 → 173库 gatlingAmx10 (sprite 98 机枪 + 143 护盾)
+//   canon75=57 → 173库 75mmAmx10 (sprite 103 + 144 底座)
+//   canon105=58 → 173库 canon105 (sprite 108 炮管 + 110 底座)
+//   canon105D=59 → 173库 canon105D (sprite 108 双管 + 112 底座)
+//   radar=61 → 173库 radar (sprite 115)
+//   crotale=62 → 173库 crotale (117 底座 + 121 弹簧 + 122 91帧导弹)
+//   canon125=65 → 173库 canon125 (sprite 125 炮管 + 127 底座; 86 库另用 sprite 64 作底盘 5 层)
+//   MLRS=67 → 173库 MLRS (sprite 128 157帧 + 130 底座)
+//   pluton=69+80 → 173库 pluton (sprite 80 枪口焰 + 132 底座)
+//   MTHEL=83+85 → 173库 MTHEL (sprite 83 激光 + 134 底座 + 136)
+//   m60=88 → 173库 m60Brad (sprite 138 底座 + 92 机枪 + 139 后座)
 const PLAYER_ETURRET = {
-  m60: 'm60Brad', gatling: 'gatlingAmx10', canon75: '75mmBrad',
+  m60: 'm60Brad', gatling: 'gatlingAmx10', canon75: '75mmAmx10',
   canon105: 'canon105', canon105D: 'canon105D', canon125: 'canon125',
   crotale: 'crotale', MLRS: 'MLRS', pluton: 'pluton', MTHEL: 'MTHEL',
+  radar: 'radar',
 };
+// 玩家塔底座 (86 库原底盘, 旋转时不动的固定件)  ← 173 库 [底座] 视觉差, 但与玩家塔对应
+// 86 库原 sprite 56/57/58/59/61/62/65/67/69/85/88 → 173 库同源 shape, 已存在于 eturrets/
+// 通过 PLAYER_ETURRET 映射到 ETURRET_PARTS 自动复用, 不再单独维护
+function playerParts(id) { return ETURRET_PARTS[PLAYER_ETURRET[id]]; }
 const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   const im = new Image();
   im.src = 'assets/explosion/' + i + '.png';
@@ -662,29 +678,29 @@ function draw() {
       ctx.fillRect(-10, -10, 20, 20);
       ctx.restore(); continue;
     }
-    // m60 (173 库 "m60" 帧 = 88 底座 + 92 机枪): 底座固定, 机枪随 rot 旋转
-    if (t.id === 'm60') {
-      const base = partImg('turrets/88.png');
-      if (base.complete && base.naturalWidth) ctx.drawImage(base, -4, -8, 8, 11);
-      const mg = partImg(gunFramePath(92, 1));
-      if (mg.complete && mg.naturalWidth) {
-        ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
-        ctx.drawImage(mg, -mg.naturalWidth / 2, -mg.naturalHeight + mg.naturalHeight * 0.12);
-        ctx.restore();
+    // 玩家塔统一走 173 库分层部件渲染 (PLAYER_ETURRET 映射后复用 ETURRET_PARTS)
+    const parts = playerParts(t.id);
+    if (parts) {
+      for (const p of parts) {
+        if (p.g) {
+          const im = partImg(gunFramePath(p.g, 1));
+          if (!(im.complete && im.naturalWidth)) continue;
+          ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
+          ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + im.naturalHeight * 0.12);
+          ctx.restore();
+        } else {
+          const im = partImg(p.s);
+          if (!(im.complete && im.naturalWidth)) continue;
+          ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+        }
       }
-    }
-    // 雷达站: 扫描波纹 (迷雾驱散可视化)
-    if (t.id === 'radar') {
+    } else if (t.id === 'radar') {
+      // 雷达: 173 库 radar=[115] 静态 + 扫描波纹
       const ph = (Date.now() / 900) % 1;
       ctx.strokeStyle = `rgba(120,220,255,${0.5 * (1 - ph)})`;
-      ctx.beginPath();
-      ctx.arc(0, 0, 40 + ph * 70, 0, 7);
-      ctx.stroke();
-      const im = TURRET_IMG.radar;
-      if (im && im.complete && im.naturalWidth)
-        ctx.drawImage(im, -im.naturalWidth / 4, -im.naturalHeight / 4,
-                      im.naturalWidth / 2, im.naturalHeight / 2);
-    } else if (t.id !== 'm60' && TURRET_IMG[t.id] && TURRET_IMG[t.id].complete && TURRET_IMG[t.id].naturalWidth) {
+      ctx.beginPath(); ctx.arc(0, 0, 40 + ph * 70, 0, 7); ctx.stroke();
+    } else if (TURRET_IMG[t.id] && TURRET_IMG[t.id].complete && TURRET_IMG[t.id].naturalWidth) {
+      // 旧 86 库兜底 (万一新映射漏了一个)
       const im = TURRET_IMG[t.id];
       const big = (t.id === 'MLRS' || t.id === 'pluton' || t.id === 'MTHEL');
       if (big) {
@@ -692,16 +708,14 @@ function draw() {
         ctx.drawImage(im, -im.naturalWidth * s / 2, -im.naturalHeight * s / 2,
                       im.naturalWidth * s, im.naturalHeight * s);
       } else {
-        // 炮管图 (17x81, 原图朝上): 旋转 = -rot - π/2
-        ctx.save();
-        ctx.rotate(t.rot + Math.PI / 2);
+        ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
         ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + 12,
                       im.naturalWidth, im.naturalHeight);
         ctx.restore();
       }
-    } else if (t.id !== 'm60') {
-      // 缺图兜底: 画炮管线条
-      ctx.save(); ctx.rotate(-t.rot);
+    } else {
+      // 缺图兜底
+      ctx.save(); ctx.rotate(t.rot);
       ctx.fillStyle = t.id.startsWith('crotale') ? '#aaf' : '#ba6';
       ctx.fillRect(0, -3, 18, 6);
       ctx.restore();

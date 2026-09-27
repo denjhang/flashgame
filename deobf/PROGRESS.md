@@ -179,6 +179,24 @@ python3 deobf/resolve_constants.py
 - 本轮队列后续（未做，不装完成）：86 库玩家塔分层(cananon125/pluton/MTHEL 枪口焰/底座)、
   炮管开火多帧动画、Su37 空袭、跳弹/金属音、阴影、选中圈、BGM 对号证据、单位去背景
 
+## 第 N+1 轮成果（2026-09-27, H5 领土防御·86库玩家塔分层）
+
+- **86 库玩家塔统一走 173 库部件表**：删掉旧的 86 库单图分支，玩家塔渲染改走
+  PLAYER_ETURRET 映射后复用 ETURRET_PARTS 同一张表（gatling→gatlingAmx10、canon75→75mmAmx10、
+  canon105→canon105、canon105D→canon105D、canon125→canon125、crotale→crotale、MLRS→MLRS、
+  pluton→pluton、MTHEL→MTHEL、m60→m60Brad、radar→radar）。ETURRET_PARTS 已是 22 种武器的全部件
+  描述（底座+炮管+装饰按原版深度序），玩家塔只是把 86 库 ID 翻译成 173 库 ID 然后绘制同一堆部件
+- **新导出的部件** sprite 64（canon125 底盘1层）、115（radar 静态）、121（crotale 弹簧）、
+  136（MTHEL 底座）、160（gatlingDTigre 翼）已全部接入 ETURRET_PARTS
+- **真机截图确认**（z.ai analyze_image）：11 塔一排部署后 m60/gatling/canon 系列/crotale/canon125 全部
+  显示出"底座+炮管"分层结构；m60 加底座与 92 机枪，canon125 看到 125 炮管 + 127 底座，
+  crotale 看到 117 底盘 + 122 91帧导弹架
+- 修正：上一轮 173 库渲染时的 canon125 描述（"86 库另用 sprite 64 作底盘 5 层"）的"5 层"是误读
+  —— 实际是 objs 数组里 64 出现 5 次（=5 个 PlaceObject2 引用同一形状）+ 65 炮管；现在按 sprite 64
+  一次画就行（其它 4 个 64 实际是不同 depth 的同一形状，1 帧已覆盖）
+- 本轮未做（按队列下推）：C 多帧炮管开火动画、Su37 空袭、跳弹音、阴影、选中圈、BGM 对号证据、
+  单位去背景——已在任务队列 A-I 列出
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）
