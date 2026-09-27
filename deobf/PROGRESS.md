@@ -252,6 +252,23 @@ python3 deobf/resolve_constants.py
   - 视野内像素差量化验证：曳光 2x14 → 轻弹 8x12 → 中弹 8x14 → 重弹 9x20 → 导弹 12x20，层次正确
 - 本轮未做（队列下推）：F 阴影、G 选中圈、H BGM 对号、I 单位去背景
 
+## 第 N+5 轮成果（2026-09-28, H5 领土防御·单位阴影 + 弹体阴影素材）
+
+- **单位阴影接入（权威源 428_unit enterFrame + SWF colorTransform 二进制解码）**：
+  - 修正任务描述的 4 处错位：521 是 **abrams**（非 jeep）、523 amx10、526 bradley、527 camion1、
+    **529** camion2（非 531）、**531** camion3（非 533）、533 camionBlinde、**534 jeep**（非 521）、
+    535 navire、537 t90、538 Yamato —— 全部以 `deobf/data/exports.txt` 的 ExportAssets 为准
+  - **关键发现：FFDec 导出的 _ombre 是中灰图（avg RGB≈85），不是黑的**。原版在舞台上以
+    PlaceObject2 colorTransform 放置：`mult R=G=B=0, alpha=0.352`（从 flags=0x1e 后的 CXFORM
+    二进制逐位解码得到）。H5 若只设 globalAlpha 会画出灰雾而非阴影 → 新增 `deobf/make_shadows.py`
+    按原版变换把 RGB 压为 0（alpha 保留），11 张全部处理
+  - 绘制按原版：`ombre._rotation = _rotation; ombre._x = _x+4; ombre._y = _y+4`，
+    在车体**之前**绘制（=车体下方），alpha=0.352
+  - 验证：drawImage 拦截确认调用序列为 `ombre → unit` (顺序正确)；隔离测试证明阴影图可绘制
+    (alpha=1/offset=25 时 940 深色像素)；原版偏移仅 4px+alpha 0.352 → 阴影多数藏在车体正下方，
+    只露边缘一丝立体感（**这是原版真实行为，非 bug**）
+- 本轮未做（队列下推）：G 选中圈 471、H BGM 对号证据、I 单位去背景+车头校正
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

@@ -88,6 +88,10 @@ console.log("音效文件: 共 %d 个, 缺失 %d %j", Object.keys(SFX_FILES).len
 playSfx = origPlaySfx;
 ['bullet','missile2','missile','obusLourd','obusLeger'].forEach(k => shellImpactSfx(k));
 console.log("shellImpactSfx 三型接线正常");
+// ---- F: 阴影映射 ----
+console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
+  Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,
+  Object.keys(UNIT_BMP).filter(k => k !== 'tigre' && !UNIT_SHADOW[k]));
 `;
 eval(src);
 console.log("[done]");

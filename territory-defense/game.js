@@ -109,6 +109,25 @@ for (const k in UNIT_BMP) {
   im.src = 'assets/units/' + UNIT_BMP[k] + '.png';
   UNIT_IMG[k] = im;
 }
+// 单位阴影 (原版 _ombre 系列, deobf/data/exports.txt 权威映射):
+//   原版放置带 colorTransform mult RGB=0/alpha=0.352 → 把 _ombre 图压成全黑半透明阴影
+//   原版 428_unit enterFrame: ombre._rotation = _rotation; ombre._x = _x+4; ombre._y = _y+4
+const UNIT_SHADOW = {
+  camion1: 'DefineSprite_527_camion1_ombre', camion2: 'DefineSprite_529_camion2_ombre',
+  camion3: 'DefineSprite_531_camion3_ombre', jeep: 'DefineSprite_534_jeep_ombre',
+  bradley: 'DefineSprite_526_bradley_ombre', amx10: 'DefineSprite_523_amx10_ombre',
+  abrams: 'DefineSprite_521_abrams_ombre', t90: 'DefineSprite_537_t90_ombre',
+  camionBlinde: 'DefineSprite_533_camionBlinde_ombre', navire: 'DefineSprite_535_navire_ombre',
+  Yamato: 'DefineSprite_538_Yamato_ombre',
+};
+const SHADOW_IMG = {};
+for (const k in UNIT_SHADOW) {
+  const im = new Image();
+  im.src = 'assets/ombre/' + UNIT_SHADOW[k] + '/1.png';
+  SHADOW_IMG[k] = im;
+}
+const SHADOW_ALPHA = 0.352;   // 原版 colorTransform alpha mult
+const SHADOW_OFFSET = 4;      // 原版 ombre._x/_y = _x/_y + 4
 
 // ---------------- 原版炮塔外观 (86 帧库 shape→PNG) + 爆炸动画 + BGM ----------------
 const TURRET_IMG = {};
@@ -915,6 +934,21 @@ function draw() {
   for (const u of G.units) {
     if (!isVisible(u.x, u.y)) continue;   // 迷雾中的敌人不可见
     const sx = w2sX(u.x), sy = w2sY(u.y);
+    // 车体阴影 (原版 428_unit enterFrame: ombre 同 rot 旋转, 偏移 +4/+4,
+    // colorTransform mult RGB=0 alpha=0.352 → 全黑半透明). 先画 = 在车体下方
+    const sim = SHADOW_IMG[u.type];
+    if (sim && sim.complete && sim.naturalWidth) {
+      const big = u.type === 'Yamato' ? 2.4 : 1;
+      ctx.save();
+      ctx.translate(sx + SHADOW_OFFSET * zoom, sy + SHADOW_OFFSET * zoom);   // y-down 世界系, +4=屏幕右下
+      ctx.scale(zoom, zoom);
+      ctx.rotate(u.rot + Math.PI / 2);
+      ctx.globalAlpha = SHADOW_ALPHA;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(sim, -sim.naturalWidth / 2 * big, -sim.naturalHeight / 2 * big,
+                    sim.naturalWidth * big, sim.naturalHeight * big);
+      ctx.restore();
+    }
     ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
     const img = UNIT_IMG[u.type];
     if (img && img.complete && img.naturalWidth) {
