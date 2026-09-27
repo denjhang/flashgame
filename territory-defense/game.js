@@ -261,14 +261,35 @@ function turretBaseImg(id) {
 // 原版另给该透明件随机初向 (DefineSprite_86/frame_1/PlaceObject3_54_1:
 //   `this._rotation = Math.random()*360;`) —— 因不可见, 无视觉影响。
 // ---------------- 持续 idle 旋转 (原版 onClipEvent(enterFrame) 逐帧自转) ----------------
-// 扫描 deobf/scripts/DefineSprite_173 全部 enterFrame 脚本, 得两处持续旋转:
-//   frame_7 (radar)          PlaceObject2_115_1   `this._rotation += 2;`   → 雷达天线扫描
-//   frame_20 (crotaleAbrams) PlaceObject2_121_4   `this._rotation += 10;`  → 发射架自转
-//   frame_25 (navireCrotale) PlaceObject3_121_24  `this._rotation += 10;`
-// 两者都是 173 库内的独立子 sprite (不会被整帧图体现), 必须在 H5 单独叠加并旋转。
-// 旋转量: 原版 += deg/帧, SWF 24fps; H5 主循环 30fps → 折算 deg/帧 = 原值 * 24/30
-const IDLE_SPIN = {
-  radar:         { chid: 115, degPerSWFFrame: 2,  scale: 2.1614, t: [1.95, 8.10] },
+// 穷举 deobf/scripts/DefineSprite_173 下全部 *onClipEvent(enterFrame)* 脚本, 权威清单:
+//   frame_7  (radar)         d1  chid115  `_rotation += 2`
+//   frame_8  (crotale)       d2  chid121  `_rotation += 10`
+//   frame_13 (radarMobile)   d1  chid115  `_rotation += 4`
+//                            d4  chid115  `_rotation -= 12`   ← 反向!
+//   frame_20 (crotaleAbrams) d4  chid121  `_rotation += 10`
+//   frame_25 (navireCrotale) d24 chid121  `_rotation += 10`
+// 这些子件都带 HasClipActions(SWF flags 0x0096), 是独立 MovieClip。
+// 速率换算: 原版 deg/帧 @SWF 24fps → H5 30fps: deg * 24/30
+//
+// 【关键区分 · 依据 turret_layout.json 逐帧组成枚举】
+//   A) 整帧**只由自转件构成** → 该武器整帧图本身就是自转件, 直接整帧自转, 不可叠加(会重影)
+//        radar(f7=[115]), radarMobile(f13=[115,115])
+//   B) 整帧 = 基座 + 自转件 + 炮管 → 整帧里自转件被 FFDec 烘成静态姿态,
+//      叠加同位置的自转件覆盖它
+//        crotale(f8)/crotaleAbrams(f20)/navireCrotale(f25)
+//   C) 无自转件 (其余 20 种) → 纯整帧贴图
+// A 类的整帧自转中心 = 子件原点在武器局部系的位置 (即 placement 平移项 t):
+//   radar     f7 d1 : t=(1.95, 8.10)
+//   radarMobile f13 : 两个子件各转各的 → 见 RADARMOBILE_SPIN (整帧拆两件渲染)
+const LIB_SPIN = {              // A 类: 单件整帧, 整帧绕 t 自转
+  radar: { chid: 115, degPerSWFFrame: 2, t: [1.95, 8.10] },
+};
+// radarMobile 整帧含两个反向自转的 115 → 必须逐件渲染 (拆成两件各转各的)
+const RADARMOBILE_SPIN = [
+  { chid: 115, degPerSWFFrame: 4,  scale: 1.1960, t: [0.85, -8.0] },
+  { chid: 115, degPerSWFFrame: -12, scale: 0.7817, t: [0.85,  5.8] },
+];
+const IDLE_SPIN = {             // B 类: 在整帧之上叠加自转件
   crotale:       { chid: 121, degPerSWFFrame: 10, scale: 0.5177, t: [-0.45, 1.90] },
   crotaleAbrams: { chid: 121, degPerSWFFrame: 10, scale: 0.5177, t: [-3.10, 8.55] },
   navireCrotale: { chid: 121, degPerSWFFrame: 10, scale: 1.1784, t: [-0.70, 5.20] },
@@ -409,9 +430,8 @@ function drawTurretGuns(id, fireT) {
 // 变换: placement 的 t=(tx,ty) 是子 MC 原点在武器局部系的位置; origin 是子 MC 画布左上角
 //   在其自身局部系的坐标(未缩放)。故: translate(t) 后用 drawImage 的 w/h 参数缩放,
 //   而**不能**先 ctx.scale 再画 origin (会把 origin 也乘一次缩放 → 位置错位)。
-function drawIdleSpin(id, spinDeg) {
-  const sd = IDLE_SPIN[id];
-  if (!sd) return;
+// 画一个自转子件 (给定 spin 定义与当前角度); 调用方需已定位到武器原点并 rotate 到朝向
+function drawSpinDef(sd, spinDeg) {
   const im = idleSprImg(sd.chid);
   if (!(im && im.complete && im.naturalWidth)) return;
   const o = IDLE_SPR_ORIGIN[sd.chid];
@@ -422,6 +442,31 @@ function drawIdleSpin(id, spinDeg) {
   ctx.rotate(spinDeg * Math.PI / 180);                    // 自转 (绕子 MC 原点)
   ctx.drawImage(im, o.x * s, o.y * s, im.naturalWidth * s, im.naturalHeight * s);
   ctx.restore();
+}
+function drawIdleSpin(id, spinDeg) {
+  const sd = IDLE_SPIN[id];
+  if (sd) drawSpinDef(sd, spinDeg);
+}
+// A 类: 整帧即自转件 (radar) —— 绕 placement 的 t 旋转整帧
+function drawLibSpin(id) {
+  const ls = LIB_SPIN[id];
+  if (!ls) return;
+  const im = turretLibImg(id);
+  if (!(im && im.complete && im.naturalWidth)) return;
+  const [tx, ty] = ls.t;
+  const deg = (G.frame * ls.degPerSWFFrame * (24 / 30)) % 360;
+  ctx.save();
+  ctx.translate(tx, ty);
+  ctx.rotate(deg * Math.PI / 180);
+  // 该帧画布原点已知 (TURRET_LIB_ORIGIN); 平移项已单独处理, 故按 画布原点 - t 偏移回画
+  ctx.drawImage(im, TURRET_LIB_ORIGIN.x - tx, TURRET_LIB_ORIGIN.y - ty);
+  ctx.restore();
+}
+// A 类特例: radarMobile 整帧含两个反向自转的 115 → 逐件各转各的
+function drawRadarMobileSpin() {
+  for (const sd of RADARMOBILE_SPIN) {
+    drawSpinDef(sd, (G.frame * sd.degPerSWFFrame * (24 / 30)) % 360);
+  }
 }
 // ---------------- 自动修理蓝色磁场 (原版 sprite 183, 挂在 structure 的 repairLogo.light) ----------------
 // 反编译依据:
@@ -1274,17 +1319,26 @@ function draw() {
     }
     const im = turretLibImg(libId);
     if (im && im.complete && im.naturalWidth) {
-      ctx.save();
-      ctx.rotate(t.rot + Math.PI / 2);
-      ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
-      // 开火时叠加 named 炮管的 fire 序列帧 (原版 canonN.gotoAndPlay("fire"))
-      drawTurretGuns(libId, t.fireT);
-      ctx.restore();
-      // 持续自转件 (雷达天线/导弹发射架) —— 在武器朝向上叠加自转角
-      const sd = IDLE_SPIN[libId];
-      if (sd) {
-        const frameDeg = sd.degPerSWFFrame * (24 / 30);      // SWF 24fps → H5 30fps
-        drawIdleSpin(libId, (G.frame * frameDeg) % 360);
+      if (LIB_SPIN[libId] || libId === 'radarMobile') {
+        // A 类: 整帧即自转件 → 整帧随瞄准朝向旋转, 再叠加自身自转 (无静态重影)
+        ctx.save();
+        ctx.rotate(t.rot + Math.PI / 2);
+        if (libId === 'radarMobile') {
+          // 两个 115 反向自转, 不能整帧旋转 → 逐件各转各的
+          drawRadarMobileSpin();
+        } else {
+          drawLibSpin(libId);       // radar: 整帧绕子件原点自转
+        }
+        ctx.restore();
+      } else {
+        // B/C 类: 整帧静态铺底 (+ 炮管开火帧 + B 类自转件覆盖)
+        ctx.save();
+        ctx.rotate(t.rot + Math.PI / 2);
+        ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
+        drawTurretGuns(libId, t.fireT);
+        ctx.restore();
+        const sd = IDLE_SPIN[libId];
+        if (sd) drawIdleSpin(libId, (G.frame * sd.degPerSWFFrame * (24 / 30)) % 360);
       }
     } else if (t.id === 'radar') {
       // 雷达: 扫描波纹 (叠加在整帧之上)
@@ -1375,15 +1429,21 @@ function draw() {
       if (im && im.complete && im.naturalWidth) {
         ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
         ctx.rotate(u.rot + Math.PI / 2);
-        ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
-        drawTurretGuns(u.weaponId, u.fireT);
+        if (LIB_SPIN[u.weaponId] || u.weaponId === 'radarMobile') {
+          // A 类: 整帧即自转件
+          if (u.weaponId === 'radarMobile') drawRadarMobileSpin();
+          else drawLibSpin(u.weaponId);
+        } else {
+          ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
+          drawTurretGuns(u.weaponId, u.fireT);
+        }
         ctx.restore();
-        // 持续自转件 (crotale 发射架等)
+        // B 类持续自转件 (crotale 发射架等)
         const sd = IDLE_SPIN[u.weaponId];
         if (sd) {
           ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
           ctx.rotate(u.rot + Math.PI / 2);
-          drawIdleSpin(u.weaponId, (G.frame * sd.degPerSWFFrame * (24 / 30)) % 360);
+          drawSpinDef(sd, (G.frame * sd.degPerSWFFrame * (24 / 30)) % 360);
           ctx.restore();
         }
       }

@@ -241,22 +241,33 @@ console.log("--- 玩家塔结构层 (86 库) ---");
   const seq = labs.map(k => TURRET_BASE_FRAME[k]);
   console.log("86 帧号序列 %j (应 1..11 连续)", seq);
 }
-// ---- 持续 idle 自转件 (原版 onClipEvent(enterFrame) 逐帧累加 _rotation) ----
-console.log("--- idle 自转件 ---");
+// ---- 持续 idle 自转 (原版 onClipEvent(enterFrame) 逐帧累加 _rotation) ----
+// 权威清单 (穷举 DefineSprite_173 全部 enterFrame 脚本):
+//   f7 radar d1 115 +=2 | f8 crotale d2 121 +=10 | f13 radarMobile d1 115 +=4 / d4 115 -=12
+//   f20 crotaleAbrams d4 121 +=10 | f25 navireCrotale d24 121 +=10
+console.log("--- idle 自转 ---");
 {
-  const ids = Object.keys(IDLE_SPIN);
-  console.log("自转件表: %j", ids);
-  const expect = { radar: 115, crotale: 121, crotaleAbrams: 121, navireCrotale: 121 };
-  const bad = ids.filter(k => IDLE_SPIN[k].chid !== expect[k]);
-  console.log("chid 与权威一致=%s 不符=%j", bad.length === 0, bad);
-  // 每个自转件必须有本源(matrix)与画布原点
-  const incomplete = ids.filter(k => !IDLE_SPIN[k].t || IDLE_SPIN[k].scale === undefined
+  // B 类: 整帧之上叠加自转件
+  const bIds = Object.keys(IDLE_SPIN);
+  const bExpect = { crotale: 121, crotaleAbrams: 121, navireCrotale: 121 };
+  const bBad = bIds.filter(k => IDLE_SPIN[k].chid !== bExpect[k]);
+  console.log("B类(叠加)自转件 %j chid 权威一致=%s 不符=%j", bIds, bBad.length === 0, bBad);
+  const bIncomplete = bIds.filter(k => !IDLE_SPIN[k].t || IDLE_SPIN[k].scale === undefined
     || !IDLE_SPR_ORIGIN[IDLE_SPIN[k].chid]);
-  console.log("自转件 m/o 完整=%s 缺=%j", incomplete.length === 0, incomplete);
-  // 旋转速率 (原版 deg/帧 @24fps → H5 30fps)
-  const rates = ids.map(k => k + '=' + IDLE_SPIN[k].degPerSWFFrame + '°/f');
-  console.log("原版自转速率: %j (radar 慢速扫描, crotale 快速自转)", rates);
-  // 底盘 shape53 结论: alpha=0 不可见, 不渲染
+  console.log("B类 m/o 完整=%s 缺=%j", bIncomplete.length === 0, bIncomplete);
+  // A 类: 整帧即自转件 (不能叠加, 否则重影)
+  console.log("A类(整帧自转): %j  %j",
+    Object.keys(LIB_SPIN), LIB_SPIN.radar);
+  console.log("A类特例 radarMobile 两个反向自转件: %j",
+    RADARMOBILE_SPIN.map(s => s.chid + ':' + s.degPerSWFFrame + '°@d'));
+  // 速率换算核对 (SWF 24fps → H5 30fps)
+  const rate = d => d * 24 / 30;
+  console.log("速率换算: radar %d°/帧(原版) → %s°/帧(H5); crotale %d → %s",
+    LIB_SPIN.radar.degPerSWFFrame, rate(LIB_SPIN.radar.degPerSWFFrame).toFixed(1),
+    IDLE_SPIN.crotale.degPerSWFFrame, rate(IDLE_SPIN.crotale.degPerSWFFrame).toFixed(1));
+  // 关键不变量: A 类的武器不能被放进 B 表 (否则重复绘制)
+  const overlap = Object.keys(LIB_SPIN).filter(k => IDLE_SPIN[k]);
+  console.log("A/B 表无重叠=%s 重叠=%j (radar 不得同时进两表)", overlap.length === 0, overlap);
   console.log("塔底盘: shape53 = DefineShape3 填充 RGBA(255,255,255,0) → alpha=0 不可见, 不渲染 (已核实)");
 }
 // 炮管叠加表 + 开火时长 (上一轮 fireT 恒为 0 的 bug 已修)
