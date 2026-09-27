@@ -93,10 +93,10 @@ heavyCv.width = W; heavyCv.height = H;
 const heavyCtx = heavyCv.getContext('2d');
 
 
-function w2sX(x) { return x - cam.x; }
-function w2sY(y) { return (MAP_ORIGIN.y - y) - cam.y; }      // y 翻转
-function s2wX(sx) { return sx + cam.x; }
-function s2wY(sy) { return MAP_ORIGIN.y - (sy + cam.y); }
+function w2sX(x) { return (x - cam.x) * zoom; }
+function w2sY(y) { return ((MAP_ORIGIN.y - y) - cam.y) * zoom; }   // y 翻转
+function s2wX(sx) { return sx / zoom + cam.x; }
+function s2wY(sy) { return MAP_ORIGIN.y - (sy / zoom + cam.y); }
 
 // ---------------- 原版单位贴图 (deobf/data/sprites.json: shape→bitmap 对号) ----------------
 const UNIT_IMG = {};
@@ -245,6 +245,9 @@ const G = {
   waveActive: false, interWave: 120,
   lost: false, won: false, losses: 0,
   shopSel: 'm60', placing: null,
+  showHp: true,            // 原版 H 键开关
+  mouseScroll: true,       // 原版 M 键开关 (鼠标边缘滚屏)
+  showBuildArea: false,    // 原版 C 键开关 (可建区域显示)
 };
 
 // ---------------- 单位 ----------------
@@ -463,6 +466,7 @@ function endWave() {
 // ---------------- 主循环 ----------------
 function tick() {
   if (G.lost || G.won) return;
+  scrollCamera();
   computeVisibility();
   revealExplored();
 
@@ -531,7 +535,8 @@ function draw() {
   ctx.clearRect(0, 0, W, H);
   clampCam();
   // 地图背景 (世界坐标 → 屏幕)
-  ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W, MAP_H);
+  // 位图顶边 = 世界 y = MAP_ORIGIN.y + MAP_H (y 向上), 屏幕上比底边高 MAP_H*zoom
+  ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y + MAP_H), MAP_W * zoom, MAP_H * zoom);
 
   // 基地红线 (北方 = y 最大; 原版 _y > 477 失败线的镜像)
   ctx.strokeStyle = '#f44'; ctx.setLineDash([6, 4]);
@@ -540,32 +545,36 @@ function draw() {
   ctx.stroke();
   ctx.setLineDash([]);
 
+  // 建造区显示 (原版 C 键: surfaceForBuild alpha=35) — 道路缓冲带外可建
+  if (G.showBuildArea) {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = '#f64'; ctx.lineWidth = 90 * zoom; ctx.lineCap = 'round';
+    for (const rn in ROUTES) {
+      const r = ROUTES[rn];
+      ctx.beginPath();
+      ctx.moveTo(w2sX(r[0][0]), w2sY(r[0][1]));
+      for (let i = 1; i < r.length; i++) ctx.lineTo(w2sX(r[i][0]), w2sY(r[i][1]));
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   for (const t of G.turrets) {
     const sx = w2sX(t.x), sy = w2sY(t.y);
-    if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) continue;
+    if (sx < -60 * zoom || sx > W + 60 * zoom || sy < -60 * zoom || sy > H + 60 * zoom) continue;
+    ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
     if (t.hp <= 0) {
       ctx.fillStyle = '#333';
-      ctx.fillRect(sx - 10, sy - 10, 20, 20);
-      continue;
+      ctx.fillRect(-10, -10, 20, 20);
+      ctx.restore(); continue;
     }
     // 雷达站: 扫描波纹 (迷雾驱散可视化)
     if (t.id === 'radar') {
       const ph = (Date.now() / 900) % 1;
       ctx.strokeStyle = `rgba(120,220,255,${0.5 * (1 - ph)})`;
       ctx.beginPath();
-      ctx.arc(sx, sy, 40 + ph * 70, 0, 7);
-      ctx.stroke();
-    }
-    ctx.save(); ctx.translate(sx, sy);
-    // 底座 (固定)
-    ctx.fillStyle = '#3a4a3a';
-    ctx.fillRect(-11, -11, 22, 22);
-    // 原版炮塔外观: radar/MLRS/pluton/MTHEL 整图 (不旋转); 其余炮管图随 rot 旋转
-    if (t.id === 'radar') {
-      const ph = (Date.now() / 900) % 1;
-      ctx.strokeStyle = `rgba(120,220,255,${0.5 * (1 - ph)})`;
-      ctx.beginPath();
-      ctx.arc(sx, sy, 40 + ph * 70, 0, 7);
+      ctx.arc(0, 0, 40 + ph * 70, 0, 7);
       ctx.stroke();
       const im = TURRET_IMG.radar;
       if (im && im.complete && im.naturalWidth)
@@ -593,16 +602,18 @@ function draw() {
       ctx.fillRect(0, -3, 18, 6);
       ctx.restore();
     }
-    ctx.restore();
     // 对空标记 (蓝色小点)
-    if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(sx + 6, sy - 14, 4, 4); }
-    // 血条
-    ctx.fillStyle = '#300'; ctx.fillRect(sx - 10, sy - 16, 20, 3);
-    ctx.fillStyle = '#4f4'; ctx.fillRect(sx - 10, sy - 16, 20 * t.hp / t.maxHp, 3);
+    if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(6, -14, 4, 4); }
+    // 血条 (原版 H 键开关)
+    if (G.showHp) {
+      ctx.fillStyle = '#300'; ctx.fillRect(-10, -16, 20, 3);
+      ctx.fillStyle = '#4f4'; ctx.fillRect(-10, -16, 20 * t.hp / t.maxHp, 3);
+    }
+    ctx.restore();
     // 射程圈 (选中)
     if (t === G.selected && t.w) {
       ctx.strokeStyle = 'rgba(255,255,150,.4)';
-      ctx.beginPath(); ctx.arc(sx, sy, t.w[1], 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx, sy, t.w[1] * zoom, 0, 7); ctx.stroke();
       ctx.fillStyle = '#ff8'; ctx.font = '11px monospace';
       const msg = t.aa ? '[对空OK] S卖 R修' : `按U升级对空 $${t.aaUpgradeCost()}`;
       ctx.fillText(msg, sx - 30, sy + 30);
@@ -611,22 +622,24 @@ function draw() {
   for (const u of G.units) {
     if (!isVisible(u.x, u.y)) continue;   // 迷雾中的敌人不可见
     const sx = w2sX(u.x), sy = w2sY(u.y);
+    ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
     const img = UNIT_IMG[u.type];
     if (img && img.complete && img.naturalWidth) {
-      ctx.save(); ctx.translate(sx, sy); ctx.rotate(-u.rot - Math.PI / 2);
+      ctx.rotate(-u.rot - Math.PI / 2);
       const big = u.type === 'Yamato' ? 2.4 : 1;
       ctx.drawImage(img, -img.naturalWidth / 2 * big, -img.naturalHeight / 2 * big,
                     img.naturalWidth * big, img.naturalHeight * big);
-      ctx.restore();
     } else {
-      ctx.save(); ctx.translate(sx, sy); ctx.rotate(-u.rot);
+      ctx.rotate(-u.rot);
       const col = { jeep:'#c66', tigre:'#6cf', navire:'#6ae' }[u.type] || '#c66';
       ctx.fillStyle = col;
       ctx.fillRect(-8, -5, 16, 10);
-      ctx.restore();
     }
-    ctx.fillStyle = '#300'; ctx.fillRect(sx - 9, sy - 14, 18, 3);
-    ctx.fillStyle = '#f43'; ctx.fillRect(sx - 9, sy - 14, 18 * Math.max(0, u.hp) / u.maxHp, 3);
+    ctx.restore();
+    if (G.showHp) {
+      ctx.fillStyle = '#300'; ctx.fillRect(sx - 9 * zoom, sy - 14 * zoom, 18 * zoom, 3 * zoom);
+      ctx.fillStyle = '#f43'; ctx.fillRect(sx - 9 * zoom, sy - 14 * zoom, 18 * zoom * Math.max(0, u.hp) / u.maxHp, 3 * zoom);
+    }
   }
   for (const s of G.shells) {
     if (!isVisible(s.x, s.y)) continue;   // 飞入迷雾的炮弹不可见
@@ -639,11 +652,11 @@ function draw() {
     const fi = Math.min(3, Math.floor((14 - e.life) / 14 * 4));
     const im = EXPLOSION_FRAMES[fi];
     if (im && im.complete && im.naturalWidth) {
-      const s = Math.max(0.4, e.r / 30);
+      const s = Math.max(0.4, e.r / 30) * zoom;
       ctx.drawImage(im, sx - 105 * s, sy - 108 * s, 210 * s, 217 * s);
     } else {
       ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / 14})`;
-      ctx.beginPath(); ctx.arc(sx, sy, e.r * (14 - e.life) / 3, 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx, sy, e.r * (14 - e.life) / 3 * zoom, 0, 7); ctx.stroke();
     }
   }
   // 建造预览
@@ -802,27 +815,38 @@ function buildShop() {
   }
 }
 
-// ---------------- 输入 ----------------
+// ---------------- 输入 (原版 master_clavier: 方向键持续滚动 + 边缘滚屏, 无 WASD) ----------------
 cv.addEventListener('mousemove', (e) => {
   const r = cv.getBoundingClientRect();
   G.mx = s2wX(e.clientX - r.left); G.my = s2wY(e.clientY - r.top);   // 世界坐标
 });
-// 边缘滚动 + 方向键移动摄像机
-setInterval(() => {
-  if (typeof G.mx === 'number' && G.mx >= WORLD.x0 && G.mx <= WORLD.x1) {
-    const sx = w2sX(G.mx);
-    if (sx < 40) cam.x -= 12; else if (sx > W - 40) cam.x += 12;
-  }
-}, 50);
+// 原版 vitesseDeplacement = 24 * fpsc(1.13) ≈ 27 世界像素/帧, 边缘阈值 k=35
+const SCROLL_SPEED = 27, EDGE = 35;
+const heldKeys = new Set();
 window.addEventListener('keydown', (e) => {
-  const k = e.key.toLowerCase();
-  const step = 60 / zoom;
-  if (k === 'arrowleft' || k === 'a') cam.x -= step;
-  if (k === 'arrowright' || k === 'd') cam.x += step;
-  if (k === 'arrowup' || k === 'w') cam.y += step;    // 世界 y 向上=北=屏幕上
-  if (k === 'arrowdown' || k === 's' && !G.turrets.length || k === 's' && !G.selected) cam.y -= step;
-  if (k === 'arrowup' || k === 'arrowdown' || k === 'arrowleft' || k === 'arrowright') e.preventDefault();
+  const map = { arrowleft:'left', arrowright:'right', arrowup:'up', arrowdown:'down' };
+  const dir = map[e.key.toLowerCase()];
+  if (dir) { heldKeys.add(dir); e.preventDefault(); }
 });
+window.addEventListener('keyup', (e) => {
+  const map = { arrowleft:'left', arrowright:'right', arrowup:'up', arrowdown:'down' };
+  const dir = map[e.key.toLowerCase()];
+  if (dir) heldKeys.delete(dir);
+});
+function scrollCamera() {   // 每帧: 方向键 + (M 开启时) 鼠标边缘滚屏, 原版 6_321 enterFrame
+  if (zoom < 1) return;     // 全图模式下锁定
+  let dx = 0, dy = 0;       // dy 为世界坐标 (上=+)
+  if (heldKeys.has('left')) dx -= SCROLL_SPEED;
+  if (heldKeys.has('right')) dx += SCROLL_SPEED;
+  if (heldKeys.has('up')) dy += SCROLL_SPEED;
+  if (heldKeys.has('down')) dy -= SCROLL_SPEED;
+  if (G.mouseScroll && typeof G.mx === 'number' && !Number.isNaN(G.mx)) {
+    const sx = w2sX(G.mx), sy = w2sY(G.my);
+    if (sx < EDGE) dx -= SCROLL_SPEED; else if (sx > W - EDGE) dx += SCROLL_SPEED;
+    if (sy < EDGE) dy += SCROLL_SPEED; else if (sy > H - EDGE) dy -= SCROLL_SPEED;
+  }
+  if (dx || dy) { cam.x += dx; cam.y -= dy; clampCam(); }
+}
 // 原版 minimap 点击: 跳转摄像机 (绑在侧栏小地图 DOM)
 mmCv.addEventListener('click', (e) => {
   const wx = WORLD.x0 + e.offsetX / MM.w * (WORLD.x1 - WORLD.x0);
@@ -859,26 +883,30 @@ cv.addEventListener('click', (e) => {
   boom(G.mx, G.my, 6);
 });
 window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
   const sel = G.selected || G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);
-  if (e.key === 's' || e.key === 'S') {
-    if (sel) { G.euros += sel.sellPrice(); G.turrets = G.turrets.filter(t => t !== sel); }
+  const k = e.key.toLowerCase();
+  // 原版 keyDown 映射: S=卖出(按血量75%折价) R=修理 空格=取消 H=血条 M=滚屏 C=建造区 G=全图
+  if (k === 's') {
+    if (sel) { G.euros += sel.sellPrice(); G.turrets = G.turrets.filter(t => t !== sel); G.selected = null; }
   }
-  if (e.key === 'r' || e.key === 'R') {
+  if (k === 'r') {
     if (sel) {
       const n = Math.min(sel.maxHp - sel.hp, Math.floor(G.euros / REPAIR_COST));
       sel.hp += n; G.euros -= n * REPAIR_COST;
     }
   }
-  if (e.key === 'u' || e.key === 'U') {
+  if (k === 'u') {
     // 对空升级: 花费 造价×0.6, 任意塔获得对空能力
     if (sel && !sel.aa) {
       if (sel.upgradeAA()) boom(sel.x, sel.y, 10);
     }
   }
-  if (e.key === 'm' || e.key === 'M') {
-    if (bgmAudio) bgmAudio.muted = !bgmAudio.muted;
-  }
-  if (e.key === ' ') { G.shopSel = null; e.preventDefault(); buildShop(); }
+  if (k === 'h') G.showHp = !G.showHp;
+  if (k === 'm') G.mouseScroll = !G.mouseScroll;
+  if (k === 'c') G.showBuildArea = !G.showBuildArea;
+  if (k === 'g') toggleZoom();
+  if (e.key === ' ') { G.shopSel = null; G.selected = null; e.preventDefault(); buildShop(); }
 });
 
 // ---------------- 启动 ----------------
