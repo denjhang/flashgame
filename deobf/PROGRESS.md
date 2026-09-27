@@ -333,6 +333,24 @@ python3 deobf/resolve_constants.py
     navire 无）；120 帧真实战斗 8 个音效全部触发、0 JS 错误
 - **队列 A-I 全部处理完毕**（A/B/C/D/E/F/G/H 前几轮完成，I 本轮以"核实不需要改 + 补全行进音"收尾）
 
+## 第 N+9 轮成果（2026-09-28, H5 领土防御·环境鸟叫补全）
+
+- **盘点发现真实缺口（非重做已完成项）**：原版 `6_430` 的 `playBirds()` 每 10 秒随机播放
+  17 个环境鸟叫（b01-b17），H5 此前**完全没有**：
+  - 权威逻辑：`setInterval(this,"playBirds",10000)`；
+    `Math.floor(Math.random() * 17) + 1` → `BSounds[1..17].start()`
+  - 原版跳过条件：`master_scenario.enScenario`（剧情模式）/ `aPerdu`（已失败）/ `edithBool`（降音量模式）
+    → H5 对应：已 lost/won 时不播、静音时不播
+- **导出 17 个音效**（chid 429-445）接入 `playBirds(now)`，10 秒节流；
+  `b12`(chid440) 原本是 flv 且 `-format sound:mp3` **静默失败**（文件未生成）→ 改用 `-format sound:wav`
+  转码成功（1ch 5512Hz 2.51s）。这正是"验证每个音效真能加载"查出来的
+- **全量音效核验**：SFX_FILES 53 项**文件全部存在**（脚本比对）+ 浏览器 `oncanplaythrough`
+  **53/53 可加载 0 失败**
+- **顺带核实的原版机制**（已确认 H5 正确，未改）：
+  - 修理费公式 `2 × (maxHP − curHP)`（DefineSprite_819 repairIfCan 权威）→ H5 的 `REPAIR_COST=2` 一致
+  - 原版另有 `barreReparation` 面板 + `repairLogo.autoRepair` 开关 UI（chid 819/184），
+    H5 已有 autoRepair 字段与逻辑，但**无面板 UI**（列为后续可选项，非队列要求）
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

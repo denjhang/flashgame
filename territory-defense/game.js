@@ -478,6 +478,12 @@ const SFX_FILES = {
   uniteMoveLight3: '478_uniteMoveLight3.mp3', uniteMoveLight4: '479_uniteMoveLight4.mp3',
   uniteMoveHeavy1: '473_uniteMoveHeavy1.mp3', uniteMoveHeavy2: '474_uniteMoveHeavy2.mp3',
   uniteMoveHeavy3: '475_uniteMoveHeavy3.mp3', uniteMoveTigre1: '480_uniteMoveTigre1.wav',
+  // 环境鸟叫 b01-b17 (原版 playBirds: setInterval 10000ms 随机播 BSounds[1..17])
+  b01: '429_b01.mp3', b02: '430_b02.mp3', b03: '431_b03.mp3', b04: '432_b04.mp3',
+  b05: '433_b05.mp3', b06: '434_b06.mp3', b07: '435_b07.mp3', b08: '436_b08.mp3',
+  b09: '437_b09.mp3', b10: '438_b10.mp3', b11: '439_b11.mp3', b12: '440_b12.wav',
+  b13: '441_b13.mp3', b14: '442_b14.mp3', b15: '443_b15.mp3', b16: '444_b16.mp3',
+  b17: '445_b17.mp3',
   Su37: '472_Su37.wav',
 };
 const SFX_POOL = {};
@@ -532,6 +538,17 @@ function rouleSfx(chassis) {
   if (!fam) return;   // navire/Yamato 原版为 "null" 族
   const m = MOVE_SFX[fam];
   playSfx(m.pre + (1 + Math.floor(Math.random() * m.n)), 0.16);
+}
+// 环境鸟叫 (原版 6_430 playBirds: setInterval(this,"playBirds",10000)):
+//   Math.floor(Math.random() * 17) + 1 → BSounds[1..17] 随机播一个
+//   原版在 enScenario / aPerdu / edithBool 三个条件下跳过; H5 对应: 剧情模式(无)/已失败/静音
+let lastBirdAt = 0;
+function playBirds(now) {
+  if (G.lost || G.won) return;       // 原版 aPerdu 时不播
+  if (bgmMuted) return;              // 原版 edithBool (降音量模式) 时不播
+  if (now - lastBirdAt < 10000) return;   // 原版 setInterval 10000ms
+  lastBirdAt = now;
+  playSfx('b' + String(1 + Math.floor(Math.random() * 17)).padStart(2, '0'), 0.12);
 }
 // 命中音 (权威源: DefineSprite_400_obus 帧库结构 → 内层精灵 frame_2 DoAction):
 //   弹体精灵: 301(obusLeger)/307(obusMoyen) → explosion1;  361(obusLourd) → explosion2
@@ -826,6 +843,7 @@ function tick() {
   G.frame++;
   scrollCamera();
   su37Update();
+  playBirds(performance.now());
   computeVisibility();
   revealExplored();
 

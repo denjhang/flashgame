@@ -100,6 +100,13 @@ for (const ch of ['camion1','jeep','bradley','amx10','abrams','camionBlinde','t9
 }
 console.log("行进音族: %j", famTest);
 console.log("单位图: %d 张 (FFDec 导出已含 alpha, bbox居中, 车头朝上)", Object.keys(UNIT_BMP).length);
+// 环境鸟叫
+const birdKeys = Object.keys(SFX_FILES).filter(k => k.length === 3 && k[0] === 'b');
+lastBirdAt = 0; const birdLog = {};
+const _ps = playSfx; playSfx = (n,v) => { birdLog[n] = (birdLog[n]||0)+1; };
+playBirds(0); playBirds(5000); playBirds(10000); playBirds(20000);
+playSfx = _ps;
+console.log("鸟叫: %d 个音效, 10s节流触发 %d 次 %j", birdKeys.length, Object.keys(birdLog).length, Object.keys(birdLog));
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
   Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,
   Object.keys(UNIT_BMP).filter(k => k !== 'tigre' && !UNIT_SHADOW[k]));
