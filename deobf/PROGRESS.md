@@ -197,6 +197,24 @@ python3 deobf/resolve_constants.py
 - 本轮未做（按队列下推）：C 多帧炮管开火动画、Su37 空袭、跳弹音、阴影、选中圈、BGM 对号证据、
   单位去背景——已在任务队列 A-I 列出
 
+## 第 N+2 轮成果（2026-09-27, H5 领土防御·炮管开火动画）
+
+- **新建权威解析器 `deobf/sprite_frames.py`**：直接读 TCS_uncompressed.swf 二进制解析 DefineSprite
+  的完整帧序列（FrameLabel + 每帧 PlaceObject chid），输出 `deobf/data/sprite_frames.json`。
+  修掉了此前"用 dump 文本扫标签"会越界扫到相邻 sprite 的错误（曾误报 sprite 122 有 41 个标签，
+  实为 1 个）。两个独立方法（二进制解析 + dump 缩进界定）一致：**14 把武器 sprite 全部只有
+  1 个标签 "fire"，位于第 2 帧**
+- **开火帧序列像素实测**：`deobf/data/gun_fire_frames.json` — 对每把武器 sprite 的每帧 PNG 统计
+  alpha 内容量，取帧 2 起连续非空段作为开火动画。结果：m60(92)=15帧、gatling(98)=23、75mm(103)=24、
+  105mm(108)=24、crotale(122)=4、canon125(125)=34、MLRS(128)=36、gatlingDT90(153)=2、navire(164)=4、
+  Yamato(167)=34；pluton(80)/MTHEL(83)/tigre(161) 帧 2 起为空 → 无开火帧（如实记录，回退静态帧）
+- **动画机制接入**：Turret.fireT / Unit.fireT 在开火时置为该武器炮管的开火序列长度，每 tick 递减，
+  gunFrameFor(id, fireT) 按序取帧；炮管放大验证证实原版动画本质是**后坐**（帧1伸出→中段后缩→末帧复位）
+  + 炮口焰。真机画布像素差验证：同塔 fireT=0 vs fireT=17 有 154 像素差异（3.4% 采样区）
+- 修正一处 ID 混淆：fireT 原用武器名查 gunFireLen（表按 sprite ID 索引）恒为 0；改
+  partsFireLen(parts) 从部件表取炮管 sprite 的序列长度
+- 本轮未做（队列下推）：D Su37 空袭、E 跳弹/金属音、F 阴影、G 选中圈、H BGM 对号、I 单位去背景
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

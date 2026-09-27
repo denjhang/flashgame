@@ -186,15 +186,46 @@ const ETURRET_PARTS = {
   radarMobile:   [{ s: 'eturrets_spr/DefineSprite_115/1.png' }],
   Yamato460:     [{ s: 'eturrets/166.png' }, { g: 167 }, { s: 'eturrets/169.png' }, { s: 'eturrets/170.png' }, { s: 'eturrets/171.png' }, { s: 'eturrets/172.png' }],
 };
-// 炮管 sprite → 帧序列路径 (任务C接动画; 现取首帧)
-const GUN_SPRITE_FRAMES = { 80: 186, 83: 25, 92: 16, 98: 24, 103: 25, 108: 25, 122: 91, 125: 35, 128: 157, 153: 3, 157: 1, 161: 46, 164: 91, 167: 35 };
-const ET_PART_IMG = {};   // 所有部件图缓存 (路径→Image)
+// 炮管 sprite 帧结构 (deobf/data/sprite_frames.json 二进制解析; deobf/data/gun_fire_frames.json 像素实测):
+//   帧 1 = 静态 base (炮管朝上, 无焰); FrameLabel "fire" 在第 2 帧 = 开火起点;
+//   后续帧为该武器的开火/后坐动画 (由 PNG alpha 内容量实测出连续段)
+const GUN_FIRE_SEQ = {
+  92: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+  98: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
+  103: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
+  108: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
+  122: [2,3,4,5],
+  125: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
+  128: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37],
+  153: [2,3],
+  157: [],
+  164: [2,3,4,5],
+  167: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
+  80: [], 161: [],   // 帧 2 起为空白 → 无可用开火帧 (回退静态帧, 如实记录)
+};
+const ET_PART_IMG = {};
 function partImg(path) {
   if (!ET_PART_IMG[path]) { const im = new Image(); im.src = 'assets/' + path; ET_PART_IMG[path] = im; }
   return ET_PART_IMG[path];
 }
 function gunFramePath(id, f) {
   return 'eturrets_spr/DefineSprite_' + id + '/' + f + '.png';
+}
+// 选定炮管当前显示的帧: 开火时按 fireT 顺序播开火序列, 播完/未开火回静态帧 1
+function gunFrameFor(id, fireT) {
+  const seq = GUN_FIRE_SEQ[id];
+  if (fireT > 0 && seq && seq.length) {
+    const idx = seq.length - fireT;
+    if (idx >= 0 && idx < seq.length) return seq[idx];
+  }
+  return 1;
+}
+function gunFireLen(id) { const s = GUN_FIRE_SEQ[id]; return s ? s.length : 0; }
+// 从部件表取该武器炮管的开火动画长度 (取所有 gun 件里最长的)
+function partsFireLen(parts) {
+  let n = 0;
+  if (parts) for (const p of parts) if (p.g) n = Math.max(n, gunFireLen(p.g));
+  return n;
 }
 // 玩家武器 → 173 库武器 ID (玩家 86 库的 sprite 88 实际是 173 库 m60 帧底座; 玩家塔炮管与 173 库底层 sprite 同源)
 //   gatling86=56 → 173库 gatlingAmx10 (sprite 98 机枪 + 143 护盾)
@@ -362,6 +393,7 @@ class Unit {
     this.weapon = weaponId !== 'null' ? WEAPONS[weaponId] : null;
     this.weaponId = weaponId;
     this.cool = 0;
+    this.fireT = 0;        // 敌方炮管开火帧计时
     this.dead = false;
     this.reached = false;
   }
@@ -385,10 +417,12 @@ class Unit {
     // 敌方武器开火 (打我方炮塔)
     if (this.weapon) {
       this.cool--;
+      if (this.fireT > 0) this.fireT--;
       if (this.cool <= 0) {
         const t = nearestTurret(this.x, this.y, this.weapon[1]);
         if (t) {
           this.cool = this.weapon[2] * 3;
+          this.fireT = partsFireLen(ETURRET_PARTS[this.weaponId]);
           spawnShell(this.x, this.y, t, this.weapon, 'ennemy');
         }
       }
@@ -417,6 +451,7 @@ class Turret {
     this.w = WEAPONS[id];
     this.rot = -Math.PI / 2;
     this.cool = 0;
+    this.fireT = 0;        // 炮管开火帧计时 (>0 时切到 fire 序列)
     this.target = null;
     this.autoRepair = false;
     this.aa = AA_WEAPONS.includes(id);   // 机枪/导弹天生对空; 其余可付费升级
@@ -432,6 +467,7 @@ class Turret {
   }
   update() {
     if (this.hp <= 0) return;   // 被摧毁的塔不再索敌开火
+    if (this.fireT > 0) this.fireT--;   // 炮管开火帧倒计时
     if (this.autoRepair && this.hp < this.maxHp && G.euros >= REPAIR_COST) {
       const n = Math.min(5, this.maxHp - this.hp, Math.floor(G.euros / REPAIR_COST));
       this.hp += n; G.euros -= n * REPAIR_COST;
@@ -456,9 +492,10 @@ class Turret {
       while (da < -Math.PI) da += 2 * Math.PI;
       const rs = this.w[0] * 0.0198;   // 原版: typeData[0] × fpsc 度/帧 → 弧度
       this.rot += Math.sign(da) * Math.min(Math.abs(da), rs);
-      // 开火 (冷却 = 威力因子 × 系数)
+      // 开火 (冷却 = 威力因子 × 系数) → 触发炮管开火帧 (fireT = 0..fireDur)
       if (Math.abs(da) < 0.3 && this.cool <= 0 && bd <= this.w[1]) {
         this.cool = this.w[2] * 1.15;
+        this.fireT = partsFireLen(playerParts(this.id));   // 播完整开火动画
         spawnShell(this.x, this.y, best, this.w, 'ally', this.id);
       }
     }
@@ -683,7 +720,8 @@ function draw() {
     if (parts) {
       for (const p of parts) {
         if (p.g) {
-          const im = partImg(gunFramePath(p.g, 1));
+          const f = gunFrameFor(p.g, t.fireT);
+          const im = partImg(gunFramePath(p.g, f));
           if (!(im.complete && im.naturalWidth)) continue;
           ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
           ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + im.naturalHeight * 0.12);
@@ -760,7 +798,8 @@ function draw() {
       if (parts) {
         for (const p of parts) {
           if (p.g) {
-            const im = partImg(gunFramePath(p.g, 1));
+            const f = gunFrameFor(p.g, u.fireT);
+            const im = partImg(gunFramePath(p.g, f));
             if (!(im.complete && im.naturalWidth)) continue;
             ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
             ctx.rotate(u.rot + Math.PI / 2);
