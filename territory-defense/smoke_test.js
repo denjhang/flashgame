@@ -91,6 +91,7 @@ console.log("shellImpactSfx 三型接线正常");
 // ---- F: 阴影映射 ----
 // ---- G: 选中视觉 ----
 console.log("选中视觉: 准星帧=%d 射程圈=%s (原版 778/775)", SEL_CROSS.length, !!SEL_RANGE);
+console.log("BGM: %j chid映射 %j (曲名来自原版1151按钮文本)", BGM_NAMES, BGM_FILES);
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
   Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,
   Object.keys(UNIT_BMP).filter(k => k !== 'tigre' && !UNIT_SHADOW[k]));

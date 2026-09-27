@@ -390,8 +390,13 @@ function su37Draw() {
 }
 
 // ---------------- 音乐 (原版 1151 面板机制: 手动选曲 changeMusic + playMusic/pauseMusic) ----------------
-const BGM_FILES = ['bgm_main.mp3', 'bgm2.mp3', 'bgm3.mp3'];   // actOfInstinct / hellMarch / justDoItUp
-const BGM_NAMES = ['actOfInstinct', 'hellMarch', 'justDoItUp'];
+const BGM_FILES = ['bgm_main.mp3', 'bgm2.mp3', 'bgm3.mp3'];
+// 曲名 = 原版 1151 音乐面板按钮显示文本 (反编译权威):
+//   PlaceObject2_1145_5 → "Act of instinct" (changeMusic 0)
+//   PlaceObject2_1145_8 → "Hell march"       (changeMusic 1)
+//   PlaceObject2_1145_11 → "Just do it up"   (changeMusic 2)
+// 与 6_430 的 musics[0..2].attachSound("actOfInstinct"/"hellMarch"/"justDoItUp") 索引一致
+const BGM_NAMES = ['Act of instinct', 'Hell march', 'Just do it up'];
 let bgmAudio = null, imusic = 0, positionmusic = 0, isPause = true, bgmMuted = false;
 function playMusic() {                    // 原版 playMusic: 从 positionmusic 恢复
   try {
@@ -427,7 +432,10 @@ function changeMusic(im) {                // 原版 changeMusic: 换曲并立即
 function refreshMusicPanel() {            // 音乐面板按钮状态
   for (let i = 0; i < 3; i++) {
     const b = document.getElementById('m' + i);
-    if (b) b.classList.toggle('on', i === imusic && !isPause);
+    if (b) {
+      b.classList.toggle('on', i === imusic && !isPause);
+      b.textContent = BGM_NAMES[i];   // 原版 1151 按钮显示曲名
+    }
   }
   const pp = document.getElementById('mPlay');
   if (pp) pp.textContent = isPause ? '▶ 播放' : '⏸ 播放中';

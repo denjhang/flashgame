@@ -286,6 +286,28 @@ python3 deobf/resolve_constants.py
   与 `350*2*0.39` 吻合）
 - 本轮未做（队列下推）：H BGM 三段对号证据、I 单位去背景 + 车头方向校正
 
+## 第 N+7 轮成果（2026-09-28, H5 领土防御·BGM 对号证据）
+
+- **权威证据（三条独立链，全部一致）**：
+  1. `frame_6/PlaceObject2_6_430 onClipEvent(load)`：
+     `musics[0].attachSound("actOfInstinct")` / `musics[1].attachSound("hellMarch")` /
+     `musics[2].attachSound("justDoItUp")`
+  2. `DefineSprite_1151`（音乐面板）三按钮的 `onClipEvent(load)` 显示文本：
+     `PlaceObject2_1145_5` → **"Act of instinct"**、`1145_8` → **"Hell march"**、
+     `1145_11` → **"Just do it up"**
+  3. 三按钮 `on(press)` 分别调 `changeMusic(0/1/2)` —— 与 1 的数组索引完全对应
+  → **索引→曲名映射已权威确认**（H5 的 BGM_NAMES 顺序正确）
+- **音频文件↔chid 已用 MD5 逐字节证明**：assets/music 的 bgm_main/bgm2/bgm3 分别等于
+  SWF 原始 `1157`(46.18s) / `1082`(66.09s) / `1084`(18.30s)（md5 完全一致）
+- **未解的一环（如实记录，不猜）**：SWF **没有把三个 BGM 名字导出**（88 条 ExportAssets 里只有
+  b01-b17 环境音与武器音效，无 BGM）；三个名字在二进制里各只出现 1 次（均在 6_430/1151 常量池），
+  **不存在 linkage 绑定表**可静态查询。因此 "chid 1157/1082/1084 分别对应哪首曲子" 无法从 SWF 静态证明
+  - 音频特征仅作参考（不足以定名，不做断言）：1157=46.2s/RMS7176/过零406；1082=66.2s/RMS3138/过零1265；
+    1084=18.2s/RMS3675/过零680
+  - 当前 H5 映射为 `bgm_main=1157 → actOfInstinct`、`bgm2=1082 → hellMarch`、`bgm3=1084 → justDoItUp`，
+    **标注为待人工听辨确认**（三首均已在浏览器验证可播放）
+- 本轮未做（队列下推）：I 单位去背景 + 车头方向校正
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）
