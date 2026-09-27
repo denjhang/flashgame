@@ -150,23 +150,10 @@ const SEL_RANGE = (() => {
   return im;
 })();
 
-// ---------------- 原版炮塔外观 (86 帧库 shape→PNG) + 爆炸动画 + BGM ----------------
-const TURRET_IMG = {};
-// 权威对号 deobf/data/turret_frames.json (DefineSprite 86 帧标签→shape):
-// gatling=56 canon75=57 canon105=58 canon105D=59 radar=61 crotale=62 canon125=65
-// MLRS=67 pluton=69(+80枪口焰) MTHEL=83(spr)+85 ; m60 无帧(原版塔库无 m60)
-const TURRET_SRC = {
-  gatling: 'assets/turrets/56.png', canon75: 'assets/turrets/57.png',
-  canon105: 'assets/turrets/58.png', canon105D: 'assets/turrets/59.png',
-  crotale: 'assets/turrets/62.png', canon125: 'assets/turrets/65.png',
-  radar: 'assets/turrets/61.png', MLRS: 'assets/turrets/67.png',
-  pluton: 'assets/turrets/69.png', MTHEL: 'assets/turrets/85.png',
-};
-for (const k in TURRET_SRC) {
-  const im = new Image();
-  im.src = TURRET_SRC[k];
-  TURRET_IMG[k] = im;
-}
+// ---------------- 爆炸动画 + BGM ----------------
+// 注: 旧的 86 库单帧方案 (TURRET_SRC/TURRET_IMG) 已删除 —— 经 FFDec 导出核实,
+//     DefineSprite_86 是黑色线框标记层 (箭头/十字/方框), 不是炮塔外观。
+//     现改用 173 库整帧, 见下方 TURRET_LIB_* 与 TURRET_GUNS。
 // 炮弹 (权威映射, 全部来自 DefineSprite_400_obus 帧库子件 + frame_1 弹体):
 //   obus 库帧标签 → 内层弹体 sprite (dump 权威):
 //     obusLeger→301(90x93) obusMoyen→307(104x108) obusLourd→361(176x182)
@@ -201,97 +188,154 @@ const SHELL_KIND = {
   MLRS: 'missile2', pluton: 'missile3', navireCrotale: 'missileUnder',
   Yamato460: 'obusLourd', MTHEL: 'obusLeger',
 };
-// 敌方武器塔分层外观 (DefineSprite_173 帧库, deobf/data/turret_frames.json objs 深度序):
-//   g: 旋转炮管 sprite (eturrets_spr/DefineSprite_N/1.png, 原版带开火动画帧)
-//   s: 静态件 shape (eturrets/N.png, 底座/护盾/装饰), 按 objs 顺序绘制 (先下后上)
-// 重复出现的 id (如 105mmD 双管 [108,108]) 去重为一次, 位置差异待矩阵解析
-const ETURRET_PARTS = {
-  m60Brad:       [{ s: 'eturrets/138.png' }, { g: 92 }, { s: 'eturrets/139.png' }],
-  '75mmBrad':    [{ s: 'eturrets/140.png' }, { g: 103 }, { s: 'eturrets/141.png' }],
-  gatlingAmx10:  [{ g: 98 }, { s: 'eturrets/143.png' }],
-  '75mmAmx10':   [{ g: 103 }, { s: 'eturrets/144.png' }],
-  canon105:      [{ g: 108 }, { s: 'eturrets/110.png' }],
-  '105mmAbrams': [{ g: 108 }, { s: 'eturrets/147.png' }],
-  canon105D:     [{ g: 108 }, { s: 'eturrets/112.png' }],
-  '105mmDAbrams': [{ g: 108 }, { s: 'eturrets/148.png' }],
-  crotale:       [{ s: 'eturrets/117.png' }, { s: 'eturrets_spr/DefineSprite_121/1.png' }, { g: 122 }],
-  crotaleAbrams: [{ s: 'eturrets/149.png' }, { s: 'eturrets_spr/DefineSprite_121/1.png' }, { s: 'eturrets/150.png' }, { g: 122 }],
-  crotaleTigre:  [{ g: 157 }, { g: 161 }],
-  navireCrotale: [{ s: 'eturrets/163.png' }, { g: 164 }],
-  canon125:      [{ g: 125 }, { s: 'eturrets/127.png' }],
-  '125mmT90':    [{ g: 125 }, { s: 'eturrets/152.png' }],
-  MLRS:          [{ g: 128 }, { s: 'eturrets/130.png' }],
-  pluton:        [{ g: 80 }, { s: 'eturrets/132.png' }],
-  MTHEL:         [{ g: 83 }, { s: 'eturrets/134.png' }, { s: 'eturrets_spr/DefineSprite_136/1.png' }],
-  gatlingDT90:   [{ g: 153 }, { s: 'eturrets/152.png' }],
-  gatlingDTigre: [{ g: 153 }, { g: 157 }, { s: 'eturrets_spr/DefineSprite_160/1.png' }],
-  radar:         [{ s: 'eturrets_spr/DefineSprite_115/1.png' }],
-  radarMobile:   [{ s: 'eturrets_spr/DefineSprite_115/1.png' }],
-  Yamato460:     [{ s: 'eturrets/166.png' }, { g: 167 }, { s: 'eturrets/169.png' }, { s: 'eturrets/170.png' }, { s: 'eturrets/171.png' }, { s: 'eturrets/172.png' }],
+// ---------------- 炮塔外观: 173 库整帧渲染 (原版权威) ----------------
+// 结论依据 (deobf/turret_layout.py + 模板匹配双证):
+//   1) DefineSprite_173 是真正的武器塔外观库 (26 帧, 帧标签=武器名)
+//      FFDec `-selectid 173 -format sprite:png` 导出的每帧都是统一画布 48x143,
+//      **部件已按原版 PlaceObject 矩阵合成为正确布局** —— 无需手工拼装。
+//   2) 画布原点 (相对武器局部坐标系) 经 12 个独立部件模板匹配一致收敛:
+//      origin = (-21.98, -76.30), 标准差 <0.31px  → 见 TURRET_LIB_ORIGIN
+//   3) DefineSprite_86 (原 H5 用的"86 库") 经导出核实是**黑色线框标记层**
+//      (箭头/十字/方框/叉, 平均 RGB≈0, 彩色占比 0%), 不是炮塔外观。
+//      这正是此前"炮塔资源用错"的根因 → 玩家塔也改用 173 库。
+//   4) 旋转语义: structure(185) 内 tourelle=dpt24 整体旋转 (DefineSprite_174 控制器
+//      调 gotoAndStop(type) 显示整帧, 再旋转 tourelle 自身) → H5 整帧一起转。
+const TURRET_LIB_ORIGIN = { x: -21.98, y: -76.30 };   // 173 库 48x143 画布原点
+// 武器 ID → 173 库帧号 (deobf/data/turret_layout.json labels)
+const TURRET_LIB_FRAME = {
+  m60: 2, gatling: 3, canon75: 4, canon105: 5, canon105D: 6, radar: 7,
+  crotale: 8, canon125: 9, MLRS: 10, pluton: 11, MTHEL: 12,
+  radarMobile: 13, m60Brad: 14, '75mmBrad': 15, gatlingAmx10: 16, '75mmAmx10': 17,
+  '105mmAbrams': 18, '105mmDAbrams': 19, crotaleAbrams: 20, '125mmT90': 21,
+  gatlingDT90: 22, gatlingDTigre: 23, crotaleTigre: 24, navireCrotale: 25, Yamato460: 26,
 };
-// 炮管 sprite 帧结构 (deobf/data/sprite_frames.json 二进制解析; deobf/data/gun_fire_frames.json 像素实测):
-//   帧 1 = 静态 base (炮管朝上, 无焰); FrameLabel "fire" 在第 2 帧 = 开火起点;
-//   后续帧为该武器的开火/后坐动画 (由 PNG alpha 内容量实测出连续段)
-const GUN_FIRE_SEQ = {
-  92: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
-  98: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
-  103: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
-  108: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
-  122: [2,3,4,5],
-  125: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
-  128: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37],
-  153: [2,3],
-  157: [],
-  164: [2,3,4,5],
-  167: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
-  80: [], 161: [],   // 帧 2 起为空白 → 无可用开火帧 (回退静态帧, 如实记录)
-};
-const ET_PART_IMG = {};
-function partImg(path) {
-  if (!ET_PART_IMG[path]) { const im = new Image(); im.src = 'assets/' + path; ET_PART_IMG[path] = im; }
-  return ET_PART_IMG[path];
-}
-function gunFramePath(id, f) {
-  return 'eturrets_spr/DefineSprite_' + id + '/' + f + '.png';
-}
-// 选定炮管当前显示的帧: 开火时按 fireT 顺序播开火序列, 播完/未开火回静态帧 1
-function gunFrameFor(id, fireT) {
-  const seq = GUN_FIRE_SEQ[id];
-  if (fireT > 0 && seq && seq.length) {
-    const idx = seq.length - fireT;
-    if (idx >= 0 && idx < seq.length) return seq[idx];
+const TURRET_LIB_IMG = {};
+function turretLibImg(id) {
+  const f = TURRET_LIB_FRAME[id];
+  if (!f) return null;
+  if (!TURRET_LIB_IMG[id]) {
+    const im = new Image();
+    im.src = 'assets/turretlib/173/' + f + '.png';
+    TURRET_LIB_IMG[id] = im;
   }
-  return 1;
+  return TURRET_LIB_IMG[id];
 }
-function gunFireLen(id) { const s = GUN_FIRE_SEQ[id]; return s ? s.length : 0; }
-// 从部件表取该武器炮管的开火动画长度 (取所有 gun 件里最长的)
-function partsFireLen(parts) {
-  let n = 0;
-  if (parts) for (const p of parts) if (p.g) n = Math.max(n, gunFireLen(p.g));
-  return n;
-}
-// 玩家武器 → 173 库武器 ID (玩家 86 库的 sprite 88 实际是 173 库 m60 帧底座; 玩家塔炮管与 173 库底层 sprite 同源)
-//   gatling86=56 → 173库 gatlingAmx10 (sprite 98 机枪 + 143 护盾)
-//   canon75=57 → 173库 75mmAmx10 (sprite 103 + 144 底座)
-//   canon105=58 → 173库 canon105 (sprite 108 炮管 + 110 底座)
-//   canon105D=59 → 173库 canon105D (sprite 108 双管 + 112 底座)
-//   radar=61 → 173库 radar (sprite 115)
-//   crotale=62 → 173库 crotale (117 底座 + 121 弹簧 + 122 91帧导弹)
-//   canon125=65 → 173库 canon125 (sprite 125 炮管 + 127 底座; 86 库另用 sprite 64 作底盘 5 层)
-//   MLRS=67 → 173库 MLRS (sprite 128 157帧 + 130 底座)
-//   pluton=69+80 → 173库 pluton (sprite 80 枪口焰 + 132 底座)
-//   MTHEL=83+85 → 173库 MTHEL (sprite 83 激光 + 134 底座 + 136)
-//   m60=88 → 173库 m60Brad (sprite 138 底座 + 92 机枪 + 139 后座)
+// 玩家武器 → 173 库武器 ID (86 库为线框层, 不能用作外观; 玩家与敌方同库同帧)
 const PLAYER_ETURRET = {
-  m60: 'm60Brad', gatling: 'gatlingAmx10', canon75: '75mmAmx10',
+  m60: 'm60', gatling: 'gatling', canon75: 'canon75',
   canon105: 'canon105', canon105D: 'canon105D', canon125: 'canon125',
   crotale: 'crotale', MLRS: 'MLRS', pluton: 'pluton', MTHEL: 'MTHEL',
   radar: 'radar',
 };
-// 玩家塔底座 (86 库原底盘, 旋转时不动的固定件)  ← 173 库 [底座] 视觉差, 但与玩家塔对应
-// 86 库原 sprite 56/57/58/59/61/62/65/67/69/85/88 → 173 库同源 shape, 已存在于 eturrets/
-// 通过 PLAYER_ETURRET 映射到 ETURRET_PARTS 自动复用, 不再单独维护
-function playerParts(id) { return ETURRET_PARTS[PLAYER_ETURRET[id]]; }
+// 开火动画: 原版 tourelle 控制器 `canonN.gotoAndPlay("fire")` —— 只让 named 炮管部件
+// 播开火序列, 底座不动 (deobf/pcode_as/DefineSprite_174... 第 340 行)。
+// 表由 deobf/turret_layout.py 生成 (deobf/data/turret_guns.json):
+//   m   = 该部件在武器局部系的权威 matrix [a,b,c,d,tx,ty] (tx,ty 已转 px)
+//   o   = 该部件 PNG 画布左上角在部件局部系的坐标 (= 首帧 bounds 的 min, px)
+//   n   = 原版实例名 (canon1/canon2... 决定开火顺序)
+const TURRET_GUNS = {
+  m60: [{ chid: 92, n: 'canon1', m: [0.565155, 0, 0, 0.565155, 0.5, -1.05], o: [-5.49, -22.65] }],
+  gatling: [{ chid: 98, n: 'canon1', m: [1.390945, 0, 0, 0.752762, 0, -4], o: [-1.41, -14.83] }],
+  canon75: [{ chid: 103, n: 'canon1', m: [0.561356, 0, 0, 0.561356, 0.05, -4.55], o: [-3.62, -27.96] }],
+  canon105: [{ chid: 108, n: 'canon1', m: [0.638199, 0, 0, 0.638199, 0, -4.15], o: [-5.17, -32.21] }],
+  canon105D: [
+    { chid: 108, n: 'canon1', m: [0.640259, 0, 0, 0.638626, -2.5, -5.9], o: [-5.17, -32.21] },
+    { chid: 108, n: 'canon2', m: [-0.640259, 0, 0, 0.638626, 3.4, -5.9], o: [-5.17, -32.21] }],
+  crotale: [{ chid: 122, n: 'canon1', m: [0.5439, 0, 0, 0.539276, -8.15, -6.5], o: [-2.84, -7.36] }],
+  canon125: [{ chid: 125, n: 'canon1', m: [0.748901, 0, 0, 0.748901, 0, -5.85], o: [-7.58, -38.13] }],
+  MLRS: [{ chid: 128, n: 'canon1', m: [0.626816, 0, 0, 0.788177, -8.65, 0.8], o: [-2.11, -22.56] }],
+  pluton: [{ chid: 80, n: 'canon1', m: [1.101685, 0, 0, 0.784576, 0, -5.25], o: [-2.74, -10.51] }],
+  MTHEL: [{ chid: 83, n: 'canon1', m: [-0.572128, 0, 0, 0.572128, 0, -13.4], o: [0, 0] }],
+  m60Brad: [{ chid: 92, n: 'canon1', m: [1.060989, 0, 0, 0.530502, 0.2, -4.15], o: [-5.49, -22.65] }],
+  '75mmBrad': [{ chid: 103, n: 'canon1', m: [0.483109, 0, 0, 0.483109, 0.05, -8.9], o: [-3.62, -27.96] }],
+  gatlingAmx10: [{ chid: 98, n: 'canon1', m: [1.713364, 0, 0, 0.681793, -0.15, -5.95], o: [-1.41, -14.83] }],
+  '75mmAmx10': [{ chid: 103, n: 'canon1', m: [0.483109, 0, 0, 0.483109, 0, -10.4], o: [-3.62, -27.96] }],
+  '105mmAbrams': [{ chid: 108, n: 'canon1', m: [0.541931, 0, 0, 0.541931, -0.15, -14.15], o: [-5.17, -32.21] }],
+  '105mmDAbrams': [
+    { chid: 108, n: 'canon2', m: [0.577667, 0, 0, 0.577026, 1.85, -12.55], o: [-5.17, -32.21] },
+    { chid: 108, n: 'canon1', m: [-0.577667, 0, 0, 0.577026, -2.15, -12.55], o: [-5.17, -32.21] }],
+  crotaleAbrams: [{ chid: 122, n: 'canon1', m: [0.5439, 0, 0, 0.539276, -7.7, -2.95], o: [-2.84, -7.36] }],
+  '125mmT90': [{ chid: 125, n: 'canon1', m: [0.748901, 0, 0, 0.748901, 0.05, -16.55], o: [-7.58, -38.13] }],
+  gatlingDT90: [
+    { chid: 153, n: 'canon2', m: [-1.390945, 0, 0, 0.752762, 2.8, -11.55], o: [-1.41, -14.83] },
+    { chid: 153, n: 'canon1', m: [1.390945, 0, 0, 0.752762, -2.15, -11.55], o: [-1.41, -14.83] }],
+  gatlingDTigre: [
+    { chid: 153, n: 'canon2', m: [-1.100342, 0, 0, 0.702637, 9.1, 3.05], o: [-1.41, -14.83] },
+    { chid: 153, n: 'canon1', m: [-1.100342, 0, 0, 0.702637, -9.3, 2.85], o: [-1.41, -14.83] }],
+  crotaleTigre: [{ chid: 161, n: 'canon1', m: [0.676193, 0, 0, 0.676193, -11.6, -3.95], o: [-2.84, -7.36] }],
+  navireCrotale: [{ chid: 164, n: 'canon1', m: [0.569885, 0, 0, 0.565033, -8.15, -6], o: [-2.84, -7.36] }],
+  Yamato460: [
+    { chid: 167, n: 'canon4', m: [0.965179, 0.002197, -0.002136, 0.645447, 4.4, -14.85], o: [-7.58, -38.13] },
+    { chid: 167, n: 'canon1', m: [0.965179, 0.002197, -0.002136, 0.645447, -4.2, -15], o: [-7.58, -38.13] },
+    { chid: 167, n: 'canon2', m: [0.965179, 0.002197, -0.002136, 0.645447, -9.2, -15], o: [-7.58, -38.13] },
+    { chid: 167, n: 'canon3', m: [0.965179, 0.002197, -0.002136, 0.645447, 9.95, -15], o: [-7.58, -38.13] }],
+};
+// (旧 ETURRET_PARTS 手工拼装表已删除; 现用 173 库整帧 + TURRET_GUNS 炮管叠加)
+// 炮管 sprite 开火帧序列 —— 像素实测 (deobf/turret_layout.py 给出 "fire" 标签帧号,
+// 再用 alpha>40 逐帧内容量确定实际可见段)。Flash 语义: canonN.gotoAndPlay("fire") 从
+// fire 标签帧顺序播到末尾。本表只保留【有内容】的帧 (全空帧播了也看不见, 跳过)。
+// 修正记录: 上一轮把 80/161 误判为"无开火帧"(只看了从帧2起的连续段, 漏掉后段真正的开火),
+//           且漏了 83 (MTHEL 激光)。本轮按 fire 标签+内容量重测, 全部补齐。
+const GUN_FIRE_SEQ = {
+  80:  [148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186],
+  83:  [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
+  92:  [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+  98:  [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
+  103: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
+  108: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
+  122: [2,3,4,5,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91],
+  125: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
+  128: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157],
+  153: [2,3],
+  157: [],
+  160: [],
+  161: [30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46],
+  164: [2,3,4,5,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91],
+  167: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],
+};
+// 每个武器的开火动画时长 (帧) —— 按【武器名】索引 (上一轮曾误按 chid 查表导致 fireT 恒为 0,
+// 开火动画永不播放)。时长 = 该武器所有 named 炮管里最长的 fire 序列长度。
+const FIRE_TICKS = {};
+function fireTicksFor(id) {
+  if (id in FIRE_TICKS) return FIRE_TICKS[id];
+  let n = 0;
+  const guns = (typeof TURRET_GUNS !== 'undefined' && TURRET_GUNS[id]) || [];
+  for (const g of guns) n = Math.max(n, (GUN_FIRE_SEQ[g.chid] || []).length);
+  FIRE_TICKS[id] = n;
+  return n;
+}
+// ---------------- 炮管开火叠加 (原版 canonN.gotoAndPlay("fire")) ----------------
+const GUN_SPR_IMG = {};
+function gunSprImg(chid, frame) {
+  const k = chid + '/' + frame;
+  if (!GUN_SPR_IMG[k]) {
+    const im = new Image();
+    im.src = 'assets/eturrets_spr/DefineSprite_' + chid + '/' + frame + '.png';
+    GUN_SPR_IMG[k] = im;
+  }
+  return GUN_SPR_IMG[k];
+}
+// 在武器局部坐标系内画所有 named 炮管 (开火时播 fire 序列帧)
+// 调用方需已 translate 到武器位置并 rotate 到朝向后
+function drawTurretGuns(id, fireT) {
+  const guns = TURRET_GUNS[id];
+  if (!guns) return;
+  for (const g of guns) {
+    const s = GUN_FIRE_SEQ[g.chid];
+    let f = 1;
+    if (fireT > 0 && s && s.length) {
+      const idx = s.length - fireT;
+      if (idx >= 0 && idx < s.length) f = s[idx];
+    }
+    const im = gunSprImg(g.chid, f);
+    if (!(im.complete && im.naturalWidth)) continue;
+    const [a, b, c, d, tx, ty] = g.m;
+    ctx.save();
+    ctx.transform(a, b, c, d, tx, ty);
+    ctx.drawImage(im, g.o[0], g.o[1]);
+    ctx.restore();
+  }
+}
 // ---------------- 自动修理蓝色磁场 (原版 sprite 183, 挂在 structure 的 repairLogo.light) ----------------
 // 反编译依据:
 //   frame_6/PlaceObject2_6_327 伤害循环: if (unitsAlliees[i].repairLogo.autoRepair) structures[i].structureDeco.autoRepair()
@@ -763,7 +807,7 @@ class Unit {
         const t = nearestTurret(this.x, this.y, this.weapon[1]);
         if (t) {
           this.cool = this.weapon[2] * 3;
-          this.fireT = partsFireLen(ETURRET_PARTS[this.weaponId]);
+          this.fireT = fireTicksFor(this.weaponId);
           spawnShell(this.x, this.y, t, this.weapon, 'ennemy');
         }
       }
@@ -841,7 +885,7 @@ class Turret {
       // 开火 (冷却 = 威力因子 × 系数) → 触发炮管开火帧 (fireT = 0..fireDur)
       if (Math.abs(da) < 0.3 && this.cool <= 0 && bd <= this.w[1]) {
         this.cool = this.w[2] * 1.15;
-        this.fireT = partsFireLen(playerParts(this.id));   // 播完整开火动画
+        this.fireT = fireTicksFor(PLAYER_ETURRET[this.id] || this.id);   // 播完整开火动画
         spawnShell(this.x, this.y, best, this.w, 'ally', this.id);
       }
     }
@@ -1131,44 +1175,25 @@ function draw() {
       ctx.fillRect(-10, -10, 20, 20);
       ctx.restore(); continue;
     }
-    // 玩家塔统一走 173 库分层部件渲染 (PLAYER_ETURRET 映射后复用 ETURRET_PARTS)
-    const parts = playerParts(t.id);
-    if (parts) {
-      for (const p of parts) {
-        if (p.g) {
-          const f = gunFrameFor(p.g, t.fireT);
-          const im = partImg(gunFramePath(p.g, f));
-          if (!(im.complete && im.naturalWidth)) continue;
-          ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
-          ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + im.naturalHeight * 0.12);
-          ctx.restore();
-        } else {
-          const im = partImg(p.s);
-          if (!(im.complete && im.naturalWidth)) continue;
-          ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
-        }
-      }
+    // 173 库整帧渲染: 部件位置由 FFDec 导出时按原版矩阵合成, 直接贴图
+    // 画布原点在武器局部 (TURRET_LIB_ORIGIN); 整帧绕局部原点旋转到 t.rot
+    //   帧内炮管朝上(=北, 屏幕 -PI/2), 故旋转量 = t.rot + PI/2
+    const libId = PLAYER_ETURRET[t.id] || t.id;
+    const im = turretLibImg(libId);
+    if (im && im.complete && im.naturalWidth) {
+      ctx.save();
+      ctx.rotate(t.rot + Math.PI / 2);
+      ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
+      // 开火时叠加 named 炮管的 fire 序列帧 (原版 canonN.gotoAndPlay("fire"))
+      drawTurretGuns(libId, t.fireT);
+      ctx.restore();
     } else if (t.id === 'radar') {
-      // 雷达: 173 库 radar=[115] 静态 + 扫描波纹
+      // 雷达: 扫描波纹 (叠加在整帧之上)
       const ph = (Date.now() / 900) % 1;
       ctx.strokeStyle = `rgba(120,220,255,${0.5 * (1 - ph)})`;
       ctx.beginPath(); ctx.arc(0, 0, 40 + ph * 70, 0, 7); ctx.stroke();
-    } else if (TURRET_IMG[t.id] && TURRET_IMG[t.id].complete && TURRET_IMG[t.id].naturalWidth) {
-      // 旧 86 库兜底 (万一新映射漏了一个)
-      const im = TURRET_IMG[t.id];
-      const big = (t.id === 'MLRS' || t.id === 'pluton' || t.id === 'MTHEL');
-      if (big) {
-        const s = 0.35;
-        ctx.drawImage(im, -im.naturalWidth * s / 2, -im.naturalHeight * s / 2,
-                      im.naturalWidth * s, im.naturalHeight * s);
-      } else {
-        ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
-        ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + 12,
-                      im.naturalWidth, im.naturalHeight);
-        ctx.restore();
-      }
     } else {
-      // 缺图兜底
+      // 缺图兜底 (库未加载完)
       ctx.save(); ctx.rotate(t.rot);
       ctx.fillStyle = t.id.startsWith('crotale') ? '#aaf' : '#ba6';
       ctx.fillRect(0, -3, 18, 6);
@@ -1222,24 +1247,22 @@ function draw() {
     // colorTransform mult RGB=0 alpha=0.352 → 全黑半透明). 先画 = 在车体下方
     const sim = SHADOW_IMG[u.type];
     if (sim && sim.complete && sim.naturalWidth) {
-      const big = u.type === 'Yamato' ? 2.4 : 1;
       ctx.save();
       ctx.translate(sx + SHADOW_OFFSET * zoom, sy + SHADOW_OFFSET * zoom);   // y-down 世界系, +4=屏幕右下
       ctx.scale(zoom, zoom);
       ctx.rotate(u.rot + Math.PI / 2);
       ctx.globalAlpha = SHADOW_ALPHA;
       ctx.globalCompositeOperation = 'source-over';
-      ctx.drawImage(sim, -sim.naturalWidth / 2 * big, -sim.naturalHeight / 2 * big,
-                    sim.naturalWidth * big, sim.naturalHeight * big);
+      // 原版 426 帧库: 所有车体 scale=(1,1) 原生尺寸 (Yamato 亦为 1.0, 无放大)
+      ctx.drawImage(sim, -sim.naturalWidth / 2, -sim.naturalHeight / 2);
       ctx.restore();
     }
     ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
     const img = UNIT_IMG[u.type];
     if (img && img.complete && img.naturalWidth) {
       ctx.rotate(u.rot + Math.PI / 2);
-      const big = u.type === 'Yamato' ? 2.4 : 1;
-      ctx.drawImage(img, -img.naturalWidth / 2 * big, -img.naturalHeight / 2 * big,
-                    img.naturalWidth * big, img.naturalHeight * big);
+      // 原版 426 帧库: 所有车体 scale=(1,1) 原生尺寸 (Yamato 亦为 1.0)
+      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
     } else {
       ctx.rotate(-u.rot);
       const col = { jeep:'#c66', tigre:'#6cf', navire:'#6ae' }[u.type] || '#c66';
@@ -1247,28 +1270,15 @@ function draw() {
       ctx.fillRect(-8, -5, 16, 10);
     }
     ctx.restore();
-    // 武器塔分层叠加 (173 库 objs 深度序: 静态件居中, 炮管随瞄准角 -rot-π/2 旋转)
+    // 武器塔整帧叠加 (173 库: 部件已按原版矩阵合成, 整帧随瞄准角旋转)
     if (u.weapon) {
-      const parts = ETURRET_PARTS[u.weaponId];
-      if (parts) {
-        for (const p of parts) {
-          if (p.g) {
-            const f = gunFrameFor(p.g, u.fireT);
-            const im = partImg(gunFramePath(p.g, f));
-            if (!(im.complete && im.naturalWidth)) continue;
-            ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
-            ctx.rotate(u.rot + Math.PI / 2);
-            // 炮管 sprite 注册点在底座环 (底部中心)
-            ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + im.naturalHeight * 0.12);
-            ctx.restore();
-          } else {
-            const im = partImg(p.s);
-            if (!(im.complete && im.naturalWidth)) continue;
-            ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
-            ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
-            ctx.restore();
-          }
-        }
+      const im = turretLibImg(u.weaponId);
+      if (im && im.complete && im.naturalWidth) {
+        ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+        ctx.rotate(u.rot + Math.PI / 2);
+        ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
+        drawTurretGuns(u.weaponId, u.fireT);
+        ctx.restore();
       }
     }
     if (G.showHp) {

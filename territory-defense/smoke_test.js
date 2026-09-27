@@ -209,6 +209,40 @@ console.log("磁场素材: %d 帧 (原版 sprite 183 七帧) 直径=%dpx 颜色=
   console.log("满血时不触发: magnetT=%d (应 0) 一致=%s", t5.magnetT, t5.magnetT === 0);
   G.euros = 850;
 }
+
+// ==== M2c: 炮塔外观库核实 (本轮: 86 库=线框标记层 → 改用 173 库整帧) ====
+console.log("--- 炮塔外观库 ---");
+console.log("173 库整帧: 帧号映射 %d 种武器, 画布原点 (%s,%s)",
+  Object.keys(TURRET_LIB_FRAME).length, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
+{
+  const bad = Object.keys(TURRET_LIB_FRAME).filter(k => !TURRET_LIB_FRAME[k]);
+  console.log("帧号映射完好=%s 缺=%j", bad.length === 0, bad);
+  // 玩家塔与敌方共用 173 库 (86 库是黑色线框层, 不可作外观)
+  const miss = Object.keys(PLAYER_ETURRET).filter(k => !TURRET_LIB_FRAME[PLAYER_ETURRET[k]]);
+  console.log("PLAYER_ETURRET 全部有 173 帧=%s 缺=%j", miss.length === 0, miss);
+  console.log("旧 86 库变量已删除: TURRET_SRC=%s TURRET_IMG=%s ETURRET_PARTS=%s",
+    typeof TURRET_SRC, typeof TURRET_IMG, typeof ETURRET_PARTS);
+}
+// 炮管叠加表 + 开火时长 (上一轮 fireT 恒为 0 的 bug 已修)
+console.log("--- 炮管开火叠加 ---");
+{
+  const names = Object.keys(TURRET_GUNS);
+  const noGuns = Object.keys(TURRET_LIB_FRAME).filter(id => !TURRET_GUNS[id]);
+  console.log("炮管表覆盖 %d 种武器; 无 named 炮管的: %j", names.length, noGuns);
+  // fireTicksFor 必须按武器名返回正确时长 (旧 bug: 按 chid 查表 → 恒 0)
+  const rows = ['m60','canon105','canon125','MLRS','Yamato460'].map(id =>
+    id + '=' + fireTicksFor(id));
+  console.log("fireTicksFor: %j", rows);
+  const allNonZero = ['m60','gatling','canon75','canon105','canon105D','canon125','MLRS','pluton','MTHEL']
+    .every(id => fireTicksFor(id) > 0);
+  console.log("所有玩家武器的开火时长 > 0=%s (旧 bug 时全为 0)", allNonZero);
+  // 双管/多管武器的 name 顺序 (原版 canonN.gotoAndPlay("fire"))
+  console.log("canon105D 炮管: %j", TURRET_GUNS.canon105D.map(g => g.n));
+  console.log("Yamato460 炮管: %j", TURRET_GUNS.Yamato460.map(g => g.n));
+  // 每条炮管项都带 matrix 与原点
+  const incomplete = names.filter(id => TURRET_GUNS[id].some(g => !g.m || g.o === undefined));
+  console.log("炮管项 m/o 完整=%s 缺=%j", incomplete.length === 0, incomplete);
+}
 `;
 eval(src);
 console.log("[done]");

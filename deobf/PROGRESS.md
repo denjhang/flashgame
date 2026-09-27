@@ -1,5 +1,83 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+14 轮成果（2026-09-28, H5 领土防御·炮塔外观库纠正 + 权威逐件矩阵 + 开火动画修复）
+
+**本轮解决用户长期反馈的"炮塔/机枪用错资源"，并修掉一个开火动画恒不播放的真 bug。**
+
+### 1. 【根因】86 库不是炮塔外观，而是黑色线框标记层
+
+- 用 FFDec `-selectid 86 -format sprite:png` 导出全部 11 帧，逐帧统计：
+  **平均 RGB≈0（纯黑描边），彩色像素占比 0%**；肉眼可见是箭头 / 十字 / 方框 / 叉等标记图形。
+- 结论：`DefineSprite_86` 是原版用于画轮廓/参考线的辅助层，**不是武器外观**。
+  此前 H5 用它当玩家塔贴图（还手工"兜底"拼装），正是"用错资源"的根因。
+- 真正的外观库是 **`DefineSprite_173`**（26 帧，帧标签=武器名，全部上色完整）。
+
+### 2. 【权威】逐件 PlaceObject 矩阵解析（deobf/turret_layout.py）
+
+- 关键教训：**FFDec dumpSWF 文本已正确解码 PlaceObject2/3 的全部字段**（含带 rotate 的
+  matrix 与 instance name），远比手写二进制解析可靠。改为「dump 文本取 (chid,depth,name)
+  + 二进制补 matrix」，并用「tag 偏移必须落在本 sprite 字节范围内」判定边界。
+- 产出 `deobf/data/turret_layout.json`：86/173/427 三库每一帧的
+  `{chid, depth, name, isSprite, m=[a,b,c,d,tx,ty](px), bounds}`。
+- 交叉验证：矩阵值与 FFDec dump 权威值逐一吻合
+  （例 canon105 chid108 `scale=0.6382 t=(0,-4.15)`；Yamato 四联装各带 `0.0022` 微旋）。
+
+### 3. 【权威】画布原点 —— 三路独立验证收敛
+
+FFDec 对同一 sprite 的所有帧导出**统一画布**（86 库全 76×76，173 库全 48×143）。
+画布原点（相对武器局部系）用三种独立方法测定，结果一致：
+
+| 方法 | 173 库原点 | 说明 |
+|---|---|---|
+| 12 个独立部件模板匹配 | (-21.98, -76.30) | 跨 12 帧，标准差 <0.31px |
+| 修正后解析器全帧 union | (-22.15, -76.20) | 画布 48.41×143.54 ≈ 实测 48×143 |
+| 单部件相减反解 (chid 110) | (-22.00, -76.10) | 与整帧像素对照 |
+
+→ 取 **(-21.98, -76.30)** 为 `TURRET_LIB_ORIGIN`。
+
+### 4. H5 渲染改造
+
+- **整帧渲染**：`turretLibImg(id)` 直接贴 `assets/turretlib/173/<帧号>.png`，
+  部件相对位置由原版权威矩阵决定，不再手工拼装。玩家塔与敌方共用 173 库
+  （`PLAYER_ETURRET` 简化为同名映射）。
+- **删除**：`TURRET_SRC` / `TURRET_IMG`（86 库单帧）、`ETURRET_PARTS`（手工拼装表）、
+  `partImg` / `gunFramePath` / `ETURRET_PARTS[..]` 等旧调用，smoke 断言确认三者已 `undefined`。
+- **炮管开火叠加**（`TURRET_GUNS` + `drawTurretGuns`）：依据原版
+  `deobf/pcode_as/DefineSprite_174...` 第 340 行 `canonN.gotoAndPlay("fire")` ——
+  **只让 named 炮管部件（canon1/canon2/…）播开火序列，底座不动**。
+  表由 `deobf/data/turret_guns.json` 生成，含每件的 matrix 与 PNG 画布原点。
+  多管武器名序已核实：canon105D=`[canon1,canon2]`、Yamato460=`[canon4,canon1,canon2,canon3]`。
+
+### 5. 【真 bug 修复】开火动画恒不播放
+
+- 上轮遗留的 `FIRE_TICKS` 用**武器名**查一张按 **chid** 索引的表 → 结果恒为 `undefined`，
+  `fireT` 永远是 0，开火动画从不播（烟测当时未覆盖到）。
+- 改为 `fireTicksFor(武器名)`：从 `TURRET_GUNS` 找该武器的炮管，取最长 fire 序列长度。
+- 真机验证：`canon105` 得 `ticks=24`，`fireT=16` 时实际取用第 10 帧且素材已加载；
+  实跑 120 帧观测到 58 次开火帧、`maxFireT=34`、击杀计分正常。
+
+### 6. 开火帧表按像素重测（修正上轮两处误判）
+
+- 上轮把 sprite **80**(pluton) / **161**(crotaleTigre) 标为"无开火帧"——因为只看
+  了"从帧 2 起的连续段"，漏掉后段真正的开火动画（80 在 148-186，161 在 30-46）。
+- 漏了 **83**(MTHEL 激光)：实测 2-21 帧为激光束扩张→收缩。
+- 现按「`fire` 标签帧号 + alpha>40 逐帧内容量」重测全部 13 支炮管，
+  只保留有内容的帧（全空帧跳过）。MLRS 102 帧的超长序列经抽样确认是火箭齐射，属实。
+
+### 7. 顺带核实：Yamato 尺寸
+
+- 移除 H5 里凭空写的 `big = u.type==='Yamato' ? 2.4 : 1`。
+- SWF 权威：单位帧库 426 所有车体 `scale=(1,1)` 原生尺寸；Yamato 车体 shape 425
+  bounds = **78.80 × 283.80 px**（本就是巨型战列舰，无需放大）。带 2.4 会变成 682px，是错的。
+
+### 本轮如实说明
+
+- 炮管叠加的**逐件原点**采用「该 sprite 首帧 bounds 的 min」。合成对照测试显示
+  与真值 alpha 平均差 8.5/255（差异像素 268/6896 ≈ 3.9%），肉眼一致；
+  但未做到逐像素精确（受 FFDec 缩放采样与 CXFORM 影响），如实记录。
+- `radar` / `radarMobile` 无 named 炮管（原版是旋转扫描，非开火），
+  已在 smoke 中显式列出，不做炮管叠加。
+
 ## 第 N+13 轮成果（2026-09-28, H5 领土防御·原版解锁机制 + 自动修理磁场）
 
 **本轮补上两个原版核心机制 (此前 H5 完全缺失)**
