@@ -1,0 +1,9 @@
+{
+  "_comment": "乱码标识符语义重命名表。证据见 deobf/RENAME_NOTES.md。仅收录有确凿用法证据的名字。",
+  "renames": {
+    "u191u163": "_root",
+    "u170.u215": "swapDepths",
+    "u155u180u132": "menuDepthClip",
+    "u239u209": "turretInfoItem"
+  }
+}

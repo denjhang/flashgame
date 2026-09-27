@@ -1,0 +1,206 @@
+[
+ {
+  "mem": "u176u200",
+  "hosts": [
+   "turretInfo_m60"
+  ],
+  "nums": [
+   350
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u208\\x18",
+  "hosts": [
+   "/Su144"
+  ],
+  "nums": [
+   300
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u184u150",
+  "hosts": [
+   "\\x01u138"
+  ],
+  "nums": [
+   420
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u227u",
+  "hosts": [
+   "\\x02a"
+  ],
+  "nums": [
+   540
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u214(u147",
+  "hosts": [
+   "\\x02a"
+  ],
+  "nums": [
+   620
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u135u159u181u242",
+  "hosts": [
+   "turretInfo_crotale"
+  ],
+  "nums": [
+   800
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u156u225\\x04",
+  "hosts": [
+   "\\x02%"
+  ],
+  "nums": [
+   50
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u186u204",
+  "hosts": [
+   "Sf\\x1cu215"
+  ],
+  "nums": [
+   80
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u154u203D<",
+  "hosts": [
+   "bu255\\x12u255"
+  ],
+  "nums": [
+   -400
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u186\\tu141)",
+  "hosts": [
+   "lu221"
+  ],
+  "nums": [
+   -900
+  ],
+  "is_call": false
+ },
+ {
+  "mem": "u136&cO",
+  "hosts": [
+   "u250-"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u191\\x10~u200",
+  "hosts": [
+   "Sf\\x1cu215"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u227\\x1eu171",
+  "hosts": [
+   "obusShell"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u177&u221M",
+  "hosts": [
+   "u209Q"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u130u159)",
+  "hosts": [
+   "u167u130z"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u226u222u187",
+  "hosts": [
+   ":\\x0f"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u235\\x02u153",
+  "hosts": [
+   "u203s"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u199Hu204k",
+  "hosts": [
+   "u226u219u123v"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u164*%u248",
+  "hosts": [
+   "u226u219u123v"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u247",
+  "hosts": [
+   "u175u212"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u198u236",
+  "hosts": [
+   "u175u212"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u188u233u237u238",
+  "hosts": [
+   "Tu130\\t"
+  ],
+  "nums": [],
+  "is_call": true
+ },
+ {
+  "mem": "u255u148SL",
+  "hosts": [
+   "7u142u157"
+  ],
+  "nums": [],
+  "is_call": true
+ }
+]

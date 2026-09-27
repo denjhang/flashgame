@@ -1,0 +1,53 @@
+{
+ "_comment": "structureData: \u5efa\u9020\u4ef7/\u5347\u7ea7\u4ef7; \u4fee\u74062$/HP; \u51fa\u552e75%\u6309\u4f59\u8840\u6bd4\u4f8b",
+ "economy": {
+  "repairPerHp": 2,
+  "sellRatio": 0.75
+ },
+ "data": {
+  "m60": {
+   "cost": 80,
+   "costUpgraded": 120
+  },
+  "gatling": {
+   "cost": 120,
+   "costUpgraded": 200
+  },
+  "canon75": {
+   "cost": 220,
+   "costUpgraded": 300
+  },
+  "canon105": {
+   "cost": 280,
+   "costUpgraded": 420
+  },
+  "canon105D": {
+   "cost": 300,
+   "costUpgraded": 540
+  },
+  "canon125": {
+   "cost": 240,
+   "costUpgraded": 1400
+  },
+  "crotale": {
+   "cost": 220,
+   "costUpgraded": 1000
+  },
+  "radar": {
+   "cost": 220,
+   "costUpgraded": 250
+  },
+  "MLRS": {
+   "cost": 320,
+   "costUpgraded": 2200
+  },
+  "pluton": {
+   "cost": 600,
+   "costUpgraded": 5000
+  },
+  "MTHEL": {
+   "cost": 300,
+   "costUpgraded": 1200
+  }
+ }
+}

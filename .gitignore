@@ -1,6 +1,10 @@
 # 大体积产物: 反编译/反混淆输出与工具不入库
 decompiled/
-deobf/
+deobf/*
+!deobf/data/
+!deobf/*.py
+!deobf/*.md
+!deobf/*.json
 ffdec/
 ffdec.zip
 *.swf

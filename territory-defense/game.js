@@ -5,7 +5,7 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 const W = cv.width, H = cv.height;
-const BASE_Y = 60;          // 基地红线 (原版 _y > 477 判定, 此处倒置: y < BASE_Y 失败)
+const BASE_LINE_Y = 560;     // 基地防线 (世界坐标, y 最大=最北; 原版 _y>477 失败线)
 
 // ---------------- 原版机制参数 (GAME_LOGIC.md) ----------------
 const REPAIR_COST = 2;          // 2$/HP
@@ -28,7 +28,8 @@ const fogCtx = fogCv.getContext('2d');
 let VIS = [];                   // 每帧重算的视野源
 
 function computeVisibility() {
-  VIS = [{ x: W / 2, y: 30, r: BASE_VIS }];
+  // 基地视野: 基地在 r10 (93, -1563) 北端
+  VIS = [{ x: 480, y: WORLD.y0 + 80, r: BASE_VIS }];
   for (const t of G.turrets) {
     if (t.hp <= 0) continue;
     if (t.id === 'radar') VIS.push({ x: t.x, y: t.y, r: RADAR_RANGE });
@@ -55,13 +56,34 @@ const SHOP = [
   { id:'pluton',    unlock:36 },
 ];
 
-// 路线 (数值化: 原版 parcourt 为舞台剪辑引用, 此处按南线/西线/空降线/海线重建)
-const ROUTES = {
-  parcourt1: [[480,500],[480,440],[430,400],[430,330],[470,290],[470,220],[430,180],[430,120],[470,90]],
-  parcourt2: [[120,500],[140,430],[200,390],[260,350],[330,330],[400,300],[470,270],[470,220],[430,180],[430,120],[470,90]],
-  parcourt3: [[900,120],[800,150],[700,140],[600,120],[520,100],[470,90]],           // 直升机空降
-  parcourt4: [[-40,330],[120,340],[260,350],[400,330],[500,300],[520,200],[490,140],[470,90]], // 海路
+// 路线: deobf/data/waypoints.json 的真实路点 (SWF PlaceObject2 矩阵坐标, y 向上)
+// 地图: map.jpg (原版 chid764, 2070x1920)。世界坐标 = Flash 坐标:
+//   x ∈ [-237, 1899], y ∈ [-1563, 580] (路点范围, 覆盖整张地图)
+// 屏幕绘制: sx = x - cam.x, sy = (MAP_TOP - y) - cam.y  (翻转 y)
+
+const MAP_W = 2070, MAP_H = 1920;
+const WORLD = { x0: -237, x1: 1899, y0: -1563, y1: 580 };   // 路点包围盒
+// 地图位图左上角对应的世界坐标 (位图 2070x1920 铺满整个世界带)
+const MAP_ORIGIN = { x: WORLD.x0, y: WORLD.y1 };             // 位图顶=世界上缘
+const cam = { x: WORLD.x0 + (WORLD.x1 - WORLD.x0 - 960) / 2, y: 0 };  // 初始居中
+
+function w2sX(x) { return x - cam.x; }
+function w2sY(y) { return (MAP_ORIGIN.y - y) - cam.y; }      // y 翻转
+function s2wX(sx) { return sx + cam.x; }
+function s2wY(sy) { return MAP_ORIGIN.y - (sy + cam.y); }
+
+// ---------------- 原版单位贴图 (deobf/data/sprites.json: shape→bitmap 对号) ----------------
+const UNIT_IMG = {};
+const UNIT_BMP = {
+  camion1: 402, camion2: 404, camion3: 406, jeep: 409, bradley: 411, amx10: 413,
+  abrams: 415, t90: 417, camionBlinde: 419, navire: 422, Yamato: 424,
+  // tigre 直升机原版为矢量绘制, 暂用配色块
 };
+for (const k in UNIT_BMP) {
+  const im = new Image();
+  im.src = 'assets/units/' + UNIT_BMP[k] + '.png';
+  UNIT_IMG[k] = im;
+}
 
 // ---------------- 游戏状态 ----------------
 const G = {
@@ -320,25 +342,49 @@ function tick() {
   hud();
 }
 
-// ---------------- 绘制 (占位美术: 矩形/圆) ----------------
+// ---------------- 绘制 (原版地图 map.jpg + 世界坐标→屏幕变换) ----------------
+const mapImg = new Image();
+mapImg.src = 'map.jpg';
+
+function clampCam() {
+  cam.x = Math.max(WORLD.x0 - 40, Math.min(WORLD.x1 + 40 - W, cam.x));
+  // 世界 y 向上; 屏幕范围对应 [MAP_ORIGIN.y - cam.y - H, MAP_ORIGIN.y - cam.y]
+  const yTop = WORLD.y1 + 40;      // 最北可见
+  const yBot = WORLD.y0 - 40;      // 最南可见
+  cam.y = Math.max(MAP_ORIGIN.y - yTop, Math.min(MAP_ORIGIN.y + H - yBot, cam.y));
+}
+
 function draw() {
   ctx.clearRect(0, 0, W, H);
-  // 草地纹理 (建造区)
-  ctx.fillStyle = 'rgba(255,255,120,.05)';
-  for (let gx = 40; gx < W - 40; gx += 160)
-    for (let gy = 100; gy < H - 40; gy += 130)
-      ctx.fillRect(gx, gy, 130, 100);
-  // 基地红线
-  ctx.strokeStyle = '#f44'; ctx.setLineDash([6, 4]);
-  ctx.beginPath(); ctx.moveTo(0, BASE_Y); ctx.lineTo(W, BASE_Y); ctx.stroke();
+  clampCam();
+  // 地图背景 (世界坐标 → 屏幕)
+  ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W, MAP_H);
+
+  // 路线虚线 (低透明度导航提示)
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+  ctx.setLineDash([10, 14]);
+  for (const rn in ROUTES) {
+    const r = ROUTES[rn];
+    ctx.beginPath();
+    ctx.moveTo(w2sX(r[0][0]), w2sY(r[0][1]));
+    for (let i = 1; i < r.length; i++) ctx.lineTo(w2sX(r[i][0]), w2sY(r[i][1]));
+    ctx.stroke();
+  }
   ctx.setLineDash([]);
-  ctx.fillStyle = '#888'; ctx.fillRect(W/2 - 40, 20, 80, 38);
-  ctx.fillStyle = '#ddd'; ctx.fillText('BASE', W/2 - 16, 44);
+
+  // 基地红线 (北方 = y 最大; 原版 _y > 477 失败线的镜像)
+  ctx.strokeStyle = '#f44'; ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, w2sY(BASE_LINE_Y)); ctx.lineTo(W, w2sY(BASE_LINE_Y));
+  ctx.stroke();
+  ctx.setLineDash([]);
 
   for (const t of G.turrets) {
+    const sx = w2sX(t.x), sy = w2sY(t.y);
+    if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) continue;
     if (t.hp <= 0) {
       ctx.fillStyle = '#333';
-      ctx.fillRect(t.x - 10, t.y - 10, 20, 20);
+      ctx.fillRect(sx - 10, sy - 10, 20, 20);
       continue;
     }
     // 雷达站: 扫描波纹 (迷雾驱散可视化)
@@ -346,50 +392,62 @@ function draw() {
       const ph = (Date.now() / 900) % 1;
       ctx.strokeStyle = `rgba(120,220,255,${0.5 * (1 - ph)})`;
       ctx.beginPath();
-      ctx.arc(t.x, t.y, 40 + ph * 70, 0, 7);
+      ctx.arc(sx, sy, 40 + ph * 70, 0, 7);
       ctx.stroke();
     }
-    ctx.save(); ctx.translate(t.x, t.y);
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(-t.rot);   // 世界 y 翻转 → 旋转取反
     ctx.fillStyle = '#464'; ctx.fillRect(-10, -10, 20, 20);
-    ctx.rotate(t.rot);
+    ctx.rotate(0);
     ctx.fillStyle = t.id.startsWith('crotale') ? '#aaf' : '#ba6';
+    // 炮管指向: 屏幕角 = -世界角
+    ctx.save(); ctx.rotate(-t.rot);
     ctx.fillRect(0, -3, 18, 6);
     ctx.restore();
+    ctx.restore();
     // 对空标记 (蓝色小点)
-    if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(t.x + 6, t.y - 14, 4, 4); }
+    if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(sx + 6, sy - 14, 4, 4); }
     // 血条
-    ctx.fillStyle = '#300'; ctx.fillRect(t.x - 10, t.y - 16, 20, 3);
-    ctx.fillStyle = '#4f4'; ctx.fillRect(t.x - 10, t.y - 16, 20 * t.hp / t.maxHp, 3);
+    ctx.fillStyle = '#300'; ctx.fillRect(sx - 10, sy - 16, 20, 3);
+    ctx.fillStyle = '#4f4'; ctx.fillRect(sx - 10, sy - 16, 20 * t.hp / t.maxHp, 3);
     // 射程圈 (选中)
     if (t === G.selected && t.w) {
       ctx.strokeStyle = 'rgba(255,255,150,.4)';
-      ctx.beginPath(); ctx.arc(t.x, t.y, t.w[1], 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx, sy, t.w[1], 0, 7); ctx.stroke();
       ctx.fillStyle = '#ff8'; ctx.font = '11px monospace';
       const msg = t.aa ? '[对空OK] S卖 R修' : `按U升级对空 $${t.aaUpgradeCost()}`;
-      ctx.fillText(msg, t.x - 30, t.y + 30);
+      ctx.fillText(msg, sx - 30, sy + 30);
     }
   }
   for (const u of G.units) {
     if (!isVisible(u.x, u.y)) continue;   // 迷雾中的敌人不可见
-    ctx.save(); ctx.translate(u.x, u.y); ctx.rotate(u.rot);
-    const col = { jeep:'#c66', camion1:'#a77', camion2:'#966', camion3:'#966', bradley:'#c96',
-      amx10:'#ca6', abrams:'#dc6', t90:'#dd3', camionBlinde:'#bbb', tigre:'#6cf',
-      navire:'#6ae', Yamato:'#eee' }[u.type] || '#c66';
-    ctx.fillStyle = col;
-    const big = u.type === 'Yamato' ? 2 : 1;
-    ctx.fillRect(-8 * big, -5 * big, 16 * big, 10 * big);
-    ctx.restore();
-    ctx.fillStyle = '#300'; ctx.fillRect(u.x - 9, u.y - 14, 18, 3);
-    ctx.fillStyle = '#f43'; ctx.fillRect(u.x - 9, u.y - 14, 18 * Math.max(0, u.hp) / u.maxHp, 3);
+    const sx = w2sX(u.x), sy = w2sY(u.y);
+    const img = UNIT_IMG[u.type];
+    if (img && img.complete && img.naturalWidth) {
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(-u.rot - Math.PI / 2);
+      const big = u.type === 'Yamato' ? 2.4 : 1;
+      ctx.drawImage(img, -img.naturalWidth / 2 * big, -img.naturalHeight / 2 * big,
+                    img.naturalWidth * big, img.naturalHeight * big);
+      ctx.restore();
+    } else {
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(-u.rot);
+      const col = { jeep:'#c66', tigre:'#6cf', navire:'#6ae' }[u.type] || '#c66';
+      ctx.fillStyle = col;
+      ctx.fillRect(-8, -5, 16, 10);
+      ctx.restore();
+    }
+    ctx.fillStyle = '#300'; ctx.fillRect(sx - 9, sy - 14, 18, 3);
+    ctx.fillStyle = '#f43'; ctx.fillRect(sx - 9, sy - 14, 18 * Math.max(0, u.hp) / u.maxHp, 3);
   }
   for (const s of G.shells) {
     if (!isVisible(s.x, s.y)) continue;   // 飞入迷雾的炮弹不可见
+    const sx = w2sX(s.x), sy = w2sY(s.y);
     ctx.fillStyle = s.side === 'ally' ? '#ff6' : '#f66';
-    ctx.fillRect(s.x - 2, s.y - 2, 4, 4);
+    ctx.fillRect(sx - 2, sy - 2, 4, 4);
   }
   for (const e of G.effects) {
+    const sx = w2sX(e.x), sy = w2sY(e.y);
     ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / 14})`;
-    ctx.beginPath(); ctx.arc(e.x, e.y, e.r * (14 - e.life) / 3, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx, sy, e.r * (14 - e.life) / 3, 0, 7); ctx.stroke();
   }
   // 建造预览
   if (G.shopSel) {
@@ -398,14 +456,15 @@ function draw() {
     ctx.fillText(SHOP.find(s => s.id === G.shopSel).id, 8, H - 8);
   }
 
-  // ---- 战争迷雾 (最后绘制, 覆盖未探索区域) ----
+  // ---- 战争迷雾 (最后绘制, 视野源换算到屏幕坐标) ----
   fogCtx.globalCompositeOperation = 'source-over';
   fogCtx.clearRect(0, 0, W, H);
   fogCtx.fillStyle = 'rgba(6,10,6,0.88)';
   fogCtx.fillRect(0, 0, W, H);
   fogCtx.globalCompositeOperation = 'destination-out';
   for (const s of VIS) {
-    const g = fogCtx.createRadialGradient(s.x, s.y, s.r * 0.55, s.x, s.y, s.r);
+    const fx = w2sX(s.x), fy = w2sY(s.y);
+    const g = fogCtx.createRadialGradient(fx, fy, s.r * 0.55, fx, fy, s.r);
     g.addColorStop(0, 'rgba(0,0,0,1)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     fogCtx.fillStyle = g;
@@ -442,7 +501,21 @@ function buildShop() {
 // ---------------- 输入 ----------------
 cv.addEventListener('mousemove', (e) => {
   const r = cv.getBoundingClientRect();
-  G.mx = e.clientX - r.left; G.my = e.clientY - r.top;
+  G.mx = s2wX(e.clientX - r.left); G.my = s2wY(e.clientY - r.top);   // 世界坐标
+});
+// 边缘滚动 + 方向键移动摄像机
+setInterval(() => {
+  if (typeof G.mx === 'number' && G.mx >= WORLD.x0 && G.mx <= WORLD.x1) {
+    const sx = w2sX(G.mx);
+    if (sx < 40) cam.x -= 12; else if (sx > W - 40) cam.x += 12;
+  }
+}, 50);
+window.addEventListener('keydown', (e) => {
+  const k = e.key;
+  if (k === 'ArrowLeft') cam.x -= 40;
+  if (k === 'ArrowRight') cam.x += 40;
+  if (k === 'ArrowUp') cam.y -= 40;
+  if (k === 'ArrowDown') cam.y += 40;
 });
 cv.addEventListener('click', () => {
   if (G.lost || G.won) return;
