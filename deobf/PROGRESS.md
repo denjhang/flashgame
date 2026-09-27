@@ -1,4 +1,38 @@
-# TCS 反混淆工程进度
+# TCS 反混淆与资源还原进度
+
+## 资源还原看板（第 7 轮更新）
+
+| 项 | 状态 | 产出 |
+|---|---|---|
+| 脚本反混淆 | ✅ 940/940 | deobf/scripts/ |
+| 玩法数据 | ✅ 100% | deobf/data/ (weapons/structures/missions/unitPhysics) |
+| 核心函数语义 | ✅ 7/7 | GAME_LOGIC.md F 节 + pcode_as/ |
+| 地图背景 | ✅ 764.jpg 2070×1920 (chid764, carteBase766内) | territory-defense/map.jpg |
+| 路点坐标 | ✅ 39/39 (FFDec dumpSWF 权威偏移) | deobf/data/waypoints.json |
+| 路线顺序 | ✅ 4 条与源码核对一致 | data.js ROUTES |
+| 单位素材对号 | ✅ 12 种 (426 帧库: camion1=402...Yamato=424) | sprites.json + territory-defense/assets/units/ |
+| 声音映射 | ✅ 37 soundFx + 3 BGM + 17 环境音 | sounds.json |
+| 炮塔素材对号 | 🔶 部分 (86 帧库: radar=61位图60 / MLRS=67位图66 / pluton=68 / MTHEL=84; 其余为矢量绘制无位图) | turret_frames.json |
+| BGM 文件确认 | 🔶 候选 1081/1082/1083/1084/1107/1124/1157.mp3 (无 export 名, 待试听) | sounds.json bgm |
+| tigre 直升机图 | ❌ 原版为矢量绘制(421 无位图), H5 暂用色块 | — |
+| UI 素材对号 | ❌ 建造菜单(1025帧库)/INFO面板/小地图未接入 | — |
+| 爆炸特效接入 | ❌ chid 279 explosion 已知, 未接入 H5 | — |
+| 建造区规则 | ❌ 原版浅色草地可建(surfaceForBuild), H5 全场可建 | — |
+| 浏览器视觉验证 | ❌ 无头逻辑已验证, 浏览器效果未看 | — |
+
+## 第 7 轮成果（2026-09-27）
+
+- **地图坐标系彻底打通**（改用 FFDec `-dumpSWF` 权威输出，弃手写解析）：
+  - carte = chid 834，carteBase = chid 766，背景位图 = chid 764 (2070×1920)
+  - DefineShape 765 bounds 解码：X[0,2070] Y[0,1920] → 路点坐标即位图像素坐标系
+  - 39/39 路点矩阵提取（begin 126,580 … r10 93,-1563），t12/h4 缺失问题解决
+- **12 种单位素材对号**：426 帧库帧标签即单位名，shape→fill-bitmapId 链提取（camion1=402.png … Yamato=424.png），已拷入 territory-defense/assets/units/ 并接入渲染
+- **声音系统完整破解**：37 个 soundFx、3 首 BGM（actOfInstinct/hellMarch/justDoItUp 循环，文件在 1081-1157 无导出名 mp3 中）、17 个 b01-b17 鸟叫环境音（每 10 秒 playBirds）
+- **炮塔外观库定位**：86=玩家炮塔库、173=敌方武器塔库 22 帧（全部对齐 typeData 名）、1025=建造菜单按钮库
+- **smoke_test 修复**：draw/hud stub 开关 + 450 帧（根治无头卡死），迷雾/对空升级/经济闭环全绿
+- 已推送 GitHub（91dba0d）
+
+## 遗留（下一轮从看板 ❌ 项继续）
 
 **状态：脚本反混淆主体完成 (100%)** — 2026-09-27
 
