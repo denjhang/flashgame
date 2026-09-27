@@ -247,6 +247,43 @@ function turretBaseImg(id) {
   }
   return TURRET_BASE_IMG[id];
 }
+// ---------------- 塔底盘: 经权威核实"不可见", 不渲染 ----------------
+// 86 库每帧含 d1:54(内嵌 shape53), shape53 bounds 40.8x40.8px, 单条 evenodd 路径。
+// 【核实过程与结论】
+//   FFDec 的 shape PNG 导出该图为全透明; 但 SVG 导出给出 fill="#ffffff"(白色),
+//   一度误判为"漏导的白色圆盘"并光栅化补上 —— 结果与 FFDec 导出的父容器 185 不符
+//   (185 全 39 帧白色像素 = 0)。
+//   最终从 SWF 原始字节解析定型: shape53 是 **DefineShape3**(RGBA 填充),
+//   唯一填充 = 纯色 RGBA(255,255,255,**0**) → **alpha=0, 完全透明**。
+//   SVG 导出丢了 alpha 通道才显示成白色。原版该 shape 是透明占位(疑为 hit-area/遗留),
+//   **不产生任何可见像素** → H5 不渲染它, 与 FFDec 的 185 导出结果一致。
+//   (即: 上一版本 H5"没有底盘"是对的; 本轮一度加回属于错误, 已回退并记录证据)
+// 原版另给该透明件随机初向 (DefineSprite_86/frame_1/PlaceObject3_54_1:
+//   `this._rotation = Math.random()*360;`) —— 因不可见, 无视觉影响。
+// ---------------- 持续 idle 旋转 (原版 onClipEvent(enterFrame) 逐帧自转) ----------------
+// 扫描 deobf/scripts/DefineSprite_173 全部 enterFrame 脚本, 得两处持续旋转:
+//   frame_7 (radar)          PlaceObject2_115_1   `this._rotation += 2;`   → 雷达天线扫描
+//   frame_20 (crotaleAbrams) PlaceObject2_121_4   `this._rotation += 10;`  → 发射架自转
+//   frame_25 (navireCrotale) PlaceObject3_121_24  `this._rotation += 10;`
+// 两者都是 173 库内的独立子 sprite (不会被整帧图体现), 必须在 H5 单独叠加并旋转。
+// 旋转量: 原版 += deg/帧, SWF 24fps; H5 主循环 30fps → 折算 deg/帧 = 原值 * 24/30
+const IDLE_SPIN = {
+  radar:         { chid: 115, degPerSWFFrame: 2,  scale: 2.1614, t: [1.95, 8.10] },
+  crotale:       { chid: 121, degPerSWFFrame: 10, scale: 0.5177, t: [-0.45, 1.90] },
+  crotaleAbrams: { chid: 121, degPerSWFFrame: 10, scale: 0.5177, t: [-3.10, 8.55] },
+  navireCrotale: { chid: 121, degPerSWFFrame: 10, scale: 1.1784, t: [-0.70, 5.20] },
+};
+const IDLE_SPR_IMG = {};
+function idleSprImg(chid) {
+  if (!IDLE_SPR_IMG[chid]) {
+    const im = new Image();
+    im.src = 'assets/eturrets_spr/DefineSprite_' + chid + '/1.png';
+    IDLE_SPR_IMG[chid] = im;
+  }
+  return IDLE_SPR_IMG[chid];
+}
+// 子 sprite 画布原点 (union 实测): 115 = (-11.15,-8.55), 121 = (-12.00,-15.25)
+const IDLE_SPR_ORIGIN = { 115: { x: -11.15, y: -8.55 }, 121: { x: -12.00, y: -15.25 } };
 // 玩家武器 → 173 库武器 ID (玩家塔 = 86 结构层 + 173 塔体层, 同武器名)
 const PLAYER_ETURRET = {
   m60: 'm60', gatling: 'gatling', canon75: 'canon75',
@@ -362,6 +399,29 @@ function drawTurretGuns(id, fireT) {
     ctx.drawImage(im, g.o[0], g.o[1]);
     ctx.restore();
   }
+}
+// ---------------- 持续 idle 自转部件 (原版 onClipEvent(enterFrame)) ----------------
+// 在武器局部坐标系内画随帧持续自转的子 sprite (雷达天线/导弹发射架)。
+// ⚠ 这两个子件(115/121)带 HasClipActions, 是**独立 MovieClip**, 各自 onClipEvent(enterFrame)
+//   逐帧累加 _rotation。FFDec 导出 173 整帧时把它们**烘平成了静态姿态**
+//   (实测: f7 碟盘区域 623 像素与 115 缩放后 100% 重合) → 故叠加自转件会覆盖那处静态件,
+//   位置一致(见下), 观感即"天线在转"。
+// 变换: placement 的 t=(tx,ty) 是子 MC 原点在武器局部系的位置; origin 是子 MC 画布左上角
+//   在其自身局部系的坐标(未缩放)。故: translate(t) 后用 drawImage 的 w/h 参数缩放,
+//   而**不能**先 ctx.scale 再画 origin (会把 origin 也乘一次缩放 → 位置错位)。
+function drawIdleSpin(id, spinDeg) {
+  const sd = IDLE_SPIN[id];
+  if (!sd) return;
+  const im = idleSprImg(sd.chid);
+  if (!(im && im.complete && im.naturalWidth)) return;
+  const o = IDLE_SPR_ORIGIN[sd.chid];
+  const [tx, ty] = sd.t;
+  const s = sd.scale;
+  ctx.save();
+  ctx.translate(tx, ty);                                  // 移到子 MC 原点
+  ctx.rotate(spinDeg * Math.PI / 180);                    // 自转 (绕子 MC 原点)
+  ctx.drawImage(im, o.x * s, o.y * s, im.naturalWidth * s, im.naturalHeight * s);
+  ctx.restore();
 }
 // ---------------- 自动修理蓝色磁场 (原版 sprite 183, 挂在 structure 的 repairLogo.light) ----------------
 // 反编译依据:
@@ -1202,10 +1262,11 @@ function draw() {
       ctx.fillRect(-10, -10, 20, 20);
       ctx.restore(); continue;
     }
-    // 玩家塔双层渲染 (原版 structure(185) 结构):
-    //   86 库结构层 (structureDeco, dpt1) —— 不随瞄准旋转 (原版 enterFrame 不设 _rotation)
+    // 玩家塔分层渲染 (原版 structure(185) 结构):
+    //   86 库结构层 (structureDeco, dpt1)  —— 不随瞄准旋转 (原版 185 内无 _rotation 赋值)
     //   173 库塔体层 (tourelle->173, dpt24) —— 随 t.rot 旋转, 含炮管与开火帧
     //   两层共用同一武器局部坐标系 (185 内均为 identity) → 各自画布原点直接叠加
+    //   (86 库每帧另含 d1 透明占位件 shape53, alpha=0 不可见, 不渲染 —— 见上方说明)
     const libId = PLAYER_ETURRET[t.id] || t.id;
     const bimg = turretBaseImg(libId);
     if (bimg && bimg.complete && bimg.naturalWidth) {
@@ -1219,6 +1280,12 @@ function draw() {
       // 开火时叠加 named 炮管的 fire 序列帧 (原版 canonN.gotoAndPlay("fire"))
       drawTurretGuns(libId, t.fireT);
       ctx.restore();
+      // 持续自转件 (雷达天线/导弹发射架) —— 在武器朝向上叠加自转角
+      const sd = IDLE_SPIN[libId];
+      if (sd) {
+        const frameDeg = sd.degPerSWFFrame * (24 / 30);      // SWF 24fps → H5 30fps
+        drawIdleSpin(libId, (G.frame * frameDeg) % 360);
+      }
     } else if (t.id === 'radar') {
       // 雷达: 扫描波纹 (叠加在整帧之上)
       const ph = (Date.now() / 900) % 1;
@@ -1311,6 +1378,14 @@ function draw() {
         ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
         drawTurretGuns(u.weaponId, u.fireT);
         ctx.restore();
+        // 持续自转件 (crotale 发射架等)
+        const sd = IDLE_SPIN[u.weaponId];
+        if (sd) {
+          ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+          ctx.rotate(u.rot + Math.PI / 2);
+          drawIdleSpin(u.weaponId, (G.frame * sd.degPerSWFFrame * (24 / 30)) % 360);
+          ctx.restore();
+        }
       }
     }
     if (G.showHp) {

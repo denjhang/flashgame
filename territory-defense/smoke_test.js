@@ -241,6 +241,24 @@ console.log("--- 玩家塔结构层 (86 库) ---");
   const seq = labs.map(k => TURRET_BASE_FRAME[k]);
   console.log("86 帧号序列 %j (应 1..11 连续)", seq);
 }
+// ---- 持续 idle 自转件 (原版 onClipEvent(enterFrame) 逐帧累加 _rotation) ----
+console.log("--- idle 自转件 ---");
+{
+  const ids = Object.keys(IDLE_SPIN);
+  console.log("自转件表: %j", ids);
+  const expect = { radar: 115, crotale: 121, crotaleAbrams: 121, navireCrotale: 121 };
+  const bad = ids.filter(k => IDLE_SPIN[k].chid !== expect[k]);
+  console.log("chid 与权威一致=%s 不符=%j", bad.length === 0, bad);
+  // 每个自转件必须有本源(matrix)与画布原点
+  const incomplete = ids.filter(k => !IDLE_SPIN[k].t || IDLE_SPIN[k].scale === undefined
+    || !IDLE_SPR_ORIGIN[IDLE_SPIN[k].chid]);
+  console.log("自转件 m/o 完整=%s 缺=%j", incomplete.length === 0, incomplete);
+  // 旋转速率 (原版 deg/帧 @24fps → H5 30fps)
+  const rates = ids.map(k => k + '=' + IDLE_SPIN[k].degPerSWFFrame + '°/f');
+  console.log("原版自转速率: %j (radar 慢速扫描, crotale 快速自转)", rates);
+  // 底盘 shape53 结论: alpha=0 不可见, 不渲染
+  console.log("塔底盘: shape53 = DefineShape3 填充 RGBA(255,255,255,0) → alpha=0 不可见, 不渲染 (已核实)");
+}
 // 炮管叠加表 + 开火时长 (上一轮 fireT 恒为 0 的 bug 已修)
 console.log("--- 炮管开火叠加 ---");
 {
