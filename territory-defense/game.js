@@ -6,6 +6,7 @@ const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 const W = cv.width, H = cv.height;
 const BASE_LINE_Y = 560;     // 基地防线 (世界坐标, y 最大=最北; 原版 _y>477 失败线)
+let zoom = 1;                // 原版 G 键: 1 ↔ 0.39 全图视图
 
 // ---------------- 原版机制参数 (GAME_LOGIC.md) ----------------
 const REPAIR_COST = 2;          // 2$/HP
@@ -29,7 +30,7 @@ let VIS = [];                   // 每帧重算的视野源
 
 function computeVisibility() {
   // 基地视野: 基地在 r10 (93, -1563) 北端
-  VIS = [{ x: 480, y: WORLD.y0 + 80, r: BASE_VIS }];
+  VIS = [{ x: 480, y: WORLD.y0 + 80, r: BASE_VIS * 1.6 }];
   for (const t of G.turrets) {
     if (t.hp <= 0) continue;
     if (t.id === 'radar') VIS.push({ x: t.x, y: t.y, r: RADAR_RANGE });
@@ -40,6 +41,20 @@ function isVisible(x, y) {
   for (const s of VIS)
     if (Math.hypot(s.x - x, s.y - y) <= s.r) return true;
   return false;
+}
+function revealExplored() {   // 视野经过的区域永久标记为已探索
+  exploredCtx.fillStyle = '#fff';
+  for (const s of VIS) {
+    const ex = (s.x - (WORLD.x0 - 40)) * EXPLORED_SCALE;
+    const ey = ((WORLD.y1 + 40) - s.y) * EXPLORED_SCALE;
+    exploredCtx.beginPath();
+    exploredCtx.arc(ex, ey, s.r * EXPLORED_SCALE, 0, 7);
+    exploredCtx.fill();
+  }
+}
+function exploredToScreen() {   // 探索记忆 → 屏幕绘制参数
+  return { x: w2sX(WORLD.x0 - 40), y: w2sY(WORLD.y1 + 40),
+           w: expW / EXPLORED_SCALE * zoom, h: expH / EXPLORED_SCALE * zoom };
 }
 
 // 建造菜单 (原版解锁关卡 iMission > N)
@@ -64,8 +79,19 @@ const SHOP = [
 const MAP_W = 2070, MAP_H = 1920;
 const WORLD = { x0: -237, x1: 1899, y0: -1563, y1: 580 };   // 路点包围盒
 // 地图位图左上角对应的世界坐标 (位图 2070x1920 铺满整个世界带)
-const MAP_ORIGIN = { x: WORLD.x0, y: WORLD.y1 };             // 位图顶=世界上缘
-const cam = { x: WORLD.x0 + (WORLD.x1 - WORLD.x0 - 960) / 2, y: 0 };  // 初始居中
+const MAP_ORIGIN = { x: 0, y: -1440 };   // carteBase 放置矩阵 (0,-1440), 位图 2070x1920
+const cam = { x: 480 - 317, y: -1440 - (-1483) - 300 };  // 初始: 基地视野圈居中
+// 探索记忆: 世界包围盒 (x -237..1899, y -1563..580) 半分辨率
+const EXPLORED_SCALE = 0.5;
+const expW = Math.ceil((WORLD.x1 - WORLD.x0 + 80) * EXPLORED_SCALE);
+const expH = Math.ceil((WORLD.y1 - WORLD.y0 + 80) * EXPLORED_SCALE);
+const exploredCv = document.createElement('canvas');
+exploredCv.width = expW; exploredCv.height = expH;
+const exploredCtx = exploredCv.getContext('2d');
+const heavyCv = document.createElement('canvas');
+heavyCv.width = W; heavyCv.height = H;
+const heavyCtx = heavyCv.getContext('2d');
+
 
 function w2sX(x) { return x - cam.x; }
 function w2sY(y) { return (MAP_ORIGIN.y - y) - cam.y; }      // y 翻转
@@ -104,28 +130,66 @@ const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   im.src = 'assets/explosion/' + i + '.png';
   return im;
 });
-// BGM (原版 musics 三曲循环: onSoundComplete 自动切下一首)
-// 1082(66s) / 1157(46s) / 1084(18s) = actOfInstinct / hellMarch / justDoItUp 候选
-const BGM_LIST = ['assets/music/bgm_main.mp3', 'assets/music/bgm2.mp3', 'assets/music/bgm3.mp3'];
-let bgmAudio = null;
-try {
-  bgmAudio = new Audio(BGM_LIST[0]);
-  bgmAudio.volume = 0.5;
-  bgmAudio.addEventListener('ended', () => {   // 原版 onSoundComplete: nextMusic
-    bgmAudio.src = BGM_LIST[(BGM_LIST.indexOf(bgmAudio.src.split('/').pop()) + 1) % BGM_LIST.length]
-      .split('/').pop() ? bgmAudio.src : bgmAudio.src;
-    const cur = BGM_LIST.findIndex(f => bgmAudio.src.endsWith(f.split('/').pop()));
-    bgmAudio.src = BGM_LIST[(cur + 1) % BGM_LIST.length];
+// ---------------- 音乐 (原版 1151 面板机制: 手动选曲 changeMusic + playMusic/pauseMusic) ----------------
+const BGM_FILES = ['bgm_main.mp3', 'bgm2.mp3', 'bgm3.mp3'];   // actOfInstinct / hellMarch / justDoItUp
+const BGM_NAMES = ['actOfInstinct', 'hellMarch', 'justDoItUp'];
+let bgmAudio = null, imusic = 0, positionmusic = 0, isPause = true, bgmMuted = false;
+function playMusic() {                    // 原版 playMusic: 从 positionmusic 恢复
+  try {
+    if (!bgmAudio) bgmAudio = new Audio();
+    if (!bgmAudio.src.endsWith(BGM_FILES[imusic])) bgmAudio.src = 'assets/music/' + BGM_FILES[imusic];
+    bgmAudio.currentTime = positionmusic;
+    bgmAudio.volume = 0.5;
+    bgmAudio.onended = () => {            // 原版 onSoundComplete=nextMusic
+      imusic = imusic === 2 ? 0 : imusic + 1;
+      positionmusic = 0;
+      playMusic();
+      refreshMusicPanel();
+    };
     bgmAudio.play().catch(() => {});
-  });
-  const startBgm = () => {
-    bgmAudio.play().catch(() => {});
-    window.removeEventListener('pointerdown', startBgm);
-    window.removeEventListener('keydown', startBgm);
-  };
-  window.addEventListener('pointerdown', startBgm);
-  window.addEventListener('keydown', startBgm);   // 浏览器自动播放策略: 首次交互启动
-} catch (e) { /* 无 Audio 环境(无头)忽略 */ }
+    isPause = false;
+  } catch (e) {}
+}
+function pauseMusic() {                   // 原版 pauseMusic: 记录进度并停止
+  try {
+    if (!bgmAudio) return;
+    positionmusic = bgmAudio.currentTime;
+    bgmAudio.pause();
+    isPause = true;
+  } catch (e) {}
+}
+function changeMusic(im) {                // 原版 changeMusic: 换曲并立即播放
+  pauseMusic();
+  positionmusic = 0;
+  imusic = im;
+  playMusic();
+  refreshMusicPanel();
+}
+function refreshMusicPanel() {            // 音乐面板按钮状态
+  for (let i = 0; i < 3; i++) {
+    const b = document.getElementById('m' + i);
+    if (b) b.classList.toggle('on', i === imusic && !isPause);
+  }
+  const pp = document.getElementById('mPlay');
+  if (pp) pp.textContent = isPause ? '▶ 播放' : '⏸ 播放中';
+}
+function wireMusicPanel() {               // 原版 1151 面板按钮
+  for (let i = 0; i < 3; i++) {
+    const b = document.getElementById('m' + i);
+    if (b) b.onclick = () => changeMusic(i);
+  }
+  const pp = document.getElementById('mPlay');
+  if (pp) pp.onclick = () => { if (isPause) playMusic(); else pauseMusic(); refreshMusicPanel(); };
+  const pa = document.getElementById('mPause');
+  if (pa) pa.onclick = () => pauseMusic();
+  const mu = document.getElementById('mMute');
+  if (mu) mu.onclick = () => { bgmMuted = !bgmMuted; if (bgmAudio) bgmAudio.muted = bgmMuted;
+                               mu.textContent = bgmMuted ? '🔇 已静音' : '🔇'; };
+  refreshMusicPanel();
+}
+wireMusicPanel();
+
+// ---------------- 游戏状态 ----------------
 
 // ---------------- 音效 (原版 soundsFx; 轮换池避免重叠切断) ----------------
 const SFX_FILES = {
@@ -179,7 +243,7 @@ const G = {
   spawnQueue: [],          // 本波待生成 [unitType, weapon, route, delayTicks]
   spawnTimer: 0,
   waveActive: false, interWave: 120,
-  lost: false, won: false,
+  lost: false, won: false, losses: 0,
   shopSel: 'm60', placing: null,
 };
 
@@ -193,7 +257,7 @@ class Unit {
     this.x = this.route[0][0]; this.y = this.route[0][1];
     this.rot = 0;
     // 原版: 速度 = chassis[0] × fpsc; 此处 tick 制, ×2.2 平衡
-    this.speed = c[0] * 0.62;
+    this.speed = c[0] * 0.45;
     this.rotateSpeed = c[2] * 0.09;
     this.hp = this.maxHp = c[3];
     this.bounty = c[4];
@@ -293,11 +357,11 @@ class Turret {
       let da = want - this.rot;
       while (da > Math.PI) da -= 2 * Math.PI;
       while (da < -Math.PI) da += 2 * Math.PI;
-      const rs = (6 - this.w[0]) * 0.02 + 0.02;
+      const rs = this.w[0] * 0.0198;   // 原版: typeData[0] × fpsc 度/帧 → 弧度
       this.rot += Math.sign(da) * Math.min(Math.abs(da), rs);
       // 开火 (冷却 = 威力因子 × 系数)
       if (Math.abs(da) < 0.3 && this.cool <= 0 && bd <= this.w[1]) {
-        this.cool = this.w[2] * 2;
+        this.cool = this.w[2] * 1.15;
         spawnShell(this.x, this.y, best, this.w, 'ally', this.id);
       }
     }
@@ -373,6 +437,8 @@ function startWave() {
   const dirNames = { parcourt1: '南方公路', parcourt2: '西侧小路', parcourt3: '北面空降', parcourt4: '海上航线' };
   const dirs = [...new Set(G.spawnQueue.map(s => s.route))];
   showBanner('第 ' + G.wave + ' / 44 波来袭 — ' + dirs.map(d => dirNames[d]).join(' + '));
+  // 原版 startInstructions: 简报期间 pauseMusic, 出兵后恢复
+  if (!isPause) { pauseMusic(); setTimeout(() => { if (isPause) playMusic(); refreshMusicPanel(); }, 3200); }
   hud();
 }
 
@@ -398,6 +464,7 @@ function endWave() {
 function tick() {
   if (G.lost || G.won) return;
   computeVisibility();
+  revealExplored();
 
   // 出兵
   if (G.waveActive) {
@@ -417,7 +484,7 @@ function tick() {
 
   for (const u of G.units) {
     u.update();
-    if (u.reached && !u.dead) { u.dead = true; G.lost = true; }  // 抵达基地 = 失败
+    if (u.reached && !u.dead) { u.dead = true; G.losses++; G.lost = true; }  // 抵达基地 = 失败
   }
   G.units = G.units.filter(u => !u.dead);
   for (const t of G.turrets) t.update();
@@ -444,11 +511,20 @@ const mapImg = new Image();
 mapImg.src = 'map.jpg';
 
 function clampCam() {
-  cam.x = Math.max(WORLD.x0 - 40, Math.min(WORLD.x1 + 40 - W, cam.x));
-  // 世界 y 向上; 屏幕范围对应 [MAP_ORIGIN.y - cam.y - H, MAP_ORIGIN.y - cam.y]
-  const yTop = WORLD.y1 + 40;      // 最北可见
-  const yBot = WORLD.y0 - 40;      // 最南可见
-  cam.y = Math.max(MAP_ORIGIN.y - yTop, Math.min(MAP_ORIGIN.y + H - yBot, cam.y));
+  const viewW = W / zoom, viewH = H / zoom;
+  const lo = Math.min(WORLD.x0 - 40, (WORLD.x0 + WORLD.x1 - viewW) / 2);
+  cam.x = Math.max(lo, Math.min(WORLD.x1 + 40 - viewW, cam.x));
+  const camYLo = Math.min(MAP_ORIGIN.y - WORLD.y1 - 40, (MAP_ORIGIN.y - (WORLD.y0 + WORLD.y1) / 2 - viewH / 2));
+  const camYHi = Math.max(MAP_ORIGIN.y + H / zoom - WORLD.y0 + 40, camYLo);
+  cam.y = Math.max(camYLo, Math.min(camYHi, cam.y));
+}
+function toggleZoom() {   // 原版 G 键: 39% 全图视图
+  zoom = zoom === 1 ? 0.39 : 1;
+  if (zoom < 1) {         // 全图居中
+    cam.x = (WORLD.x0 + WORLD.x1 - W / zoom) / 2;
+    cam.y = MAP_ORIGIN.y - (WORLD.y0 + WORLD.y1) / 2 - H / zoom / 2;
+  }
+  clampCam();
 }
 
 function draw() {
@@ -456,18 +532,6 @@ function draw() {
   clampCam();
   // 地图背景 (世界坐标 → 屏幕)
   ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W, MAP_H);
-
-  // 路线虚线 (低透明度导航提示)
-  ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-  ctx.setLineDash([10, 14]);
-  for (const rn in ROUTES) {
-    const r = ROUTES[rn];
-    ctx.beginPath();
-    ctx.moveTo(w2sX(r[0][0]), w2sY(r[0][1]));
-    for (let i = 1; i < r.length; i++) ctx.lineTo(w2sX(r[i][0]), w2sY(r[i][1]));
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
 
   // 基地红线 (北方 = y 最大; 原版 _y > 477 失败线的镜像)
   ctx.strokeStyle = '#f44'; ctx.setLineDash([6, 4]);
@@ -590,27 +654,52 @@ function draw() {
   }
 
   // ---- 战争迷雾 (最后绘制, 视野源换算到屏幕坐标) ----
+  // 三态迷雾: 淡雾基底 → 挖当前视野 → 叠未探索浓雾(探索记忆挖除)
+  // 第一层: 已探索淡雾基底
   fogCtx.globalCompositeOperation = 'source-over';
   fogCtx.clearRect(0, 0, W, H);
-  fogCtx.fillStyle = 'rgba(6,10,6,0.88)';
+  fogCtx.fillStyle = 'rgba(5,9,5,0.42)';
   fogCtx.fillRect(0, 0, W, H);
+  // 第二层: 未探索浓雾 (探索记忆挖除已探索区域)
+  heavyCtx.globalCompositeOperation = 'source-over';
+  heavyCtx.clearRect(0, 0, W, H);
+  heavyCtx.fillStyle = 'rgba(4,8,4,0.85)';
+  heavyCtx.fillRect(0, 0, W, H);
+  heavyCtx.globalCompositeOperation = 'destination-out';
+  const ep = exploredToScreen();
+  heavyCtx.drawImage(exploredCv, ep.x, ep.y, ep.w, ep.h);
+  fogCtx.drawImage(heavyCv, 0, 0);
+  // 第三层 (最后): 挖当前视野圈 → 全亮
   fogCtx.globalCompositeOperation = 'destination-out';
   for (const s of VIS) {
     const fx = w2sX(s.x), fy = w2sY(s.y);
-    const g = fogCtx.createRadialGradient(fx, fy, s.r * 0.55, fx, fy, s.r);
+    const g = fogCtx.createRadialGradient(fx, fy, s.r * 0.55 * zoom, fx, fy, s.r * zoom);
     g.addColorStop(0, 'rgba(0,0,0,1)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     fogCtx.fillStyle = g;
     fogCtx.beginPath();
-    fogCtx.arc(s.x, s.y, s.r, 0, 7);
+    fogCtx.arc(fx, fy, s.r * zoom, 0, 7);
     fogCtx.fill();
   }
+  fogCtx.globalCompositeOperation = 'source-over';
   // 雷达站扫描圈提示 (可见的驱雾范围)
   ctx.drawImage(fogCv, 0, 0);
 
   // ---- 小地图 + INFO 面板 (迷雾之上, 原版右上角 minimap 152px) ----
   drawMinimap();
   drawInfoPanel();
+
+  // ---- 敌军路线情报 (虚线, 任务简报已知) ----
+  ctx.strokeStyle = 'rgba(255,255,150,0.22)';
+  ctx.setLineDash([8, 16]);
+  for (const rn in ROUTES) {
+    const r = ROUTES[rn];
+    ctx.beginPath();
+    ctx.moveTo(w2sX(r[0][0]), w2sY(r[0][1]));
+    for (let i = 1; i < r.length; i++) ctx.lineTo(w2sX(r[i][0]), w2sY(r[i][1]));
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
 
   // ---- 波次来袭横幅 ----
   if (banner && Date.now() < banner.until) {
@@ -625,7 +714,7 @@ function draw() {
 }
 
 // ---- 小地图: 右上角 152x141, 敌(红,限可见)/塔(绿)/视野(淡圈)/视口框 ----
-const MM = { w: 152, h: 141, x: 0, y: 0 };
+const MM = { w: 161, h: 150, x: 0, y: 0 };
 function drawMinimap() {
   MM.x = W - MM.w - 6; MM.y = 6;
   ctx.save();
@@ -649,17 +738,25 @@ function drawMinimap() {
     ctx.fillStyle = '#f44';
     ctx.fillRect(mx(u.x) - 1.5, my(u.y) - 1.5, 3, 3);
   }
-  // 视口框
+  // 视口框 (屏幕对应世界区域)
+  const vyN = MAP_ORIGIN.y - cam.y;
+  const vyS = MAP_ORIGIN.y - cam.y - H / zoom;
+  const vxL = cam.x, vxR = cam.x + W / zoom;
   ctx.strokeStyle = '#fff';
-  ctx.strokeRect(mx(cam.x) , my(MAP_ORIGIN.y - cam.y), W / (WORLD.x1 - WORLD.x0) * MM.w,
-                 H / (WORLD.y1 - WORLD.y0) * MM.h);
+  ctx.strokeRect(mx(vxL), my(vyN), (vxR - vxL) / (WORLD.x1 - WORLD.x0) * MM.w,
+                 (vyS - vyN) / -(WORLD.y1 - WORLD.y0) * MM.h);
   ctx.restore();
 }
 
 // ---- INFO 面板: 选中塔属性 (原版 informations 面板) ----
 function drawInfoPanel() {
+  const box = document.getElementById('infoBox');
   const t = G.selected;
-  if (!t) return;
+  if (!t) { if (box && !box.dataset.keep) box.innerHTML = '点选炮塔查看属性'; return; }
+  if (box) box.innerHTML =
+    '<b>' + t.id.toUpperCase() + (t.aa ? ' [对空]' : '') + '</b><br>' +
+    'HP ' + Math.max(0, t.hp) + '/' + t.maxHp + '<br>' +
+    (t.w ? '伤害 ' + t.w[4] + ' · 射程 ' + t.w[1] + '<br>冷却 ' + t.w[2] + ' · 炮管 ' + t.w[3] : '无武装');
   const px = 8, py = H - 86, pw = 210, ph = 78;
   ctx.fillStyle = 'rgba(20,26,20,0.82)';
   ctx.fillRect(px, py, pw, ph);
@@ -678,13 +775,15 @@ function drawInfoPanel() {
 
 // ---------------- HUD / 商店 ----------------
 function hud() {
-  document.getElementById('hEuros').textContent = G.euros;
-  document.getElementById('hInt').textContent = G.interest + '%';
+  document.getElementById('hEuros').textContent = G.euros + ' $';
   document.getElementById('hWave').textContent = Math.max(1, G.wave);
   document.getElementById('hScore').textContent = G.score;
+  document.getElementById('hCash').textContent = G.euros + ' $';
+  document.getElementById('hInt2').textContent = 'interest ' + G.interest + '%';
+  document.getElementById('hLoss').textContent = 'LOSSES ' + G.losses;
 }
 function buildShop() {
-  const el = document.getElementById('hShop');
+  const el = document.getElementById('shop');
   el.innerHTML = '';
   for (const s of SHOP) {
     const locked = G.wave < s.unlock;
@@ -693,10 +792,16 @@ function buildShop() {
     // 原版建造菜单武器照片 (1025 帧库)
     const im = document.createElement('img');
     im.src = 'assets/menu/' + s.id + '.png';
-    im.style.cssText = 'height:28px;vertical-align:middle;margin-right:4px';
     sp.appendChild(im);
-    sp.appendChild(document.createTextNode('$' + STRUCTURES[s.id].cost));
-    if (!locked) sp.onclick = () => { G.shopSel = s.id; buildShop(); };
+    const nm = document.createElement('div');
+    nm.className = 'nm';
+    nm.textContent = s.id;
+    sp.appendChild(nm);
+    const pr = document.createElement('div');
+    pr.className = 'price';
+    pr.textContent = '$' + STRUCTURES[s.id].cost;
+    sp.appendChild(pr);
+    if (!locked) sp.onclick = () => { G.shopSel = s.id; playSfx('boutonScroll', 0.35); buildShop(); };
     el.appendChild(sp);
   }
 }
@@ -714,11 +819,13 @@ setInterval(() => {
   }
 }, 50);
 window.addEventListener('keydown', (e) => {
-  const k = e.key;
-  if (k === 'ArrowLeft') cam.x -= 40;
-  if (k === 'ArrowRight') cam.x += 40;
-  if (k === 'ArrowUp') cam.y -= 40;
-  if (k === 'ArrowDown') cam.y += 40;
+  const k = e.key.toLowerCase();
+  const step = 60 / zoom;
+  if (k === 'arrowleft' || k === 'a') cam.x -= step;
+  if (k === 'arrowright' || k === 'd') cam.x += step;
+  if (k === 'arrowup' || k === 'w') cam.y += step;    // 世界 y 向上=北=屏幕上
+  if (k === 'arrowdown' || k === 's' && !G.turrets.length || k === 's' && !G.selected) cam.y -= step;
+  if (k === 'arrowup' || k === 'arrowdown' || k === 'arrowleft' || k === 'arrowright') e.preventDefault();
 });
 cv.addEventListener('click', (e) => {
   const r = cv.getBoundingClientRect();

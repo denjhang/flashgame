@@ -4,23 +4,79 @@
 <meta charset="utf-8">
 <title>领土防御 Territory Defense</title>
 <style>
-  body { background:#1a2a1a; margin:0; display:flex; flex-direction:column; align-items:center; font-family:monospace; }
-  #hud { color:#cfc; padding:6px; font-size:14px; }
-  #hud b { color:#ff8; }
-  canvas { background:#2d4a2d; cursor:crosshair; }
-  #tip { color:#888; font-size:12px; padding:4px; }
-  .sel { display:inline-block; margin:0 6px; padding:1px 8px; border:2px solid #555; cursor:pointer; color:#ddd; }
-  .sel.on { border-color:#ff8; color:#ff8; }
-  .sel.lock { opacity:.35; cursor:not-allowed; }
+  body { background:#000; margin:0; display:flex; font-family:monospace; user-select:none; }
+  /* 原版 800x600 舞台: 地图区 635 + 右侧栏 165 */
+  #stage { width:800px; height:600px; position:relative; background:#000; overflow:hidden; }
+  #cv { position:absolute; left:0; top:0; cursor:crosshair; }
+  /* 原版右侧栏 (frames/6.png) */
+  #side { position:absolute; right:0; top:0; width:165px; height:600px;
+          background:#4a4a4a; display:flex; flex-direction:column; }
+  #minimapBox { height:152px; border-bottom:2px solid #222; background:#000; }
+  #minimap { display:block; cursor:pointer; width:165px; height:152px; }
+  .panelTitle { background:#333; color:#ddd; text-align:center; font-weight:bold;
+                font-size:12px; padding:4px 0; letter-spacing:1px; border-top:1px solid #666;
+                border-bottom:1px solid #111; }
+  #shop { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:5px; background:#c8c8c8; }
+  .sel { border:2px solid #999; background:#d8d8d8; cursor:pointer; position:relative; }
+  .sel img { width:100%; height:56px; object-fit:cover; display:block; }
+  .sel.on { border-color:#e80; }
+  .sel.lock { opacity:.30; cursor:not-allowed; }
+  .sel .nm { position:absolute; left:2px; top:0; font-size:10px; font-weight:bold; color:#111;
+             background:rgba(255,255,255,.65); padding:0 2px; }
+  .sel .price { position:absolute; right:1px; bottom:0; font-size:11px; font-weight:bold; color:#040;
+                background:rgba(255,255,255,.75); padding:0 2px; }
+  .panelHead { display:flex; }
+  .panelHead .panelTitle { flex:1; border-top:none; }
+  .panelHead .arrow { background:#555; color:#ddd; width:26px; text-align:center; font-size:12px;
+                      padding:4px 0; cursor:default; border-bottom:1px solid #111; }
+  #infoBox { background:#101010; color:#9f9; font-size:11px; min-height:96px; padding:5px; flex:1; }
+  #infoBox b { color:#cf9; }
+  #lossBox { background:#0a0a0a; padding:4px 5px; font-size:12px; }
+  #lossBox .losses { color:#daa; }
+  #lossBox .cash { color:#ee8; display:block; margin-top:3px; }
+  #lossBox .interest { color:#aa8; font-size:10px; }
+  /* 音乐面板 (原版 1151: 三曲选择 + 播放/暂停) */
+  #musicBox { background:#2a2a2a; padding:4px; display:flex; flex-direction:column; gap:3px; }
+  #musicBox button { background:#444; color:#ccc; border:1px solid #666; font-size:10px;
+                     font-family:monospace; padding:2px; cursor:pointer; text-align:left; }
+  #musicBox button.on { background:#6a6a3a; color:#ff8; }
+  #musicBox .row { display:flex; gap:3px; }
+  #musicBox .row button { flex:1; text-align:center; }
 </style>
 </head>
 <body>
-<div id="hud">
-  金钱 <b id="hEuros"></b> (+利息<b id="hInt"></b>) | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> |
-  <span id="hShop"></span>
+<div id="stage">
+  <canvas id="cv" width="635" height="600"></canvas>
+  <div id="side">
+    <div id="minimapBox"><canvas id="minimap" width="161" height="150"></canvas></div>
+    <div class="panelTitle">UNIT / BUILD MENU</div>
+    <div id="shop"></div>
+    <div class="panelHead">
+      <div class="panelTitle">INFO</div>
+      <div class="arrow">◀</div><div class="arrow">▶</div>
+    </div>
+    <div id="infoBox">点选炮塔查看属性</div>
+    <div id="musicBox">
+      <button id="m0">♪ actOfInstinct</button>
+      <button id="m1">♪ hellMarch</button>
+      <button id="m2">♪ justDoItUp</button>
+      <div class="row">
+        <button id="mPlay">▶ 播放</button>
+        <button id="mPause">⏸ 暂停</button>
+        <button id="mMute">🔇</button>
+      </div>
+    </div>
+    <div id="lossBox">
+      <span class="losses" id="hLoss">LOSSES 0</span>
+      <span class="cash" id="hCash"></span>
+      <span class="interest" id="hInt2"></span>
+    </div>
+  </div>
 </div>
-<canvas id="cv" width="960" height="480"></canvas>
-<div id="tip">迷雾模式: 塔提供射程外一小圈视野 | <b>雷达站消除1200范围迷雾</b> | 点草地建塔(不受视野限制) | 点塔选中 → S 卖 / R 修 / <b>U 对空升级</b> | 空格取消</div>
+<div id="hud" style="position:absolute; left:8px; top:604px; color:#cfc; font-size:13px;">
+  金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> |
+  <span style="color:#9aa">方向键/WASD 滚动 · G 缩放全图 · H 血条 · M 滚动开关 · 空格取消 · 点塔选中 → S卖/R修/U对空</span>
+</div>
 <script src="data.js"></script>
 <script src="game.js"></script>
 </body>
