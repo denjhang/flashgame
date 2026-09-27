@@ -558,6 +558,60 @@ function draw() {
   }
   // 雷达站扫描圈提示 (可见的驱雾范围)
   ctx.drawImage(fogCv, 0, 0);
+
+  // ---- 小地图 + INFO 面板 (迷雾之上, 原版右上角 minimap 152px) ----
+  drawMinimap();
+  drawInfoPanel();
+}
+
+// ---- 小地图: 右上角 152x141, 敌(红,限可见)/塔(绿)/视野(淡圈)/视口框 ----
+const MM = { w: 152, h: 141, x: 0, y: 0 };
+function drawMinimap() {
+  MM.x = W - MM.w - 6; MM.y = 6;
+  ctx.save();
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 1;
+  ctx.strokeRect(MM.x - 1, MM.y - 1, MM.w + 2, MM.h + 2);
+  ctx.drawImage(mapImg, MM.x, MM.y, MM.w, MM.h);
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(MM.x, MM.y, MM.w, MM.h);
+  ctx.globalAlpha = 1;
+  // 坐标换算: 世界 → minimap (路点包围盒映射)
+  const mx = (wx) => MM.x + (wx - WORLD.x0) / (WORLD.x1 - WORLD.x0) * MM.w;
+  const my = (wy) => MM.y + (WORLD.y1 - wy) / (WORLD.y1 - WORLD.y0) * MM.h;
+  for (const t of G.turrets) {
+    if (t.hp <= 0) continue;
+    ctx.fillStyle = t.id === 'radar' ? '#6cf' : '#4f4';
+    ctx.fillRect(mx(t.x) - 1.5, my(t.y) - 1.5, 3, 3);
+  }
+  for (const u of G.units) {
+    if (u.hp <= 0 || !isVisible(u.x, u.y)) continue;
+    ctx.fillStyle = '#f44';
+    ctx.fillRect(mx(u.x) - 1.5, my(u.y) - 1.5, 3, 3);
+  }
+  // 视口框
+  ctx.strokeStyle = '#fff';
+  ctx.strokeRect(mx(cam.x) , my(MAP_ORIGIN.y - cam.y), W / (WORLD.x1 - WORLD.x0) * MM.w,
+                 H / (WORLD.y1 - WORLD.y0) * MM.h);
+  ctx.restore();
+}
+
+// ---- INFO 面板: 选中塔属性 (原版 informations 面板) ----
+function drawInfoPanel() {
+  const t = G.selected;
+  if (!t) return;
+  const px = 8, py = H - 86, pw = 210, ph = 78;
+  ctx.fillStyle = 'rgba(20,26,20,0.82)';
+  ctx.fillRect(px, py, pw, ph);
+  ctx.strokeStyle = '#6a6'; ctx.strokeRect(px, py, pw, ph);
+  ctx.fillStyle = '#cfc'; ctx.font = '12px monospace';
+  ctx.fillText(t.id.toUpperCase() + (t.aa ? '  [对空]' : ''), px + 8, py + 16);
+  ctx.fillStyle = '#8f8';
+  ctx.fillText('HP ' + t.hp + '/' + t.maxHp, px + 8, py + 34);
+  if (t.w) {
+    ctx.fillText('伤害 ' + t.w[4] + '  射程 ' + t.w[1], px + 8, py + 50);
+    ctx.fillText('冷却 ' + t.w[2] + '  炮管 ' + t.w[3], px + 8, py + 66);
+  }
 }
 
 // 修改 draw 里的敌/弹绘制: 迷雾中不渲染 (在 draw 主循环内已由 VIS 过滤)
@@ -606,7 +660,16 @@ window.addEventListener('keydown', (e) => {
   if (k === 'ArrowUp') cam.y -= 40;
   if (k === 'ArrowDown') cam.y += 40;
 });
-cv.addEventListener('click', () => {
+cv.addEventListener('click', (e) => {
+  const r = cv.getBoundingClientRect();
+  const cx = e.clientX - r.left, cy = e.clientY - r.top;
+  // 小地图命中 → 摄像机跳转 (原版 minimap 点击行为)
+  if (cx >= MM.x && cx <= MM.x + MM.w && cy >= MM.y && cy <= MM.y + MM.h) {
+    cam.x = WORLD.x0 + (cx - MM.x) / MM.w * (WORLD.x1 - WORLD.x0) - W / 2;
+    cam.y = MAP_ORIGIN.y - (WORLD.y1 - (cy - MM.y) / MM.h * (WORLD.y1 - WORLD.y0)) - H / 2;
+    clampCam();
+    return;
+  }
   if (G.lost || G.won) return;
   // 点中已有塔 → 选中 (供 U 升级对空)
   const hit = G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);
