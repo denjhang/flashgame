@@ -308,6 +308,31 @@ python3 deobf/resolve_constants.py
     **标注为待人工听辨确认**（三首均已在浏览器验证可播放）
 - 本轮未做（队列下推）：I 单位去背景 + 车头方向校正
 
+## 第 N+8 轮成果（2026-09-28, H5 领土防御·单位图核实 + 行进音补全）
+
+- **任务描述 I 的两个前提经实测均不成立（如实记录，未做无谓改动）**：
+  1. **"像素去背景"不需要**：FFDec 导出的 11 张单位 PNG **已自带 alpha 通道**（18-58% 透明像素），
+     合成到红底上验证无背景残留、无黑边；边缘仅有 alpha≤4 的抗锯齿残留（正常）
+  2. **"车头方向校正"不需要**：原版 `428_unit` 的朝向算法权威破解后确认 H5 已正确：
+     - `directionToGet = 57.29578 * asin(...)`（角度制，>180 转 -360+x）
+     - 位移 `_x += sin(rot)*speed`、**`_y -= cos(rot)*speed`** → `_rotation=0` 指北
+     - 图未旋转时车头朝上（=北），与 `_rotation` 自洽
+     - H5 的 `rotate(u.rot + π/2)` 正是"车头朝上→东起顺时针"的映射；真机四方向验证：
+       rot=-90/北、+90/南、0/东、180/西 车头与炮管方向全部正确
+     - 图片 bbox 中心与画布中心重合（dx/dy≈0），内容有 2-11px 边距，旋转不裁剪
+- **【本轮实质产出】补全 8 个车辆行进音效（此前完全缺失）**：
+  - 原版 `428_unit` 的 `roule()` 权威分支：默认 `r5="Light"`（camion1/2/3、jeep、bradley、amx10、
+    abrams、camionBlinde）→ `uniteMoveLight1-4`；`chassis=="t90"` → `uniteMoveHeavy1-3`；
+    `chassis=="tigre"` → `uniteMoveTigre1`；`chassis==navire/Yamato`（乱码名 u228Wu132 / $u180u147）
+    → `"null"` 族无音效。随机选 `Math.floor(Math.random()*n)+1`
+  - 乱码底盘名解码依据：同文件 chassisData 表 `u228Wu132=(1,0.3,0.8,1800,1000)`=navire、
+    `$u180u147=(0.5,0.2,0.2,20000,0)`=Yamato
+  - 导出 473-480 全部音效（480 为 flv→wav 转码），接入 `rouleSfx()`
+  - H5 适配：原版每次 roule 都播会音效轰炸，H5 节流为每 12 帧一次且仅视野内
+  - 真机验证：8 个音效全部可加载；触发族正确（Light 4 选 1 / Heavy 3 选 1 / tigre 固定 /
+    navire 无）；120 帧真实战斗 8 个音效全部触发、0 JS 错误
+- **队列 A-I 全部处理完毕**（A/B/C/D/E/F/G/H 前几轮完成，I 本轮以"核实不需要改 + 补全行进音"收尾）
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

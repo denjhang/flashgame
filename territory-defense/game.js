@@ -473,6 +473,11 @@ const SFX_FILES = {
   ricochet1: '467_ricochet1.mp3', ricochet2: '468_ricochet2.mp3',
   ricochet3: '469_ricochet3.mp3', ricochet4: '470_ricochet4.mp3',
   metal1: '481_metal1.mp3', metal2: '482_metal2.mp3',
+  // 车辆行进音 (原版 428_unit 的 roule(): 按底盘类型随机播)
+  uniteMoveLight1: '476_uniteMoveLight1.mp3', uniteMoveLight2: '477_uniteMoveLight2.mp3',
+  uniteMoveLight3: '478_uniteMoveLight3.mp3', uniteMoveLight4: '479_uniteMoveLight4.mp3',
+  uniteMoveHeavy1: '473_uniteMoveHeavy1.mp3', uniteMoveHeavy2: '474_uniteMoveHeavy2.mp3',
+  uniteMoveHeavy3: '475_uniteMoveHeavy3.mp3', uniteMoveTigre1: '480_uniteMoveTigre1.wav',
   Su37: '472_Su37.wav',
 };
 const SFX_POOL = {};
@@ -509,6 +514,24 @@ function explosionSfx(power) {
 function impactSfx() {
   if (Math.random() > 0.85) playSfx('ricochet' + (1 + Math.floor(Math.random() * 4)), 0.35);
   if (Math.random() > 0.7) playSfx('metal' + (1 + Math.floor(Math.random() * 2)), 0.35);
+}
+// 车辆行进音 (原版 428_unit 的 roule() 权威逻辑):
+//   默认 r5="Light" (camion1/2/3, jeep, bradley, amx10, abrams, camionBlinde)
+//   chassis=="t90" → "Heavy";  chassis=="tigre" → "Tigre"
+//   chassis==navire(u228Wu132) / Yamato($u180\x17u147) → "null" (无音效)
+//   随机选: Math.floor(Math.random() * n) + 1
+// H5 按 30fps 节流到每 12 帧一次且仅视野内 (原版每次 roule 都播, 直接照搬会音效轰炸)
+const MOVE_SFX = {
+  Light: { pre: 'uniteMoveLight', n: 4 },
+  Heavy: { pre: 'uniteMoveHeavy', n: 3 },
+  Tigre: { pre: 'uniteMoveTigre', n: 1 },
+};
+const MOVE_FAMILY = { t90: 'Heavy', tigre: 'Tigre', navire: null, Yamato: null };
+function rouleSfx(chassis) {
+  const fam = chassis in MOVE_FAMILY ? MOVE_FAMILY[chassis] : 'Light';
+  if (!fam) return;   // navire/Yamato 原版为 "null" 族
+  const m = MOVE_SFX[fam];
+  playSfx(m.pre + (1 + Math.floor(Math.random() * m.n)), 0.16);
 }
 // 命中音 (权威源: DefineSprite_400_obus 帧库结构 → 内层精灵 frame_2 DoAction):
 //   弹体精灵: 301(obusLeger)/307(obusMoyen) → explosion1;  361(obusLourd) → explosion2
@@ -588,6 +611,8 @@ class Unit {
     this.rot += Math.sign(da) * turn;
     this.x += Math.cos(this.rot) * this.speed;
     this.y += Math.sin(this.rot) * this.speed;
+    // 行进音 (原版 roule(): 按底盘随机播车体音; 节流到每 12 帧, 且仅在视野内)
+    if (G.frame % 12 === 0 && isVisible(this.x, this.y)) rouleSfx(this.type);
     if (d < Math.max(12, this.speed * 5)) {
       this.pt++;
       if (this.pt >= this.route.length) this.reached = true;

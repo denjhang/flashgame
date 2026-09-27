@@ -92,6 +92,14 @@ console.log("shellImpactSfx 三型接线正常");
 // ---- G: 选中视觉 ----
 console.log("选中视觉: 准星帧=%d 射程圈=%s (原版 778/775)", SEL_CROSS.length, !!SEL_RANGE);
 console.log("BGM: %j chid映射 %j (曲名来自原版1151按钮文本)", BGM_NAMES, BGM_FILES);
+// I: 行进音族 + 单位朝向
+const famTest = {};
+for (const ch of ['camion1','jeep','bradley','amx10','abrams','camionBlinde','t90','tigre','navire','Yamato']) {
+  const fam = ch in MOVE_FAMILY ? MOVE_FAMILY[ch] : 'Light';
+  famTest[ch] = fam || '(无)';
+}
+console.log("行进音族: %j", famTest);
+console.log("单位图: %d 张 (FFDec 导出已含 alpha, bbox居中, 车头朝上)", Object.keys(UNIT_BMP).length);
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
   Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,
   Object.keys(UNIT_BMP).filter(k => k !== 'tigre' && !UNIT_SHADOW[k]));
