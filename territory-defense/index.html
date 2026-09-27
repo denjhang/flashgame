@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>领土防御 Territory Defense</title>
+<style>
+  body { background:#1a2a1a; margin:0; display:flex; flex-direction:column; align-items:center; font-family:monospace; }
+  #hud { color:#cfc; padding:6px; font-size:14px; }
+  #hud b { color:#ff8; }
+  canvas { background:#2d4a2d; cursor:crosshair; }
+  #tip { color:#888; font-size:12px; padding:4px; }
+  .sel { display:inline-block; margin:0 6px; padding:2px 10px; border:2px solid #555; cursor:pointer; color:#ddd; }
+  .sel.on { border-color:#ff8; color:#ff8; }
+  .sel.lock { opacity:.35; cursor:not-allowed; }
+</style>
+</head>
+<body>
+<div id="hud">
+  金钱 <b id="hEuros"></b> (+利息<b id="hInt"></b>) | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> |
+  <span id="hShop"></span>
+</div>
+<canvas id="cv" width="960" height="480"></canvas>
+<div id="tip">迷雾模式: 塔提供射程外一小圈视野 | <b>雷达站消除1200范围迷雾</b> | 点草地建塔(不受视野限制) | 点塔选中 → S 卖 / R 修 / <b>U 对空升级</b> | 空格取消</div>
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

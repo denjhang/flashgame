@@ -1,0 +1,8 @@
+# 大体积产物: 反编译/反混淆输出与工具不入库
+decompiled/
+deobf/
+ffdec/
+ffdec.zip
+*.swf
+*.log
+__pycache__/
