@@ -5,7 +5,6 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 const W = cv.width, H = cv.height;
-const BASE_LINE_Y = 560;     // 基地防线 (世界坐标, y 最大=最北; 原版 _y>477 失败线)
 let zoom = 1;                // 原版 G 键: 1 ↔ 0.39 全图视图
 
 // ---------------- 原版机制参数 (GAME_LOGIC.md) ----------------
@@ -46,14 +45,14 @@ function revealExplored() {   // 视野经过的区域永久标记为已探索
   exploredCtx.fillStyle = '#fff';
   for (const s of VIS) {
     const ex = (s.x - (WORLD.x0 - 40)) * EXPLORED_SCALE;
-    const ey = ((WORLD.y1 + 40) - s.y) * EXPLORED_SCALE;
+    const ey = (s.y - (WORLD.y0 - 40)) * EXPLORED_SCALE;
     exploredCtx.beginPath();
     exploredCtx.arc(ex, ey, s.r * EXPLORED_SCALE, 0, 7);
     exploredCtx.fill();
   }
 }
 function exploredToScreen() {   // 探索记忆 → 屏幕绘制参数
-  return { x: w2sX(WORLD.x0 - 40), y: w2sY(WORLD.y1 + 40),
+  return { x: w2sX(WORLD.x0 - 40), y: w2sY(WORLD.y0 - 40),
            w: expW / EXPLORED_SCALE * zoom, h: expH / EXPLORED_SCALE * zoom };
 }
 
@@ -80,7 +79,7 @@ const MAP_W = 2070, MAP_H = 1920;
 const WORLD = { x0: -237, x1: 1899, y0: -1563, y1: 580 };   // 路点包围盒
 // 地图位图左上角对应的世界坐标 (位图 2070x1920 铺满整个世界带)
 const MAP_ORIGIN = { x: 0, y: -1440 };   // carteBase 放置矩阵 (0,-1440), 位图 2070x1920
-const cam = { x: 480 - 317, y: -1440 - (-1483) - 300 };  // 初始: 基地视野圈居中
+const cam = { x: 60, y: 0 };   // 初始: 原版 carte._y=0 视图 (舞台 y 0..600, 出发区在底部)
 // 探索记忆: 世界包围盒 (x -237..1899, y -1563..580) 半分辨率
 const EXPLORED_SCALE = 0.5;
 const expW = Math.ceil((WORLD.x1 - WORLD.x0 + 80) * EXPLORED_SCALE);
@@ -94,9 +93,9 @@ const heavyCtx = heavyCv.getContext('2d');
 
 
 function w2sX(x) { return (x - cam.x) * zoom; }
-function w2sY(y) { return ((MAP_ORIGIN.y - y) - cam.y) * zoom; }   // y 翻转
+function w2sY(y) { return (y - cam.y) * zoom; }   // 世界 y = Flash 屏幕坐标 (y 向下=南), 无翻转
 function s2wX(sx) { return sx / zoom + cam.x; }
-function s2wY(sy) { return MAP_ORIGIN.y - (sy / zoom + cam.y); }
+function s2wY(sy) { return sy / zoom + cam.y; }
 
 // ---------------- 原版单位贴图 (deobf/data/sprites.json: shape→bitmap 对号) ----------------
 const UNIT_IMG = {};
@@ -122,8 +121,6 @@ const TURRET_SRC = {
   crotale: 'assets/turrets/62.png', canon125: 'assets/turrets/65.png',
   radar: 'assets/turrets/61.png', MLRS: 'assets/turrets/67.png',
   pluton: 'assets/turrets/69.png', MTHEL: 'assets/turrets/85.png',
-  // m60: 塔库86无独立帧, 本体=DefineSprite_173帧"m60"的底座 shape 88 (8x11)
-  m60: 'assets/turrets/88.png',
 };
 for (const k in TURRET_SRC) {
   const im = new Image();
@@ -161,37 +158,45 @@ const SHELL_KIND = {
   MLRS: 'missile2', pluton: 'missile3', navireCrotale: 'missileUnder',
   Yamato460: 'obusLourd', MTHEL: 'obusLeger',
 };
-// 敌方武器塔外观 (DefineSprite_173 帧库, turret_frames.json 对号):
-// 每种武器 = 173 帧内的主要炮管 sprite (旋转件), 首帧朝上, 与我方塔同画法
-const ETURRET_SRC = {
-  m60Brad: 'assets/eturrets_spr/DefineSprite_92/1.png',
-  '75mmBrad': 'assets/eturrets_spr/DefineSprite_103/1.png',
-  '75mmAmx10': 'assets/eturrets_spr/DefineSprite_103/1.png',
-  gatlingAmx10: 'assets/eturrets_spr/DefineSprite_92/1.png',
-  canon105: 'assets/eturrets_spr/DefineSprite_108/1.png',
-  '105mmAbrams': 'assets/eturrets_spr/DefineSprite_108/1.png',
-  canon105D: 'assets/eturrets_spr/DefineSprite_108/1.png',
-  '105mmDAbrams': 'assets/eturrets_spr/DefineSprite_108/1.png',
-  crotale: 'assets/eturrets_spr/DefineSprite_122/1.png',
-  crotaleAbrams: 'assets/eturrets_spr/DefineSprite_122/1.png',
-  crotaleTigre: 'assets/eturrets_spr/DefineSprite_161/1.png',
-  navireCrotale: 'assets/eturrets_spr/DefineSprite_164/1.png',
-  canon125: 'assets/eturrets_spr/DefineSprite_125/1.png',
-  '125mmT90': 'assets/eturrets_spr/DefineSprite_125/1.png',
-  MLRS: 'assets/eturrets_spr/DefineSprite_128/1.png',
-  pluton: 'assets/eturrets/132.png',      // DefineShape (pluton 炮管)
-  MTHEL: 'assets/eturrets/134.png',       // DefineShape (MTHEL 炮管)
-  gatlingDT90: 'assets/eturrets_spr/DefineSprite_153/1.png',
-  gatlingDTigre: 'assets/eturrets_spr/DefineSprite_157/1.png',
-  Yamato460: 'assets/eturrets_spr/DefineSprite_167/1.png',
+// 敌方武器塔分层外观 (DefineSprite_173 帧库, deobf/data/turret_frames.json objs 深度序):
+//   g: 旋转炮管 sprite (eturrets_spr/DefineSprite_N/1.png, 原版带开火动画帧)
+//   s: 静态件 shape (eturrets/N.png, 底座/护盾/装饰), 按 objs 顺序绘制 (先下后上)
+// 重复出现的 id (如 105mmD 双管 [108,108]) 去重为一次, 位置差异待矩阵解析
+const ETURRET_PARTS = {
+  m60Brad:       [{ s: 'eturrets/138.png' }, { g: 92 }, { s: 'eturrets/139.png' }],
+  '75mmBrad':    [{ s: 'eturrets/140.png' }, { g: 103 }, { s: 'eturrets/141.png' }],
+  gatlingAmx10:  [{ g: 98 }, { s: 'eturrets/143.png' }],
+  '75mmAmx10':   [{ g: 103 }, { s: 'eturrets/144.png' }],
+  canon105:      [{ g: 108 }, { s: 'eturrets/110.png' }],
+  '105mmAbrams': [{ g: 108 }, { s: 'eturrets/147.png' }],
+  canon105D:     [{ g: 108 }, { s: 'eturrets/112.png' }],
+  '105mmDAbrams': [{ g: 108 }, { s: 'eturrets/148.png' }],
+  crotale:       [{ s: 'eturrets/117.png' }, { s: 'eturrets_spr/DefineSprite_121/1.png' }, { g: 122 }],
+  crotaleAbrams: [{ s: 'eturrets/149.png' }, { s: 'eturrets_spr/DefineSprite_121/1.png' }, { s: 'eturrets/150.png' }, { g: 122 }],
+  crotaleTigre:  [{ g: 157 }, { g: 161 }],
+  navireCrotale: [{ s: 'eturrets/163.png' }, { g: 164 }],
+  canon125:      [{ g: 125 }, { s: 'eturrets/127.png' }],
+  '125mmT90':    [{ g: 125 }, { s: 'eturrets/152.png' }],
+  MLRS:          [{ g: 128 }, { s: 'eturrets/130.png' }],
+  pluton:        [{ g: 80 }, { s: 'eturrets/132.png' }],
+  MTHEL:         [{ g: 83 }, { s: 'eturrets/134.png' }, { s: 'eturrets_spr/DefineSprite_136/1.png' }],
+  gatlingDT90:   [{ g: 153 }, { s: 'eturrets/152.png' }],
+  gatlingDTigre: [{ g: 153 }, { g: 157 }, { s: 'eturrets_spr/DefineSprite_160/1.png' }],
+  radar:         [{ s: 'eturrets_spr/DefineSprite_115/1.png' }],
+  radarMobile:   [{ s: 'eturrets_spr/DefineSprite_115/1.png' }],
+  Yamato460:     [{ s: 'eturrets/166.png' }, { g: 167 }, { s: 'eturrets/169.png' }, { s: 'eturrets/170.png' }, { s: 'eturrets/171.png' }, { s: 'eturrets/172.png' }],
 };
-const ETURRET_IMG = {};
-for (const k in ETURRET_SRC) {
-  const im = new Image();
-  im.src = ETURRET_SRC[k];
-  ETURRET_IMG[k] = im;
+// 炮管 sprite → 帧序列路径 (任务C接动画; 现取首帧)
+const GUN_SPRITE_FRAMES = { 80: 186, 83: 25, 92: 16, 98: 24, 103: 25, 108: 25, 122: 91, 125: 35, 128: 157, 153: 3, 157: 1, 161: 46, 164: 91, 167: 35 };
+const ET_PART_IMG = {};   // 所有部件图缓存 (路径→Image)
+function partImg(path) {
+  if (!ET_PART_IMG[path]) { const im = new Image(); im.src = 'assets/' + path; ET_PART_IMG[path] = im; }
+  return ET_PART_IMG[path];
 }
-// 玩家武器 → 同型敌武器塔外观 (玩家 86 塔库的炮管也用于 173 库, 同源形状)
+function gunFramePath(id, f) {
+  return 'eturrets_spr/DefineSprite_' + id + '/' + f + '.png';
+}
+// 玩家武器 → 同型敌武器塔外观 (86 塔库无 m60 帧, m60 用 173 库 "m60" 帧 = 88底座+92机枪)
 const PLAYER_ETURRET = {
   m60: 'm60Brad', gatling: 'gatlingAmx10', canon75: '75mmBrad',
   canon105: 'canon105', canon105D: 'canon105D', canon125: 'canon125',
@@ -615,15 +620,14 @@ function clampCam() {
   const viewW = W / zoom, viewH = H / zoom;
   const lo = Math.min(WORLD.x0 - 40, (WORLD.x0 + WORLD.x1 - viewW) / 2);
   cam.x = Math.max(lo, Math.min(WORLD.x1 + 40 - viewW, cam.x));
-  const camYLo = Math.min(MAP_ORIGIN.y - WORLD.y1 - 40, (MAP_ORIGIN.y - (WORLD.y0 + WORLD.y1) / 2 - viewH / 2));
-  const camYHi = Math.max(MAP_ORIGIN.y + H / zoom - WORLD.y0 + 40, camYLo);
-  cam.y = Math.max(camYLo, Math.min(camYHi, cam.y));
+  // cam.y = 屏幕顶边的世界 y (Flash 系, 北=-1563 顶 / 南=580 底)
+  cam.y = Math.max(WORLD.y0 - 40, Math.min(WORLD.y1 + 40 - viewH, cam.y));
 }
 function toggleZoom() {   // 原版 G 键: 39% 全图视图
   zoom = zoom === 1 ? 0.39 : 1;
   if (zoom < 1) {         // 全图居中
     cam.x = (WORLD.x0 + WORLD.x1 - W / zoom) / 2;
-    cam.y = MAP_ORIGIN.y - (WORLD.y0 + WORLD.y1) / 2 - H / zoom / 2;
+    cam.y = (WORLD.y0 + WORLD.y1 - H / zoom) / 2;
   }
   clampCam();
 }
@@ -631,16 +635,8 @@ function toggleZoom() {   // 原版 G 键: 39% 全图视图
 function draw() {
   ctx.clearRect(0, 0, W, H);
   clampCam();
-  // 地图背景 (世界坐标 → 屏幕)
-  // 位图顶边 = 世界 y = MAP_ORIGIN.y + MAP_H (y 向上), 屏幕上比底边高 MAP_H*zoom
-  ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y + MAP_H), MAP_W * zoom, MAP_H * zoom);
-
-  // 基地红线 (北方 = y 最大; 原版 _y > 477 失败线的镜像)
-  ctx.strokeStyle = '#f44'; ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  ctx.moveTo(0, w2sY(BASE_LINE_Y)); ctx.lineTo(W, w2sY(BASE_LINE_Y));
-  ctx.stroke();
-  ctx.setLineDash([]);
+  // 地图背景: 位图左上角放在世界 (MAP_ORIGIN.x, MAP_ORIGIN.y=-1440=北缘), Flash 屏幕系直接铺
+  ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W * zoom, MAP_H * zoom);
 
   // 建造区显示 (原版 C 键: surfaceForBuild alpha=35) — 道路缓冲带外可建
   if (G.showBuildArea) {
@@ -666,11 +662,16 @@ function draw() {
       ctx.fillRect(-10, -10, 20, 20);
       ctx.restore(); continue;
     }
-    // m60 本体 (shape 88, 8x11 迷彩底座): 固定不旋转
+    // m60 (173 库 "m60" 帧 = 88 底座 + 92 机枪): 底座固定, 机枪随 rot 旋转
     if (t.id === 'm60') {
-      const im = TURRET_IMG.m60;
-      if (im && im.complete && im.naturalWidth)
-        ctx.drawImage(im, -4, -8, 8, 11);
+      const base = partImg('turrets/88.png');
+      if (base.complete && base.naturalWidth) ctx.drawImage(base, -4, -8, 8, 11);
+      const mg = partImg(gunFramePath(92, 1));
+      if (mg.complete && mg.naturalWidth) {
+        ctx.save(); ctx.rotate(t.rot + Math.PI / 2);
+        ctx.drawImage(mg, -mg.naturalWidth / 2, -mg.naturalHeight + mg.naturalHeight * 0.12);
+        ctx.restore();
+      }
     }
     // 雷达站: 扫描波纹 (迷雾驱散可视化)
     if (t.id === 'radar') {
@@ -693,7 +694,7 @@ function draw() {
       } else {
         // 炮管图 (17x81, 原图朝上): 旋转 = -rot - π/2
         ctx.save();
-        ctx.rotate(-t.rot - Math.PI / 2);
+        ctx.rotate(t.rot + Math.PI / 2);
         ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + 12,
                       im.naturalWidth, im.naturalHeight);
         ctx.restore();
@@ -728,7 +729,7 @@ function draw() {
     ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
     const img = UNIT_IMG[u.type];
     if (img && img.complete && img.naturalWidth) {
-      ctx.rotate(-u.rot - Math.PI / 2);
+      ctx.rotate(u.rot + Math.PI / 2);
       const big = u.type === 'Yamato' ? 2.4 : 1;
       ctx.drawImage(img, -img.naturalWidth / 2 * big, -img.naturalHeight / 2 * big,
                     img.naturalWidth * big, img.naturalHeight * big);
@@ -739,15 +740,27 @@ function draw() {
       ctx.fillRect(-8, -5, 16, 10);
     }
     ctx.restore();
-    // 武器塔叠加 (原版 173 库: 炮管随瞄准角旋转, 图朝上 → -rot-π/2, 与我方塔同画法)
+    // 武器塔分层叠加 (173 库 objs 深度序: 静态件居中, 炮管随瞄准角 -rot-π/2 旋转)
     if (u.weapon) {
-      const wimg = ETURRET_IMG[u.weaponId];
-      if (wimg && wimg.complete && wimg.naturalWidth) {
-        const wr = wimg.naturalWidth > 60 ? 0.32 : wimg.naturalWidth > 30 ? 0.5 : 0.75;
-        ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom * wr, zoom * wr);
-        ctx.rotate(-u.rot - Math.PI / 2);
-        ctx.drawImage(wimg, -wimg.naturalWidth / 2, -wimg.naturalHeight + 6);
-        ctx.restore();
+      const parts = ETURRET_PARTS[u.weaponId];
+      if (parts) {
+        for (const p of parts) {
+          if (p.g) {
+            const im = partImg(gunFramePath(p.g, 1));
+            if (!(im.complete && im.naturalWidth)) continue;
+            ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+            ctx.rotate(u.rot + Math.PI / 2);
+            // 炮管 sprite 注册点在底座环 (底部中心)
+            ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight + im.naturalHeight * 0.12);
+            ctx.restore();
+          } else {
+            const im = partImg(p.s);
+            if (!(im.complete && im.naturalWidth)) continue;
+            ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+            ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+            ctx.restore();
+          }
+        }
       }
     }
     if (G.showHp) {
@@ -759,7 +772,7 @@ function draw() {
     if (!isVisible(s.x, s.y)) continue;   // 飞入迷雾的炮弹不可见
     const sx = w2sX(s.x), sy = w2sY(s.y);
     const t = s.target && s.target.hp > 0 ? s.target : null;
-    const ang = t ? Math.atan2(-(t.y - s.y), t.x - s.x) : 0;   // 世界y向上→屏幕取负
+    const ang = t ? Math.atan2(t.y - s.y, t.x - s.x) : 0;   // y-down 世界系, 屏幕角=世界角
     const kind = SHELL_KIND[s.turretId] || 'bullet';
     const frames = SHELL_IMG[kind];
     const im = frames[(G.frame >> 2) % frames.length];
@@ -864,9 +877,9 @@ function drawMinimap() {
   const ctx = mmCtx;   // 画到侧栏小地图
   ctx.clearRect(0, 0, MM.w, MM.h);
   ctx.drawImage(mapImg, 0, 0, MM.w, MM.h);
-  // 坐标换算: 与缩略图同一坐标系 = 地图位图 (世界 x 0..2070, y -1440..480, 顶=北)
+  // 坐标换算: 与缩略图同一坐标系 = 地图位图 (世界 x 0..2070, y -1440(北)..480(南), 顶=北)
   const mx = (wx) => (wx - MAP_ORIGIN.x) / MAP_W * MM.w;
-  const my = (wy) => (MAP_ORIGIN.y + MAP_H - wy) / MAP_H * MM.h;
+  const my = (wy) => (wy - MAP_ORIGIN.y) / MAP_H * MM.h;
   for (const t of G.turrets) {
     if (t.hp <= 0) continue;
     ctx.fillStyle = t.id === 'radar' ? '#6cf' : '#4f4';
@@ -877,9 +890,8 @@ function drawMinimap() {
     ctx.fillStyle = '#f44';
     ctx.fillRect(mx(u.x) - 1.5, my(u.y) - 1.5, 3, 3);
   }
-  // 视口框 (屏幕对应世界区域)
-  const vyN = MAP_ORIGIN.y - cam.y;
-  const vyS = MAP_ORIGIN.y - cam.y - H / zoom;
+  // 视口框 (屏幕对应世界区域; cam.y = 屏幕顶边世界 y)
+  const vyN = cam.y, vyS = cam.y + H / zoom;
   const vxL = cam.x, vxR = cam.x + W / zoom;
   ctx.strokeStyle = '#fff';
   ctx.strokeRect(mx(vxL), my(vyN), (vxR - vxL) / MAP_W * MM.w,
@@ -983,11 +995,15 @@ mmCv.addEventListener('mousedown', () => { mmDrag = true; });
 window.addEventListener('mouseup', () => { mmDrag = false; });
 mmCv.addEventListener('mousemove', (e) => { if (mmDrag) mmJump(e); });   // 原版 viseurMiniMap 拖拽
 function mmJump(e) {
-  // 与缩略图同坐标系: 地图位图 (世界 x 0..2070, y -1440..480)
-  const wx = MAP_ORIGIN.x + e.offsetX / MM.w * MAP_W;
-  const wy = MAP_ORIGIN.y + MAP_H - e.offsetY / MM.h * MAP_H;
+  // CSS 拉伸归一 (canvas 161x150, 显示 165x152): 用 getBoundingClientRect 换算
+  const r = mmCv.getBoundingClientRect();
+  const fx = (e.clientX - r.left) / r.width * MM.w;
+  const fy = (e.clientY - r.top) / r.height * MM.h;
+  // 与缩略图同坐标系: 地图位图 (世界 x 0..2070, y -1440(北)..480(南), 顶=北, 无翻转)
+  const wx = MAP_ORIGIN.x + fx / MM.w * MAP_W;
+  const wy = MAP_ORIGIN.y + fy / MM.h * MAP_H;
   cam.x = wx - W / (2 * zoom);
-  cam.y = MAP_ORIGIN.y - wy - H / (2 * zoom);
+  cam.y = wy - H / (2 * zoom);   // cam.y = 屏幕顶边世界 y
   clampCam();
 }
 // 侧栏开关按钮 (原版 menu.informations 可点击按钮, 鼠标为主)
