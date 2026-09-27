@@ -459,6 +459,41 @@ wireMusicPanel();
 // ---------------- 游戏状态 ----------------
 
 // ---------------- 音效 (原版 soundsFx; 轮换池避免重叠切断) ----------------
+// 修理面板 (原版 819 barreReparation = 814 base(236x21) + 813 repairPrice(EditText) + 818 autor + 184 repairLogo)
+// 注意: FFDec 把 814/818 里 EditText 的示例文字("repair for 1000000$")烧进了导出位图, 不可直接用;
+// 已从 814 采样权威配色: 边框纯黑 + 填充 RGB(0,102,152); 818 autor 为黑底。H5 按此配色 + 原版布局自绘
+const BAR_FILL = '#006698', BAR_BORDER = '#000';
+// 修理费公式 (原版 819 refresh() 权威): round(2 * (etatMax - etat)) = 2 $/HP
+//   注: pcode 里 r3=(r3/2); r3=(r3/r5); 是混淆死代码, 随后 `r3 = 2` 直接覆盖
+function repairPrice(t) {
+  if (t.hp >= t.maxHp) return 0;
+  return REPAIR_COST * (t.maxHp - t.hp);
+}
+function repairIfCan(t) {
+  const price = repairPrice(t);
+  if (price <= 0) return false;
+  if (G.euros < price) { playSfx('cannot', 0.4); return false; }
+  G.euros -= price; t.hp = t.maxHp;
+  playSfx('selectionUnite', 0.4);
+  return true;
+}
+function swithRepair(t) { t.autoRepair = !t.autoRepair; }
+
+// 修理费公式 (原版 819 refresh() 权威): round(2 * (etatMax - etat)) = 2 $/HP
+//   注: pcode 里 r3=(r3/2); r3=(r3/r5); 是混淆死代码, 随后 `r3 = 2` 直接覆盖,
+//   最终 r3 = round(2 * (maxHP - curHP))。H5 的 REPAIR_COST=2 与之完全一致
+function repairPrice(t) {
+  if (t.hp >= t.maxHp) return 0;
+  return REPAIR_COST * (t.maxHp - t.hp);
+}
+function repairIfCan(t) {
+  if (G.euros < REPAIR_COST) { playSfx('cannot', 0.4); return false; }
+  t.hp = t.maxHp;
+  playSfx('selectionUnite', 0.4);
+  return true;
+}
+function swithRepair(t) { t.autoRepair = !t.autoRepair; }
+
 const SFX_FILES = {
   boutonScroll: '450_boutonScroll.mp3', creationUnite: '452_creationUnite.mp3',
   selectionUnite: '471_selectionUnite.mp3', cannot: '451_cannot.mp3',
@@ -1222,21 +1257,45 @@ function drawInfoPanel() {
   const box = document.getElementById('infoBox');
   const t = G.selected;
   if (!t) { if (box && !box.dataset.keep) box.innerHTML = '点选炮塔查看属性'; return; }
+  const price = repairPrice(t);
   if (box) box.innerHTML =
     '<b>' + t.id.toUpperCase() + (t.aa ? ' [对空]' : '') + '</b><br>' +
     'HP ' + Math.max(0, t.hp) + '/' + t.maxHp + '<br>' +
-    (t.w ? '伤害 ' + t.w[4] + ' · 射程 ' + t.w[1] + '<br>冷却 ' + t.w[2] + ' · 炮管 ' + t.w[3] : '无武装');
-  const px = 8, py = H - 86, pw = 210, ph = 78;
+    (t.w ? '伤害 ' + t.w[4] + ' · 射程 ' + t.w[1] + '<br>冷却 ' + t.w[2] + ' · 炮管 ' + t.w[3] : '无武装') + '<br>' +
+    (price > 0 ? '<b>修理 ' + price + ' $</b> (按 R)' : '无需修理') + '<br>' +
+    (t.autoRepair ? '<b>自动修理 ON</b>' : '自动修理 OFF') + ' (按 T)';
+  const px = 8, py = H - 112, pw = 244, ph = 104;
   ctx.fillStyle = 'rgba(20,26,20,0.82)';
   ctx.fillRect(px, py, pw, ph);
   ctx.strokeStyle = '#6a6'; ctx.strokeRect(px, py, pw, ph);
-  ctx.fillStyle = '#cfc'; ctx.font = '12px monospace';
+  ctx.fillStyle = '#cfc'; ctx.font = 'bold 13px monospace';
   ctx.fillText(t.id.toUpperCase() + (t.aa ? '  [对空]' : ''), px + 8, py + 16);
-  ctx.fillStyle = '#8f8';
-  ctx.fillText('HP ' + t.hp + '/' + t.maxHp, px + 8, py + 34);
-  if (t.w) {
-    ctx.fillText('伤害 ' + t.w[4] + '  射程 ' + t.w[1], px + 8, py + 50);
-    ctx.fillText('冷却 ' + t.w[2] + '  炮管 ' + t.w[3], px + 8, py + 66);
+  ctx.fillStyle = '#8f8'; ctx.font = '11px monospace';
+  ctx.fillText('HP ' + t.hp + '/' + t.maxHp, px + 8, py + 32);
+  if (t.w) ctx.fillText('伤害 ' + t.w[4] + '  射程 ' + t.w[1] + '  冷却 ' + t.w[2], px + 8, py + 46);
+  // 修理条 (原版 814 base 尺寸 236x21, 权威配色: 纯黑边框 + RGB(0,102,152) 填充)
+  {
+    const barX = px + 4, barY = py + 56, barW = 236, barH = 21;
+    ctx.fillStyle = BAR_BORDER; ctx.fillRect(barX, barY, barW, barH);
+    ctx.fillStyle = BAR_FILL;  ctx.fillRect(barX + 1, barY + 1, barW - 2, barH - 2);
+    // HP 进度 (亮起部分)
+    const ratio = t.maxHp > 0 ? Math.max(0, t.hp) / t.maxHp : 0;
+    ctx.fillStyle = 'rgba(120,230,160,.45)';
+    ctx.fillRect(barX + 1, barY + 1, (barW - 2) * ratio, barH - 2);
+    // 修理费文字 (原版 813 repairPrice EditText 的内容, 中英双写保留原版英文)
+    ctx.fillStyle = price > 0 ? '#fff' : '#bfe';
+    ctx.font = '12px monospace';
+    ctx.fillText(price > 0 ? 'repair for ' + price + ' $' : 'no reparations needed', barX + 8, barY + 15);
+  }
+  // autoRepair 开关 (原版 818 autor 文字层: 黑底 + "auto repair ON/OFF")
+  {
+    const aX = px + 4, aY = py + 82, aW = 236, aH = 19;
+    ctx.fillStyle = BAR_BORDER; ctx.fillRect(aX, aY, aW, aH);
+    ctx.fillStyle = t.autoRepair ? '#1a3a1a' : '#2a1010';
+    ctx.fillRect(aX + 1, aY + 1, aW - 2, aH - 2);
+    ctx.fillStyle = t.autoRepair ? '#8f8' : '#a88';
+    ctx.font = '12px monospace';
+    ctx.fillText(t.autoRepair ? 'auto repair ON' : 'auto repair OFF', aX + 8, aY + 14);
   }
 }
 
@@ -1351,6 +1410,25 @@ cv.addEventListener('click', (e) => {
   if (G.lost || G.won) return;
   // Su37 瞄准中: 点击地图 = 空袭落点 (原版 zone = _xmouse/_ymouse)
   if (G.su37Aiming) { su37Launch(G.mx, G.my); return; }
+  // 修理面板点击 (原版 819: 条上 on(press)=repairIfCan, autor 按钮 on(press)=swithRepair)
+  {
+    const rr = cv.getBoundingClientRect();
+    const cx = e.clientX - rr.left, cy = e.clientY - rr.top;
+    const px = 8, py = H - 112, pw = 244;
+    const sel0 = G.selected;
+    if (sel0) {
+      if (cx >= px + pw - 22 && cx <= px + pw - 5 && cy >= py + 84 && cy <= py + 101) {
+        sel0.autoRepair = !sel0.autoRepair; playSfx('selectionUnite', 0.35); return;
+      }
+      if (cx >= px + 4 && cx <= px + 240 && cy >= py + 56 && cy <= py + 77) {
+        const price = repairPrice(sel0);
+        if (price <= 0) return;
+        if (G.euros < price) playSfx('cannot', 0.4);
+        else { G.euros -= price; sel0.hp = sel0.maxHp; playSfx('selectionUnite', 0.4); }
+        return;
+      }
+    }
+  }
   // 点中已有塔 → 选中 (供 U 升级对空)
   const hit = G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);
   if (hit) { G.selected = hit; return; }
@@ -1384,11 +1462,15 @@ window.addEventListener('keydown', (e) => {
   if (k === 's') {
     if (sel) { G.euros += sel.sellPrice(); G.turrets = G.turrets.filter(t => t !== sel); G.selected = null; }
   }
-  if (k === 'r') {
-    if (sel) {
-      const n = Math.min(sel.maxHp - sel.hp, Math.floor(G.euros / REPAIR_COST));
-      sel.hp += n; G.euros -= n * REPAIR_COST;
+  if (k === 'r') {   // 原版 819 repairIfCan(): 全额修复, 扣 repairPrice
+    if (sel && sel.hp < sel.maxHp) {
+      const price = repairPrice(sel);
+      if (G.euros < price) playSfx('cannot', 0.4);
+      else { G.euros -= price; sel.hp = sel.maxHp; playSfx('selectionUnite', 0.4); }
     }
+  }
+  if (k === 't') {   // 原版 818 autor: 切换 auto repair ON/OFF
+    if (sel) { sel.autoRepair = !sel.autoRepair; playSfx('selectionUnite', 0.35); }
   }
   if (k === 'u') {
     // 对空升级: 花费 造价×0.6, 任意塔获得对空能力

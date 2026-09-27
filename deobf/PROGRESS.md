@@ -351,6 +351,26 @@ python3 deobf/resolve_constants.py
   - 原版另有 `barreReparation` 面板 + `repairLogo.autoRepair` 开关 UI（chid 819/184），
     H5 已有 autoRepair 字段与逻辑，但**无面板 UI**（列为后续可选项，非队列要求）
 
+## 第 N+10 轮成果（2026-09-28, H5 领土防御·修理面板 barreReparation）
+
+- **补全原版 `barreReparation` 修理面板**（上一轮盘点出的缺口，队列 A-I 之外）：
+  - **权威逻辑**（`DefineSprite_819` 的 `refresh(unit)` / `repairIfCan()` / `DefineSprite_184` 的 `swithRepair()`）：
+    - `priceToPay = round(2 * (etatMax - etat))` —— **2 $/HP**
+      （注：pcode 里 `r3=(r3/2); r3=(r3/r5);` 是混淆死代码，随后 `r3 = 2` 直接覆盖；
+      我第一版误读成 `4*(maxHP-curHP)/range`，经测试发现 `canon105 缺10HP→0$` 显然不对而纠正）
+    - `repairIfCan()`：钞票不足播 `cannot` 音并拒绝；否则扣款、`etat = etatMax`、播 `selectionUnite`
+    - `swithRepair()`：翻转 `repairLogo` 内的布尔（即 autoRepair），文案切 "auto repair ON/OFF"
+    - 面板点击：条上 `on(press)=repairIfCan`、autor 按钮 `on(press)=swithRepair`
+  - **素材问题（如实记录）**：`814 base` / `818 autor` 两张导出位图里 **FFDec 把 EditText 的示例文字
+    "repair for 1000000$" 烧进了像素**，不可直接用；`184 repairLogo` 实为圆形阴影图（非图标）。
+    → 改为**从 814 采样权威配色**（纯黑边框 + `RGB(0,102,152)` 蓝底）按原版尺寸布局自绘，
+    文字由 H5 动态生成。删除不可用的 assets/repair_bar/
+  - **H5 交互**：R 键 = repairIfCan（全额修复扣款）；**T 键 = 切换 auto repair**；
+    面板点击（修理条 / autor 区）也可触发
+  - **真机验证**：T 键 auto false→true；R 键 255→280HP 扣 50$（=2×25）；
+    点击修理条 240→280HP 扣 80$（=2×40）；截图确认蓝条 + HP 进度 + "repair for 50 $" + "auto repair OFF"
+- 顺带：HUD 提示补上 "T自动修理"
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

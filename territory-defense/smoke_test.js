@@ -106,6 +106,20 @@ lastBirdAt = 0; const birdLog = {};
 const _ps = playSfx; playSfx = (n,v) => { birdLog[n] = (birdLog[n]||0)+1; };
 playBirds(0); playBirds(5000); playBirds(10000); playBirds(20000);
 playSfx = _ps;
+// 修理面板 (原版 819 refresh 公式: 4*(maxHP-curHP)/range)
+{
+  const t2 = new Turret('canon105', 0, 0);
+  t2.hp = t2.maxHp - 10;
+  const p = repairPrice(t2);
+  const expect = 2 * 10;
+  console.log("修理费: canon105 缺10HP → %d $ (公式 2*10=%d) 一致=%s", p, expect, p === expect);
+  const e0 = G.euros; G.euros = 9999;
+  const ok = repairIfCan(t2);
+  console.log("repairIfCan: %s HP=%d/%d", ok, t2.hp, t2.maxHp);
+  t2.autoRepair = false; swithRepair(t2);
+  console.log("swithRepair: autoRepair=%s", t2.autoRepair);
+  G.euros = e0;
+}
 console.log("鸟叫: %d 个音效, 10s节流触发 %d 次 %j", birdKeys.length, Object.keys(birdLog).length, Object.keys(birdLog));
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
   Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,
