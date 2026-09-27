@@ -13,7 +13,8 @@ const ctxStub = new Proxy(function () {}, {
 global.__ctxStub = ctxStub;
 global.document = {
   getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {} }),
-  createElement: () => ({ onclick: null, classList: {}, style: {}, getContext: () => ctxStub, width: 0, height: 0 }),
+  createElement: () => ({ onclick: null, classList: {}, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {} }),
+  createTextNode: () => ({}),
   addEventListener() {},
 };
 global.window = { addEventListener() {} };

@@ -104,12 +104,20 @@ const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   im.src = 'assets/explosion/' + i + '.png';
   return im;
 });
-// BGM (原版 musics 循环: hellMarch 候选 1157)
+// BGM (原版 musics 三曲循环: onSoundComplete 自动切下一首)
+// 1082(66s) / 1157(46s) / 1084(18s) = actOfInstinct / hellMarch / justDoItUp 候选
+const BGM_LIST = ['assets/music/bgm_main.mp3', 'assets/music/bgm2.mp3', 'assets/music/bgm3.mp3'];
 let bgmAudio = null;
 try {
-  bgmAudio = new Audio('assets/music/bgm_main.mp3');
-  bgmAudio.loop = true;
+  bgmAudio = new Audio(BGM_LIST[0]);
   bgmAudio.volume = 0.5;
+  bgmAudio.addEventListener('ended', () => {   // 原版 onSoundComplete: nextMusic
+    bgmAudio.src = BGM_LIST[(BGM_LIST.indexOf(bgmAudio.src.split('/').pop()) + 1) % BGM_LIST.length]
+      .split('/').pop() ? bgmAudio.src : bgmAudio.src;
+    const cur = BGM_LIST.findIndex(f => bgmAudio.src.endsWith(f.split('/').pop()));
+    bgmAudio.src = BGM_LIST[(cur + 1) % BGM_LIST.length];
+    bgmAudio.play().catch(() => {});
+  });
   const startBgm = () => {
     bgmAudio.play().catch(() => {});
     window.removeEventListener('pointerdown', startBgm);
@@ -300,6 +308,12 @@ function boom(x, y, r) {
 // ---------------- 波次调度 (startMission) ----------------
 function startWave() {
   if (G.wave >= WAVES.length) return;
+  // 原版 yamatoBattle: 终波 Yamato 出场切换战斗音乐
+  const isYamatoWave = WAVES[G.wave].some(u => u.type === 'Yamato');
+  if (isYamatoWave && bgmAudio) {
+    bgmAudio.src = 'assets/music/bgm_alt.mp3';
+    bgmAudio.play().catch(() => {});
+  }
   const wave = WAVES[G.wave];
   G.wave++;
   const routeName = 'parcourt' + (wave[0] && JSON.stringify(ROUTES).includes('p') ? guessRoute(wave) : 1);
@@ -562,7 +576,12 @@ function buildShop() {
     const locked = G.wave < s.unlock;
     const sp = document.createElement('span');
     sp.className = 'sel' + (locked ? ' lock' : '') + (G.shopSel === s.id ? ' on' : '');
-    sp.textContent = s.id + ' $' + STRUCTURES[s.id].cost;
+    // 原版建造菜单武器照片 (1025 帧库)
+    const im = document.createElement('img');
+    im.src = 'assets/menu/' + s.id + '.png';
+    im.style.cssText = 'height:28px;vertical-align:middle;margin-right:4px';
+    sp.appendChild(im);
+    sp.appendChild(document.createTextNode('$' + STRUCTURES[s.id].cost));
     if (!locked) sp.onclick = () => { G.shopSel = s.id; buildShop(); };
     el.appendChild(sp);
   }

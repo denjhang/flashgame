@@ -41,6 +41,13 @@
 - 建造区规则：敌军道路中心线 45px 内禁建
 - smoke_test 全绿（Audio stub 补齐）
 
+## 第 9 轮成果（2026-09-27）
+
+- **建造菜单原版武器照片接入**：1025 帧库 12 张按钮图（m60.png...su37.png，原版真实武器照片风格）→ H5 商店按钮图文化
+- **BGM 三曲循环**：时长权威判定（mutagen）1082=66.1s / 1157=46.2s / 1084=18.3s 为最长三曲 → 对应原版 musics 循环（actOfInstinct/hellMarch/justDoItUp），onSoundComplete 自动切下一首已还原
+- **Yamato 战斗音乐**：终波 Yamato 出场自动切换 bgm_alt（原版 yamatoBattle 标志还原）
+- smoke_test 全绿
+
 ## 遗留（下一轮从看板 ❌ 项继续）
 
 **状态：脚本反混淆主体完成 (100%)** — 2026-09-27
