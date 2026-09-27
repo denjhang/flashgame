@@ -220,7 +220,34 @@ function turretLibImg(id) {
   }
   return TURRET_LIB_IMG[id];
 }
-// 玩家武器 → 173 库武器 ID (86 库为线框层, 不能用作外观; 玩家与敌方同库同帧)
+// ---------------- 玩家塔结构层: 86 库 (structureDeco) ----------------
+// 【重要修正】上一轮误判 86 库为"线框标记层"而弃用 —— 错了。
+//   权威依据 deobf/scripts/DefineSprite_185_structure/frame_1/PlaceObject2_86_1 onClipEvent(load):
+//     `var structure = _parent.structure; this.gotoAndStop(structure);`
+//   → 86 库按【武器名】跳帧, 与 173 库同一套武器名 (86 恰 11 帧 = 玩家 11 种武器)
+//   结构: structure(185) = 86[dpt1 结构层, 不旋转] + 174->173[dpt24 炮塔层, 随 rot 旋转]
+//         两层在 185 内都是 identity 变换 → 共用同一武器局部坐标系, 直接叠加
+//   合成验证: 86 f6(雷达支架) + 173 f7(碟盘) 严丝合缝拼成完整雷达站;
+//             86 f4(X 形驻锄) + 173 f5(炮管) = 完整 105mm 炮塔;
+//             86 f10(发射结构) + 173 f11(导弹) = 完整 pluton
+//   画布原点经 union 验证: 76.49x76.49 ≈ FFDec 实测 76x76 → (-38.20, -35.55)
+const TURRET_BASE_ORIGIN = { x: -38.20, y: -35.55 };   // 86 库 76x76 画布原点
+const TURRET_BASE_FRAME = {
+  m60: 1, gatling: 2, canon75: 3, canon105: 4, canon105D: 5, radar: 6,
+  crotale: 7, canon125: 8, MLRS: 9, pluton: 10, MTHEL: 11,
+};
+const TURRET_BASE_IMG = {};
+function turretBaseImg(id) {
+  const f = TURRET_BASE_FRAME[id];
+  if (!f) return null;
+  if (!TURRET_BASE_IMG[id]) {
+    const im = new Image();
+    im.src = 'assets/turretlib/86/' + f + '.png';
+    TURRET_BASE_IMG[id] = im;
+  }
+  return TURRET_BASE_IMG[id];
+}
+// 玩家武器 → 173 库武器 ID (玩家塔 = 86 结构层 + 173 塔体层, 同武器名)
 const PLAYER_ETURRET = {
   m60: 'm60', gatling: 'gatling', canon75: 'canon75',
   canon105: 'canon105', canon105D: 'canon105D', canon125: 'canon125',
@@ -1175,10 +1202,15 @@ function draw() {
       ctx.fillRect(-10, -10, 20, 20);
       ctx.restore(); continue;
     }
-    // 173 库整帧渲染: 部件位置由 FFDec 导出时按原版矩阵合成, 直接贴图
-    // 画布原点在武器局部 (TURRET_LIB_ORIGIN); 整帧绕局部原点旋转到 t.rot
-    //   帧内炮管朝上(=北, 屏幕 -PI/2), 故旋转量 = t.rot + PI/2
+    // 玩家塔双层渲染 (原版 structure(185) 结构):
+    //   86 库结构层 (structureDeco, dpt1) —— 不随瞄准旋转 (原版 enterFrame 不设 _rotation)
+    //   173 库塔体层 (tourelle->173, dpt24) —— 随 t.rot 旋转, 含炮管与开火帧
+    //   两层共用同一武器局部坐标系 (185 内均为 identity) → 各自画布原点直接叠加
     const libId = PLAYER_ETURRET[t.id] || t.id;
+    const bimg = turretBaseImg(libId);
+    if (bimg && bimg.complete && bimg.naturalWidth) {
+      ctx.drawImage(bimg, TURRET_BASE_ORIGIN.x, TURRET_BASE_ORIGIN.y);
+    }
     const im = turretLibImg(libId);
     if (im && im.complete && im.naturalWidth) {
       ctx.save();

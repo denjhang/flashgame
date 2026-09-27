@@ -217,11 +217,29 @@ console.log("173 库整帧: 帧号映射 %d 种武器, 画布原点 (%s,%s)",
 {
   const bad = Object.keys(TURRET_LIB_FRAME).filter(k => !TURRET_LIB_FRAME[k]);
   console.log("帧号映射完好=%s 缺=%j", bad.length === 0, bad);
-  // 玩家塔与敌方共用 173 库 (86 库是黑色线框层, 不可作外观)
+  // 玩家塔 = 86 结构层 + 173 塔体层 (同武器名)
   const miss = Object.keys(PLAYER_ETURRET).filter(k => !TURRET_LIB_FRAME[PLAYER_ETURRET[k]]);
   console.log("PLAYER_ETURRET 全部有 173 帧=%s 缺=%j", miss.length === 0, miss);
-  console.log("旧 86 库变量已删除: TURRET_SRC=%s TURRET_IMG=%s ETURRET_PARTS=%s",
+  console.log("旧单帧变量已删除: TURRET_SRC=%s TURRET_IMG=%s ETURRET_PARTS=%s",
     typeof TURRET_SRC, typeof TURRET_IMG, typeof ETURRET_PARTS);
+}
+// ---- 玩家塔结构层 86 库 (structureDeco, 不随瞄准旋转) ----
+console.log("--- 玩家塔结构层 (86 库) ---");
+{
+  console.log("86 库画布原点 (%s,%s) [union 验证 76.49x76.49 ≈ FFDec 实测 76x76]",
+    TURRET_BASE_ORIGIN.x, TURRET_BASE_ORIGIN.y);
+  const labs = ['m60','gatling','canon75','canon105','canon105D','radar','crotale','canon125','MLRS','pluton','MTHEL'];
+  const missing = labs.filter(k => !TURRET_BASE_FRAME[k]);
+  console.log("86 库 %d 帧 = 玩家 %d 种武器, 映射完好=%s 缺=%j",
+    Object.keys(TURRET_BASE_FRAME).length, labs.length, missing.length === 0, missing);
+  // 每个玩家武器必须两层都有
+  const noBase = labs.filter(k => !TURRET_BASE_FRAME[k]);
+  const noLib = labs.filter(k => !TURRET_LIB_FRAME[k]);
+  console.log("11 种玩家武器双层齐全=%s (缺基座 %j / 缺塔体 %j)",
+    noBase.length === 0 && noLib.length === 0, noBase, noLib);
+  // 帧号对应关系与原版一致 (86 f1=m60 ... f11=MTHEL 连续)
+  const seq = labs.map(k => TURRET_BASE_FRAME[k]);
+  console.log("86 帧号序列 %j (应 1..11 连续)", seq);
 }
 // 炮管叠加表 + 开火时长 (上一轮 fireT 恒为 0 的 bug 已修)
 console.log("--- 炮管开火叠加 ---");
