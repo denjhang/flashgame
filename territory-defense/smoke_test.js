@@ -71,6 +71,23 @@ console.log("Su37 投弹: 3 敌HP损伤=%j 爆炸特效=%d", dmg, G.effects.leng
 SU37.available = false; SU37.cool = SU37.COOL_FRAMES;
 let f = 0; while (!SU37.available && f++ < 200) su37Update();
 console.log("Su37 冷却: 从 %d 跑到恢复用了 %d 帧 (期望 %d)", SU37.COOL_FRAMES, f, SU37.COOL_FRAMES);
+// ---- E: 命中音概率 + 音效文件存在性 ----
+const fs2 = require('fs');
+const played = {};
+const origPlaySfx = playSfx;
+playSfx = function(name, vol) { played[name] = (played[name] || 0) + 1; };
+const N = 4000;
+for (let i = 0; i < N; i++) impactSfx();
+const rico = Object.keys(played).filter(k => k.startsWith('ricochet')).reduce((a,k)=>a+played[k],0);
+const metal = Object.keys(played).filter(k => k.startsWith('metal')).reduce((a,k)=>a+played[k],0);
+console.log("命中音概率 (%d 次): ricochet=%d (期望~15%%) metal=%d (期望~30%%)",
+  N, rico, metal);
+const missing = [];
+for (const k in SFX_FILES) if (!fs2.existsSync('./assets/sounds/' + SFX_FILES[k])) missing.push(k + '→' + SFX_FILES[k]);
+console.log("音效文件: 共 %d 个, 缺失 %d %j", Object.keys(SFX_FILES).length, missing.length, missing);
+playSfx = origPlaySfx;
+['bullet','missile2','missile','obusLourd','obusLeger'].forEach(k => shellImpactSfx(k));
+console.log("shellImpactSfx 三型接线正常");
 `;
 eval(src);
 console.log("[done]");

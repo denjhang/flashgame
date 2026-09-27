@@ -233,6 +233,25 @@ python3 deobf/resolve_constants.py
   受 500 伤害 → 60 帧精确恢复；真机验证战机按 0.4946 缩放渲染、机头朝向落点
 - 本轮未做（队列下推）：E 跳弹/金属音、F 阴影、G 选中圈、H BGM 对号、I 单位去背景
 
+## 第 N+4 轮成果（2026-09-28, H5 领土防御·命中音 + 弹体素材纠正）
+
+- **命中音完整接线（权威源 DefineSprite_400_obus 帧库结构）**：
+  - 修正任务描述的猜测：`Math.random() > 0.85` → ricochet（**15%**，不是 30%），`> 0.7` → metal（30%）
+  - 权威链路：obus 库帧标签→内层精灵（dump 缩进界定）→ 该精灵 frame_2 DoAction：
+    obusLeger→301 / obusMoyen→307 / obusLourd→361（各播 explosion1/1/2）；
+    bullet/bulletLourde→**390**（无自带音，frame_2 就是那条 0.85/0.7 概率）；导弹帧内嵌
+    爆炸精灵 missile→392(explosionCrotale) missile2→394(explosionMlrs) missile3→395(explosionLarge)
+    missileUnderSu37→396(explosionLarge)。**爆炸音随弹体精灵而非武器 ID 决定**，已改为 SHELL_SFX 表
+  - 4000 次实测概率：ricochet 598 (15.0%)、metal 1222 (30.6%) — 与权威阈值吻合
+- **音效文件补全**：ricochet1-4 (467-470)、metal1-2 (481-482)、explosionCrotale (460)、
+  explosion4 (457, flv→wav 转码) 全部导出；**28 个音效浏览器可加载验证 0 失败**（Audio.oncanplaythrough）
+- **弹体素材重大纠正**（此前用错）：旧代码把 361(obusLourd 176x182 爆炸图) 当导弹、303 当轻弹。
+  权威结构是 obus 库帧内含独立弹体 sprite，按内容 bbox 实测重新对号：
+  390(6x32 曳光) / 301(14x25 轻弹) / 307(16x26 中弹) / 361(16x36 重弹) / 393(16x25 导弹, 取第 8 帧成形体)
+  渲染改为按 bbox 裁剪 + 归一到 14-22px 世界长度（原来的画布比例缩放是错的）
+  - 视野内像素差量化验证：曳光 2x14 → 轻弹 8x12 → 中弹 8x14 → 重弹 9x20 → 导弹 12x20，层次正确
+- 本轮未做（队列下推）：F 阴影、G 选中圈、H BGM 对号、I 单位去背景
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）

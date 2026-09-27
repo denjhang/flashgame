@@ -127,25 +127,28 @@ for (const k in TURRET_SRC) {
   im.src = TURRET_SRC[k];
   TURRET_IMG[k] = im;
 }
-// 炮弹 (权威映射): 弹体 = obus 帧库内层的独立 sprite, 由塔的 clipevent 调 createObus(type):
-//   gatling系(92)=bullet  75/105mm系(98)=bulletLourde  105单管(103)=obusLeger  105双管(108)=obusMoyen
-//   125mm(125)=obusLourd   crotale(122,164)=missile    MLRS(128)=missile2  pluton(80)=missile3
-//   舰载crotale(161)=missileUnder  Su37(786)=missileUnderSu37  MTHEL(83)=laser
-// 弹体图形: 303=中弹体(17x67) 307=重弹爆亮弹头(104x108) 361=导弹尾焰(176x182)
+// 炮弹 (权威映射, 全部来自 DefineSprite_400_obus 帧库子件 + frame_1 弹体):
+//   obus 库帧标签 → 内层弹体 sprite (dump 权威):
+//     obusLeger→301(90x93) obusMoyen→307(104x108) obusLourd→361(176x182)
+//     bullet/bulletLourde→390(曳光, 无爆炸音, 带 ricochet/metal 概率)
+//     missile/missileUnder→393(23x56 导弹) missile2→394 内嵌 missile3→395 内嵌
+//   飞行弹体统一取 sprite 的 frame 1 (其余帧是爆炸/尾焰动画)
 const SHELL_FRAMES = {
-  obusLeger:  ['assets/shells/DefineSprite_303/7.png'],      // 细长小弹
-  obusMoyen:  ['assets/shells/DefineSprite_303/7.png'],
-  bullet:     ['assets/shells/DefineSprite_303/3.png', 'assets/shells/DefineSprite_303/7.png'],
-  bulletLourde: ['assets/shells/DefineSprite_307/8.png', 'assets/shells/DefineSprite_307/9.png'],
-  obusLourd:  ['assets/shells/DefineSprite_307/8.png'],
-  missile:    ['assets/shells/DefineSprite_361/14.png', 'assets/shells/DefineSprite_361/15.png'],
-  missile2:   ['assets/shells/DefineSprite_361/14.png', 'assets/shells/DefineSprite_361/15.png'],
-  missile3:   ['assets/shells/DefineSprite_361/14.png'],
-  missileUnder: ['assets/shells/DefineSprite_361/14.png'],
+  // 每型: sprite 路径 + 内容 bbox (实测) + 缩放到 ~16-22px 世界长度
+  bullet:      { src: 'assets/shells/DefineSprite_390/1.png', bbox: [19,38,6,32],  scale: 0.4688 },
+  bulletLourde:{ src: 'assets/shells/DefineSprite_390/1.png', bbox: [19,38,6,32],  scale: 0.4688 },
+  obusLeger:   { src: 'assets/shells/DefineSprite_301/1.png', bbox: [39,36,14,25], scale: 0.5600 },
+  obusMoyen:   { src: 'assets/shells/DefineSprite_307/1.png', bbox: [45,43,16,26], scale: 0.6154 },
+  obusLourd:   { src: 'assets/shells/DefineSprite_361/1.png', bbox: [81,74,16,36], scale: 0.6111 },
+  missile:     { src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
+  missile2:    { src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
+  missile3:    { src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
+  missileUnder:{ src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
 };
 const SHELL_IMG = {};
-for (const k in SHELL_FRAMES)
-  SHELL_IMG[k] = SHELL_FRAMES[k].map(src => { const im = new Image(); im.src = src; return im; });
+for (const k in SHELL_FRAMES) {
+  const im = new Image(); im.src = SHELL_FRAMES[k].src; SHELL_IMG[k] = im;
+}
 // 武器 → 弹型 (塔库帧→内部弹 sprite→createObus 类型, 逐一对号)
 const SHELL_KIND = {
   m60: 'bullet', gatling: 'bullet', m60Brad: 'bullet', gatlingAmx10: 'bullet',
@@ -420,8 +423,13 @@ const SFX_FILES = {
   c105mm1: '447_c105mm1.mp3', c105mm2: '448_c105mm2.mp3', c125mm: '449_c125mm.mp3',
   crotale: '453_crotale.mp3', mlrs: '465_mlrs.mp3',
   explosion1: '454_explosion1.mp3', explosion2: '455_explosion2.mp3',
-  explosion3: '456_explosion3.mp3', explosionLarge: '461_explosionLarge.mp3',
-  explosionMlrs: '462_explosionMlrs.mp3', ricochet1: '467_ricochet1.mp3',
+  explosion3: '456_explosion3.mp3', explosion4: '457_explosion4.wav',
+  explosion5: '458_explosion5.mp3', explosion6: '459_explosion6.mp3',
+  explosionLarge: '461_explosionLarge.mp3', explosionMlrs: '462_explosionMlrs.mp3',
+  explosionCrotale: '460_explosionCrotale.mp3',
+  ricochet1: '467_ricochet1.mp3', ricochet2: '468_ricochet2.mp3',
+  ricochet3: '469_ricochet3.mp3', ricochet4: '470_ricochet4.mp3',
+  metal1: '481_metal1.mp3', metal2: '482_metal2.mp3',
   Su37: '472_Su37.wav',
 };
 const SFX_POOL = {};
@@ -452,6 +460,34 @@ function explosionSfx(power) {
   if (power >= 200) playSfx('explosionLarge', 0.5);
   else if (power >= 100) playSfx('explosionMlrs', 0.45);
   else playSfx('explosion' + (1 + Math.floor(Math.random() * 3)), 0.4);
+}
+// 普通弹命中附加音 (原版 DefineSprite_390 frame_2 DoAction 权威概率):
+//   Math.random() > 0.85 → ricochet1-4 (15%)  |  Math.random() > 0.7 → metal1-2 (30%)
+function impactSfx() {
+  if (Math.random() > 0.85) playSfx('ricochet' + (1 + Math.floor(Math.random() * 4)), 0.35);
+  if (Math.random() > 0.7) playSfx('metal' + (1 + Math.floor(Math.random() * 2)), 0.35);
+}
+// 命中音 (权威源: DefineSprite_400_obus 帧库结构 → 内层精灵 frame_2 DoAction):
+//   弹体精灵: 301(obusLeger)/307(obusMoyen) → explosion1;  361(obusLourd) → explosion2
+//   导弹帧内嵌爆炸精灵: missile/missileUnder → 392(explosionCrotale), missile2 → 394(explosionMlrs),
+//                       missile3 → 395(explosionLarge), missileUnderSu37 → 396(explosionLarge)
+//   曳光弹帧 bullet/bulletLourde → 390 (无自带音, frame_2 = 0.85 阈值 ricochet + 0.7 阈值 metal)
+// 结论: 爆炸音随"弹体精灵"而非武器 ID 决定, 与 H5 的 SHELL_KIND 一一对应
+const SHELL_SFX = {
+  obusLeger:  { boom: 'explosion1' },
+  obusMoyen:  { boom: 'explosion1' },
+  obusLourd:  { boom: 'explosion2' },
+  bullet:     { boom: null },            // 390: 只播弹道金属音
+  bulletLourde: { boom: null },
+  missile:    { boom: 'explosionCrotale' },
+  missile2:   { boom: 'explosionMlrs' },
+  missile3:   { boom: 'explosionLarge' },
+  missileUnder: { boom: 'explosionCrotale' },
+};
+function shellImpactSfx(shellKind) {
+  const e = SHELL_SFX[shellKind] || SHELL_SFX.bullet;
+  if (e.boom) playSfx(e.boom, 0.45);
+  else impactSfx();   // 曳光弹: 原版 sprite 390 的 ricochet/metal 概率音
 }
 // 波次来袭横幅
 let banner = null;   // {text, until}
@@ -631,10 +667,9 @@ function shellHit(s) {
         u.dead = true;
         G.euros += u.bounty;
         G.score += u.bounty;
-        const utype = u.type === 'Yamato' || u.type === 'navire' ? 'large2'
-          : u.hp <= 0 && s.turretId === 'MLRS' ? 'mlrs' : 'small';
+        const utype = u.type === 'Yamato' || u.type === 'navire' ? 'large2' : 'small';
         boomTyped(u.x, u.y, 8, utype);
-        explosionSfx(60);   // 原版: 死亡随机 explosion1-6
+        shellImpactSfx(SHELL_KIND[s.turretId] || 'bullet');
       }
     }
   } else {
@@ -649,6 +684,7 @@ function shellHit(s) {
     : s.turretId === 'pluton' || s.turretId === 'Yamato460' ? 'large'
     : 'small';
   boomTyped(tx, ty, 4 + s.w[4] / 40, kind);
+  shellImpactSfx(SHELL_KIND[s.turretId] || 'bullet');   // 命中音 (原版弹体精灵 frame_2)
 }
 
 // 分型爆炸 (原版 sprite: 390=普通弹爆(小) 392=crotale 394=MLRS 395=large/pluton 396=large2/Yamato)
@@ -928,13 +964,14 @@ function draw() {
     const t = s.target && s.target.hp > 0 ? s.target : null;
     const ang = t ? Math.atan2(t.y - s.y, t.x - s.x) : 0;   // y-down 世界系, 屏幕角=世界角
     const kind = SHELL_KIND[s.turretId] || 'bullet';
-    const frames = SHELL_IMG[kind];
-    const im = frames[(G.frame >> 2) % frames.length];
+    const spec = SHELL_FRAMES[kind] || SHELL_FRAMES.bullet;
+    const im = SHELL_IMG[kind];
     if (im && im.complete && im.naturalWidth) {
-      const nw = im.naturalWidth;
-      const sc = (nw > 150 ? 0.09 : nw > 90 ? 0.16 : 0.4) * zoom;   // 导弹/重弹/轻弹各自缩放
+      const [bx, by, bw, bh] = spec.bbox;
+      const sc = spec.scale * zoom;
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang + Math.PI / 2); ctx.scale(sc, sc);
-      ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+      // 以内容 bbox 中心对齐弹道点 (画布中心 ≠ 内容中心)
+      ctx.drawImage(im, bx, by, bw, bh, -bw / 2, -bh / 2, bw, bh);
       ctx.restore();
     } else {
       ctx.fillStyle = s.side === 'ally' ? '#ff6' : '#f66';
