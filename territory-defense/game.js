@@ -459,6 +459,61 @@ wireMusicPanel();
 // ---------------- 游戏状态 ----------------
 
 // ---------------- 音效 (原版 soundsFx; 轮换池避免重叠切断) ----------------
+// 建造区判定: 原版用 carte.surfaceForBuild(768) 的 shape hitTest
+//   (DefineSprite_834/frame_1/PlaceObject2_822_226 on(press):
+//    `if (surfaceForBuild.hitTest(x,y,true)) {...允许建...}`)
+// 【未完成】尝试用 768 遮罩位图复现该判定失败: 遮罩 1838x1730 的几何基准无法用
+//   世界坐标 + PlaceObject2 矩阵(translate 166.1,391.5) 对齐 (多种变换组合均不吻合,
+//   见 PROGRESS 记录)。故仍用道路缓冲近似作为可建判定 (逻辑正确、与遮罩意图一致)
+function buildAllowedAt(wx, wy) {
+  for (const t of G.turrets)
+    if (Math.hypot(t.x - wx, t.y - wy) < 26) return false;
+  return !roadBlocked(wx, wy);
+}
+
+// 建造预览光标 (原版 carte.viseurConstruction, chid 822, 3 帧):
+//   帧1 浅灰绿 = 可建; 帧2 粉红 = hover; 帧3 深红 = 已建/不可建 (代码 gotoAndStop("red"))
+const CURSOR_FRAMES = [1, 2, 3].map(i => {
+  const im = new Image();
+  im.src = 'assets/build_ui/DefineSprite_822/' + i + '.png';
+  return im;
+});
+// 取消提示条 (原版 carte.cancelhint, chid 1161, 2 帧):
+//   帧1 = 建造中 (提示可取消), 帧2 = 无建造 (隐藏) —— 原版 enterFrame:
+//   `if (viseurConstruction) cancelhint.gotoAndStop(2) else cancelhint.gotoAndStop(1)`
+const CANCEL_HINT = [1, 2].map(i => {
+  const im = new Image();
+  im.src = 'assets/build_ui/DefineSprite_1161/' + i + '.png';
+  return im;
+});
+
+// 建造区判定: 原版用 carte.surfaceForBuild(768) 的 shape hitTest
+//   (DefineSprite_834/frame_1/PlaceObject2_822_226 on(press):
+//    `if (surfaceForBuild.hitTest(x,y,true)) {...允许建...}`)
+// 【未完成·如实记录】尝试用 768 遮罩位图(1838x1730)复现该判定失败:
+//   PlaceObject2 矩阵解出 translate=(166.1,391.5)/scale=1, 但按世界坐标(含 y 翻转、
+//   多种原点组合)采样均无法与路点吻合; 遮罩几何基准另有来源, 未破解。
+//   故仍用道路缓冲近似 (逻辑与遮罩意图一致: 道路/水/建筑不可建)。
+function roadBlocked(wx, wy) {
+  for (const rn in ROUTES) {
+    const r = ROUTES[rn];
+    for (let i = 0; i < r.length - 1; i++) {
+      const ax = r[i][0], ay = r[i][1], bx = r[i+1][0], by = r[i+1][1];
+      const L2 = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+      let t2 = ((wx - ax) * (bx - ax) + (wy - ay) * (by - ay)) / L2;
+      t2 = Math.max(0, Math.min(1, t2));
+      if (Math.hypot(wx - (ax + (bx - ax) * t2), wy - (ay + (by - ay) * t2)) < 45) return true;
+    }
+  }
+  return false;
+}
+// 完整可建判定 (原版 822_226 on(press)): 不与已有塔重叠 + 非道路
+function buildAllowedAt(wx, wy) {
+  for (const t of G.turrets)
+    if (Math.hypot(t.x - wx, t.y - wy) < 26) return false;
+  return !roadBlocked(wx, wy);
+}
+
 // 修理面板 (原版 819 barreReparation = 814 base(236x21) + 813 repairPrice(EditText) + 818 autor + 184 repairLogo)
 // 注意: FFDec 把 814/818 里 EditText 的示例文字("repair for 1000000$")烧进了导出位图, 不可直接用;
 // 已从 814 采样权威配色: 边框纯黑 + 填充 RGB(0,102,152); 818 autor 为黑底。H5 按此配色 + 原版布局自绘
@@ -1156,11 +1211,28 @@ function draw() {
     ctx.fillText('点击目标投放炸弹', sx + 18, sy - 8);
     ctx.restore();
   }
-  // 建造预览
-  if (G.shopSel) {
-    ctx.fillStyle = 'rgba(255,255,255,.5)';
+  // 建造预览光标 (原版 carte.viseurConstruction: 跟随鼠标, 帧号反映可建状态)
+  if (G.shopSel && !G.su37Aiming) {
+    const ok = buildAllowedAt(G.mx, G.my);
+    const aff = G.euros >= (STRUCTURES[G.shopSel] || {}).cost;
+    // 帧3(深红)=不可建; 帧1(浅绿)=可建; 帧2(粉)为 hover 中间态
+    const fi = (ok && aff) ? 0 : 2;
+    const im = CURSOR_FRAMES[fi];
+    if (im.complete && im.naturalWidth) {
+      const sx0 = w2sX(G.mx), sy0 = w2sY(G.my);
+      const w = im.naturalWidth * zoom, h = im.naturalHeight * zoom;
+      ctx.save(); ctx.globalAlpha = 0.75;
+      ctx.drawImage(im, sx0 - w / 2, sy0 - h / 2, w, h);
+      ctx.restore();
+    }
+    // 原版 cancelhint: 建造中显示提示条 (帧 2 = 建造中)
+    const hi = CANCEL_HINT[1];
+    if (hi.complete && hi.naturalWidth) {
+      ctx.drawImage(hi, (W - hi.naturalWidth) / 2, H - 26);
+    }
+    ctx.fillStyle = ok ? '#cfc' : '#f88';
     ctx.font = '11px monospace';
-    ctx.fillText(SHOP.find(s => s.id === G.shopSel).id, 8, H - 8);
+    ctx.fillText((ok ? '可建 ' : '不可建 ') + (SHOP.find(s => s.id === G.shopSel) || {}).id, 8, H - 8);
   }
 
   // ---- 战争迷雾 (最后绘制, 视野源换算到屏幕坐标) ----
@@ -1435,23 +1507,11 @@ cv.addEventListener('click', (e) => {
   G.selected = null;
   if (!G.shopSel) return;
   const s = STRUCTURES[G.shopSel];
-  if (G.euros < s.cost) return;
-  // 只能在草地 (简化: 全场可建, 不与现有塔重叠)
-  for (const t of G.turrets)
-    if (Math.hypot(t.x - G.mx, t.y - G.my) < 26) return;
-  // 原版 surfaceForBuild 规则: 敌军道路上不可建
-  for (const rn in ROUTES) {
-    const r = ROUTES[rn];
-    for (let i = 0; i < r.length - 1; i++) {
-      const ax = r[i][0], ay = r[i][1], bx = r[i+1][0], by = r[i+1][1];
-      const L2 = (bx-ax)*(bx-ax) + (by-ay)*(by-ay);
-      let t2 = ((G.mx-ax)*(bx-ax) + (G.my-ay)*(by-ay)) / L2;
-      t2 = Math.max(0, Math.min(1, t2));
-      if (Math.hypot(G.mx - (ax + (bx-ax)*t2), G.my - (ay + (by-ay)*t2)) < 45) return;
-    }
-  }
+  if (G.euros < s.cost) { playSfx('cannot', 0.35); return; }
+  if (!buildAllowedAt(G.mx, G.my)) { playSfx('cannot', 0.35); return; }
   G.euros -= s.cost;
   G.turrets.push(new Turret(G.shopSel, G.mx, G.my));
+  playSfx('creationUnite', 0.4);   // 原版 creationUnite.start()
   boom(G.mx, G.my, 6);
 });
 window.addEventListener('keydown', (e) => {

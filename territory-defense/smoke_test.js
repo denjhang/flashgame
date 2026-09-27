@@ -120,6 +120,17 @@ playSfx = _ps;
   console.log("swithRepair: autoRepair=%s", t2.autoRepair);
   G.euros = e0;
 }
+// 建造区遮罩 (原版 surfaceForBuild chid 768)
+console.log("建造预览: 光标帧=%d 取消提示帧=%d (原版 822/1161)", CURSOR_FRAMES.length, CANCEL_HINT.length);
+{
+  G.turrets.length = 0;   // 清空已有塔, 隔离测试
+  const R1 = ROUTES.parcourt1;
+  const onRoad = R1[3];               // 真实路点上 (599,87)
+  const offRoad = [1600, 400];        // 离最近路线 208px 的草地
+  console.log("可建判定(回退路径): 路点%j上=%s (应false)  草地%j=%s (应true)",
+    [Math.round(onRoad[0]), Math.round(onRoad[1])], buildAllowedAt(onRoad[0], onRoad[1]),
+    offRoad, buildAllowedAt(offRoad[0], offRoad[1]));
+}
 console.log("鸟叫: %d 个音效, 10s节流触发 %d 次 %j", birdKeys.length, Object.keys(birdLog).length, Object.keys(birdLog));
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
   Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,

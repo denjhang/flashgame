@@ -371,6 +371,26 @@ python3 deobf/resolve_constants.py
     点击修理条 240→280HP 扣 80$（=2×40）；截图确认蓝条 + HP 进度 + "repair for 50 $" + "auto repair OFF"
 - 顺带：HUD 提示补上 "T自动修理"
 
+## 第 N+11 轮成果（2026-09-28, H5 领土防御·建造预览光标 + 一次如实失败的尝试）
+
+- **补全原版建造预览 UI（822 viseurConstruction + 1161 cancelhint）**：
+  - 权威依据 `DefineSprite_822`（3 帧 40x40）：**帧1 浅灰绿=可建 / 帧2 粉红=hover / 帧3 深红=不可建**
+    （代码里 `gotoAndStop("red")` 对应帧 3）；`1161`（2 帧 634x15）为取消提示条，
+    原版 enterFrame：`if (viseurConstruction) cancelhint.gotoAndStop(2) else gotoAndStop(1)`
+  - H5 接入：选建筑后光标跟随鼠标，可建时帧1、不可建/钱不够时帧3；底部显示原版提示条
+    （实测文案 "press spacebar to cancel build mode"）+ 左下 "可建/不可建 xxx"
+  - 真机验证：5 张素材全部加载；光标 40x40、提示条 634x15；草地处判定可建、光标为浅灰绿
+- **【未完成·如实记录】原版 surfaceForBuild 遮罩判定未能复现**：
+  - 原版的真·可建判定是 `surfaceForBuild.hitTest(x,y,true)`（形状级命中测试，见
+    `DefineSprite_834/frame_1/PlaceObject2_822_226 on(press)`），非道路缓冲近似
+  - 导出 `chid 768`（1838x1730 位图，alpha=255 处即可建，覆盖约 24%）尝试复现，
+    **失败**：严格解码其 PlaceObject2 矩阵得 `scale=1.00003 translate=(166.1,391.5)`，
+    但按世界坐标（含 y 翻转、多种原点/符号组合共 17 种）采样均无法与路点吻合
+    （理想应"路点上必为不可建、远离路点处多可建"，实际全部不匹配）。遮罩几何基准另有来源，未破解
+  - **决定**：保留已验证正确的 45px 道路缓冲近似（逻辑与遮罩意图一致），
+    并在代码注释与看板中明确标注此未完成项，不假装已还原
+- 本轮未做（如有需要可下轮）：`785 zoneBombardement`（Su37 轰炸区指示，H5 已用瞄准圈近似）
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）
