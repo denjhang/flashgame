@@ -113,18 +113,41 @@ for (const k in UNIT_BMP) {
 
 // ---------------- 原版炮塔外观 (86 帧库 shape→PNG) + 爆炸动画 + BGM ----------------
 const TURRET_IMG = {};
+// 权威对号 deobf/data/turret_frames.json (DefineSprite 86 帧标签→shape):
+// gatling=56 canon75=57 canon105=58 canon105D=59 radar=61 crotale=62 canon125=65
+// MLRS=67 pluton=69(+80枪口焰) MTHEL=83(spr)+85 ; m60 无帧(原版塔库无 m60)
 const TURRET_SRC = {
   gatling: 'assets/turrets/56.png', canon75: 'assets/turrets/57.png',
   canon105: 'assets/turrets/58.png', canon105D: 'assets/turrets/59.png',
   crotale: 'assets/turrets/62.png', canon125: 'assets/turrets/65.png',
-  radar: 'assets/turrets/60.png', MLRS: 'assets/turrets/66.png',
-  pluton: 'assets/turrets/68.png', MTHEL: 'assets/turrets/84.png',
+  radar: 'assets/turrets/61.png', MLRS: 'assets/turrets/67.png',
+  pluton: 'assets/turrets/69.png', MTHEL: 'assets/turrets/85.png',
 };
 for (const k in TURRET_SRC) {
   const im = new Image();
   im.src = TURRET_SRC[k];
   TURRET_IMG[k] = im;
 }
+// 炮弹: DefineSprite_400_obus 帧序列 (原版 gotoAndPlay(type))
+// 帧1-4=轻弹 obusLeger, 5-7=重弹 bulletLourde, 8-10=导弹 missile, 11-13=舰载导弹
+const SHELL_FRAMES = {
+  light: [1, 2, 3, 4].map(i => 'assets/shells/DefineSprite_400_obus/' + i + '.png'),
+  heavy: [5, 6, 7].map(i => 'assets/shells/DefineSprite_400_obus/' + i + '.png'),
+  missile: [8, 9, 10].map(i => 'assets/shells/DefineSprite_400_obus/' + i + '.png'),
+};
+const SHELL_IMG = {};
+for (const k in SHELL_FRAMES)
+  SHELL_IMG[k] = SHELL_FRAMES[k].map(src => { const im = new Image(); im.src = src; return im; });
+// 武器 → 弹型 (原版: 机枪=轻弹, 坦克炮=重弹, crotale/MLRS/舰载=导弹)
+const SHELL_KIND = {
+  m60: 'light', gatling: 'light', m60Brad: 'light', gatlingAmx10: 'light',
+  gatlingDT90: 'light', gatlingDTigre: 'light',
+  canon75: 'heavy', canon105: 'heavy', canon105D: 'heavy', canon125: 'heavy',
+  '75mmBrad': 'heavy', '75mmAmx10': 'heavy', '105mmAbrams': 'heavy',
+  '105mmDAbrams': 'heavy', '125mmT90': 'heavy',
+  crotale: 'missile', 'crotaleAbrams': 'missile', 'crotaleTigre': 'missile',
+  navireCrotale: 'missile', MLRS: 'missile', Yamato460: 'missile',
+};
 const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   const im = new Image();
   im.src = 'assets/explosion/' + i + '.png';
@@ -248,6 +271,7 @@ const G = {
   showHp: true,            // 原版 H 键开关
   mouseScroll: true,       // 原版 M 键开关 (鼠标边缘滚屏)
   showBuildArea: false,    // 原版 C 键开关 (可建区域显示)
+  frame: 0,               // 帧计数 (炮弹动画)
 };
 
 // ---------------- 单位 ----------------
@@ -466,6 +490,7 @@ function endWave() {
 // ---------------- 主循环 ----------------
 function tick() {
   if (G.lost || G.won) return;
+  G.frame++;
   scrollCamera();
   computeVisibility();
   revealExplored();
@@ -644,8 +669,20 @@ function draw() {
   for (const s of G.shells) {
     if (!isVisible(s.x, s.y)) continue;   // 飞入迷雾的炮弹不可见
     const sx = w2sX(s.x), sy = w2sY(s.y);
-    ctx.fillStyle = s.side === 'ally' ? '#ff6' : '#f66';
-    ctx.fillRect(sx - 2, sy - 2, 4, 4);
+    const t = s.target && s.target.hp > 0 ? s.target : null;
+    const ang = t ? Math.atan2(-(t.y - s.y), t.x - s.x) : 0;   // 世界y向上→屏幕取负
+    const kind = SHELL_KIND[s.turretId] || 'light';
+    const frames = SHELL_IMG[kind];
+    const im = frames[(G.frame >> 2) % frames.length];
+    if (im && im.complete && im.naturalWidth) {
+      const sc = (kind === 'missile' ? 0.075 : 0.05) * zoom;   // 465px 原图缩小
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang + Math.PI / 2); ctx.scale(sc, sc);
+      ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = s.side === 'ally' ? '#ff6' : '#f66';
+      ctx.fillRect(sx - 2, sy - 2, 4, 4);
+    }
   }
   for (const e of G.effects) {
     const sx = w2sX(e.x), sy = w2sY(e.y);
@@ -734,9 +771,9 @@ function drawMinimap() {
   const ctx = mmCtx;   // 画到侧栏小地图
   ctx.clearRect(0, 0, MM.w, MM.h);
   ctx.drawImage(mapImg, 0, 0, MM.w, MM.h);
-  // 坐标换算: 世界 → minimap (路点包围盒映射)
-  const mx = (wx) => (wx - WORLD.x0) / (WORLD.x1 - WORLD.x0) * MM.w;
-  const my = (wy) => (WORLD.y1 - wy) / (WORLD.y1 - WORLD.y0) * MM.h;
+  // 坐标换算: 与缩略图同一坐标系 = 地图位图 (世界 x 0..2070, y -1440..480, 顶=北)
+  const mx = (wx) => (wx - MAP_ORIGIN.x) / MAP_W * MM.w;
+  const my = (wy) => (MAP_ORIGIN.y + MAP_H - wy) / MAP_H * MM.h;
   for (const t of G.turrets) {
     if (t.hp <= 0) continue;
     ctx.fillStyle = t.id === 'radar' ? '#6cf' : '#4f4';
@@ -752,9 +789,8 @@ function drawMinimap() {
   const vyS = MAP_ORIGIN.y - cam.y - H / zoom;
   const vxL = cam.x, vxR = cam.x + W / zoom;
   ctx.strokeStyle = '#fff';
-  ctx.strokeRect(mx(vxL), my(vyN), (vxR - vxL) / (WORLD.x1 - WORLD.x0) * MM.w,
-                 (vyS - vyN) / (WORLD.y1 - WORLD.y0) * MM.h);
-  ctx.restore();
+  ctx.strokeRect(mx(vxL), my(vyN), (vxR - vxL) / MAP_W * MM.w,
+                 (vyS - vyN) / MAP_H * MM.h);
 }
 
 // ---- INFO 面板: 选中塔属性 (原版 informations 面板) ----
@@ -848,13 +884,32 @@ function scrollCamera() {   // 每帧: 方向键 + (M 开启时) 鼠标边缘滚
   if (dx || dy) { cam.x += dx; cam.y -= dy; clampCam(); }
 }
 // 原版 minimap 点击: 跳转摄像机 (绑在侧栏小地图 DOM)
-mmCv.addEventListener('click', (e) => {
-  const wx = WORLD.x0 + e.offsetX / MM.w * (WORLD.x1 - WORLD.x0);
-  const wy = WORLD.y1 - e.offsetY / MM.h * (WORLD.y1 - WORLD.y0);
+mmCv.addEventListener('click', mmJump);
+let mmDrag = false;
+mmCv.addEventListener('mousedown', () => { mmDrag = true; });
+window.addEventListener('mouseup', () => { mmDrag = false; });
+mmCv.addEventListener('mousemove', (e) => { if (mmDrag) mmJump(e); });   // 原版 viseurMiniMap 拖拽
+function mmJump(e) {
+  // 与缩略图同坐标系: 地图位图 (世界 x 0..2070, y -1440..480)
+  const wx = MAP_ORIGIN.x + e.offsetX / MM.w * MAP_W;
+  const wy = MAP_ORIGIN.y + MAP_H - e.offsetY / MM.h * MAP_H;
   cam.x = wx - W / (2 * zoom);
   cam.y = MAP_ORIGIN.y - wy - H / (2 * zoom);
   clampCam();
-});
+}
+// 侧栏开关按钮 (原版 menu.informations 可点击按钮, 鼠标为主)
+function refreshToggleBtns() {
+  const set = (id, on) => { const b = document.getElementById(id); if (b) b.classList.toggle('on', on); };
+  set('tHp', G.showHp); set('tScroll', G.mouseScroll); set('tArea', G.showBuildArea); set('tZoom', zoom < 1);
+}
+function bindToggle(id, fn) {
+  const b = document.getElementById(id);
+  if (b) b.onclick = () => { fn(); refreshToggleBtns(); };
+}
+bindToggle('tHp', () => G.showHp = !G.showHp);
+bindToggle('tScroll', () => G.mouseScroll = !G.mouseScroll);
+bindToggle('tArea', () => G.showBuildArea = !G.showBuildArea);
+bindToggle('tZoom', () => toggleZoom());
 cv.addEventListener('click', (e) => {
   if (G.lost || G.won) return;
   // 点中已有塔 → 选中 (供 U 升级对空)
@@ -910,6 +965,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 // ---------------- 启动 ----------------
+refreshToggleBtns();
 buildShop();
 hud();
 setInterval(tick, 1000 / 30);

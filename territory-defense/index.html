@@ -57,12 +57,20 @@
     </div>
     <div id="infoBox">点选炮塔查看属性</div>
     <div id="musicBox">
-      <button id="m0">♪ actOfInstinct</button>
-      <button id="m1">♪ hellMarch</button>
-      <button id="m2">♪ justDoItUp</button>
+      <div class="row" id="toggles">
+        <button id="tHp">血条 H</button>
+        <button id="tScroll">滚屏 M</button>
+        <button id="tArea">建区 C</button>
+      </div>
       <div class="row">
-        <button id="mPlay">▶ 播放</button>
-        <button id="mPause">⏸ 暂停</button>
+        <button id="tZoom">全图 G</button>
+        <button id="m0">♪1</button>
+        <button id="m1">♪2</button>
+        <button id="m2">♪3</button>
+      </div>
+      <div class="row">
+        <button id="mPlay">▶</button>
+        <button id="mPause">⏸</button>
         <button id="mMute">🔇</button>
       </div>
     </div>
@@ -75,7 +83,7 @@
 </div>
 <div id="hud" style="position:absolute; left:8px; top:604px; color:#cfc; font-size:13px;">
   金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> |
-  <span style="color:#9aa">方向键/WASD 滚动 · G 缩放全图 · H 血条 · M 滚动开关 · 空格取消 · 点塔选中 → S卖/R修/U对空</span>
+  <span style="color:#9aa">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/U对空</span>
 </div>
 <script src="data.js"></script>
 <script src="game.js"></script>
