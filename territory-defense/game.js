@@ -254,6 +254,103 @@ const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   im.src = 'assets/explosion/' + i + '.png';
   return im;
 });
+// ---------------- Su37 空袭 (原版 DefineSprite_834 on(press) 逻辑) ----------------
+// 反编译依据 (deobf/scripts/DefineSprite_834/frame_1/PlaceObject2_785_17 + 793_23):
+//   disponible=false 时播 cannot 音并拒绝; 否则按 4 边随机选进入边 (bas/gauch/droit/haut),
+//   进入点: bas=(rand*2200, 600) haut=(rand*2200, -1600) gauche=(-100, rand*2200) droit=(2100, rand*2200)
+//   机头朝点击点 (zone = 鼠标位置), 播 Su37S 音效, disponible=false 并启动冷却
+//   冷却 = comptDispo=60 次 chargeBombes 调用 (原版 setInterval 43ms → ≈2.6s/次 → ~2.6s 总计)
+//   弹体属性 (793_23 load): speed=28, puissance=500, impact=260
+const SU37 = {
+  img: null,
+  available: true,
+  cool: 0,          // 剩余冷却帧 (原版 comptDispo)
+  COOL_FRAMES: 60,  // 原版 comptDispo 初值
+  pending: false,   // 已选边待点击落点
+  plane: null,      // 飞行中的飞机 {x,y,rot,side,tx,ty,phase}
+  SPEED: 28 * 0.45, // 原版 speed=28 (每帧) → H5 tick 折算
+  POWER: 500,       // 原版 puissance
+  IMPACT: 260,      // 原版 impact (溅射范围)
+  SCALE: 0.4946,    // 原版 PlaceObject2 矩阵 scaleX/Y (SWF 二进制权威解码)
+};
+const SU37_IMG_SRC = 'assets/su37/DefineSprite_793/1.png';
+function su37Img() {
+  if (!SU37.img) { SU37.img = new Image(); SU37.img.src = SU37_IMG_SRC; }
+  return SU37.img;
+}
+function su37Start() {   // 侧栏按钮: 选进入边, 等待玩家点击地图落点
+  if (!SU37.available) { playSfx('cannot', 0.4); return false; }
+  const rd = Math.random();
+  const side = rd < 0.25 ? 'bas' : rd < 0.5 ? 'gauche' : rd < 0.75 ? 'droit' : 'haut';
+  let x, y;
+  if (side === 'haut' || side === 'bas') {
+    x = Math.random() * 2200;
+    y = side === 'bas' ? 600 : -1600;
+  } else {
+    y = Math.random() * 2200 - 800;   // 原版对 gauche/droit 用 rand*2200 (世界 y 范围)
+    x = side === 'gauche' ? -100 : 2100;
+  }
+  SU37.pending = { side, x, y };
+  G.su37Aiming = true;
+  playSfx('selectionUnite', 0.35);
+  return true;
+}
+function su37Launch(tx, ty) {   // 玩家点击地图落点 → 起飞
+  if (!SU37.pending) return;
+  const p = SU37.pending;
+  const rot = Math.atan2(ty - p.y, tx - p.x);
+  SU37.plane = { x: p.x, y: p.y, rot, tx, ty, dropped: false };
+  SU37.pending = null; G.su37Aiming = false;
+  playSfx('Su37', 0.55);       // 原版 master_sounds.Su37S.start()
+  SU37.available = false;
+  SU37.cool = SU37.COOL_FRAMES;
+}
+function su37Update() {
+  if (!SU37.available && SU37.cool > 0) {
+    if (--SU37.cool === 0) SU37.available = true;
+  }
+  const p = SU37.plane;
+  if (!p) return;
+  const dx = p.tx - p.x, dy = p.ty - p.y;
+  const d = Math.hypot(dx, dy);
+  const turn = Math.min(Math.abs(0) , 0);
+  p.rot = Math.atan2(dy, dx);
+  if (d < SU37.SPEED) {
+    // 抵达目标 → 投弹 (原版 793_23: 到达 zone 后引爆, impact=260 溅射)
+    if (!p.dropped) {
+      p.dropped = true;
+      boomTyped(p.tx, p.ty, 40, 'large');
+      playSfx('explosionLarge', 0.6);
+      for (const u of G.units) {
+        if (u.hp <= 0) continue;
+        const dd = Math.hypot(u.x - p.tx, u.y - p.ty);
+        if (dd <= SU37.IMPACT) u.hp -= SU37.POWER * (dd <= SU37.IMPACT / 3 ? 1 : 0.5);
+      }
+      for (const u of G.units) {
+        if (u.hp <= 0 && !u.dead) { u.dead = true; G.euros += u.bounty; G.score += u.bounty; }
+      }
+    }
+    SU37.plane = null;   // 投弹后离场
+    return;
+  }
+  p.x += dx / d * SU37.SPEED;
+  p.y += dy / d * SU37.SPEED;
+}
+function su37Draw() {
+  const p = SU37.plane;
+  if (!p) return;
+  const sx = w2sX(p.x), sy = w2sY(p.y);
+  const im = su37Img();
+  const s = SU37.SCALE * zoom;   // 原版 PlaceObject2 矩阵 scaleX/Y=0.4946 (SWF 权威解码)
+  if (im.complete && im.naturalWidth) {
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(p.rot + Math.PI / 2); ctx.scale(s, s);
+    ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = '#8cf'; ctx.beginPath(); ctx.arc(sx, sy, 8 * zoom, 0, 7); ctx.fill();
+  }
+}
+
 // ---------------- 音乐 (原版 1151 面板机制: 手动选曲 changeMusic + playMusic/pauseMusic) ----------------
 const BGM_FILES = ['bgm_main.mp3', 'bgm2.mp3', 'bgm3.mp3'];   // actOfInstinct / hellMarch / justDoItUp
 const BGM_NAMES = ['actOfInstinct', 'hellMarch', 'justDoItUp'];
@@ -325,6 +422,7 @@ const SFX_FILES = {
   explosion1: '454_explosion1.mp3', explosion2: '455_explosion2.mp3',
   explosion3: '456_explosion3.mp3', explosionLarge: '461_explosionLarge.mp3',
   explosionMlrs: '462_explosionMlrs.mp3', ricochet1: '467_ricochet1.mp3',
+  Su37: '472_Su37.wav',
 };
 const SFX_POOL = {};
 function playSfx(name, vol = 0.4) {
@@ -373,6 +471,7 @@ const G = {
   mouseScroll: true,       // 原版 M 键开关 (鼠标边缘滚屏)
   showBuildArea: false,    // 原版 C 键开关 (可建区域显示)
   frame: 0,               // 帧计数 (炮弹动画)
+  su37Aiming: false,      // Su37 已选边, 等待玩家点击落点
 };
 
 // ---------------- 单位 ----------------
@@ -622,6 +721,7 @@ function tick() {
   if (G.lost || G.won) return;
   G.frame++;
   scrollCamera();
+  su37Update();
   computeVisibility();
   revealExplored();
 
@@ -663,6 +763,7 @@ function tick() {
   // 炮塔全毁不算输 (原版只有基地被突破才输)
   draw();
   hud();
+  refreshToggleBtns();   // Su37 冷却倒计时显示
 }
 
 // ---------------- 绘制 (原版地图 map.jpg + 世界坐标→屏幕变换) ----------------
@@ -854,6 +955,22 @@ function draw() {
       ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / e.life0})`;
       ctx.beginPath(); ctx.arc(sx, sy, e.r * (e.life0 - e.life) / 3 * zoom, 0, 7); ctx.stroke();
     }
+  }
+  // Su37 空袭 (飞行中的战机, 在迷雾之前绘制)
+  su37Draw();
+  // Su37 瞄准提示 (原版 zoneBombardement: 光标区标记)
+  if (G.su37Aiming) {
+    const sx = w2sX(G.mx), sy = w2sY(G.my);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,90,60,.85)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sx, sy, SU37.IMPACT * zoom, 0, 7); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(sx - 14, sy); ctx.lineTo(sx + 14, sy);
+    ctx.moveTo(sx, sy - 14); ctx.lineTo(sx, sy + 14);
+    ctx.stroke();
+    ctx.fillStyle = '#ff9'; ctx.font = '12px monospace';
+    ctx.fillText('点击目标投放炸弹', sx + 18, sy - 8);
+    ctx.restore();
   }
   // 建造预览
   if (G.shopSel) {
@@ -1063,6 +1180,14 @@ function mmJump(e) {
 function refreshToggleBtns() {
   const set = (id, on) => { const b = document.getElementById(id); if (b) b.classList.toggle('on', on); };
   set('tHp', G.showHp); set('tScroll', G.mouseScroll); set('tArea', G.showBuildArea); set('tZoom', zoom < 1);
+  // Su37 按钮: 冷却中禁用并显示剩余秒数 (原版 compteur.text = ".. wait" / "ready")
+  const b = document.getElementById('tSu37');
+  if (b) {
+    b.disabled = !SU37.available;
+    b.classList.toggle('on', G.su37Aiming);
+    b.textContent = SU37.available ? 'Su37 空袭'
+      : 'Su37 ' + Math.ceil(SU37.cool / 30) + 's';
+  }
 }
 function bindToggle(id, fn) {
   const b = document.getElementById(id);
@@ -1072,8 +1197,11 @@ bindToggle('tHp', () => G.showHp = !G.showHp);
 bindToggle('tScroll', () => G.mouseScroll = !G.mouseScroll);
 bindToggle('tArea', () => G.showBuildArea = !G.showBuildArea);
 bindToggle('tZoom', () => toggleZoom());
+bindToggle('tSu37', () => su37Start());
 cv.addEventListener('click', (e) => {
   if (G.lost || G.won) return;
+  // Su37 瞄准中: 点击地图 = 空袭落点 (原版 zone = _xmouse/_ymouse)
+  if (G.su37Aiming) { su37Launch(G.mx, G.my); return; }
   // 点中已有塔 → 选中 (供 U 升级对空)
   const hit = G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);
   if (hit) { G.selected = hit; return; }

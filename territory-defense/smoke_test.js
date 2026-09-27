@@ -46,5 +46,31 @@ src += '  14 - G.turrets.length + G.turrets.filter(t=>t.hp>0).length, G.turrets.
 src += '\nconst aaT = G.turrets.find(t => !t.aa);';
 src += '\nif (aaT) { G.euros += 5000; const c0 = aaT.aaUpgradeCost(); const ok = aaT.upgradeAA(); console.log("对空升级: 花费=%d 成功=%s 可对空=%s", c0, ok, aaT.aa); }';
 src += '\nconsole.log("迷雾验证: 视野源数=", VIS.length, " 敌人在迷雾外不可见=", !isVisible(100000, 100000));';
+// ---- Su37 空袭流程 (按钮→选边→点击落点→投弹→冷却) ----
+src += `
+G.frame = 0;
+const su0 = { avail: SU37.available, cool: SU37.cool };
+// 放一队敌人在目标点附近, 验证炸弹伤害
+G.units.length = 0;
+[0,1,2].forEach(i => { const u = new Unit('abrams', '105mmAbrams', 'parcourt1'); u.x = 800 + i*30; u.y = 200; G.units.push(u); });
+const hp0 = G.units.map(u => u.hp);
+const okStart = su37Start();
+const aiming = G.su37Aiming;
+const p0 = SU37.pending ? { side: SU37.pending.side, x: Math.round(SU37.pending.x), y: Math.round(SU37.pending.y) } : null;
+su37Launch(820, 210);
+const planeAfter = !!SU37.plane;
+const availAfterLaunch = SU37.available;
+let guard = 0;
+while (SU37.plane && guard++ < 400) su37Update();
+const hp1 = G.units.map(u => u.hp);
+const dmg = hp0.map((h, i) => h - hp1[i]);
+console.log("Su37: start=%s aiming=%s 边=%s 起飞=%s 起飞后available=%s",
+  okStart, aiming, p0 && p0.side, planeAfter, availAfterLaunch);
+console.log("Su37 投弹: 3 敌HP损伤=%j 爆炸特效=%d", dmg, G.effects.length);
+// 冷却: 从 COOL_FRAMES 起逐帧跑到恢复
+SU37.available = false; SU37.cool = SU37.COOL_FRAMES;
+let f = 0; while (!SU37.available && f++ < 200) su37Update();
+console.log("Su37 冷却: 从 %d 跑到恢复用了 %d 帧 (期望 %d)", SU37.COOL_FRAMES, f, SU37.COOL_FRAMES);
+`;
 eval(src);
 console.log("[done]");

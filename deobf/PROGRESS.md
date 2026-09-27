@@ -215,6 +215,24 @@ python3 deobf/resolve_constants.py
   partsFireLen(parts) 从部件表取炮管 sprite 的序列长度
 - 本轮未做（队列下推）：D Su37 空袭、E 跳弹/金属音、F 阴影、G 选中圈、H BGM 对号、I 单位去背景
 
+## 第 N+3 轮成果（2026-09-27, H5 领土防御·Su37 空袭）
+
+- **Su37 空袭完整接入**（原版 DefineSprite_834 反编译依据）：
+  - 进入边：`on(press)` 用 Math.random() 四等分选 bas/gauche/droit/haut，进入点
+    bas=(rand*2200, 600) haut=(rand*2200, -1600) gauche=(-100, rand*2200) droit=(2100, rand*2200)
+  - 落点：`zone = Array(_xmouse, _ymouse)` → H5 点击地图落点，机头 atan2 朝向落点
+  - 冷却：`comptDispo = 60`（原版 chargeBombes 每次递减，归零时 disponible=true）
+    → H5 每 tick 递减，60 帧后恢复；按钮显示 "Su37 Ns" 倒计时，冷却中 disabled
+  - 弹体属性（793_23 onClipEvent(load) 权威值）：`speed=28`、`puissance=500`、`impact=260`
+  - 音效：`master_sounds.Su37S.start()` → chid 472 (Su37.flv)。**FFDec -format sound:wav 转码成功**
+    （此前 flv 无法播放），得到 22050Hz 单声道 1.63s 呼啸声 → assets/sounds/472_Su37.wav
+- **飞机素材**：Su37 战机 = DefineSprite_793（carte 上 `nm: Su37` 引用），导出得 111x183 真实矢量战机图。
+  **缩放从头解码 SWF 二进制 PlaceObject2 矩阵得 scaleX/Y=0.4946**（而非目测猜测），机头朝上、随 rot 旋转
+- **UI**：侧栏新增 "Su37 空袭" 按钮；瞄准模式画 impact=260 半径红圈 + 十字准星 + "点击目标投放炸弹"
+- **无头验证**（smoke_test 扩展）：选边(gauche/haut 随机) → 起飞 available=false → 命中后 3 敌各
+  受 500 伤害 → 60 帧精确恢复；真机验证战机按 0.4946 缩放渲染、机头朝向落点
+- 本轮未做（队列下推）：E 跳弹/金属音、F 阴影、G 选中圈、H BGM 对号、I 单位去背景
+
 ## 第 4 轮成果（2026-09-27）
 
 - **伪代码库建成**：`deobf/pcode_as/` — 全部 459 个命名函数的可读伪代码（含 fireOnEnnemi/createUnit/startMission/roule/getTarget/OCEEF 等核心）
