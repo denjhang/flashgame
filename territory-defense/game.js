@@ -122,31 +122,80 @@ const TURRET_SRC = {
   crotale: 'assets/turrets/62.png', canon125: 'assets/turrets/65.png',
   radar: 'assets/turrets/61.png', MLRS: 'assets/turrets/67.png',
   pluton: 'assets/turrets/69.png', MTHEL: 'assets/turrets/85.png',
+  // m60: 塔库86无独立帧, 本体=DefineSprite_173帧"m60"的底座 shape 88 (8x11)
+  m60: 'assets/turrets/88.png',
 };
 for (const k in TURRET_SRC) {
   const im = new Image();
   im.src = TURRET_SRC[k];
   TURRET_IMG[k] = im;
 }
-// 炮弹: DefineSprite_400_obus 帧序列 (原版 gotoAndPlay(type))
-// 帧1-4=轻弹 obusLeger, 5-7=重弹 bulletLourde, 8-10=导弹 missile, 11-13=舰载导弹
+// 炮弹 (权威映射): 弹体 = obus 帧库内层的独立 sprite, 由塔的 clipevent 调 createObus(type):
+//   gatling系(92)=bullet  75/105mm系(98)=bulletLourde  105单管(103)=obusLeger  105双管(108)=obusMoyen
+//   125mm(125)=obusLourd   crotale(122,164)=missile    MLRS(128)=missile2  pluton(80)=missile3
+//   舰载crotale(161)=missileUnder  Su37(786)=missileUnderSu37  MTHEL(83)=laser
+// 弹体图形: 303=中弹体(17x67) 307=重弹爆亮弹头(104x108) 361=导弹尾焰(176x182)
 const SHELL_FRAMES = {
-  light: [1, 2, 3, 4].map(i => 'assets/shells/DefineSprite_400_obus/' + i + '.png'),
-  heavy: [5, 6, 7].map(i => 'assets/shells/DefineSprite_400_obus/' + i + '.png'),
-  missile: [8, 9, 10].map(i => 'assets/shells/DefineSprite_400_obus/' + i + '.png'),
+  obusLeger:  ['assets/shells/DefineSprite_303/7.png'],      // 细长小弹
+  obusMoyen:  ['assets/shells/DefineSprite_303/7.png'],
+  bullet:     ['assets/shells/DefineSprite_303/3.png', 'assets/shells/DefineSprite_303/7.png'],
+  bulletLourde: ['assets/shells/DefineSprite_307/8.png', 'assets/shells/DefineSprite_307/9.png'],
+  obusLourd:  ['assets/shells/DefineSprite_307/8.png'],
+  missile:    ['assets/shells/DefineSprite_361/14.png', 'assets/shells/DefineSprite_361/15.png'],
+  missile2:   ['assets/shells/DefineSprite_361/14.png', 'assets/shells/DefineSprite_361/15.png'],
+  missile3:   ['assets/shells/DefineSprite_361/14.png'],
+  missileUnder: ['assets/shells/DefineSprite_361/14.png'],
 };
 const SHELL_IMG = {};
 for (const k in SHELL_FRAMES)
   SHELL_IMG[k] = SHELL_FRAMES[k].map(src => { const im = new Image(); im.src = src; return im; });
-// 武器 → 弹型 (原版: 机枪=轻弹, 坦克炮=重弹, crotale/MLRS/舰载=导弹)
+// 武器 → 弹型 (塔库帧→内部弹 sprite→createObus 类型, 逐一对号)
 const SHELL_KIND = {
-  m60: 'light', gatling: 'light', m60Brad: 'light', gatlingAmx10: 'light',
-  gatlingDT90: 'light', gatlingDTigre: 'light',
-  canon75: 'heavy', canon105: 'heavy', canon105D: 'heavy', canon125: 'heavy',
-  '75mmBrad': 'heavy', '75mmAmx10': 'heavy', '105mmAbrams': 'heavy',
-  '105mmDAbrams': 'heavy', '125mmT90': 'heavy',
-  crotale: 'missile', 'crotaleAbrams': 'missile', 'crotaleTigre': 'missile',
-  navireCrotale: 'missile', MLRS: 'missile', Yamato460: 'missile',
+  m60: 'bullet', gatling: 'bullet', m60Brad: 'bullet', gatlingAmx10: 'bullet',
+  gatlingDT90: 'bullet', gatlingDTigre: 'bullet',
+  canon75: 'bulletLourde', '75mmBrad': 'bulletLourde', '75mmAmx10': 'bulletLourde',
+  canon105: 'obusLeger', '105mmAbrams': 'obusLeger',
+  canon105D: 'obusMoyen', '105mmDAbrams': 'obusMoyen',
+  canon125: 'obusLourd', '125mmT90': 'obusLourd',
+  crotale: 'missile', crotaleAbrams: 'missile', crotaleTigre: 'missile',
+  MLRS: 'missile2', pluton: 'missile3', navireCrotale: 'missileUnder',
+  Yamato460: 'obusLourd', MTHEL: 'obusLeger',
+};
+// 敌方武器塔外观 (DefineSprite_173 帧库, turret_frames.json 对号):
+// 每种武器 = 173 帧内的主要炮管 sprite (旋转件), 首帧朝上, 与我方塔同画法
+const ETURRET_SRC = {
+  m60Brad: 'assets/eturrets_spr/DefineSprite_92/1.png',
+  '75mmBrad': 'assets/eturrets_spr/DefineSprite_103/1.png',
+  '75mmAmx10': 'assets/eturrets_spr/DefineSprite_103/1.png',
+  gatlingAmx10: 'assets/eturrets_spr/DefineSprite_92/1.png',
+  canon105: 'assets/eturrets_spr/DefineSprite_108/1.png',
+  '105mmAbrams': 'assets/eturrets_spr/DefineSprite_108/1.png',
+  canon105D: 'assets/eturrets_spr/DefineSprite_108/1.png',
+  '105mmDAbrams': 'assets/eturrets_spr/DefineSprite_108/1.png',
+  crotale: 'assets/eturrets_spr/DefineSprite_122/1.png',
+  crotaleAbrams: 'assets/eturrets_spr/DefineSprite_122/1.png',
+  crotaleTigre: 'assets/eturrets_spr/DefineSprite_161/1.png',
+  navireCrotale: 'assets/eturrets_spr/DefineSprite_164/1.png',
+  canon125: 'assets/eturrets_spr/DefineSprite_125/1.png',
+  '125mmT90': 'assets/eturrets_spr/DefineSprite_125/1.png',
+  MLRS: 'assets/eturrets_spr/DefineSprite_128/1.png',
+  pluton: 'assets/eturrets/132.png',      // DefineShape (pluton 炮管)
+  MTHEL: 'assets/eturrets/134.png',       // DefineShape (MTHEL 炮管)
+  gatlingDT90: 'assets/eturrets_spr/DefineSprite_153/1.png',
+  gatlingDTigre: 'assets/eturrets_spr/DefineSprite_157/1.png',
+  Yamato460: 'assets/eturrets_spr/DefineSprite_167/1.png',
+};
+const ETURRET_IMG = {};
+for (const k in ETURRET_SRC) {
+  const im = new Image();
+  im.src = ETURRET_SRC[k];
+  ETURRET_IMG[k] = im;
+}
+// 玩家武器 → 同型敌武器塔外观 (玩家 86 塔库的炮管也用于 173 库, 同源形状)
+const PLAYER_ETURRET = {
+  m60: 'm60Brad', gatling: 'gatlingAmx10', canon75: '75mmBrad',
+  canon105: 'canon105', canon105D: 'canon105D', canon125: 'canon125',
+  crotale: 'crotale', MLRS: 'MLRS', pluton: 'pluton', MTHEL: 'MTHEL',
 };
 const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   const im = new Image();
@@ -425,7 +474,9 @@ function shellHit(s) {
         u.dead = true;
         G.euros += u.bounty;
         G.score += u.bounty;
-        boom(u.x, u.y, 8);
+        const utype = u.type === 'Yamato' || u.type === 'navire' ? 'large2'
+          : u.hp <= 0 && s.turretId === 'MLRS' ? 'mlrs' : 'small';
+        boomTyped(u.x, u.y, 8, utype);
         explosionSfx(60);   // 原版: 死亡随机 explosion1-6
       }
     }
@@ -435,11 +486,32 @@ function shellHit(s) {
       if (Math.hypot(t.x - tx, t.y - ty) <= range * 2) t.hp -= power;
     }
   }
-  boom(tx, ty, 4 + power / 40);
+  // 命中爆型 (原版: crotale弹→392, MLRS→394, pluton/Yamato重炮→395/396, 普通→390)
+  const kind = s.turretId === 'crotale' || s.turretId === 'crotaleAbrams' || s.turretId === 'crotaleTigre' ? 'crotale'
+    : s.turretId === 'MLRS' ? 'mlrs'
+    : s.turretId === 'pluton' || s.turretId === 'Yamato460' ? 'large'
+    : 'small';
+  boomTyped(tx, ty, 4 + s.w[4] / 40, kind);
 }
 
+// 分型爆炸 (原版 sprite: 390=普通弹爆(小) 392=crotale 394=MLRS 395=large/pluton 396=large2/Yamato)
+const EXPLOSION_TYPED = {
+  small: [1,2,3,4,5,6,7,8,9,10,11,12,13].map(i => 'assets/explosion/typed/DefineSprite_390/' + i + '.png'),
+  crotale: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(i => 'assets/explosion/typed/DefineSprite_392/' + i + '.png'),
+  mlrs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(i => 'assets/explosion/typed/DefineSprite_394/' + i + '.png'),
+  large: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27].map(i => 'assets/explosion/typed/DefineSprite_395/' + i + '.png'),
+  large2: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(i => 'assets/explosion/typed/DefineSprite_396/' + i + '.png'),
+};
+const EXPLOSION_TYPED_IMG = {};
+for (const k in EXPLOSION_TYPED)
+  EXPLOSION_TYPED_IMG[k] = EXPLOSION_TYPED[k].map(src => { const im = new Image(); im.src = src; return im; });
+
 function boom(x, y, r) {
-  G.effects.push({ x, y, r, life: 14 });
+  boomTyped(x, y, r, 'small');
+}
+function boomTyped(x, y, r, type) {
+  const n = (EXPLOSION_TYPED[type] || EXPLOSION_TYPED.small).length;
+  G.effects.push({ x, y, r, life: n, life0: n, type: type || 'small' });
 }
 
 // ---------------- 波次调度 (startMission) ----------------
@@ -594,6 +666,12 @@ function draw() {
       ctx.fillRect(-10, -10, 20, 20);
       ctx.restore(); continue;
     }
+    // m60 本体 (shape 88, 8x11 迷彩底座): 固定不旋转
+    if (t.id === 'm60') {
+      const im = TURRET_IMG.m60;
+      if (im && im.complete && im.naturalWidth)
+        ctx.drawImage(im, -4, -8, 8, 11);
+    }
     // 雷达站: 扫描波纹 (迷雾驱散可视化)
     if (t.id === 'radar') {
       const ph = (Date.now() / 900) % 1;
@@ -605,7 +683,7 @@ function draw() {
       if (im && im.complete && im.naturalWidth)
         ctx.drawImage(im, -im.naturalWidth / 4, -im.naturalHeight / 4,
                       im.naturalWidth / 2, im.naturalHeight / 2);
-    } else if (TURRET_IMG[t.id] && TURRET_IMG[t.id].complete && TURRET_IMG[t.id].naturalWidth) {
+    } else if (t.id !== 'm60' && TURRET_IMG[t.id] && TURRET_IMG[t.id].complete && TURRET_IMG[t.id].naturalWidth) {
       const im = TURRET_IMG[t.id];
       const big = (t.id === 'MLRS' || t.id === 'pluton' || t.id === 'MTHEL');
       if (big) {
@@ -620,8 +698,8 @@ function draw() {
                       im.naturalWidth, im.naturalHeight);
         ctx.restore();
       }
-    } else {
-      // m60 / 缺图兜底: 画炮管线条
+    } else if (t.id !== 'm60') {
+      // 缺图兜底: 画炮管线条
       ctx.save(); ctx.rotate(-t.rot);
       ctx.fillStyle = t.id.startsWith('crotale') ? '#aaf' : '#ba6';
       ctx.fillRect(0, -3, 18, 6);
@@ -661,6 +739,17 @@ function draw() {
       ctx.fillRect(-8, -5, 16, 10);
     }
     ctx.restore();
+    // 武器塔叠加 (原版 173 库: 炮管随瞄准角旋转, 图朝上 → -rot-π/2, 与我方塔同画法)
+    if (u.weapon) {
+      const wimg = ETURRET_IMG[u.weaponId];
+      if (wimg && wimg.complete && wimg.naturalWidth) {
+        const wr = wimg.naturalWidth > 60 ? 0.32 : wimg.naturalWidth > 30 ? 0.5 : 0.75;
+        ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom * wr, zoom * wr);
+        ctx.rotate(-u.rot - Math.PI / 2);
+        ctx.drawImage(wimg, -wimg.naturalWidth / 2, -wimg.naturalHeight + 6);
+        ctx.restore();
+      }
+    }
     if (G.showHp) {
       ctx.fillStyle = '#300'; ctx.fillRect(sx - 9 * zoom, sy - 14 * zoom, 18 * zoom, 3 * zoom);
       ctx.fillStyle = '#f43'; ctx.fillRect(sx - 9 * zoom, sy - 14 * zoom, 18 * zoom * Math.max(0, u.hp) / u.maxHp, 3 * zoom);
@@ -671,11 +760,12 @@ function draw() {
     const sx = w2sX(s.x), sy = w2sY(s.y);
     const t = s.target && s.target.hp > 0 ? s.target : null;
     const ang = t ? Math.atan2(-(t.y - s.y), t.x - s.x) : 0;   // 世界y向上→屏幕取负
-    const kind = SHELL_KIND[s.turretId] || 'light';
+    const kind = SHELL_KIND[s.turretId] || 'bullet';
     const frames = SHELL_IMG[kind];
     const im = frames[(G.frame >> 2) % frames.length];
     if (im && im.complete && im.naturalWidth) {
-      const sc = (kind === 'missile' ? 0.075 : 0.05) * zoom;   // 465px 原图缩小
+      const nw = im.naturalWidth;
+      const sc = (nw > 150 ? 0.09 : nw > 90 ? 0.16 : 0.4) * zoom;   // 导弹/重弹/轻弹各自缩放
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang + Math.PI / 2); ctx.scale(sc, sc);
       ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
       ctx.restore();
@@ -686,14 +776,17 @@ function draw() {
   }
   for (const e of G.effects) {
     const sx = w2sX(e.x), sy = w2sY(e.y);
-    const fi = Math.min(3, Math.floor((14 - e.life) / 14 * 4));
-    const im = EXPLOSION_FRAMES[fi];
+    const frames = EXPLOSION_TYPED_IMG[e.type] || EXPLOSION_FRAMES;
+    const n = frames.length;
+    const fi = Math.min(n - 1, Math.floor((e.life0 - e.life) / e.life0 * n));
+    const im = frames[fi];
     if (im && im.complete && im.naturalWidth) {
-      const s = Math.max(0.4, e.r / 30) * zoom;
-      ctx.drawImage(im, sx - 105 * s, sy - 108 * s, 210 * s, 217 * s);
+      const s = Math.max(0.35, e.r / 45) * zoom;
+      ctx.drawImage(im, sx - im.naturalWidth / 2 * s, sy - im.naturalHeight / 2 * s,
+                    im.naturalWidth * s, im.naturalHeight * s);
     } else {
-      ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / 14})`;
-      ctx.beginPath(); ctx.arc(sx, sy, e.r * (14 - e.life) / 3 * zoom, 0, 7); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,${120 + e.life * 8},60,${e.life / e.life0})`;
+      ctx.beginPath(); ctx.arc(sx, sy, e.r * (e.life0 - e.life) / 3 * zoom, 0, 7); ctx.stroke();
     }
   }
   // 建造预览
