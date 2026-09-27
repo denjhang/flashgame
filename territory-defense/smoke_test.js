@@ -46,9 +46,10 @@ src += '  14 - G.turrets.length + G.turrets.filter(t=>t.hp>0).length, G.turrets.
 src += '\nconst aaT = G.turrets.find(t => !t.aa);';
 src += '\nif (aaT) { G.euros += 5000; const c0 = aaT.aaUpgradeCost(); const ok = aaT.upgradeAA(); console.log("对空升级: 花费=%d 成功=%s 可对空=%s", c0, ok, aaT.aa); }';
 src += '\nconsole.log("迷雾验证: 视野源数=", VIS.length, " 敌人在迷雾外不可见=", !isVisible(100000, 100000));';
-// ---- Su37 空袭流程 (按钮→选边→点击落点→投弹→冷却) ----
+// ---- Su37 空袭流程 (原版 m31 才解锁, 测试前先置 unlocker.su37 = true) ----
 src += `
 G.frame = 0;
+G.unlocker.su37 = true;
 const su0 = { avail: SU37.available, cool: SU37.cool };
 // 放一队敌人在目标点附近, 验证炸弹伤害
 G.units.length = 0;
@@ -135,6 +136,79 @@ console.log("鸟叫: %d 个音效, 10s节流触发 %d 次 %j", birdKeys.length, 
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",
   Object.keys(UNIT_SHADOW).length, SHADOW_ALPHA, SHADOW_OFFSET,
   Object.keys(UNIT_BMP).filter(k => k !== 'tigre' && !UNIT_SHADOW[k]));
+
+// ==== M2a: 原版解锁机制 (unlockNextWeapon / interest+3 二选一) ====
+console.log("--- 解锁机制 ---");
+console.log("初始 unlocker: m60=%s gatling=%s canon75=%s crotale=%s su37=%s",
+  G.unlocker.m60, G.unlocker.gatling, G.unlocker.canon75, G.unlocker.crotale, G.unlocker.su37);
+console.log("AUTO_UNLOCK=%j  PANEL_WAVES=%j  weaponsToUnlock=%j", AUTO_UNLOCK, PANEL_WAVES, WEAPONS_TO_UNLOCK);
+// 自动解锁: 波 7/11/16/27/31
+G.unlocker = { m60:true, gatling:true, canon75:false, canon105:false, canon105D:false,
+               radar:false, crotale:false, canon125:false, MLRS:false, pluton:false, MTHEL:false, su37:false };
+G.iUnlock = 0;
+[7,11,16,27,31].forEach(w => autoUnlockForWave(w));
+const autoOK = ['canon75','canon105','canon105D','radar','su37'].every(k => G.unlocker[k]);
+console.log("自动解锁 m7/11/16/27/31 全生效=%s (canon75=%s radar=%s su37=%s)",
+  autoOK, G.unlocker.canon75, G.unlocker.radar, G.unlocker.su37);
+console.log("二选一面板触发波次判定: m18=%s m19=%s m37=%s",
+  shouldShowUnlockPanel(18), shouldShowUnlockPanel(19), shouldShowUnlockPanel(37));
+// 二选一: 解锁路线 (iUnlock 递增, 依次 crotale→canon125→...)
+const seq = [];
+for (let i = 0; i < WEAPONS_TO_UNLOCK.length; i++) {
+  const r = unlockNextWeapon();
+  seq.push(WEAPONS_TO_UNLOCK[i] + ':' + r + '/' + G.unlocker[WEAPONS_TO_UNLOCK[i]]);
+}
+console.log("连续解锁 5 件: %j  iUnlock=%d", seq, G.iUnlock);
+console.log("第 6 次调用 (应返回 false)=%s", unlockNextWeapon());
+// 二选一: 利息路线
+G.lockItem = false; const i0 = G.interest;
+panelPickInterest();
+console.log("panelPickInterest: interest %d → %d (原版 +3) 一致=%s  lockItem=%s", i0, G.interest, i0 + 3, G.interest === i0 + 3, G.lockItem);
+// 面板锁: lockItem=true 时按钮无效
+G.lockItem = true; const e1 = G.euros, i1 = G.interest;
+panelPickInterest();
+console.log("lockItem=true 时点击无效: interest 仍=%d (应 %d) 一致=%s", G.interest, i1, G.interest === i1);
+// 重置到游戏初始态, 供后续一致性使用
+G.unlocker = { m60:true, gatling:true, canon75:false, canon105:false, canon105D:false,
+               radar:false, crotale:false, canon125:false, MLRS:false, pluton:false, MTHEL:false, su37:false };
+G.iUnlock = 0; G.panelOpen = false; G.lockItem = true;
+
+// ==== M2b: 自动修理蓝色磁场 (sprite 183) ====
+console.log("--- 自动修理磁场 ---");
+console.log("磁场素材: %d 帧 (原版 sprite 183 七帧) 直径=%dpx 颜色=#99CCFF (CXFORM add=[153,204,255])",
+  MAGNET_FRAMES.length, MAGNET_DIAM);
+{
+  const t3 = new Turret('canon105', 0, 0);
+  t3.hp = t3.maxHp - 100;
+  t3.autoRepair = true;
+  G.euros = 99999;
+  const hpA = t3.hp;
+  t3.update();
+  const healed = t3.hp - hpA;
+  console.log("autoRepair 一次 update: 修理 %d HP, magnetT=%d (应=%d)", healed, t3.magnetT, MAGNET_TICKS);
+  // 关掉 autoRepair 再跑完剩余磁场, 确认单遍时长 = MAGNET_TICKS
+  // (开着修理会每遍结束就重播 → 持续光环, 这正是原版 "every time a turret is auto-repaired" 语义)
+  t3.autoRepair = false;
+  let mf = 0; while (t3.magnetT > 0 && mf++ < 50) t3.update();
+  console.log("单遍磁场用 %d 帧 (期望 %d = 7帧@24fps 折算到 30fps) 一致=%s", mf, MAGNET_TICKS, mf === MAGNET_TICKS);
+  // 持续修理 → 持续重播 (原版语义)
+  const t3b = new Turret('canon105', 0, 0);
+  t3b.hp = 1; t3b.autoRepair = true; G.euros = 99999;
+  let everZero = false;
+  for (let i = 0; i < 60; i++) { t3b.update(); if (t3b.magnetT === 0) everZero = true; }
+  console.log("持续修理 60 帧: 磁场从未熄灭=%s (原版每次修理重播) HP=%d/%d", !everZero, t3b.hp, t3b.maxHp);
+  G.euros = 850;
+  // autoRepair 关闭时不触发
+  const t4 = new Turret('canon105', 0, 0);
+  t4.hp = t4.maxHp - 100; t4.autoRepair = false;
+  t4.update();
+  console.log("autoRepair=false 时不触发: magnetT=%d (应 0) 一致=%s", t4.magnetT, t4.magnetT === 0);
+  // 满血时不触发
+  const t5 = new Turret('canon105', 0, 0);
+  t5.autoRepair = true; t5.update();
+  console.log("满血时不触发: magnetT=%d (应 0) 一致=%s", t5.magnetT, t5.magnetT === 0);
+  G.euros = 850;
+}
 `;
 eval(src);
 console.log("[done]");

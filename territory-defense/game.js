@@ -56,19 +56,24 @@ function exploredToScreen() {   // 探索记忆 → 屏幕绘制参数
            w: expW / EXPLORED_SCALE * zoom, h: expH / EXPLORED_SCALE * zoom };
 }
 
-// 建造菜单 (原版解锁关卡 iMission > N)
+// 建造菜单 —— 顺序按原版 menu.constructionCont 子件顺序 (frame_6/PlaceObject2_6_333)
+// 解锁不再看波数阈值, 全部走原版 unlocker 表 + 二选一面板
 const SHOP = [
-  { id:'m60',       unlock:0 },
-  { id:'gatling',   unlock:0 },
-  { id:'canon75',   unlock:7 },
-  { id:'canon105',  unlock:11 },
-  { id:'canon105D', unlock:16 },
-  { id:'crotale',   unlock:5 },
-  { id:'canon125',  unlock:22 },
-  { id:'MLRS',      unlock:28 },
-  { id:'MTHEL',     unlock:30 },
-  { id:'pluton',    unlock:36 },
+  { id:'m60'       }, { id:'gatling'   }, { id:'canon75'   },
+  { id:'canon105'  }, { id:'canon105D' }, { id:'radar'     },
+  { id:'crotale'   }, { id:'canon125'  }, { id:'MLRS'      },
+  { id:'MTHEL'     }, { id:'pluton'    },
 ];
+// 原版解锁时间线 (DefineSprite_834/frame_1/PlaceObject2_773_189 newEvents, 关卡号=波号):
+//   m7 → canon75 / m11 → canon105 / m16 → canon105D  (自动解锁)
+//   m27 → radar / m31 → su37                          (自动解锁 + 开二选一面板)
+//   m18 m20 m27 m31 m37 m39                            (开二选一面板)
+// 二选一 (sprite 989): 解锁下一件 weaponsToUnlock[iUnlock], 或 interest += 3
+const AUTO_UNLOCK = { 7:'canon75', 11:'canon105', 16:'canon105D', 27:'radar', 31:'su37' };
+const PANEL_WAVES = [18, 20, 27, 31, 37, 39];
+const WEAPONS_TO_UNLOCK = ['crotale', 'canon125', 'MLRS', 'MTHEL', 'pluton'];
+const WEAPON_CN = { crotale:'响尾蛇导弹', canon125:'125mm 炮', MLRS:'火箭炮',
+                    MTHEL:'激光防空', pluton:'冥王导弹' };
 
 // 路线: deobf/data/waypoints.json 的真实路点 (SWF PlaceObject2 矩阵坐标, y 向上)
 // 地图: map.jpg (原版 chid764, 2070x1920)。世界坐标 = Flash 坐标:
@@ -287,6 +292,22 @@ const PLAYER_ETURRET = {
 // 86 库原 sprite 56/57/58/59/61/62/65/67/69/85/88 → 173 库同源 shape, 已存在于 eturrets/
 // 通过 PLAYER_ETURRET 映射到 ETURRET_PARTS 自动复用, 不再单独维护
 function playerParts(id) { return ETURRET_PARTS[PLAYER_ETURRET[id]]; }
+// ---------------- 自动修理蓝色磁场 (原版 sprite 183, 挂在 structure 的 repairLogo.light) ----------------
+// 反编译依据:
+//   frame_6/PlaceObject2_6_327 伤害循环: if (unitsAlliees[i].repairLogo.autoRepair) structures[i].structureDeco.autoRepair()
+//   DefineSprite_185/frame_2/PlaceObject2_6_31 autoRepair(): etat=etatMax; repairLogo.light.gotoAndPlay(1); light2.gotoAndPlay(1)
+//   sprite 183 = 7 帧 (shape 77→179→180→181→182→空), 307×307, 24fps → ≈0.29s
+//   PlaceObject3 light: chid=183, CXFORM mult=[0,0,0,256] add=[153,204,255,0] → 纯 #99CCFF
+//   sprite184 内 scale=0.0554 t=(-170,-170); structure185 内 scale=2.079 → 净直径 ≈ 35px, 居中塔身
+const MAGNET_FRAMES = [1,2,3,4,5,6,7].map(i => {
+  const im = new Image();
+  im.src = 'assets/repair/light_' + i + '.png';
+  return im;
+});
+const MAGNET_FPS = 24;               // SWF 帧率
+const MAGNET_DIAM = 35;              // 净显示直径 (世界像素)
+// 7 帧 @24fps ≈ 0.292s; H5 主循环 30fps → 折算 9 帧, 视觉时长与原版一致
+const MAGNET_TICKS = Math.round(MAGNET_FRAMES.length / MAGNET_FPS * 30);
 const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
   const im = new Image();
   im.src = 'assets/explosion/' + i + '.png';
@@ -317,6 +338,7 @@ function su37Img() {
   return SU37.img;
 }
 function su37Start() {   // 侧栏按钮: 选进入边, 等待玩家点击地图落点
+  if (!G.unlocker.su37) { playSfx('cannot', 0.4); return false; }   // 原版 m31 才解锁
   if (!SU37.available) { playSfx('cannot', 0.4); return false; }
   const rd = Math.random();
   const side = rd < 0.25 ? 'bas' : rd < 0.5 ? 'gauche' : rd < 0.75 ? 'droit' : 'haut';
@@ -683,6 +705,13 @@ const G = {
   showBuildArea: false,    // 原版 C 键开关 (可建区域显示)
   frame: 0,               // 帧计数 (炮弹动画)
   su37Aiming: false,      // Su37 已选边, 等待玩家点击落点
+  // ---- 原版解锁状态 (frame_6/PlaceObject2_6_333 onClipEvent(load)) ----
+  unlocker: { m60: true, gatling: true, canon75: false, canon105: false, canon105D: false,
+              radar: false, crotale: false, canon125: false, MLRS: false,
+              pluton: false, MTHEL: false, su37: false },
+  iUnlock: 0,              // 已通过二选一解锁的件数 (0..5)
+  lockItem: true,          // 面板期间锁住, 防连点 (on(press) 里 lockItem 守卫)
+  panelOpen: false,        // 二选一面板已弹出, 冻结波次调度
 };
 
 // ---------------- 单位 ----------------
@@ -766,6 +795,7 @@ class Turret {
     this.fireT = 0;        // 炮管开火帧计时 (>0 时切到 fire 序列)
     this.target = null;
     this.autoRepair = false;
+    this.magnetT = 0;      // 蓝色磁场剩余帧 (原版 repairLogo.light.gotoAndPlay(1), 7 帧)
     this.aa = AA_WEAPONS.includes(id);   // 机枪/导弹天生对空; 其余可付费升级
   }
   aaUpgradeCost() { return Math.floor(this.cost * AA_UP_RATIO); }
@@ -780,9 +810,13 @@ class Turret {
   update() {
     if (this.hp <= 0) return;   // 被摧毁的塔不再索敌开火
     if (this.fireT > 0) this.fireT--;   // 炮管开火帧倒计时
+    if (this.magnetT > 0) this.magnetT--;   // 蓝色磁场动画倒计时
     if (this.autoRepair && this.hp < this.maxHp && G.euros >= REPAIR_COST) {
       const n = Math.min(5, this.maxHp - this.hp, Math.floor(G.euros / REPAIR_COST));
       this.hp += n; G.euros -= n * REPAIR_COST;
+      // 原版 autoRepair() 里 repairLogo.light/light2.gotoAndPlay(1): 每次实际修理播一遍光环
+      // 上一遍播完才重开, 避免逐帧修理把动画钉在第 1 帧
+      if (this.magnetT === 0) this.magnetT = MAGNET_TICKS;
     }
     if (!this.w || this.w[0] === 0) return;   // radar: 零属性 (原版鸡肋, 忠实还原)
     if (this.cool > 0) { this.cool--; }
@@ -918,10 +952,76 @@ function guessRoute(wave) {
   return (G.wave % 3 === 0) ? 'parcourt2' : 'parcourt1';
 }
 
+// ---------------- 原版解锁机制 (unlockNextWeapon / showPanelForUnlock) ----------------
+// 伪代码出处 deobf/pcode_as/frame_6__PlaceObject2_6_333 onClipEvent(load):
+//   unlockNextWeapon: iUnlock==unlockerLength → return false; 否则 weaponsToUnlock[iUnlock]=true, iUnlock++
+//   showPanelForUnlock: 弹出面板, lockItem=false, 显示下一件武器名 + (interest+3)%
+function unlockNextWeapon() {
+  if (G.iUnlock >= WEAPONS_TO_UNLOCK.length) return false;
+  G.unlocker[WEAPONS_TO_UNLOCK[G.iUnlock]] = true;
+  G.iUnlock++;
+  buildShop();
+  return true;
+}
+// 原版 newEvents 里按关卡号自动解锁 (mR 是当前任务号, 事件在波开始前调用)
+function autoUnlockForWave(waveNo) {
+  const id = AUTO_UNLOCK[waveNo];
+  if (id && !G.unlocker[id]) { G.unlocker[id] = true; buildShop(); }
+}
+function shouldShowUnlockPanel(waveNo) { return PANEL_WAVES.includes(waveNo); }
+// 面板弹出: 原版 _x=400/_y=300 居中, 冻结演出直到玩家二选一
+function showPanelForUnlock() {
+  G.panelOpen = true;
+  G.lockItem = false;
+  playSfx('boutonScroll', 0.4);
+  refreshPanelButtons();
+  syncPanel();          // 函数声明提升, 定义在输入段
+}
+// sprite 989 / PlaceObject2_988_6 on(press): 解锁下一件武器 (失败播 cannot)
+function panelPickUnlock() {
+  if (G.lockItem) return;
+  G.lockItem = true;
+  if (unlockNextWeapon()) { playSfx('creationUnite', 0.45); closeUnlockPanel(); }
+  else playSfx('cannot', 0.45);
+}
+// sprite 989 / PlaceObject2_988_3 on(press): interest += 3
+function panelPickInterest() {
+  if (G.lockItem) return;
+  G.lockItem = true;
+  playSfx('creationUnite', 0.45);
+  G.interest += INTEREST_STEP;
+  closeUnlockPanel();
+}
+function closeUnlockPanel() {
+  G.panelOpen = false;
+  G.interWave = 200;
+  hud();
+}
+function refreshPanelButtons() {
+  const b1 = document.getElementById('upUnlock');
+  const b2 = document.getElementById('upInterest');
+  if (!b1 || !b2) return;
+  const done = G.iUnlock >= WEAPONS_TO_UNLOCK.length;
+  b1.disabled = done;
+  b1.textContent = done ? '已解锁全部武器' : '解锁 ' + (WEAPON_CN[WEAPONS_TO_UNLOCK[G.iUnlock]] || WEAPONS_TO_UNLOCK[G.iUnlock]);
+  b2.textContent = '利率 → ' + (G.interest + INTEREST_STEP) + '%';
+  const el = document.getElementById('upInfo');
+  if (el) {
+    el.textContent = done
+      ? '全部武器已解锁。\n你可以把利率提到 ' + (G.interest + INTEREST_STEP) + '%'
+      : '你可以解锁 "' + (WEAPON_CN[WEAPONS_TO_UNLOCK[G.iUnlock]] || WEAPONS_TO_UNLOCK[G.iUnlock])
+        + '"\n或把利率提到 ' + (G.interest + INTEREST_STEP) + '%';
+  }
+}
+
 function endWave() {
-  // 利息 (giveIntrest): euros = floor(euros × (1 + interest/100))
+  // 利息 (giveIntrest, 953/frame_30): euros = floor(euros × (1 + interest/100)); 第 1 波后不给
   if (G.wave > 1) G.euros = Math.floor(G.euros * (1 + G.interest / 100));
   G.waveActive = false;
+  // 原版两波之间的剧情段调用 _root.events() (953/frame_2), 此时 mR = 即将开始的波号
+  const nextWave = G.wave + 1;
+  autoUnlockForWave(nextWave);
+  if (shouldShowUnlockPanel(nextWave)) { showPanelForUnlock(); return; }   // 面板期间不推进 interWave
   G.interWave = 200;
   if (G.wave >= WAVES.length && G.units.every(u => u.hp <= 0 || u.dead)) {
     G.won = true;
@@ -952,7 +1052,8 @@ function tick() {
       endWave();
     }
   } else {
-    if (--G.interWave <= 0) startWave();
+    // 二选一面板打开时冻结波次调度 (原版 startMissionPause 期间不推进)
+    if (!G.panelOpen && --G.interWave <= 0) startWave();
   }
 
   for (const u of G.units) {
@@ -1075,6 +1176,19 @@ function draw() {
     }
     // 对空标记 (蓝色小点)
     if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(6, -14, 4, 4); }
+    // 自动修理蓝色磁场 (原版 repairLogo dpt=31 > tourelle dpt=24, 画在塔身之上)
+    //   7 帧 24fps, frame7 为空白帧, 播完自然消失
+    if (t.magnetT > 0) {
+      // magnetT: MAGNET_TICKS..1 → 映射到精灵帧 1..7
+      const done = MAGNET_TICKS - t.magnetT;              // 0..TICKS-1
+      const idx = Math.floor(done / MAGNET_TICKS * MAGNET_FRAMES.length);
+      const im = MAGNET_FRAMES[Math.max(0, Math.min(MAGNET_FRAMES.length - 1, idx))];
+      if (im && im.complete && im.naturalWidth) {
+        const s = MAGNET_DIAM / im.naturalWidth;
+        ctx.drawImage(im, -im.naturalWidth * s / 2, -im.naturalHeight * s / 2,
+                      im.naturalWidth * s, im.naturalHeight * s);
+      }
+    }
     // 血条 (原版 H 键开关)
     if (G.showHp) {
       ctx.fillStyle = '#300'; ctx.fillRect(-10, -16, 20, 3);
@@ -1383,12 +1497,13 @@ function hud() {
   document.getElementById('hCash').textContent = G.euros + ' $';
   document.getElementById('hInt2').textContent = 'interest ' + G.interest + '%';
   document.getElementById('hLoss').textContent = 'LOSSES ' + G.losses;
+  if (typeof syncPanel === 'function') syncPanel();
 }
 function buildShop() {
   const el = document.getElementById('shop');
   el.innerHTML = '';
   for (const s of SHOP) {
-    const locked = G.wave < s.unlock;
+    const locked = !G.unlocker[s.id];
     const sp = document.createElement('span');
     sp.className = 'sel' + (locked ? ' lock' : '') + (G.shopSel === s.id ? ' on' : '');
     // 原版建造菜单武器照片 (1025 帧库)
@@ -1465,9 +1580,12 @@ function refreshToggleBtns() {
   // Su37 按钮: 冷却中禁用并显示剩余秒数 (原版 compteur.text = ".. wait" / "ready")
   const b = document.getElementById('tSu37');
   if (b) {
-    b.disabled = !SU37.available;
+    // 原版: su37 要在 m31 解锁后才出现在建造菜单 (unlocker.su37)
+    const unlocked = G.unlocker.su37;
+    b.disabled = !unlocked || !SU37.available;
     b.classList.toggle('on', G.su37Aiming);
-    b.textContent = SU37.available ? 'Su37 空袭'
+    b.textContent = !unlocked ? 'Su37 未解锁'
+      : SU37.available ? 'Su37 空袭'
       : 'Su37 ' + Math.ceil(SU37.cool / 30) + 's';
   }
 }
@@ -1480,6 +1598,18 @@ bindToggle('tScroll', () => G.mouseScroll = !G.mouseScroll);
 bindToggle('tArea', () => G.showBuildArea = !G.showBuildArea);
 bindToggle('tZoom', () => toggleZoom());
 bindToggle('tSu37', () => su37Start());
+// 二选一面板按钮 (原版 sprite 989 两个按钮的 on(press))
+{
+  const b1 = document.getElementById('upUnlock');
+  const b2 = document.getElementById('upInterest');
+  if (b1) b1.onclick = () => { panelPickUnlock(); refreshPanelButtons(); syncPanel(); };
+  if (b2) b2.onclick = () => { panelPickInterest(); refreshPanelButtons(); syncPanel(); };
+}
+// 面板 DOM 显隐跟随 G.panelOpen (原版 debloquerArme._x = 400 / -500 切换)
+function syncPanel() {
+  const el = document.getElementById('unlockPanel');
+  if (el) el.classList.toggle('show', G.panelOpen);
+}
 cv.addEventListener('click', (e) => {
   if (G.lost || G.won) return;
   // Su37 瞄准中: 点击地图 = 空袭落点 (原版 zone = _xmouse/_ymouse)

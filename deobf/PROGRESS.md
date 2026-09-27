@@ -1,5 +1,69 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+13 轮成果（2026-09-28, H5 领土防御·原版解锁机制 + 自动修理磁场）
+
+**本轮补上两个原版核心机制 (此前 H5 完全缺失)**
+
+### 1. 每波结束二选一：解锁武器 / 利息 +3%
+
+反编译证据链（全部来自权威脚本，非推测）：
+
+| 环节 | 出处 | 内容 |
+|---|---|---|
+| 解锁表初值 | `frame_6/PlaceObject2_6_333 onClipEvent(load)` | `unlocker.m60/gatling=true`，其余 false；`weaponsToUnlock=["crotale","canon125","MLRS","MTHEL","pluton"]`；`iUnlock=0`；`unlockerLength=5` |
+| 自动解锁时间线 | `DefineSprite_834/frame_1/PlaceObject2_773_189` `newEvents` | `mR==7→canon75`、`11→canon105`、`16→canon105D`、`27→radar`、`31→su37`；另 `18/20/27/31/37/39` 调 `showPanelForUnlock()` |
+| 解锁函数 | `pcode_as/frame_6__PlaceObject2_6_333` `unlockNextWeapon` | `iUnlock==unlockerLength → return false`；否则 `weaponsToUnlock[iUnlock]=true; iUnlock++` |
+| 面板函数 | 同上 `showPanelForUnlock` | `debloquerArme._x=400; _y=300; lockItem=false`；文案 `"you can unlock the <X>" + "\n" + "or increase your interest rate to " + (interest+3) + "%"` |
+| 解锁按钮 | `DefineSprite_989/frame_1/PlaceObject2_988_6 on(press)` | `lockItem` 守卫 → `unlockNextWeapon()` → 成功播 `creationUnite` + `_alpha=45` + `_parent._x=-500`；失败播 `cannot` |
+| 利息按钮 | `DefineSprite_989/frame_1/PlaceObject2_988_3 on(press)` | `lockItem` 守卫 → `interest += 3` → `_alpha=45; _parent._x=-500` |
+| 按钮文本 | 两个 `onClipEvent(load)` | `"unlock the next weapon"` / `"increase interest"` |
+| 利息结算 | `953/frame_30` + `pcode_as/frame_6__PlaceObject2_6_329 giveIntrest` | 每波结束 `euros = floor(euros × (1 + interest/100))`，第 1 波后不给 |
+| 触发时机 | `953/frame_2 DoAction` | 两波之间剧情段调 `_root.events()`，此时 `mR` = 即将开始的波号 |
+
+**H5 实现**（`territory-defense/game.js`）：
+- `SHOP` 去掉 `unlock` 波数字段，改为全部读 `G.unlocker`；初始只 `m60`/`gatling` 可选（商店 11 项 / 9 项灰锁）
+- 新增 `AUTO_UNLOCK` / `PANEL_WAVES` / `WEAPONS_TO_UNLOCK` 表 + `unlockNextWeapon()` / `autoUnlockForWave()` / `showPanelForUnlock()` / `panelPickUnlock()` / `panelPickInterest()`
+- `endWave()` 用 `nextWave = G.wave + 1` 查表（对应原版 `events()` 在下一波前调用），命中 `PANEL_WAVES` 则弹面板且**不推进 `interWave`**
+- 面板打开时 `tick()` 冻结波次调度；`lockItem` 守卫防连点（与原版一致）
+- Su37 空袭按钮加 `G.unlocker.su37` 解锁门（原版 m31 才出现）
+- `index.html` 新增 `#unlockPanel`（舞台居中，对应原版 `_x=400 _y=300`）
+
+**真机验证**（browser-use，http://127.0.0.1:8123）：
+- 开局：商店 11 项 / 9 锁定；Su37 按钮 `disabled=true` 文案"Su37 未解锁"
+- 波 6 结束 → `canon75=true` 自动解锁，无面板，`interWave=200`
+- 波 17 结束 → 弹面板，文案 `你可以解锁 "125mm 炮" / 或把利率提到 9%`
+- 真实点击"解锁 响尾蛇导弹" → `crotale=true`、商店锁定 9→8、面板关闭、`interWave=188`（波次恢复）
+- 真实点击"利率 → 9%" → `interest 6→9`、`hInt2` 显示 `interest 9%`、`iUnlock` 不变（1）
+- 面板打开时跑 60 帧 `tick()` 波次冻结；关闭后 3 帧恢复推进
+
+### 2. 自动修理蓝色磁场（原版剧情明文记载的视觉）
+
+反编译证据链：
+
+| 环节 | 出处 | 内容 |
+|---|---|---|
+| 伤害循环触发 | `frame_6/PlaceObject2_6_327` | `if (unitsAlliees[i].repairLogo.autoRepair) unitsAlliees[i].structureDeco.autoRepair()` |
+| 修理函数 | `DefineSprite_185/frame_2/PlaceObject2_6_31 autoRepair()` | 扣 `priceToPay = 2*(maxHP-curHP)`；`etat=etatMax`；`repairLogo.light.gotoAndPlay(1)` + `repairLogo.light2.gotoAndPlay(1)` |
+| 磁场精灵 | SWF dump `DefineSprite (chid:183)` | 7 帧：shape 77 → 179 → 180 → 181 → 182 → RemoveObject2（空白帧） |
+| 权威配色 | `PlaceObject3 light/light2`（body 0x5a796 / 0x5a7f4） | `chid=183`，CXFORM `mult=[0,0,0,256] add=[153,204,255,0]` → 纯 **#99CCFF** |
+| 权威尺寸 | 同上 + `structure(185)` 内 `PlaceObject2 repairLogo` | sprite184 内 `scale=0.05537, t=(-170,-170)`；sprite185 内 `scale=2.07898, t=(0,0)` → 净直径 ≈ 35px，居中塔身 |
+| 深度 | `structure(185)` 子件 | `structureDeco dpt=1` < `tourelle dpt=24` < `repairLogo dpt=31` → 磁场画在塔身**之上** |
+| 时长 | SWF 头 | 24fps × 7 帧 ≈ 0.292s |
+| 剧情佐证 | `frame_6/PlaceObject2_980_242` | *"Every time a turret is auto-repaired, a blue magnetic field appears around it."* |
+
+**H5 实现**：
+- 新增 `deobf` 侧生成脚本流程：FFDec `-selectid 183 -format sprite:png` 导出 7 帧 → 按 CXFORM 把纯白渐变重着色为 `#99CCFF`（保留原 alpha 通道），存 `assets/repair/light_1..7.png`
+- `MAGNET_FRAMES`(7) / `MAGNET_FPS`(24) / `MAGNET_DIAM`(35) / `MAGNET_TICKS = round(7/24*30) = 9`
+- `Turret.magnetT`：`autoRepair` 实际修理到 HP 时触发；`magnetT===0` 才重开（**与原版 `gotoAndPlay(1)` 语义一致：持续修理 → 持续重播光环**）
+- 绘制位置在塔身之后（对应 dpt=31 最高层）
+
+**真机验证**：7 帧素材全部 `complete && naturalWidth`；像素级开关对比 —— 开 `magnetT=9` 时塔周围 50×50 窗口内 34 px 均色 `rgb(149,199,248)≈#99CCFF`，关时 0 px；截图可见炮塔上方的蓝色光晕
+
+### 本轮如实说明
+
+- 原版 `newEvents` 里 `m25` 额外 `euros += 2400`、`m26/m59` 播 `edithStart` 语音等**剧情奖励**未接入（H5 已去剧情，只保留与玩法/经济相关的解锁与利息）
+- `su37` 在原版是 `menu.constructionCont` 里的建造项；H5 架构里 Su37 走侧栏按钮，故只把解锁门挂在按钮可用性上（视觉与玩法效果等价）
+
 ## 资源还原看板（第 7 轮更新）
 
 | 项 | 状态 | 产出 |

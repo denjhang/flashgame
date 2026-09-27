@@ -42,6 +42,22 @@
   #musicBox button.on { background:#6a6a3a; color:#ff8; }
   #musicBox .row { display:flex; gap:3px; }
   #musicBox .row button { flex:1; text-align:center; }
+  /* 波间二选一面板 (原版 sprite 989 debloquerArme, 舞台居中 _x=400 _y=300) */
+  #unlockPanel { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+                 width:300px; background:#3a3a3a; border:3px solid #888;
+                 box-shadow:0 0 0 3px #111, 0 6px 22px rgba(0,0,0,.7);
+                 display:none; z-index:50; padding:10px; }
+  #unlockPanel.show { display:block; }
+  #upInfo { background:#101010; color:#cfc; font-size:12px; line-height:1.5;
+            padding:8px; margin-bottom:8px; white-space:pre-line; text-align:center;
+            border:1px solid #555; }
+  #unlockPanel .btns { display:flex; flex-direction:column; gap:6px; }
+  #unlockPanel button { background:#5a5a3a; color:#ffe; border:2px solid #999;
+                        font-family:monospace; font-size:12px; padding:7px; cursor:pointer; }
+  #unlockPanel button:hover:not(:disabled) { border-color:#e80; background:#6a6a4a; }
+  #unlockPanel button:disabled { opacity:.35; cursor:not-allowed; }
+  #unlockPanel button.int { background:#3a4a5a; }
+  #unlockPanel button.int:hover:not(:disabled) { background:#4a5a6a; }
 </style>
 </head>
 <body>
@@ -83,12 +99,19 @@
       <span class="interest" id="hInt2"></span>
     </div>
   </div>
+  <div id="unlockPanel">
+    <div id="upInfo"></div>
+    <div class="btns">
+      <button id="upUnlock">解锁下一件武器</button>
+      <button id="upInterest" class="int">提高利率</button>
+    </div>
+  </div>
 </div>
 <div id="hud" style="position:absolute; left:8px; top:604px; color:#cfc; font-size:13px;">
   金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> |
   <span style="color:#9aa">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空</span>
 </div>
-<script src="data.js?v=1790536111"></script>
-<script src="game.js?v=1790536111"></script>
+<script src="data.js?v=1790538935"></script>
+<script src="game.js?v=1790538935"></script>
 </body>
 </html>
