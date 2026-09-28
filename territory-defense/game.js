@@ -310,27 +310,53 @@ function updateDeathShake() {
 //     DefineSprite_86 是黑色线框标记层 (箭头/十字/方框), 不是炮塔外观。
 //     现改用 173 库整帧, 见下方 TURRET_LIB_* 与 TURRET_GUNS。
 // 炮弹 (权威映射, 全部来自 DefineSprite_400_obus 帧库子件 + frame_1 弹体):
-//   obus 库帧标签 → 内层弹体 sprite (dump 权威):
-//     obusLeger→301(90x93) obusMoyen→307(104x108) obusLourd→361(176x182)
-//     bullet/bulletLourde→390(曳光, 无爆炸音, 带 ricochet/metal 概率)
-//     missile/missileUnder→393(23x56 导弹) missile2→394 内嵌 missile3→395 内嵌
-//   飞行弹体统一取 sprite 的 frame 1 (其余帧是爆炸/尾焰动画)
+//   obus 库帧标签 → 内层实体子件 (FFDec SVG 逐帧导出, 权威):
+//     f1 obusLeger  → 301(弹体 90x93) + 303(枪口焰) + 304(弹壳)
+//     f2 obusMoyen  → 307 + 304
+//     f3 obusLourd  → 361 + 304
+//     f4 bullet     → 365(枪口焰) + 390(曳光弹) + 391(弹壳)
+//     f8 missile    → 392(弹体,细长) + 393(尾焰喷流, 15 帧动画)   ← crotale 音效
+//     f9 missile2   → 394(弹体) + 393(尾焰)                       ← mlrs 音效
+//     f10 missile3  → 395(弹体) + 393(尾焰)                       ← pluton 音效
+//     f11 missileUnder → 392 + 393                                ← crotale 音效
+//   ★【本轮修正】旧实现把 missile 画成 sprite 393 的 f8 —— 但 393 是【尾焰喷流】不是弹体
+//     (393 在所有 missile 帧里都是【负缩放】, 尺寸随帧放大 1.06→1.69→2.05, 即喷流变长;
+//      真正的弹体是 392/394/395, 各自 frame1 是细长小弹体, frame2+ 才是爆炸)。
+//     ⇒ 现改为【弹体 + 尾焰】两层合成, 且尾焰按 15 帧循环播放 (= 用户说的"子弹有动画")。
 const SHELL_FRAMES = {
-  // 每型: sprite 路径 + 内容 bbox (实测) + 缩放到 ~16-22px 世界长度
+  // 每型: 弹体 sprite + 内容 bbox (实测) + 缩放到 ~16-22px 世界长度
   bullet:      { src: 'assets/shells/DefineSprite_390/1.png', bbox: [19,38,6,32],  scale: 0.4688 },
   bulletLourde:{ src: 'assets/shells/DefineSprite_390/1.png', bbox: [19,38,6,32],  scale: 0.4688 },
   obusLeger:   { src: 'assets/shells/DefineSprite_301/1.png', bbox: [39,36,14,25], scale: 0.5600 },
   obusMoyen:   { src: 'assets/shells/DefineSprite_307/1.png', bbox: [45,43,16,26], scale: 0.6154 },
   obusLourd:   { src: 'assets/shells/DefineSprite_361/1.png', bbox: [81,74,16,36], scale: 0.6111 },
-  missile:     { src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
-  missile2:    { src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
-  missile3:    { src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
-  missileUnder:{ src: 'assets/shells/DefineSprite_393/8.png', bbox: [4,21,16,25],  scale: 0.8000 },
+  // 导弹弹体: 392(185x191 画布 / 弹体 4x17) 394 395 —— 用发射者绝对坐标的 bbox
+  missile:     { src: 'assets/shells/DefineSprite_392/1.png', bbox: [91,84,4,17],   scale: 1.0000 },
+  missileUnder:{ src: 'assets/shells/DefineSprite_392/1.png', bbox: [91,84,4,17],   scale: 1.0000 },
+  missile2:    { src: 'assets/shells/DefineSprite_394/1.png', bbox: [111,105,4,17], scale: 1.0000 },
+  missile3:    { src: 'assets/shells/DefineSprite_395/1.png', bbox: [166,161,4,17], scale: 1.0000 },
 };
 const SHELL_IMG = {};
 for (const k in SHELL_FRAMES) {
   const im = new Image(); im.src = SHELL_FRAMES[k].src; SHELL_IMG[k] = im;
 }
+// 导弹尾焰 (原版 obus 各 missile 帧里的 chid 393): 15 帧循环, f15 有 stop() 后停住
+//   相对弹体的安放 (obus 局部系, 注册点原点):
+//     missile   : 393 m=[-0.7785,0,0,-1.0601, 9.109, 46.834]   (负缩放 = 朝后喷)
+//     missile2  : 393 m=[-0.731, 0,0,-1.688,  8.607, 90.942]
+//     missile3  : 393 m=[-1.84,  0,0,-2.048, 21.424,117.405]
+//     missileUnder: 393 m=[-0.74, 0,0,-1.181, 8.712, 61.419]
+//   393 画布 23.85x56.6, 其自身 root g=(11.7,43.85) (内容原点在画布内)
+const PLUME_SRC = 'assets/shells/DefineSprite_393/';
+const PLUME = [];
+for (let i = 1; i <= 15; i++) { const im = new Image(); im.src = PLUME_SRC + i + '.png'; PLUME.push(im); }
+const PLUME_M = {
+  missile:      [-0.7785, 0, 0, -1.0601, 9.109, 46.834],
+  missileUnder: [-0.74, 0, 0, -1.181, 8.712, 61.419],
+  missile2:     [-0.731, 0, 0, -1.688, 8.607, 90.942],
+  missile3:     [-1.84, 0, 0, -2.048, 21.424, 117.405],
+};
+const PLUME_W = 23.85, PLUME_H = 56.6, PLUME_OX = 11.7, PLUME_OY = 43.85;
 
 // ---------------- 弹壳 / 枪口焰 / 车头灯 (原版细节三件套) ----------------
 // 权威依据 (DefineSprite_400_obus 的逐帧 SVG 导出, 以 f4 "bullet" 为例):
@@ -1370,7 +1396,7 @@ function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   const ca = Math.cos(ang), sa = Math.sin(ang);
   const mx = x + ca * dy - sa * dx, my = y + sa * dy + ca * dx;
   G.shells.push({ x: mx, y: my, target, w, side, turretId,
-    speed: 9, trail: 0 });
+    speed: 9, trail: 0, born: G.frame });
   // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件 303/304, 都在炮口)
   spawnMuzzleFx(mx, my, ang, side);
 }
@@ -1960,8 +1986,36 @@ function draw() {
     const ang = t ? Math.atan2(t.y - s.y, t.x - s.x) : 0;   // y-down 世界系, 屏幕角=世界角
     const kind = SHELL_KIND[s.turretId] || 'bullet';
     const spec = SHELL_FRAMES[kind] || SHELL_FRAMES.bullet;
+    const isMissile = !!PLUME_M[kind];
     const im = SHELL_IMG[kind];
-    if (im && im.complete && im.naturalWidth) {
+    if (isMissile) {
+      // ★ 导弹 = 【弹体 + 尾焰喷流】两层 (原版 obus f8/f9/f10/f11 的子件构成)
+      //   弹体 = sprite 392/394/395 的 frame1 (细长小弹体, 全画布见 SHELL_FRAMES 的 bbox)
+      //   尾焰 = sprite 393 的 15 帧循环 (负缩放朝后喷; 原版 f15 带 stop() → 播完停住)
+      //   ⚠ 旧实现把 393 的 f8 当弹体画 —— 但 393 是喷流, 见上方注释
+      const [bx, by, bw, bh] = spec.bbox;
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang + Math.PI / 2); ctx.scale(zoom, zoom);
+      // 弹体 (内容 bbox 中心对齐弹道点)
+      if (im && im.complete && im.naturalWidth) {
+        ctx.drawImage(im, bx, by, bw, bh, -bw / 2, -bh / 2, bw, bh);
+      }
+      // 尾焰 (原版矩阵原样施加 + lighten 混合)
+      //   393 是 15 帧动画 (@24fps); 原版 f15 有 stop() → 播完停在第 15 帧
+      const pm = PLUME_M[kind];
+      const pf = Math.floor((G.frame - (s.born || G.frame)) * (24 / 30));
+      const pfi = Math.min(14, pf);
+      const pim = PLUME[pfi];
+      if (pim && pim.complete && pim.naturalWidth) {
+        ctx.save();
+        ctx.transform(pm[0], pm[1], pm[2], pm[3], pm[4], pm[5]);
+        // 原版 393 是 mix-blend-mode: lighten → Flash "Lighten" = 逐通道取 max
+        //   Canvas 的 'lighten' 语义与之一致 ('lighter' 是加法, 不等价)
+        ctx.globalCompositeOperation = 'lighten';
+        ctx.drawImage(pim, 0, 0, PLUME_W, PLUME_H);
+        ctx.restore();
+      }
+      ctx.restore();
+    } else if (im && im.complete && im.naturalWidth) {
       const [bx, by, bw, bh] = spec.bbox;
       const sc = spec.scale * zoom;
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(ang + Math.PI / 2); ctx.scale(sc, sc);

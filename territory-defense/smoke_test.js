@@ -266,6 +266,21 @@ console.log("--- 开火细节 ---");
   }
   console.log("车头灯: 11 车型灯数与原版 426 一致=" + ok + " (tigre 无灯=" + !HEADLIGHTS.tigre + ")");
   console.log("车头灯素材=" + (HEADLIGHT_IMG && HEADLIGHT_IMG.src.split('/').slice(-3).join('/')));
+  // ★ 导弹 = 弹体 + 尾焰两层 (旧实现误把尾焰 393 当弹体)
+  console.log("导弹尾焰动画: " + PLUME.length + " 帧 (原版 sprite 393 = 15 帧, f15 stop)");
+  const bodyOk = {
+    missile: 'DefineSprite_392', missileUnder: 'DefineSprite_392',
+    missile2: 'DefineSprite_394', missile3: 'DefineSprite_395',
+  };
+  let mb = [];
+  for (const k in bodyOk) {
+    const s = SHELL_FRAMES[k];
+    if (!s || s.src.indexOf(bodyOk[k]) < 0) mb.push(k + "=" + (s ? s.src : 'missing'));
+  }
+  console.log("导弹弹体 sprite 与原版 obus f8/f9/f10/f11 一致=" + (mb.length === 0) + (mb.length ? " 偏差:" + mb.join(",") : ""));
+  const pmOk = ['missile', 'missileUnder', 'missile2', 'missile3'].every(k => PLUME_M[k] && PLUME_M[k].length === 6);
+  console.log("导弹尾焰矩阵 4 型齐全=" + pmOk);
+  console.log("导弹不再误用 393 作弹体=" + Object.keys(SHELL_FRAMES).every(k => SHELL_FRAMES[k].src.indexOf('DefineSprite_393') < 0));
   G.muzzle = []; G.casings = []; G.shells = [];
 }
 // ---- 车体放置 (原版 426 patternTransform 矩阵) + 影子矩形 ----
