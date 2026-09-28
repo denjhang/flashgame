@@ -1,5 +1,38 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+53 轮成果（2026-09-28, H5 领土防御·雷达快照 refreshRadar 1Hz + noTarget 结清）
+
+**（权威 = 327 pcode 的 refreshRadar / noTarget 函数体逐行解码）**
+
+### 1. 【noTarget(side) 结清（N+51 遗留）】
+
+解码：`return (side==X) ? iFirstAlly : iFirstEnnemy` —— 即"首个存活单位槽位索引"
+（getFirstEA 每 200ms 维护，removeUnits 把死槽位置 "null" 的扫描起点优化）。
+H5 无死槽结构（全扫 + hp 过滤），**行为等价，以解码记录结清**。
+
+### 2. 【★ 雷达快照：小地图点集每 1s 重建 + radar/radarMobile 排除】
+
+refreshRadar（setInterval 1000ms）逐行解码：重建 unitsEnnemiesRadar/unitsAllieesRadar
+两个**引用数组**，排除 `type=='radar'` / `'radarMobile'` —— **雷达塔与 radarMobile
+不上小地图**。快照存引用 → blip 位置实时（无滞后）；滞后的只是成员增删
+（新出生 ≤1s 才出现在小地图；死亡因 removeUnits 即删 ptRadar 而立即消失）。
+
+H5 实现：`refreshRadar()`（radarA 排除 radar 塔；radarE 按 type 字面排除）+
+tick 内 1Hz 快照计时；drawMinimap 改从快照绘制（radar 塔的青色特殊点删除）。
+保留 H5 的迷雾可见过滤（原版 blip 自身的可见性规则需 radar 显示 clip 的脚本佐证，
+未逐行核，如实记录）。
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `雷达塔排除出小地图=true (radarA=1)`、`camion3(radarMobile武器) 在点集=true`、
+  `type=='radarMobile' 字面排除=true`、`快照后新出生不在点集=true → 下次刷新进入=true`
+- 113 项 `=true`；450 帧 sim 正常（塔 15/15 / lost=false）
+
+### 4. 本轮仍未做（如实记录）
+
+- 小地图敌点的迷雾可见过滤是 H5 自有设计（原版 blip 可见性未逐行核）——保留现状
+- m26 edithStart 音乐 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器覆盖率 / 真机听感（均搁置）
+
 ## 第 N+52 轮成果（2026-09-28, H5 领土防御·复刻僵尸锁定开火 — N+51 遗留项）
 
 **（权威同 N+51：174 OCEEF 超保持半径分支只重排轮询、不清 target）**

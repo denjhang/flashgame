@@ -1939,6 +1939,12 @@ function tick() {
   playBirds(performance.now());
   computeVisibility();
   revealExplored();
+  // 雷达快照 (原版 refreshRadar, setInterval 1000ms): 每 1s 重建小地图点集成员。
+  //   排除 type=='radar'/'radarMobile' (雷达塔/radarMobile 不上小地图); 位置无滞后
+  //   (快照存引用, blip 每帧读实时 _x), 滞后的只是成员增删 (新出生 ≤1s 才出现)
+  G.radarSnapT = (G.radarSnapT === undefined) ? 0 : G.radarSnapT;
+  G.radarSnapT -= G.dt;
+  if (G.radarSnapT <= 0) { refreshRadar(); G.radarSnapT = 1000; }
 
   // 出兵 (原版 startMission 整波即时生成, 无 spawnQueue)
   if (G.waveActive) {
@@ -2508,6 +2514,16 @@ function draw() {
 const MM = { w: 161, h: 150 };
 const mmCv = document.getElementById('minimap');
 const mmCtx = mmCv.getContext('2d');
+// 雷达快照 (原版 refreshRadar, 327 pcode): 每 1s 重建成员, 排除 type=='radar'/'radarMobile';
+//   快照存引用 (blip 位置实时), 死亡单位由 hp 过滤即时消失 (对应原版 removeUnits 即删 ptRadar)
+function refreshRadar() {
+  G.radarA = [];
+  for (const t of G.turrets)
+    if (t.hp > 0 && t.id !== 'radar') G.radarA.push(t);      // 雷达塔不上小地图
+  G.radarE = [];
+  for (const u of G.units)
+    if (u.hp > 0 && u.type !== 'radar' && u.type !== 'radarMobile') G.radarE.push(u);
+}
 function drawMinimap() {
   const ctx = mmCtx;   // 画到侧栏小地图
   ctx.clearRect(0, 0, MM.w, MM.h);
@@ -2515,12 +2531,11 @@ function drawMinimap() {
   // 坐标换算: 与缩略图同一坐标系 = 地图位图 (世界 x 0..2070, y -1440(北)..480(南), 顶=北)
   const mx = (wx) => (wx - MAP_ORIGIN.x) / MAP_W * MM.w;
   const my = (wy) => (wy - MAP_ORIGIN.y) / MAP_H * MM.h;
-  for (const t of G.turrets) {
-    if (t.hp <= 0) continue;
-    ctx.fillStyle = t.id === 'radar' ? '#6cf' : '#4f4';
+  for (const t of G.radarA || []) {
+    ctx.fillStyle = '#4f4';
     ctx.fillRect(mx(t.x) - 1.5, my(t.y) - 1.5, 3, 3);
   }
-  for (const u of G.units) {
+  for (const u of G.radarE || []) {
     if (u.hp <= 0 || !isVisible(u.x, u.y)) continue;
     ctx.fillStyle = '#f44';
     ctx.fillRect(mx(u.x) - 1.5, my(u.y) - 1.5, 3, 3);
