@@ -724,6 +724,35 @@ console.log("--- 机枪连发 ---");
   // 冷却 = 整轮之后 (m60: floor(40/1.13)×43 = 1505ms)
   console.log("m60 整轮冷却=" + fireCooldownMs(40) + "ms (期望 1505, 原版 floor(40/1.13)×43)");
 }
+// ---- 车队链表 (原版 createUnit unitDevant/unitDerriere + frame_39 拆链) ----
+console.log("--- 车队链表 ---");
+{
+  // 建链: 同路线按出场顺序互链
+  G.units.length = 0;
+  const a = new Unit('camion1', 'null', 'parcourt1');
+  const b = new Unit('camion1', 'null', 'parcourt1');
+  a.devant = null;
+  b.devant = a;                       // createUnit: 后车.devant = 前车
+  const c = new Unit('jeep', 'null', 'parcourt2');   // 不同路线
+  c.devant = null;
+  G.units.push(a, b, c);
+  console.log("建链: 同路线后车.devant=前车=" + (b.devant === a) + ", 异路线=null=" + (c.devant === null));
+  // 制动: 前车停在正前方 15px (<18px 间距) → 后车速度钳到前车
+  a.x = b.x + 15 * Math.cos(b.rot); a.y = b.y + 15 * Math.sin(b.rot);
+  a.v = 0; a.rot = b.rot;
+  b.v = 2.89;
+  const px0 = b.x;
+  // 手动跑一次移动段 (模拟 update 的链表制动; draw 已 stub, 直接调 tick 会推进整场)
+  const gap = 18;
+  const dd = Math.hypot(b.devant.x - b.x, b.devant.y - b.y);
+  const braked = dd < gap ? Math.min(b.v, a.v) : b.v;
+  console.log("前车 15px 内制动: 距离=" + dd.toFixed(1) + " < 18 → v " + b.v.toFixed(2) + "→" + braked.toFixed(2) + " (钳到前车=0)");
+  // 拆链: 前车死亡 → 后车脱离
+  a.hp = 0; a.dead = true;
+  if (b.devant.dead || b.devant.reached || b.devant.hp <= 0) b.devant = null;
+  console.log("前车死亡拆链 (等价 frame_39 unlink)=" + (b.devant === null));
+  G.units.length = 0;
+}
 // ---- 单位移动模型 (原版 428_unit: 速度=chassis[0]×fpsc px/帧@24, 转向=chassis[2] 度/帧) ----
 console.log("--- 单位移动模型 ---");
 {

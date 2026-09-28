@@ -1267,6 +1267,19 @@ class Unit {
     //   当前速度以 freinVirage 为步长渐变 (原版 vitesse ±= freinVirage 的加减速模型)
     const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
     this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
+    // 原版车队链表制动 (GAME_LOGIC.md B: 维持车距 CONST_ELOIGNEMENT=1.8/舰4):
+    //   前车在本车前方 CONVOY_GAP 内时不超越 —— 本车速度钳到前车当前速度。
+    //   前车已亡/到达则拆链 (等价原版 frame_39 的双向 unlink)。
+    //   注: 精确比较倍率无法从混淆 pcode 解出, 取 1.8×10=18px (舰 4×10=40px, 与车长同量级)
+    if (this.devant) {
+      if (this.devant.dead || this.devant.reached || this.devant.hp <= 0 || this.devant.dying > 0) {
+        this.devant = null;
+      } else {
+        const gap = (this.type === 'navire' || this.type === 'Yamato') ? 40 : 18;
+        const dd = Math.hypot(this.devant.x - this.x, this.devant.y - this.y);
+        if (dd < gap) this.v = Math.min(this.v, this.devant.v);
+      }
+    }
     this.x += Math.cos(this.rot) * this.v;
     this.y += Math.sin(this.rot) * this.v;
     // 行进音 (原版 roule(): 按底盘随机播车体音; 节流到每 12 帧, 且仅在视野内)
@@ -1785,7 +1798,12 @@ function tick() {
       G.spawnTimer++;
       if (G.spawnTimer >= G.spawnQueue[0].delay) {
         const s = G.spawnQueue.shift();
-        G.units.push(new Unit(s.type, s.weapon, s.route));
+        const nu = new Unit(s.type, s.weapon, s.route);
+        // 原版车队链表 (frame_6/329 createUnit): unitDevant = 上一个出场的同路线单位,
+        //   首个为 "null"; 被移除时(frame_39)双向拆链。H5 按 route 引用同路即同队。
+        const prev = G.units.filter(u => u.route === nu.route && !u.dead && !u.reached).pop();
+        nu.devant = prev || null;
+        G.units.push(nu);
         G.spawnTimer = 0;
       }
     } else if (G.units.every(u => u.dead || u.reached)) {
