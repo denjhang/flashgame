@@ -737,63 +737,66 @@ console.log("--- 舞台底色 ---");
 // ---- 开火序列: H5 GUN_FIRE_SEQ 全序列帧应均有内容(无 PNG 空帧) ----
 console.log("--- 开火序列无空帧 ---");
 {
-  // 用浏览器渲染同样的 alpha>10 阈值, 统计每枪管 sprite 的"真正"非空帧集
-  const fs=require('fs');
-  const zlib=require('zlib');
-  function pngAlpha(p){
-    const d=fs.readFileSync(p);
-    if (d.length<200) return { w:0, h:0, nonempty:0, max:0 };
+  // 正确的 PNG 解码: 收集全部 IDAT -> inflate -> 逐行 unfilter -> 统计 alpha>10
+  // (旧版有 bug: d.length<200 直接返回空, 把小文件误判为空白)
+  const fsx=require('fs');
+  const zlix=require('zlib');
+  function pngNonBlank(p){
+    const d=fsx.readFileSync(p);
     const w=d.readUInt32BE(16), h=d.readUInt32BE(20), ct=d[25];
-    const chunks=[]; let i=8;
-    while (i<d.length-1){
+    const ids=[]; let i=8;
+    while (i<d.length-8){
       const ln=d.readUInt32BE(i);
       const t=d.slice(i+4, i+8).toString('latin1');
-      if (t==='IDAT') chunks.push(d.slice(i+8, i+8+ln));
+      if (t==='IDAT') ids.push(d.slice(i+8, i+8+ln));
       i+=12+ln;
     }
-    const raw=zlib.inflateSync(Buffer.concat(chunks));
-    const ch=({0:1,2:3,3:1,4:2,6:4})[ct]; const st=w*ch;
-    const out=Buffer.alloc(raw.length);
-    let p2=0; let prev=Buffer.alloc(st);
+    if (!ids.length) return false;
+    const raw=zlix.inflateSync(Buffer.concat(ids));
+    const ch=({0:1,2:3,3:1,4:2,6:4})[ct]||4;
+    if (ch!==4 && ch!==2) return true;   // 调色板/灰度图视为有内容
+    const step=ch; const st=w*step;
+    let prev=Buffer.alloc(st); let p2=0;
     for (let y=0;y<h;y++){
       const ft=raw[p2]; p2++;
       const line=Buffer.from(raw.slice(p2, p2+st)); p2+=st;
       for (let x=0;x<st;x++){
-        const a=x>=ch?line[x-ch]:0; const b=prev[x]; const c=x>=ch?prev[x-ch]:0;
-        if (ft===0) {} else if (ft===1) line[x]=(line[x]+a)&255;
+        const a=x>=step?line[x-step]:0; const b=prev[x]; const c=x>=step?prev[x-step]:0;
+        if (ft===1) line[x]=(line[x]+a)&255;
         else if (ft===2) line[x]=(line[x]+b)&255;
         else if (ft===3) line[x]=(line[x]+((a+b)>>1))&255;
-        else { const pp=a+b-c; const da=Math.abs(pp-a),db=Math.abs(pp-b),dc=Math.abs(pp-c);
+        else if (ft===4){ const pp=a+b-c; const da=Math.abs(pp-a),db=Math.abs(pp-b),dc=Math.abs(pp-c);
           const pr=da<=db&&da<=dc?a:(db<=dc?b:c); line[x]=(line[x]+pr)&255; }
       }
-      out.set(line, y*st); prev=line;
+      if (ch===4){ for (let j=3;j<st;j+=4) if (line[j]>10) return true; }
+      else { for (let j=0;j<st;j++) if (line[j]>10) return true; }
+      prev=line;
     }
-    let mx=0, n=0; if (ch===4){ for (let j=3;j<out.length;j+=4){ if (out[j]>mx) mx=out[j]; if (out[j]>10) n++; } }
-    return { w, h, nonempty:n, max:mx };
+    return false;
   }
-  function set(dir){
-    const set=new Set();
-    for (let f=1;f<300;f++){
-      const p='assets/eturrets_spr/DefineSprite_'+dir+'/'+f+'.png';
-      if (!fs.existsSync(p)) break;
-      const r=pngAlpha(p);
-      if (r.nonempty>0) set.add(f);
+  const nonBlankSet={};
+  function isNonBlank(sid, f){
+    const k=sid+'/'+f;
+    if (!(k in nonBlankSet)){
+      const p='assets/eturrets_spr/DefineSprite_'+sid+'/'+f+'.png';
+      nonBlankSet[k]=fsx.existsSync(p) && pngNonBlank(p);
     }
-    return set;
+    return nonBlankSet[k];
   }
-  // 已实测的"PNG 导出为 0 内容"区间(FFDec 的 pattern 渲染已知 bug)
-  const KNOWN_BLANK={};
   let bad=[];
   for (const sid in GUN_FIRE_SEQ){
     const seq=GUN_FIRE_SEQ[sid];
     if (!seq || !seq.length) continue;
-    const ok=set(sid);
-    for (const f of seq){
-      if (!ok.has(f)){ bad.push(sid+':f'+f); break; }
-    }
+    for (const f of seq){ if (!isNonBlank(sid, f)){ bad.push(sid+':f'+f); break; } }
   }
-  console.log("开火序列 %d 序列里含空帧=%s"+(bad.length?'  偏差: '+bad.slice(0,10).join(','):''),
-    bad.length===0);
+  console.log("开火序列全部帧 PNG 有内容=" + (bad.length===0) +
+    (bad.length ? "  空帧序列: " + bad.slice(0,10).join(',') : " (覆盖 " + Object.keys(GUN_FIRE_SEQ).length + " 型)"));
+  // 连发帧位表: 每型的连发帧数 (帧位权威见 BURST_FRAMES 注释)
+  const burstCount={};
+  for (const sid in BURST_FRAMES) burstCount[sid]=BURST_FRAMES[sid].length;
+  console.log("连发数一览: m60(92)=" + burstCount[92] + " gatling(98)=" + burstCount[98] +
+    " crotale(122)=" + burstCount[122] + " MLRS(128)=" + burstCount[128] +
+    " (期望 4/6/2/6)");
 }
 `;
 eval(src);
