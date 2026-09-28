@@ -1318,8 +1318,9 @@ class Unit {
       //   锁定后停止轮询 (不切换更近目标); 死亡/抵达/超 100% 射程才解锁;
       //   超 0.8×射程只恢复 500ms 轮询 (旧目标继续挨打, 原版不解锁)
       const utD = (t) => Math.hypot(t.x - this.x, t.y - this.y);
+      // 解锁仅: 死亡/移除。超射程为僵尸锁定 (同玩家塔, 轮询到期才置空)
       if (this.target && (this.target.hp <= 0 || this.target.dying > 0 || this.target.dead ||
-                          !G.turrets.includes(this.target) || utD(this.target) > this.weapon[1])) {
+                          !G.turrets.includes(this.target))) {
         // 原版 OCEEF: target._parent == undefined (clip 已移除) → 视同无目标
         this.target = null;
       }
@@ -1445,10 +1446,12 @@ class Turret {
     //         setInterval) —— 原版此时【不解锁】, 旧目标继续挨打直到下次轮询按 ≤100% 重取;
     //         H5 忠实实现之。跳过 _x<0/_y>477 (舰船在海上、南口堆叠单位不可索敌)
     const twD = (u) => Math.hypot(u.x - this.x, u.y - this.y);
-    if (this.target && (this.target.hp <= 0 || this.target.reached || twD(this.target) > this.w[1])) {
-      this.target = null;
+    // 解锁仅: 死亡/到达。超射程【不清 target】—— 原版 OCEEF 只重排轮询, 僵尸锁定继续
+    // 开火直到下次轮询 (≤500ms) 按 ≤100% 重取/置空 (N+52 复刻 N+51 遗留项)
+    if (this.target && (this.target.hp <= 0 || this.target.reached)) this.target = null;
+    if (this.target) {
+      if (twD(this.target) > this.w[1] * 0.6) this.pollArmed = true;
     }
-    if (this.target && twD(this.target) > this.w[1] * 0.6) this.pollArmed = true;
     if (!this.target || this.pollArmed) {
       this.retargetT = (this.retargetT === undefined) ? 0 : this.retargetT;
       this.retargetT -= G.dt;

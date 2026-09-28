@@ -1036,10 +1036,14 @@ console.log("--- 索敌节奏 ---");
   tw.retargetT = 1; tw.update();
   const relocked = tw.target === u;
   console.log("0.6-1.0× 环带: 恢复轮询但保持锁定=%s, 轮询重取仍是同一目标=%s", annulus, relocked);
-  // 解锁: 目标超出 100% 射程
+  // 僵尸锁定: 超 100% 射程【不解锁】(原版 OCEEF 只重排轮询, 旧目标继续挨打),
+  // 轮询到期才按 ≤100% 重取/置空
   u.x = 1000 + R * 1.05;
   tw.update();
-  console.log("超 100% 射程解锁 (无他目标 → null)=%s", tw.target === null);
+  const zombie = tw.target === u;
+  tw.retargetT = 1; tw.update();
+  console.log("超 100% 射程: 僵尸锁定继续=%s → 轮询到期置空 (无他目标)=%s",
+    zombie, tw.target === null);
   // 战场边界 (获取侧): 唯一单位在 y>477 → 无法获取
   u.x = 1000; u.y = 500;
   tw.retargetT = 1; tw.update();
@@ -1053,7 +1057,10 @@ console.log("--- 索敌节奏 ---");
   en.retargetT = 1; en.x = 200 - er * 0.85; en.update();
   const kept85 = en.target === twr;
   en.x = 200 - er * 1.05; en.update();
-  console.log("敌方 0.85× 射程保持锁定=%s → 超 100%% 解锁=%s", kept85, en.target === null);
+  const zombieE = en.target === twr;
+  en.retargetT = 1; en.update();
+  console.log("敌方 0.85× 射程保持锁定=%s → 超 100%% 僵尸锁定=%s → 轮询到期置空=%s",
+    kept85, zombieE, en.target === null);
   G.units.length = 0; G.turrets.length = 0;
   G.lost = sv.lost; G.losses = sv.losses;
 }
