@@ -1210,7 +1210,7 @@ class Unit {
           // 敌方冷却同用 OCEEF 模型 (原版 174 对 ally/ennemy 是同一套 numberOfRequestForPermission)
           this.cool = fireCooldownMs(this.weapon[2]);
           this.fireT = fireTicksFor(this.weaponId);
-          spawnShell(this.x, this.y, t, this.weapon, 'ennemy');
+          spawnShell(this.x, this.y, t, this.weapon, 'ennemy', this.weaponId, this.tRot);
         }
       }
     }
@@ -1321,8 +1321,10 @@ class Turret {
       //   改为毫秒冷却计数 (G.dt), 与 fpsc 解耦。
       if (Math.abs(da) < 0.3 && this.cool <= 0 && bd <= this.w[1]) {
         this.cool = fireCooldownMs(this.w[2]);
-        this.fireT = fireTicksFor(PLAYER_ETURRET[this.id] || this.id);   // 播完整开火动画
-        spawnShell(this.x, this.y, best, this.w, 'ally', this.id);
+        const gunId = PLAYER_ETURRET[this.id] || this.id;
+        this.fireT = fireTicksFor(gunId);   // 播完整开火动画
+        // 从炮口生成 (原版 obus 放在炮管世界坐标; barrelAng = 炮塔朝向)
+        spawnShell(this.x, this.y, best, this.w, 'ally', gunId, this.rot);
       }
     }
   }
@@ -1330,13 +1332,42 @@ class Turret {
 }
 
 // ---------------- 炮弹 (溅射按原版三段公式) ----------------
-function spawnShell(x, y, target, w, side, turretId) {
-  G.shells.push({ x, y, target, w, side, turretId,
+// ★炮口偏移 (原版 createObus(type, tireur, decalY, decalX) 的第 3 实参)
+//   炮弹【不在炮塔中心生成】—— 原版把 obus 放在【炮管的世界坐标】(祖先链 _x/_y 求和),
+//   再沿炮管轴前推 decalY 到炮口; 第 4 实参 decalX 是并联炮管的横向错开。
+//   权威来源: 各武器 sprite 内 createObus 调用点 (逐条抄录)
+//     m60(92)         "bullet",      decalY=40
+//     gatling(98)     "bulletLourde",decalY=60
+//     canon75(103)    "obusLeger",   decalY=60   (173 f15 this.decalY=60)
+//     canon105(108)   "obusMoyen",   decalY=62
+//     crotale(122)    "missile",     decalY=0
+//     canon125(125)   "obusLourd",   decalY=79
+//     MLRS(128)       "missile2",    decalY=16
+//     pluton(80)      "missile3",    decalY=0
+//     MTHEL(83)       "laser",       decalY=10
+//     Yamato460(167)  "obusLourd",   decalY=79
+//     navireCrotale(164) "missile",  decalY=0
+//     tigre 系(161/153)              decalY=60
+//   ⇒ H5 旧实现从炮塔中心生成, 炮弹实际"从车体里冒出来", 与炮口差 40~79px。
+const MUZZLE_DY = {
+  m60: 40, gatling: 60, canon75: 60, canon105: 62, canon105D: 62,
+  crotale: 0, canon125: 79, MLRS: 16, pluton: 0, MTHEL: 10, radar: 0,
+  m60Brad: 40, '75mmBrad': 60, gatlingAmx10: 60, '75mmAmx10': 60,
+  '105mmAbrams': 62, '105mmDAbrams': 62, crotaleAbrams: 0, '125mmT90': 79,
+  gatlingDT90: 60, gatlingDTigre: 60, crotaleTigre: 0, navireCrotale: 0,
+  Yamato460: 79,
+};
+function spawnShell(x, y, target, w, side, turretId, barrelAng) {
+  // 朝目标的角度 (无 barrelAng 时的回退; 原版 obus._rotation 取炮管朝向)
+  const ang = (barrelAng === undefined)
+    ? Math.atan2(target.y - y, target.x - x) : barrelAng;
+  // 沿炮管轴前推到炮口
+  const dy = MUZZLE_DY[turretId] || 0;
+  const mx = x + Math.cos(ang) * dy, my = y + Math.sin(ang) * dy;
+  G.shells.push({ x: mx, y: my, target, w, side, turretId,
     speed: 9, trail: 0 });
-  // 炮口细节: 枪口焰 + 弹壳 (原版 createObus 里 obus sprite 自带的子件)
-  //   开火朝向 = 指向目标 (原版 obus._rotation = 炮塔/车体朝向)
-  const ang = Math.atan2(target.y - y, target.x - x);
-  spawnMuzzleFx(x, y, ang, side);
+  // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件 303/304, 都在炮口)
+  spawnMuzzleFx(mx, my, ang, side);
 }
 // 枪口焰 (chid 303/365) + 白色光斑 (chid 78): 原版在弹体 sprite 内, 开火瞬间出现
 const MUZZLE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => {

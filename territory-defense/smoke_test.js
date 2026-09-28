@@ -211,6 +211,26 @@ console.log("--- 开火细节 ---");
   spawnShell(0, 0, tgt, [4, 380, 40, 1, 3, 3], 'ally', 'm60');
   console.log("开火一次 → 弹壳 %d 枚 (期望1), 枪口焰 %d 个 (期望1), 弹体 %d",
     G.casings.length, G.muzzle.length, G.shells.length);
+  // ★ 炮口生成点 (原版 createObus 的 decalY: 第3实参) —— 旧实现从炮塔中心生成
+  {
+    G.shells = []; G.muzzle = []; G.casings = [];
+    const t2 = { x: 100, y: 0, hp: 10, aa: false };
+    spawnShell(0, 0, t2, [4, 380, 40, 1, 3, 3], 'ally', 'canon125');   // decalY=79, 朝 +x
+    const sh = G.shells[0];
+    console.log("炮口生成点: canon125 朝+x → 弹体 x=%s (期望 79, 旧实现=0)", sh && sh.x);
+    // 朝上 (barrelAng=-PI/2) 应沿 -y 前推
+    G.shells = []; G.muzzle = []; G.casings = [];
+    spawnShell(0, 0, t2, [4, 380, 40, 1, 3, 3], 'ally', 'canon125', -Math.PI / 2);
+    const sh2 = G.shells[0];
+    console.log("炮口生成点(朝北): y=%s (期望 -79), x=%s (期望 0)",
+      sh2 && Math.round(sh2.y), sh2 && Math.round(sh2.x));
+    const exp = { m60:40, gatling:60, canon75:60, canon105:62, crotale:0, canon125:79,
+                  MLRS:16, pluton:0, MTHEL:10, Yamato460:79, navireCrotale:0 };
+    let bad = [];
+    for (const k in exp) if (MUZZLE_DY[k] !== exp[k]) bad.push(k + "=" + MUZZLE_DY[k]);
+    console.log("MUZZLE_DY 权威表 11 项一致=" + (bad.length === 0) + (bad.length ? " 偏差:" + bad.join(",") : ""));
+    G.shells = []; G.muzzle = []; G.casings = [];
+  }
   console.log("弹壳帧数=" + CASING_FRAMES.length + " (原版 douille chid304 = 29 帧) 时长=" + CASING_TICKS + " tick");
   console.log("枪口焰帧数=" + MUZZLE.length + " (原版 chid303 = 14 帧) 时长=" + MUZZLE_TICKS + " tick");
   const expected = { camion1:2, camion2:2, camion3:2, jeep:2, bradley:2, amx10:4,

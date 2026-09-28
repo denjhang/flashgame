@@ -1,5 +1,72 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+28 轮成果（2026-09-28, H5 领土防御·炮弹改为从【炮口】生成）
+
+**（继续盘点差异：用户要求"每种武器都有后坐力/开火动画、抛弹壳、子弹动画、发射火焰"，
+本轮逐条核对 createObus 调用点，发现一处系统性错误）**
+
+### 1. 【★ 发现：炮弹生成点错误（从炮塔中心 → 应为炮口）】
+
+权威依据 —— 各武器 sprite 内的 `createObus(type, tireur, decalY, decalX)` 调用点
+（`deobf/scripts/DefineSprite_<武器>/frame_2/.../CLIPACTIONRECORD onClipEvent(load).as`）：
+
+| 武器 | 弹型 | decalY | decalX |
+|---|---|---|---|
+| m60 (92) | bullet | **40** | 0 |
+| gatling (98) | bulletLourde | **60** | `_parent.decalX` |
+| canon75 (103) | obusLeger | **60** | 0 |
+| canon105 (108) | obusMoyen | **62** | `_parent.decalX` |
+| crotale (122) | missile | 0 | −8 / +6 |
+| canon125 (125) | obusLourd | **79** | 0 |
+| MLRS (128) | missile2 | 16 | −8.7…+7.8 |
+| pluton (80) | missile3 | 0 | 0 |
+| MTHEL (83) | laser | 10 | 0 |
+| Yamato460 (167) | obusLourd | **79** | ±5/±10 |
+| navireCrotale (164) | missile | 0 | −8 / +4 |
+| tigre 系 (153/161) | bulletLourde/missileUnder | 60 | 0 |
+
+**语义（`createObus` 伪代码，`frame_6__PlaceObject2_6_335` 内）**：
+```
+obus._x = 炮管祖先链 _x 之和;  obus._y = 其 _y 之和;  obus._rotation = 炮管祖先链 _rotation 之和
+obus.decalY = decalY;  obus.decalX = decalX;
+```
+而 obus 内层的 `301`/`303` 子件 `onClipEvent(load)` 里：
+```
+this._y -= _parent.decalY;      // 沿炮管轴前推到炮口
+this._x += _parent.decalX;      // 并联炮管横向错开
+```
+⇒ **炮弹不是从炮塔中心生成的**，而是从**炮口**（沿炮管轴前推 decalY ≈ 40~79px）。
+
+**H5 旧实现**：`spawnShell(this.x, this.y, ...)` —— 从炮塔中心生成，
+炮弹看起来"从车体里冒出来"，与炮口差 40~79px；枪口焰与弹壳同理跟着错位。
+
+### 2. H5 修正
+
+- 新增 `MUZZLE_DY` 权威表（上表 decalY 全部落表）
+- `spawnShell(x, y, target, w, side, turretId, barrelAng)`：新增 `barrelAng` 形参，
+  沿 `barrelAng` 前推 `MUZZLE_DY[turretId]` 得到炮口坐标；弹体与枪口焰/弹壳
+  **统一从炮口生成**
+- 两处调用点接线真实炮管朝向：玩家塔传 `this.rot`（`OCEEF` 逼近的塔头朝向），
+  敌方单位传 `this.tRot`（174 的独立塔头朝向）；玩家塔同时把
+  `PLAYER_ETURRET[id] || id` 作为 gunId 传入（与 `fireTicksFor` 取同一把武器表）
+
+### 3. 真机验证
+
+- 冒烟测试新增：`炮口生成点: canon125 朝+x → 弹体 x=79 (期望 79, 旧实现=0)`、
+  `朝北 → y=-79, x=0`、`MUZZLE_DY 权威表 11 项一致=true`
+- 浏览器实测：塔在 (480,−1483) 开火，弹体出现在 88px 处
+  （= decalY 79 + 当帧飞行 9），枪口焰/弹壳同点；2 倍镜截图确认炮口光焰在**炮管尖端**
+
+### 4. 本轮仍未做（队列下推，如实记录）
+
+- **并联炮管的多发齐射**：原版 canon105D/105mmDAbrams/gatlingDT90/gatlingDTigre/Yamato460
+  是**每个炮管各 createObus 一次**（decalX 分别为 ±6/±2/−4+2/−9+9/±5±10），
+  H5 目前仍是**单发 + 单点 decalY**。需要把 TURRET_GUNS 的每根炮管映射成独立的
+  生成点（含 decalX 横向错开），本轮只做了"主轴前推"，**未做多管齐射**
+- 飞行弹体的**尾焰动画**（obus 帧 1~7 的 chid 365 火焰 + 302 烟）未接入 ——
+  H5 目前只用静态首帧贴图飞完全程
+- 原版舞台背景色 `#441100`（SWF header 21-23 字节，已核实）未还原
+
 ## 第 N+27 轮成果（2026-09-28, H5 领土防御·车头灯点亮路面 + 车体/影子放置矩阵修正）
 
 **用户纠正 + 追问：「车灯是点亮路面，而不是直接糊一坨在路面上」「这个你还是得参考原版
