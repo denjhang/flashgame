@@ -1245,19 +1245,29 @@ function boom(x, y, r) {
 // 权威依据 deobf/scripts/DefineSprite_428_unit/frame_2/DoAction_2.as:
 //   euros += prixRevient; master_units.removeUnits("E", this);
 //   var ie = Math.floor(Math.random()*6)+1; master_sounds["explosion"+ie].start();
-// 即: 赏金在阵亡瞬间结算, 并随机播放 6 种爆炸音之一 (与命中音不同, 这是"车辆被摧毁"音)
+// 注: 428 只加 euros, 【不动 score】—— score 是"我方损失"计数, 见 killTurret
 function killUnit(u) {
   if (u.hp > 0 || u.dead || u.dying > 0) return;   // 只在"血已尽且未在阵亡中"时启动序列
   G.euros += u.bounty;
-  G.score += u.bounty;
   u.dying = DEATH_TICKS;
   u.dyingFired = 0;
   // 原版: master_sounds["explosion" + (1..6)].start()
   playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
 }
 // 玩家塔阵亡 → 启动阵亡序列 (原版 185 的 destruction 与 428 同构: 三点爆炸, 但结构层不漂移)
+// 权威依据 deobf/scripts/DefineSprite_185_structure/frame_2/DoAction_2.as:
+//   if (master_scenario.iMission < 45) master_menuItems.score++;   // ← score 在此增加!
+//   master_units.removeUnits("A", this);
+//   var ie = Math.floor(Math.random()*6)+1; master_sounds["explosion"+ie].start();
+// ★ score 语义纠正: score 统计的是【我方损失】(丢塔数), 不是击杀数。
+//   原版自己的台词佐证 (frame_6/PlaceObject2_980_242 的教程对白):
+//     "chaque fois que vous perdez une tourelle, votre score général en est grandement affecté"
+//     "Votre score est bien là : les pertes que vous aurez subi"
+//   而 428 (敌方单位) 只加 euros、【不加 score】—— H5 之前把 score 记成击杀赏金, 是错的。
+//   iMission < 45: H5 共 44 波, 恒成立, 故不加门限。
 function killTurret(t) {
   if (t.hp > 0 || t.dying > 0) return;
+  G.score++;              // 丢塔 → score++ (原版 185 frame_2 DoAction_2)
   t.dying = DEATH_TICKS;
   t.dyingFired = 0;
   playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
@@ -1923,6 +1933,15 @@ function hud() {
   document.getElementById('hLoss').textContent = 'LOSSES ' + G.losses;
   if (typeof syncPanel === 'function') syncPanel();
 }
+// 预热全部炮塔素材 (173 塔体层 + 86 结构层 + 敌方武器塔)
+// 原因: turretLibImg/turretBaseImg 是惰性建图, 若等到 draw() 里首次请求, 玩家刚建好的
+//   第一座塔会在 PNG 到位前渲染成兜底色块 (#ba6 竖条)。这里在启动时一次性预载,
+//   消除该首帧色块 (违反"无占位/色块"要求)。
+function preloadTurretArt() {
+  for (const id in TURRET_LIB_FRAME) turretLibImg(id);
+  for (const id in TURRET_BASE_FRAME) turretBaseImg(id);
+}
+
 function buildShop() {
   const el = document.getElementById('shop');
   el.innerHTML = '';
@@ -2102,6 +2121,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 // ---------------- 启动 ----------------
+preloadTurretArt();   // 预载炮塔素材, 避免首座塔在 PNG 到位前渲染成兜底色块
 refreshToggleBtns();
 buildShop();
 hud();

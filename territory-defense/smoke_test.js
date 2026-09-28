@@ -88,6 +88,8 @@ console.log("--- 阵亡序列 ---");
     u.dying, DEATH_TICKS, G.euros - e0, sfxName);
   console.log("赏金在阵亡瞬间结算=%s 随机爆炸音在1..6=%s",
     G.euros - e0 === u.bounty, /^explosion[1-6]$/.test(sfxName || ''));
+  // ★ 428 只加 euros, 不动 score (score 是"我方丢塔数", 由 killTurret 负责)
+  console.log("击毁敌车不改 score=%s (%d→%d, 原版 428 只加 euros)", G.score === s0, s0, G.score);
   // 推进序列: 统计爆炸点数 + 序列总长 + 漂移
   let booms = 0, flames = 0, ticks = 0;
   const fx1 = G.effects.length;
@@ -175,11 +177,16 @@ console.log("--- 玩家塔阵亡序列 ---");
   const t = new Turret('canon105', 0, 0);
   t.hp = 0;
   let sfx = null;
+  const scBefore = G.score;
   const _p3 = playSfx; playSfx = (n) => { if (sfx === null) sfx = n; };
   killTurret(t);
   playSfx = _p3;
   console.log("killTurret: dying=%d (期望 %d) 随机音=%s", t.dying, DEATH_TICKS, sfx);
-  // 原版 185 destruction 段只做 removeMovieClip, 不改 euros (与单位 428 不同 —— 428 给赏金)
+  // ★ score 语义: 原版 185 frame_2 DoAction_2 是 score++ (丢塔计数), 428 才是给 euros。
+  //   原版台词佐证: "chaque fois que vous perdez une tourelle, votre score général en est grandement affecté"
+  console.log("丢塔 score++=%s (%d→%d, 原版 185 score++) 一致=%s",
+    G.score === scBefore + 1, scBefore, G.score, G.score === scBefore + 1);
+  // 原版 185 destruction 段只做 removeMovieClip + score++, 不改 euros
   const eBefore = G.euros;
   killTurret(t);   // 已在阵亡中, 应无效
   console.log("塔阵亡不改 euros=%s (%d→%d); 阵亡中重复 killTurret 无效=%s",

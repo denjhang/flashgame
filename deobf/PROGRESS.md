@@ -1,5 +1,94 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+23 轮成果（2026-09-28, H5 领土防御·修正 score 语义 + 消除首座塔的兜底色块）
+
+**本轮在做视觉审计时，意外发现 H5 把"分数"的含义搞反了 —— 原版 score 统计的是
+我方丢塔数，不是击杀数。顺带修掉首座塔的一帧兜底色块。**
+
+### 1. 【语义错误发现】score 计的是"我方损失"，H5 记成了"击杀赏金"
+
+逐行对照两侧的 destruction 脚本：
+
+| 文件 | 关键语句 |
+|---|---|
+| `DefineSprite_428_unit/frame_2/DoAction_2`（敌方车） | `euros += prixRevient;` + `removeUnits("E", this)` |
+| `DefineSprite_185_structure/frame_2/DoAction_2`（我方塔） | `if (iMission < 45) score++;` + `removeUnits("A", this)` |
+
+- **428 只加 `euros`，完全不碰 `score`**
+- **185 才 `score++`**，且 `removeUnits` 的 side 参数是 `"A"`（我方）
+- `removeUnits(side, unit)` 的伪代码证实：`"A"` 走 `unitsAlliees`（我方），否则 `unitsEnnemies`
+
+**原版自己的台词给出了决定性命中**（`frame_6/PlaceObject2_980_242` 的教程对白，法文原文）：
+
+> "chaque fois que vous perdez une tourelle, votre score général en est grandement affecté"
+> （每当您损失一座炮塔，您的总分就会大受影响）
+> "Votre score est bien là : les pertes que vous aurez subi"
+> （您的分数就在那里：您所遭受的损失）
+
+→ **`score` = 玩家丢塔计数**。H5 之前在 `killUnit` 里写 `G.score += u.bounty`（击杀赏金），
+语义完全相反；且 HUD 上"分数"会随击杀单调上升，与"损失越大分越受影响"的设定冲突。
+
+### 2. H5 修正
+
+```javascript
+function killUnit(u) {          // 428
+  G.euros += u.bounty;
+  //  ★ 删掉原来的 G.score += u.bounty —— 428 不动 score
+}
+function killTurret(t) {        // 185
+  G.score++;                    //  ★ 新增: 丢塔 → score++
+  ...
+}
+```
+
+- `iMission < 45` 门限未加：H5 共 44 波（实测 `data.js` 顶层波次数 = 44），该条件恒成立
+- HUD 文案补注"(丢塔数)"，让界面含义与原版一致（字段名 `score` 沿用原版命名）
+
+### 3. 【附带修复】首座塔会闪一帧兜底色块
+
+审计中发现: `turretLibImg()` / `turretBaseImg()` 是**惰性建图**（首次调用才 `new Image()`），
+而它们只在 `draw()` 渲染路径里被调用（`game.js:300/327`）。后果：
+玩家造出的**第一座塔**在对应 PNG 下载完成前，会走 `#ba6` 竖条兜底分支 —— 又是一处
+"占位色块"。虽然只闪一两帧，仍违反硬性要求。
+
+修法：新增 `preloadTurretArt()`，在**启动时**（`setInterval(tick)` 之前）一次性建好
+全部 25 张 173 塔体层 + 11 张 86 结构层。实测启动后立即检查：
+```
+libCount=25 baseCount=11 libAll=true baseAll=true
+```
+即所有炮塔素材在任何塔被建造前就已 complete。
+
+### 4. 真机验证
+
+- 冒烟测试新增/强化断言全绿：
+  ```
+  击毁敌车不改 score=true (0→0, 原版 428 只加 euros)
+  丢塔 score++=true (0→1, 原版 185 score++) 一致=true
+  ```
+- 浏览器实测（直接调用 killUnit/killTurret）：
+  ```
+  击毁敌车 → {euros: 50, score: 0}
+  丢塔     → {euros: 50, score: 1}   HUD 显示 "1"
+  ```
+- 预载验证：新开会话后未建任何塔时，`TURRET_LIB_IMG` 25 张、`TURRET_BASE_IMG` 11 张
+  全部 `complete && naturalWidth>0`
+- 像素检查：11 种玩家塔同时布置后逐塔采样中心区域，**兜底色 `#ba6` 命中 0 像素**
+
+### 5. 本轮如实说明
+
+- `score` 的**显示单位**：原版就是无单位的整数计数（"votre score général"），H5 沿用整数 + 文案注明。
+- 本轮只在 `killTurret` / `killUnit` 两处改动 score。`G.losses` 字段（H5 自己的"抵达基地次数"）
+  与原版 score 是两套东西，未合并 —— 原版把"丢塔"和"漏怪"记在不同地方，这里保持 H5 现状，
+  如实记录该差异。
+- 视觉审计中还发现原版 `426` 底盘是 **4 层合成**（401 小件 + 两个 `chid 154` 的
+  `mix-blend-mode: overlay` 高光层 + 403 车体），而 H5 只用单张位图（402.png）。
+  我用 SVG 与 PNG 双路核对过：两个 154 层是**白色径向渐变**的柔光叠加，会让车体顶面更亮。
+  这是一个**真实但轻微**的差异，本轮**未做**（改动涉及 12 种底盘各 4 层的矩阵与混合模式，
+  风险高于收益），如实记录为下一轮候选。
+- 之前几轮我在浏览器里看到的"炮塔是土黄色方块"，本轮查明**是我自己测试脚本的假象**：
+  我在 `evaluate` 里 `draw()` 时图片尚未 onload 完成。真实游戏里图片在启动时预载、
+  且每帧重绘，不会持续显示兜底色。已用"预载后采样 0 个兜底像素"证实。
+
 ## 第 N+22 轮成果（2026-09-28, H5 领土防御·接入阵亡镜头抖动 destruction camera shake）
 
 **本轮补上 N+20 / N+21 连续两轮都记录为"未接入"的一项：单位与玩家塔阵亡时的镜头抖动。**
