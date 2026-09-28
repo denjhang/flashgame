@@ -1,5 +1,111 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+20 轮成果（2026-09-28, H5 领土防御·补原版单位阵亡序列 destruction + markFlame 三点爆炸）
+
+**本轮把 N+18 记录为"未做"的 markFlame 彻底查清并接入，过程中发现它牵出的是一个
+比预期大得多的真实缺口：原版单位被击毁后并不立即消失，而是播一段 39 帧的阵亡序列。**
+
+### 1. 【缺口发现】原版有 39 帧阵亡序列，H5 此前是"瞬间移除"
+
+N+18 只查到 `markFlame` 是"命中时创建爆炸的定位件"，本轮把整条链读通：
+
+`deobf/scripts/DefineSprite_428_unit/frame_1/PlaceObject2_178_etat_22`（unitEtat 的 load 脚本）：
+
+```actionscript
+function destruction() {
+   removeMovieClip(_parent.ptRadar);
+   removeMovieClip(_parent.etatJauge);       // 血条
+   removeMovieClip(_parent.ombre);           // 阴影
+   _parent.tourelle.play();
+   _parent.gotoAndPlay("destruction");       // ← 跳到 destruction 帧标签
+}
+```
+
+序列长度与内容（`swf_dump.txt` 中 428 的 tag 序 + 逐帧 SVG 导出）：
+- 标签 `destruction` 在第 **2** 帧（`FrameLabel (name: destruction)`），库共 **39 帧**
+- 帧 2/4/7 各放一个 `chid 6`（`nm: markFlame` / 无名）→ 其 load 脚本各调一次
+  `master_weapons.createExplosion(车体 markFlame 世界坐标, prefID=4)`（帧 4/7 无第 3 参）
+- 帧 39 的 `DoAction`：`master_units.removeUnits("E", this) + removeMovieClip(this)`
+  —— **序列播完才真正移除**
+- 帧 2 的 `DoAction_2`：`euros += prixRevient`（赏金）+ `master_sounds["explosion"+(1..6)].start()`
+  —— **赏金在阵亡瞬间就结算，并随机播 6 种摧毁音之一**
+
+车体姿态：逐帧 SVG 显示 chassis(426) 的 `ty` 从 `-155.05` 单调漂到 `-167.05`
+（**共 12px**，沿车体纵轴向后），期间无旋转、无缩放、无透明度变化。
+
+### 2. 【关键纠正】createExplosion 用的是 chid 279 + chid 637，不是命中爆型
+
+`createExplosion`（`deobf/pcode/scripts/frame_6/PlaceObject2_6_335` 字节码）实际是：
+
+```
+Push 26000, r2; Add2 ; Push "explosion", r2; Add2 ; ... carte.attachMovie(...)
+Push 28000, r2; Add2 ; Push "flame",     r2; Add2 ; ... carte.attachMovie(...)
+... "explosion"+r2.gotoAndStop(prefID 或 random 1..3)
+```
+
+pseudo 把它写成 `attachMovie(26000+i, "explosion"+i, "explosion")` —— **参数序被写反**。
+以 N+18 已独立验证的 etincelle 为标定（`attachMovie("etincelle"+i)` → chid **564**，
+`exports.txt` 有权威导出名），可知**第 3 个参数才是链接名**，第 1 个是 depth：
+
+| 函数 | 链接名 | chid | 帧数 | H5 素材 |
+|---|---|---|---|---|
+| `createExplosion` 爆炸 | `explosion` | **279** | 4 | `assets/explosion/1..4.png`（本轮核实 = 279 的 4 帧） |
+| `createExplosion` 火焰 | `flame` | **637** | 34 | `assets/flame/1..34.png`（本轮导出） |
+| `createEclat` 火花 | `etincelle` | 564 | 7 | `assets/spark/`（N+18 已接入） |
+
+→ 我此前的阵亡爆炸误用了命中爆型（390 `small`）。本轮改用 **chid 279**（原生 210×217，
+原版只设 `_x/_y` 不缩放）。
+
+### 3. 【关键坑】flame 的黑色底 + `mix-blend-mode:lighten`
+
+`chid 637` 的 FFDec PNG 导出**黑底不透明**（34 帧全部 alpha=255，角落像素 (0,0,0,255)）。
+若直接 `source-over` 绘制会盖出一块黑方块。SVG 导出给出答案 —— 该 sprite 的子件带
+`style="mix-blend-mode: lighten"`，即 Flash 的 **Layer/ADD 混合**，黑底因此不可见。
+
+→ H5 用 `ctx.globalCompositeOperation = 'lighter'` 还原该混合。**实测修正前后对比：
+修正前是黑方块（明显 bug），修正后是叠加火光。** 该 sprite 第 28 帧起自带 alpha 淡出，
+第 34 帧全透明，并有 `this.removeMovieClip(); stop()`（`0x96 06 00 00 74 68 69 73 00 1c 25 07 00`）
+—— 播完自删，与 H5 的 `DEATH_FLAME_TICKS = 27`（34帧@24fps→30fps）一致。
+
+### 4. H5 实现
+
+- `DEATH_TICKS = round(39×24/30) = 31`；`DEATH_BOOM_TICKS = [0,2,5]×24/30`（对应原版帧 2/4/7）
+- `Unit` 新增 `dying`（剩余 tick）/ `dyingFired`（已触发爆炸数）/ `drift`
+- `Unit.update()`：`dying>0` 时**先于** `hp<=0` 判断进入阵亡分支 —— 原地滞留、按进度漂移
+  `DEATH_DRIFT=12`、在 0/2/5 tick 各生成一对 `death`(279, 3 tick) + `flame`(637, 27 tick) 特效
+  （各带 ±10px 抖动），归零后 `dead = true`
+- `killUnit(u)`：**赏金立即结算** + 随机 `explosion1..6` 音；带 `hp>0 || dead || dying>0` 守卫
+- 渲染：阵亡中 **不画武器塔、不画阴影、不画血条**（对应 `destruction()` 里三个 `removeMovieClip`），
+  车体沿 `rot` 反方向偏移 `drift`
+- 波次/胜负判定改为等 `dead`（不再用 `hp<=0`），避免序列没播完就清场
+
+### 5. 真机验证
+
+- 冒烟测试新增断言全绿：
+  ```
+  killUnit: dying=31 (期望 31) 赏金+50 随机音=explosion6
+  赏金在阵亡瞬间结算=true 随机爆炸音在1..6=true
+  序列: 31 tick 一致=true
+  车体爆炸 3 个 (原版帧2/4/7 共3个) 一致=true; 火焰叠层 3 个 一致=true
+  漂移量=12.0 → 序列结束 dead=true
+  阵亡中再 killUnit 不重复结算=true；活单位 killUnit 无效=true
+  ```
+- 浏览器逐帧截图：t0 车体无塔无影无血条 → t1/t4 火光叠加在车体上 → t12 三处爆炸齐现
+  → t24 火光衰减 → t31 车体漂移到位
+- **真实玩法闭环**（布 10 座 canon105 打 camion1）：tick 154 进入 `dying` → tick 185 `dead`
+  （差 31 tick，与 `DEATH_TICKS` 一致），赏金 +50 到账
+
+### 6. 本轮如实说明
+
+- 原版 `explosion`(279) 是 **`gotoAndStop(prefID)`** —— 停在某一帧上，靠该帧内的嵌套子精灵
+  自带动画。H5 没有这层嵌套，改为 4 帧快播后消失（`DEATH_BOOM_TICKS_LOCAL=3`）。
+  视觉上等价，但严格说不是"停在某帧"，如实记录此近似。
+- 帧 4/7 的调用没有第 3 参，原版会走 `random(1..3)` 分支；H5 未区分（都是 279 的 4 帧序列）。
+- 原版 `destruction` 段每帧还有 `_root.carte._x/_y` 的镜头抖动（帧 6/8/10/12 的 DoAction，
+  ±4~8px）。H5 未接入该镜头抖动（现有相机模型是自由滚动，不共享此语义），如实记录未做。
+- `markFlame`(chid 6) 自身是 46×46 的实心黑方块，**不是可见美术**，只作定位锚点；
+  真正可见的是它触发的 279+637。N+18 的"markFlame 未接入"至此结清。
+
 ## 第 N+19 轮成果（2026-09-28, H5 领土防御·补原版 Su37 瞄准区标记 zoneBombardement chid785）
 
 **本轮补上 N+11 已记录"未做"的真实缺口：用原版真实 SWF 素材替换侧栏按钮触发后

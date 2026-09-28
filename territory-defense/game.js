@@ -168,6 +168,51 @@ const SPARK_TICKS = Math.round(SPARK_FRAMES.length / SPARK_FPS * 30);   // 7帧@
 //   (frame1 内容 bbox x[50,52] 中心 51 ≈ 51.8, 交叉证实)
 const SPARK_ORIGIN = { x: -51.8, y: -2.3 };
 
+// ---------------- 阵亡序列 (原版 428 "destruction" 39 帧) ----------------
+// 原版流程 (权威依据 deobf/scripts/DefineSprite_428_unit/):
+//   unitEtat.destruction()  →  tourelle.play() + _parent.gotoAndPlay("destruction")
+//   destruction 段 (f2..f39): 车辆原地滞留, 车体沿自身轴向后漂移 12px,
+//     帧 2 / 帧 4 / 帧 7 各触发一次 createExplosion(车体 markFlame 世界坐标, prefID=4)
+//     (f4 与 f7 调用无第 3 参 → createExplosion 内 `if (prefID == undefined) 随机1..3`)
+//   frame_39 DoAction: master_units.removeUnits("E", this) + removeMovieClip(this)
+//   frame_2 DoAction_2: euros += prixRevient (售回收益) + 随机 explosion1..6 音效
+const DEATH_TICKS = Math.round(39 * 24 / 30);      // 39 帧 @24fps → 31 tick
+// 三次爆炸在序列内的触发 tick (原版帧 2/4/7 → 相对帧 2 偏移 0/2/5 帧)
+const DEATH_BOOM_TICKS = [0, 2, 5].map(f => Math.round(f * 24 / 30));
+// 车体漂移总量 (SVG 实测 chassis ty -155.05 → -167.05 = 12px, 沿车体纵轴向后)
+const DEATH_DRIFT = 12;
+// 阵亡爆炸用原版 createExplosion 的素材: chid 279 "explosion" (4 帧) + chid 637 "flame" (34 帧)
+//   权威依据 deobf/pcode/scripts/frame_6/PlaceObject2_6_335 (createExplosion 字节码):
+//     carte.attachMovie("explosion"+i) → chid 279; carte.attachMovie("flame"+i) → chid 637
+//     (pseudo 里显示为 26000+i / 28000+i, 实为 AS2 attachMovie 参数序被写反, 链接名才是常量)
+//     gotoAndStop(prefID) —— prefID=4 时播 "flame"? 不: explosion 停在第 4 帧 (共 4 帧, 即最后一帧)
+//   H5 assets/explosion/1..4.png 已核实 = chid 279 的 4 帧; assets/flame/ = chid 637 的 34 帧
+const DEATH_FLAME_FRAMES = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,
+  25,26,27,28,29,30,31,32,33,34].map(i => {
+  const im = new Image();
+  im.src = 'assets/flame/' + i + '.png';
+  return im;
+});
+const DEATH_FLAME_TICKS = Math.round(DEATH_FLAME_FRAMES.length * 24 / 30);   // 34帧@24fps → 27 tick
+// 爆炸本体 (chid 279, 4 帧)。原版 createExplosion 末尾是 gotoAndStop(prefID 或随机1..3) ——
+// 即"停在一帧上", 但该帧内的子精灵自带动画。H5 无此嵌套, 改为 4 帧快播后消失 (视觉近似, 如实记录)
+const DEATH_BOOM_TICKS_LOCAL = Math.round(4 * 24 / 30);   // 4帧@24fps → 3 tick
+
+// ---------------- 单位阵亡 → 启动阵亡序列 (替代原来的"立即移除") ----------------
+// 权威依据 deobf/scripts/DefineSprite_428_unit/frame_2/DoAction_2.as:
+//   euros += prixRevient; master_units.removeUnits("E", this);
+//   var ie = Math.floor(Math.random()*6)+1; master_sounds["explosion"+ie].start();
+// 即: 赏金在阵亡瞬间结算, 并随机播放 6 种爆炸音之一 (与命中音不同, 这是"车辆被摧毁"音)
+function killUnit(u) {
+  if (u.hp > 0 || u.dead || u.dying > 0) return;   // 只在"血已尽且未在阵亡中"时启动序列
+  G.euros += u.bounty;
+  G.score += u.bounty;
+  u.dying = DEATH_TICKS;
+  u.dyingFired = 0;
+  // 原版: master_sounds["explosion" + (1..6)].start()
+  playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
+}
+
 // ---------------- 爆炸动画 + BGM ----------------
 // 注: 旧的 86 库单帧方案 (TURRET_SRC/TURRET_IMG) 已删除 —— 经 FFDec 导出核实,
 //     DefineSprite_86 是黑色线框标记层 (箭头/十字/方框), 不是炮塔外观。
@@ -590,9 +635,7 @@ function su37Update() {
         const dd = Math.hypot(u.x - p.tx, u.y - p.ty);
         if (dd <= SU37.IMPACT) u.hp -= SU37.POWER * (dd <= SU37.IMPACT / 3 ? 1 : 0.5);
       }
-      for (const u of G.units) {
-        if (u.hp <= 0 && !u.dead) { u.dead = true; G.euros += u.bounty; G.score += u.bounty; }
-      }
+      for (const u of G.units) killUnit(u);
     }
     SU37.plane = null;   // 投弹后离场
     return;
@@ -939,8 +982,39 @@ class Unit {
     this.fireT = 0;        // 敌方炮管开火帧计时
     this.dead = false;
     this.reached = false;
+    // 阵亡序列 (原版 428 unit 的 "destruction" 标签, 39 帧; 由 unitEtat.destruction() 触发)
+    //   权威依据 deobf/scripts/DefineSprite_428_unit/frame_1/PlaceObject2_178_etat_22 onClipEvent(load):
+    //     destruction(): removeClip(ptRadar/etatJauge/ombre); tourelle.play(); _parent.gotoAndPlay("destruction")
+    //   428 的 destruction 段: 车辆原地滞留, 车体每帧微漂 (SVG 实测 chassis ty 从 -155.05 → -167.05, 共 12px),
+    //   并在帧 2/4/7 各创建一次 createExplosion(markFlame 世界坐标) —— 即"车体三点爆炸";
+    //   frame_39 的 DoAction: removeMovieClip(this) —— 序列结束才真正移除。
+    //   39 帧 @24fps → H5 30fps = 31 tick
+    this.dying = 0;        // >0 表示正在播阵亡序列 (剩余 tick)
+    this.dyingFired = 0;   // 已触发的爆炸点数 (0..3, 对应原版帧 2/4/7)
   }
   update() {
+    // 阵亡序列播放中: 车辆原地滞留 + 车体漂移, 不再行进/开火 (原版 gotoAndPlay("destruction") 后
+    // enterFrame 的行进/索敌逻辑不再作用于该单位; 漂移由 destruction 段自身的矩阵逐帧给出)
+    // 注: 必须放在 hp<=0 判断之前 —— 阵亡单位的 hp 已 <=0, 但序列仍要推进
+    if (this.dying > 0) {
+      this.dying--;
+      const p = (DEATH_TICKS - this.dying) / DEATH_TICKS;
+      this.drift = DEATH_DRIFT * p;
+      while (this.dyingFired < 3 &&
+             (DEATH_TICKS - this.dying) >= DEATH_BOOM_TICKS[this.dyingFired]) {
+        // 车体三点爆炸 (原版 createExplosion: 同时挂 explosion(chid279) + flame(chid637),
+        // 各带 ±10px 抖动; 两者都按原生尺寸摆放 —— 原版只设 _x/_y, 不设 _xscale/_yscale)
+        const jx = Math.random() * 20 - 10, jy = Math.random() * 20 - 10;
+        const ex = this.x + jx, ey = this.y + jy;
+        G.effects.push({ x: ex, y: ey, type: 'death',
+                         life: DEATH_BOOM_TICKS_LOCAL, life0: DEATH_BOOM_TICKS_LOCAL });
+        G.effects.push({ x: ex, y: ey, type: 'flame',
+                         life: DEATH_FLAME_TICKS, life0: DEATH_FLAME_TICKS });
+        this.dyingFired++;
+      }
+      if (this.dying === 0) this.dead = true;
+      return;
+    }
     if (this.hp <= 0) return;
     const [tx, ty] = this.route[this.pt];
     const dx = tx - this.x, dy = ty - this.y;
@@ -1081,17 +1155,8 @@ function shellHit(s) {
     // 原版命中循环: 每个受击单位 createEclat(单位位置 + (unitEtat偏移)/4) —— 车体中部
     // (unitEtat 在 428 内 t=(0,-60) scale y=2 → 偏移/4 ≈ 车体中心偏上约 8px)
     for (const u of damaged) createEclat(u.x, u.y - 8, power);
-    // 击杀赏金
-    for (const u of victims) {
-      if (u.hp <= 0 && !u.dead) {
-        u.dead = true;
-        G.euros += u.bounty;
-        G.score += u.bounty;
-        const utype = u.type === 'Yamato' || u.type === 'navire' ? 'large2' : 'small';
-        boomTyped(u.x, u.y, 8, utype);
-        shellImpactSfx(SHELL_KIND[s.turretId] || 'bullet');
-      }
-    }
+    // 击杀 → 启动阵亡序列 (原版 unitEtat.destruction(): 车辆滞留 39 帧播 destruction 段)
+    for (const u of victims) killUnit(u);
   } else {
     for (const t of victims) {
       if (t.hp <= 0) continue;
@@ -1121,6 +1186,20 @@ for (const k in EXPLOSION_TYPED)
 
 function boom(x, y, r) {
   boomTyped(x, y, r, 'small');
+}
+// 单位阵亡 → 启动阵亡序列 (替代原来的"立即移除")
+// 权威依据 deobf/scripts/DefineSprite_428_unit/frame_2/DoAction_2.as:
+//   euros += prixRevient; master_units.removeUnits("E", this);
+//   var ie = Math.floor(Math.random()*6)+1; master_sounds["explosion"+ie].start();
+// 即: 赏金在阵亡瞬间结算, 并随机播放 6 种爆炸音之一 (与命中音不同, 这是"车辆被摧毁"音)
+function killUnit(u) {
+  if (u.hp > 0 || u.dead || u.dying > 0) return;   // 只在"血已尽且未在阵亡中"时启动序列
+  G.euros += u.bounty;
+  G.score += u.bounty;
+  u.dying = DEATH_TICKS;
+  u.dyingFired = 0;
+  // 原版: master_sounds["explosion" + (1..6)].start()
+  playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
 }
 function boomTyped(x, y, r, type) {
   const n = (EXPLOSION_TYPED[type] || EXPLOSION_TYPED.small).length;
@@ -1246,7 +1325,7 @@ function endWave() {
   autoUnlockForWave(nextWave);
   if (shouldShowUnlockPanel(nextWave)) { showPanelForUnlock(); return; }   // 面板期间不推进 interWave
   G.interWave = 200;
-  if (G.wave >= WAVES.length && G.units.every(u => u.hp <= 0 || u.dead)) {
+  if (G.wave >= WAVES.length && G.units.every(u => u.dead)) {
     G.won = true;
   }
   hud();
@@ -1271,7 +1350,8 @@ function tick() {
         G.units.push(new Unit(s.type, s.weapon, s.route));
         G.spawnTimer = 0;
       }
-    } else if (G.units.every(u => u.hp <= 0 || u.dead || u.reached)) {
+    } else if (G.units.every(u => u.dead || u.reached)) {
+      // 注: 阵亡序列播放中 (dying>0) 的单位不算"已清场" —— 等它播完才结束本波
       endWave();
     }
   } else {
@@ -1444,10 +1524,15 @@ function draw() {
   }
   for (const u of G.units) {
     if (!isVisible(u.x, u.y)) continue;   // 迷雾中的敌人不可见
-    const sx = w2sX(u.x), sy = w2sY(u.y);
+    // 阵亡序列: 车体沿自身纵轴向后漂移 (原版 destruction 段 chassis ty 逐帧 -155→-167, 共 12px)
+    // 车头方向 = rot (世界系 y 向下)。向后 = 车头反方向。
+    const dr = u.dying > 0 ? (u.drift || 0) : 0;
+    const ux = u.x - Math.cos(u.rot) * dr, uy = u.y - Math.sin(u.rot) * dr;
+    const sx = w2sX(ux), sy = w2sY(uy);
     // 车体阴影 (原版 428_unit enterFrame: ombre 同 rot 旋转, 偏移 +4/+4,
     // colorTransform mult RGB=0 alpha=0.352 → 全黑半透明). 先画 = 在车体下方
-    const sim = SHADOW_IMG[u.type];
+    // 注: 原版 destruction() 里 removeMovieClip(_parent.ombre) —— 阵亡序列中阴影已移除
+    const sim = u.dying > 0 ? null : SHADOW_IMG[u.type];
     if (sim && sim.complete && sim.naturalWidth) {
       ctx.save();
       ctx.translate(sx + SHADOW_OFFSET * zoom, sy + SHADOW_OFFSET * zoom);   // y-down 世界系, +4=屏幕右下
@@ -1473,7 +1558,8 @@ function draw() {
     }
     ctx.restore();
     // 武器塔整帧叠加 (173 库: 部件已按原版矩阵合成, 整帧随瞄准角旋转)
-    if (u.weapon) {
+    // 注: 阵亡序列中不再绘制武器塔 (原版 destruction 段只保留 chassis, 塔已随 tourelle.play() 停止)
+    if (u.weapon && u.dying === 0) {
       const im = turretLibImg(u.weaponId);
       if (im && im.complete && im.naturalWidth) {
         ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
@@ -1497,7 +1583,9 @@ function draw() {
         }
       }
     }
-    if (G.showHp) {
+    // 血条 (原版 unitEtat/etatJauge; destruction() 里 removeMovieClip(_parent.etatJauge) →
+    // 阵亡序列中不再显示)
+    if (G.showHp && u.dying === 0) {
       ctx.fillStyle = '#300'; ctx.fillRect(sx - 9 * zoom, sy - 14 * zoom, 18 * zoom, 3 * zoom);
       ctx.fillStyle = '#f43'; ctx.fillRect(sx - 9 * zoom, sy - 14 * zoom, 18 * zoom * Math.max(0, u.hp) / u.maxHp, 3 * zoom);
     }
@@ -1524,6 +1612,37 @@ function draw() {
   }
   for (const e of G.effects) {
     const sx = w2sX(e.x), sy = w2sY(e.y);
+    // 阵亡火焰叠层 (原版 createExplosion 附带的 chid 637 "flame", 34 帧, 播完自删)
+    // 注: SVG 导出证明该 sprite 用 mix-blend-mode:lighten (Flash Layer/ADD 混合) —— 黑色底在
+    //     原版里因混合模式而不可见。H5 用 globalCompositeOperation='lighter' 还原该混合,
+    //     否则整块黑底会盖住画面 (实测过, 是个明显 bug)
+    if (e.type === 'flame') {
+      const n = DEATH_FLAME_FRAMES.length;
+      const fi = Math.min(n - 1, Math.floor((e.life0 - e.life) / e.life0 * n));
+      const fim = DEATH_FLAME_FRAMES[fi];
+      if (fim && fim.complete && fim.naturalWidth) {
+        ctx.save();
+        ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.drawImage(fim, -fim.naturalWidth / 2, -fim.naturalHeight / 2);   // 原生尺寸
+        ctx.restore();
+      }
+      continue;
+    }
+    // 阵亡爆炸用 chid 279 (4 帧, 原生 210x217 大画布, 中心对齐) —— 与命中爆型
+    // (390/392/394/395/396) 不同: 原版 createExplosion 只设 _x/_y, 不缩放
+    if (e.type === 'death') {
+      const n = EXPLOSION_FRAMES.length;
+      const fi = Math.min(n - 1, Math.floor((e.life0 - e.life) / e.life0 * n));
+      const im = EXPLOSION_FRAMES[fi];
+      if (im && im.complete && im.naturalWidth) {
+        ctx.save();
+        ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+        ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+        ctx.restore();
+      }
+      continue;
+    }
     const frames = EXPLOSION_TYPED_IMG[e.type] || EXPLOSION_FRAMES;
     const n = frames.length;
     const fi = Math.min(n - 1, Math.floor((e.life0 - e.life) / e.life0 * n));

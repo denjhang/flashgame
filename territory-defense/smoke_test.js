@@ -74,6 +74,47 @@ console.log("瞄准区: img=%s origin=(%s,%s) 154.3px (原版 785, FFDec 导出)
 const zbOk = ZONE_IMG && ZONE_IMG.src.endsWith('/zone/1.png')
   && ZONE_ORIGIN.x === -77.15 && ZONE_ORIGIN.y === -77.15;
 console.log("瞄准区 785 资源已接入=%s", zbOk);
+// ---- 阵亡序列 (原版 428 "destruction" 39帧: 车体三点爆炸 + 随机爆炸音) ----
+console.log("--- 阵亡序列 ---");
+{
+  const u = new Unit('camion1', 'null', 'parcourt1');
+  u.hp = 0;
+  const e0 = G.euros, s0 = G.score, fx0 = G.effects.length;
+  let sfxName = null;
+  const _ps2 = playSfx; playSfx = (n) => { if (sfxName === null) sfxName = n; };
+  killUnit(u);
+  playSfx = _ps2;
+  console.log("killUnit: dying=%d (期望 %d) 赏金+%d 随机音=%s",
+    u.dying, DEATH_TICKS, G.euros - e0, sfxName);
+  console.log("赏金在阵亡瞬间结算=%s 随机爆炸音在1..6=%s",
+    G.euros - e0 === u.bounty, /^explosion[1-6]$/.test(sfxName || ''));
+  // 推进序列: 统计爆炸点数 + 序列总长 + 漂移
+  let booms = 0, flames = 0, ticks = 0;
+  const fx1 = G.effects.length;
+  while (u.dying > 0 && ticks++ < 100) {
+    const before = G.effects.length;
+    u.update();
+    for (let i = before; i < G.effects.length; i++) {
+      if (G.effects[i].type === 'death') booms++;
+      if (G.effects[i].type === 'flame') flames++;
+    }
+  }
+  console.log("序列: %d tick (期望 %d) 一致=%s", ticks, DEATH_TICKS, ticks === DEATH_TICKS);
+  console.log("车体爆炸 %d 个 (原版帧2/4/7 共3个) 一致=%s; 火焰叠层 %d 个 (每次爆炸各1) 一致=%s",
+    booms, booms === 3, flames, flames === 3);
+  console.log("素材: 爆炸=chid279 4帧 火焰=chid637 %d帧 原生下落时长 %d tick",
+    DEATH_FLAME_FRAMES.length, DEATH_FLAME_TICKS);
+  console.log("漂移量=%s (原版 chassis ty -155.05→-167.05 = %d) 序列结束 dead=%s",
+    u.drift.toFixed(1), DEATH_DRIFT, u.dead);
+  // 重复调用不重复结算
+  const e1 = G.euros; killUnit(u);
+  console.log("阵亡中再 killUnit 不重复结算=%s (euros %d→%d)", G.euros === e1, e1, G.euros);
+  // 活着的单位不会被误杀
+  const alive = new Unit('jeep', 'null', 'parcourt1');
+  killUnit(alive);
+  console.log("活单位 killUnit 无效=%s (dying=%d, 应 0)", alive.dying === 0, alive.dying);
+  G.euros = e0; G.score = s0;
+}
 // 冷却: 从 COOL_FRAMES 起逐帧跑到恢复
 SU37.available = false; SU37.cool = SU37.COOL_FRAMES;
 let f = 0; while (!SU37.available && f++ < 200) su37Update();
