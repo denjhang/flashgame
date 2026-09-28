@@ -118,6 +118,9 @@ const MAP_W = 2070, MAP_H = 1920;
 const WORLD = { x0: -237, x1: 1899, y0: -1563, y1: 580 };   // 路点包围盒
 // 地图位图左上角对应的世界坐标 (位图 2070x1920 铺满整个世界带)
 const MAP_ORIGIN = { x: 0, y: -1440 };   // carteBase 放置矩阵 (0,-1440), 位图 2070x1920
+// 原版舞台底色 = SWF header SetBackgroundColor (字节 offset 21-23) = #441100
+//   地图位图只覆盖世界 y -1440..480; 视野越过边缘时原版露出这个底色
+const STAGE_BG = '#441100';
 const cam = { x: 60, y: 0 };   // 初始: 原版 carte._y=0 视图 (舞台 y 0..600, 出发区在底部)
 // 探索记忆: 世界包围盒 (x -237..1899, y -1563..580) 半分辨率
 const EXPLORED_SCALE = 0.5;
@@ -1788,6 +1791,13 @@ function toggleZoom() {   // 原版 G 键: 39% 全图视图
 
 function draw() {
   ctx.clearRect(0, 0, W, H);
+  // 原版舞台底色: SWF header 的 SetBackgroundColor (offset 21-23) = #441100 (暗棕)
+  //   权威依据: TCS_uncompressed.swf 头部字节 `44 11 00`
+  //   地图位图 (chid 766) 只覆盖世界 y -1440..480; 视野若越过地图边缘 (初始 cam.y=0
+  //   的可视范围是 y 0..600, 底部 120px 就超出地图), 原版显示的是这个舞台底色,
+  //   H5 之前是 clearRect 成透明 → 透出 CSS 的纯黑, 观感不符。
+  ctx.fillStyle = STAGE_BG;
+  ctx.fillRect(0, 0, W, H);
   clampCam();
   // 地图背景: 位图左上角放在世界 (MAP_ORIGIN.x, MAP_ORIGIN.y=-1440=北缘), Flash 屏幕系直接铺
   ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W * zoom, MAP_H * zoom);

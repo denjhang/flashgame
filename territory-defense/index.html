@@ -13,7 +13,8 @@
   #fit { position:relative; transform-origin:center center; flex:none; }
 
   /* 舞台: 地图区 (宽度动态, 由 fitStage 设 canvas.width) + 右侧栏 165 */
-  #stage { position:relative; background:#000; overflow:hidden; }
+  /* 底色 = 原版 SWF 舞台背景色 #441100 (canvas 未覆盖处与原版一致) */
+  #stage { position:relative; background:#441100; overflow:hidden; }
   #cv { position:absolute; left:0; top:0; cursor:crosshair; }
   /* 原版右侧栏 (frames/6.png) —— 高度锁 600px, 否则会把 INFO 挤出舞台 (N+25 修过) */
   #side { position:absolute; right:0; top:0; width:165px; height:600px;
@@ -138,7 +139,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600007"></script>
-<script src="game.js?v=1790600007"></script>
+<script src="data.js?v=1790600008"></script>
+<script src="game.js?v=1790600008"></script>
 </body>
 </html>

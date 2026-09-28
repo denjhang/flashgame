@@ -679,6 +679,16 @@ console.log("--- 炮管开火叠加 ---");
   const incomplete = names.filter(id => TURRET_GUNS[id].some(g => !g.m || g.o === undefined));
   console.log("炮管项 m/o 完整=%s 缺=%j", incomplete.length === 0, incomplete);
 }
+// ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
+console.log("--- 舞台底色 ---");
+{
+  // SWF header offset 21-23 = 44 11 00
+  console.log("STAGE_BG=" + STAGE_BG + " (原版 SWF header 字节 44 11 00) 一致=" + (STAGE_BG === '#441100'));
+  // 地图只覆盖世界 y -1440..480; 初始视高 600 → 底部越界量
+  const over = 600 - (MAP_ORIGIN.y + MAP_H);
+  console.log("地图覆盖世界 y [%d, %d]; 初始视野 y 0..600 → 底部越界 %d px (原版露舞台底色)",
+    MAP_ORIGIN.y, MAP_ORIGIN.y + MAP_H, over);
+}
 `;
 eval(src);
 console.log("[done]");
