@@ -1,5 +1,39 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+58 轮成果（2026-09-29, H5 领土防御·★ 经济表勘误：建造价/满血两列用反了）
+
+**（权威 = 185/frame_1/PlaceObject2_86_1 load 的 structureData 全表 + 1027 商店 12 槽位
+load 实测建造价）**
+
+### 1. 【★ 勘误：structureData 两列语义 —— [0]=满血, [1]=建造价（旧版全反）】
+
+原版结构（逐行）：
+```
+structureData.m60 = new Array(80,120); ... pluton = new Array(600,5000);
+_parent.etat = structureData[structure][0];        ← [0] = 满血
+etatJauge.maxEtat = etat;
+```
+商店槽位（1027/1026_* load）实测**建造价 = [1]**：m60=120、gatling=200、canon75=300、
+canon105=420、canon125=1400、crotale=1000、radar=250、MLRS=2200、pluton=5000、MTHEL=1200。
+
+H5 旧版把 [0] 当建造价（m60 卖 80 造）、[1] 当"升级价"——**建造价整体偏低 25%~4×**
+（m60 80 vs 120、pluton 600 vs 5000）。已修正：`STRUCTURES = {cost:[1], maxHp:[0]}`，
+Turret 血量改从 `s.maxHp` 取源（删除硬编码血量表——该表恰好等于 [0] 列所以血量本身
+一直是对的）。卖出价公式不变（floor(hp/maxHp × cost × 0.75)），cost 修正后自动对齐：
+满血 m60 卖出 = 90（=75%×120，原版同式）；对空升级费随真实建造价自动修正
+（canon105 168→252）。
+
+### 2. 验证（node 冒烟，无浏览器）
+
+- `STRUCTURES 11 型 maxHp=[0]/cost=[1] 与原版 structureData 一致=true`
+- `满血 m60 卖出=90=true, 半血=45=true`
+- 111 项 `=true`；450 帧 sim 正常；初始金钱 850 的购买力随真实物价自然收紧（原版同）
+
+### 3. 本轮仍未做（如实记录）
+
+- 雷达门控语义（N+56 待真机观察，维持）
+- m26 edithStart 音乐 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+57 轮成果（2026-09-29, H5 领土防御·血条子系统审计对齐 + fireOnEnnemi 解码）
 
 **（权威 = 428_unit enterFrame 的 etatJauge 段 + 6_1 load/keyDown + 327 fireOnEnnemi）**

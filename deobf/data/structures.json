@@ -1,53 +1,53 @@
 {
- "_comment": "structureData: \u5efa\u9020\u4ef7/\u5347\u7ea7\u4ef7; \u4fee\u74062$/HP; \u51fa\u552e75%\u6309\u4f59\u8840\u6bd4\u4f8b",
+ "_comment": "structureData (185/frame_1/PlaceObject2_86_1 load): [0]=满血(maxHp), [1]=建造价(cost); 修理2$/HP; 出售75%按余血比例 × 建造价 (N+58 勘误: 旧注\"建造价/升级价\"有误)",
  "economy": {
   "repairPerHp": 2,
   "sellRatio": 0.75
  },
  "data": {
   "m60": {
-   "cost": 80,
-   "costUpgraded": 120
+   "maxHp": 80,
+   "buildCost": 120
   },
   "gatling": {
-   "cost": 120,
-   "costUpgraded": 200
+   "maxHp": 120,
+   "buildCost": 200
   },
   "canon75": {
-   "cost": 220,
-   "costUpgraded": 300
+   "maxHp": 220,
+   "buildCost": 300
   },
   "canon105": {
-   "cost": 280,
-   "costUpgraded": 420
+   "maxHp": 280,
+   "buildCost": 420
   },
   "canon105D": {
-   "cost": 300,
-   "costUpgraded": 540
+   "maxHp": 300,
+   "buildCost": 540
   },
   "canon125": {
-   "cost": 240,
-   "costUpgraded": 1400
+   "maxHp": 240,
+   "buildCost": 1400
   },
   "crotale": {
-   "cost": 220,
-   "costUpgraded": 1000
+   "maxHp": 220,
+   "buildCost": 1000
   },
   "radar": {
-   "cost": 220,
-   "costUpgraded": 250
+   "maxHp": 220,
+   "buildCost": 250
   },
   "MLRS": {
-   "cost": 320,
-   "costUpgraded": 2200
+   "maxHp": 320,
+   "buildCost": 2200
   },
   "pluton": {
-   "cost": 600,
-   "costUpgraded": 5000
+   "maxHp": 600,
+   "buildCost": 5000
   },
   "MTHEL": {
-   "cost": 300,
-   "costUpgraded": 1200
+   "maxHp": 300,
+   "buildCost": 1200
   }
  }
 }

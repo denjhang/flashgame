@@ -1375,10 +1375,12 @@ class Turret {
   constructor(id, x, y) {
     this.id = id;
     const s = STRUCTURES[id];
-    this.cost = s.cost; this.costUp = s.costUpgraded;
+    this.cost = s.cost;
     this.x = x; this.y = y;
-    this.hp = this.maxHp = {m60:80,gatling:120,canon75:220,canon105:280,canon105D:300,
-      canon125:240,crotale:220,radar:220,MLRS:320,pluton:600,MTHEL:300}[id] || 200;
+    this.cost = s.cost;
+    // 满血 = structureData[0] (原版 185/frame_1/PlaceObject2_86_1 load: _parent.etat =
+    //   structureData[structure][0], etatJauge.maxEtat = etat); 建造价 = [1] (N+58 勘误)
+    this.hp = this.maxHp = s.maxHp;
     this.w = WEAPONS[id];
     this.rot = -Math.PI / 2;
     this.cool = 0;

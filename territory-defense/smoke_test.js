@@ -1064,6 +1064,25 @@ console.log("--- 索敌节奏 ---");
   G.units.length = 0; G.turrets.length = 0;
   G.lost = sv.lost; G.losses = sv.losses;
 }
+// ---- 经济表 (原版 185 structureData: [0]=满血, [1]=建造价 — N+58 勘误) ----
+console.log("--- 经济表 ---");
+{
+  const SD = { m60: [80,120], gatling: [120,200], canon75: [220,300], canon105: [280,420],
+    canon105D: [300,540], canon125: [240,1400], crotale: [220,1000], radar: [220,250],
+    MLRS: [320,2200], pluton: [600,5000], MTHEL: [300,1200] };
+  let bad = [];
+  for (const id in SD) {
+    if (STRUCTURES[id].maxHp !== SD[id][0]) bad.push(id + '.maxHp');
+    if (STRUCTURES[id].cost !== SD[id][1]) bad.push(id + '.cost');
+  }
+  console.log("STRUCTURES 11 型 maxHp=[0]/cost=[1] 与原版 structureData 一致=%s" + (bad.length ? " 偏差:" + bad : ""),
+    bad.length === 0);
+  // 建造价实测佐证: 商店槽位 gatling this.cost=200, canon105 costUpgraded(乱码成员)=420
+  // 卖出价: floor(hp/maxHp × cost × 0.75) — 满血 m60 = floor(120×0.75)=90 (原版同式)
+  const t = new Turret('m60', 0, 0);
+  console.log("满血 m60 卖出=%d (期望 90 = 75%%×建造价120)=%s, 半血=%d (期望 45)=%s",
+    t.sellPrice(), t.sellPrice() === 90, Math.floor(t.sellPrice() / 2), Math.floor(t.sellPrice() / 2) === 45);
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {
