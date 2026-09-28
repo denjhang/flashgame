@@ -256,7 +256,22 @@ console.log("--- 开火细节 ---");
     G.shells = []; G.muzzle = []; G.casings = [];
   }
   console.log("弹壳帧数=" + CASING_FRAMES.length + " (原版 douille chid304 = 29 帧) 时长=" + CASING_TICKS + " tick");
-  console.log("枪口焰帧数=" + MUZZLE.length + " (原版 chid303 = 14 帧) 时长=" + MUZZLE_TICKS + " tick");
+  console.log("枪口焰: 303=" + MUZZLE303.length + " 帧/" + MUZZLE303_TICKS + " tick (炮弹类), 365=" +
+    MUZZLE365.length + " 帧/" + MUZZLE365_TICKS + " tick (曳光弹类)");
+  // 弹型 → 枪口焰 sprite 选择 (原版 obus f1-f3 用 303, f4-f7 用 365)
+  {
+    const pick = (k) => muzzleFor(k).frames;
+    const ok = pick('bullet') === MUZZLE365 && pick('bulletLourde') === MUZZLE365 &&
+               pick('obusLeger') === MUZZLE303 && pick('obusMoyen') === MUZZLE303 &&
+               pick('obusLourd') === MUZZLE303 && pick('missile') === MUZZLE303;
+    console.log("枪口焰按弹型选用(曳光弹用365, 炮弹/导弹用303)=" + ok);
+    // 365 不再是死代码: spawnMuzzleFx 会按 kind 选
+    G.muzzle = []; G.casings = []; G.shells = [];
+    spawnMuzzleFx(0, 0, 0, 'ally', 'bullet');
+    const is365 = G.muzzle.length === 1 && G.muzzle[0].life0 === MUZZLE365_TICKS;
+    console.log("曳光弹开火确实用 365 (旧实现是死代码)=" + is365);
+    G.muzzle = []; G.casings = []; G.shells = [];
+  }
   const expected = { camion1:2, camion2:2, camion3:2, jeep:2, bradley:2, amx10:4,
                      abrams:2, t90:4, camionBlinde:2, navire:4, Yamato:5 };
   let ok = true;

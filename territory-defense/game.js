@@ -1397,8 +1397,9 @@ function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   const mx = x + ca * dy - sa * dx, my = y + sa * dy + ca * dx;
   G.shells.push({ x: mx, y: my, target, w, side, turretId,
     speed: 9, trail: 0, born: G.frame });
-  // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件 303/304, 都在炮口)
-  spawnMuzzleFx(mx, my, ang, side);
+  // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件, 都在炮口)
+  //   枪口焰按弹型选 303/365 (见 muzzleFor)
+  spawnMuzzleFx(mx, my, ang, side, SHELL_KIND[turretId] || 'bullet');
 }
 // ★并联炮管的横向错开 (原版 createObus 第 4 实参 decalX; 173 库各帧子件的 this.decalX)
 //   按【炮管名】索引 (canon1..canon4), 与 TURRET_GUNS 的 n 字段严格对应
@@ -1432,17 +1433,29 @@ function barrelDecalX(id, guns, k) {
   if (!tbl || !guns || !guns[k]) return 0;
   return tbl[guns[k].n] || 0;
 }
-// 枪口焰 (chid 303/365) + 白色光斑 (chid 78): 原版在弹体 sprite 内, 开火瞬间出现
-const MUZZLE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => {
+// 枪口焰: 两种, 按【弹型】选用 (原版 obus 帧库, 权威)
+//   chid 303 (14 帧)  ← obus f1/f2/f3 (obusLeger/Moyen/Lourd, 即炮弹类)
+//   chid 365 ( 2 帧)  ← obus f4/f5/f6/f7 (bullet/bulletLourde 曳光弹类)
+//   ⚠ 旧实现只画 303 且对所有弹型都画; 365 被加载却从未绘制 (死代码)
+const MUZZLE303 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => {
   const im = new Image(); im.src = 'assets/muzzle/DefineSprite_303/' + i + '.png'; return im;
 });
-const MUZZLE_TICKS = Math.round(14 * 24 / 30);   // 14 帧 → 11 tick
-const FLASH = [1, 2].map(i => {
+const MUZZLE303_TICKS = Math.round(14 * 24 / 30);   // 14 帧 @24fps → 30fps: 11 tick
+const MUZZLE365 = [1, 2].map(i => {
   const im = new Image(); im.src = 'assets/muzzle/DefineSprite_365/' + i + '.png'; return im;
 });
-function spawnMuzzleFx(x, y, ang, side) {
+const MUZZLE365_TICKS = Math.round(2 * 24 / 30);    // 2 帧 → 2 tick
+// 哪些弹型用 365 (曳光弹), 其余用 303
+const MUZZLE365_KINDS = { bullet: 1, bulletLourde: 1 };
+function muzzleFor(kind) {
+  return kind && MUZZLE365_KINDS[kind]
+    ? { frames: MUZZLE365, ticks: MUZZLE365_TICKS }
+    : { frames: MUZZLE303, ticks: MUZZLE303_TICKS };
+}
+function spawnMuzzleFx(x, y, ang, side, kind) {
   if (!G.muzzle) G.muzzle = [];
-  G.muzzle.push({ x, y, ang, life: MUZZLE_TICKS, life0: MUZZLE_TICKS });
+  const m = muzzleFor(kind);
+  G.muzzle.push({ x, y, ang, life: m.ticks, life0: m.ticks, kind: (kind || '') });
   // 弹壳 (douille, 29 帧抛体) —— 原版每次开火都抛一枚
   if (!G.casings) G.casings = [];
   G.casings.push({ x, y, ang, life: CASING_TICKS, life0: CASING_TICKS });
@@ -2087,12 +2100,14 @@ function draw() {
       ctx.restore();
     }
   }
-  // 枪口焰 (原版 obus sprite 内的 chid 303, 14 帧) + 白色光斑 (chid 78, 压扁成椭圆)
+  // 枪口焰 (原版 obus sprite 内的 chid 303 = 炮弹类 / chid 365 = 曳光弹类)
   for (const m of G.muzzle) {
     if (!isVisible(m.x, m.y)) continue;
     const sx = w2sX(m.x), sy = w2sY(m.y);
-    const fi = Math.min(MUZZLE.length - 1, Math.floor((m.life0 - m.life) / m.life0 * MUZZLE.length));
-    const im = MUZZLE[fi];
+    const mf = muzzleFor(m.kind);
+    const n = mf.frames.length;
+    const fi = Math.min(n - 1, Math.floor((m.life0 - m.life) / m.life0 * n));
+    const im = mf.frames[fi];
     if (im && im.complete && im.naturalWidth) {
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(m.ang - Math.PI / 2); ctx.scale(zoom, zoom);
       ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
