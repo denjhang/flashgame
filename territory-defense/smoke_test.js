@@ -202,6 +202,30 @@ console.log("--- 玩家塔阵亡序列 ---");
   console.log("已毁塔不被 nearestTurret 选中=%s", nearestTurret(0, 0, 1000) === null);
   G.turrets.length = 0; G.effects.length = 0;
 }
+// ---- 阵亡镜头抖动 (原版 destruction 段改 _root.carte._x/_y, 428 与 185 数值相同) ----
+console.log("--- 阵亡镜头抖动 ---");
+{
+  console.log("抖动表 (原版帧 2/4/6/8/10/12): %j", DEATH_SHAKE);
+  const sx = DEATH_SHAKE.reduce((a, d) => a + d[0], 0);
+  const sy = DEATH_SHAKE.reduce((a, d) => a + d[1], 0);
+  console.log("六组位移之和=(%d,%d) (应 0,0 → 确定性抖动而非漂移) 一致=%s", sx, sy, sx === 0 && sy === 0);
+  console.log("触发 tick: %j (帧 2/4/6/8/10/12 @24fps→30fps)", DEATH_SHAKE_TICKS);
+  // 无阵亡单位时 shake 归零
+  G.units.length = 0; G.turrets.length = 0; updateDeathShake();
+  const zero = shake.x === 0 && shake.y === 0;
+  // 一个单位进入阵亡 → 逐 tick 记录 shake 轨迹, 并验证序列结束归零
+  const u2 = new Unit('camion1', 'null', 'parcourt1');
+  G.units.push(u2); u2.hp = 0; killUnit(u2);
+  const traj = [];
+  while (u2.dying > 0) { u2.update(); updateDeathShake(); traj.push(shake.x + ',' + shake.y); }
+  const uniq = [...new Set(traj)];
+  updateDeathShake();   // 单位 dead 后仍留 1 tick 于数组, 但 dying=0 → 不再计入
+  const back0 = shake.x === 0 && shake.y === 0;
+  console.log("抖动轨迹唯一值 %d 个 (多段跳变), 序列结束归零=%s", uniq.length, back0);
+  console.log("无阵亡时归零=%s; 抖动中最大 |dx|=%d |dy|=%d",
+    zero, Math.max(...DEATH_SHAKE.map(d => Math.abs(d[0]))), Math.max(...DEATH_SHAKE.map(d => Math.abs(d[1]))));
+  G.units.length = 0; G.turrets.length = 0; updateDeathShake();
+}
 // 建造区遮罩 (原版 surfaceForBuild chid 768)
 console.log("建造预览: 光标帧=%d 取消提示帧=%d (原版 822/1161)", CURSOR_FRAMES.length, CANCEL_HINT.length);
 {

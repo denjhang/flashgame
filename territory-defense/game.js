@@ -97,10 +97,15 @@ heavyCv.width = W; heavyCv.height = H;
 const heavyCtx = heavyCv.getContext('2d');
 
 
-function w2sX(x) { return (x - cam.x) * zoom; }
-function w2sY(y) { return (y - cam.y) * zoom; }   // 世界 y = Flash 屏幕坐标 (y 向下=南), 无翻转
-function s2wX(sx) { return sx / zoom + cam.x; }
-function s2wY(sy) { return sy / zoom + cam.y; }
+// 阵亡镜头抖动偏移 (屏幕像素)。原版在 destruction 段直接累加 _root.carte._x/_y;
+// H5 里 carte 的角色由世界→屏幕变换承担, 故把该偏移加在 w2s*/s2w* 上。
+// 必须在 w2sX/w2sY 之前声明 (它们是热路径, 直接读 shake.x/shake.y)。
+const shake = { x: 0, y: 0 };
+
+function w2sX(x) { return (x - cam.x) * zoom + shake.x; }
+function w2sY(y) { return (y - cam.y) * zoom + shake.y; }   // 世界 y = Flash 屏幕坐标 (y 向下=南), 无翻转
+function s2wX(sx) { return (sx - shake.x) / zoom + cam.x; }
+function s2wY(sy) { return (sy - shake.y) / zoom + cam.y; }
 
 // ---------------- 原版单位贴图 (deobf/data/sprites.json: shape→bitmap 对号) ----------------
 const UNIT_IMG = {};
@@ -197,6 +202,40 @@ const DEATH_FLAME_TICKS = Math.round(DEATH_FLAME_FRAMES.length * 24 / 30);   // 
 // 爆炸本体 (chid 279, 4 帧)。原版 createExplosion 末尾是 gotoAndStop(prefID 或随机1..3) ——
 // 即"停在一帧上", 但该帧内的子精灵自带动画。H5 无此嵌套, 改为 4 帧快播后消失 (视觉近似, 如实记录)
 const DEATH_BOOM_TICKS_LOCAL = Math.round(4 * 24 / 30);   // 4帧@24fps → 3 tick
+// 阵亡期的镜头抖动 (原版 destruction 段帧 2/4/6/8/10/12 直接改 _root.carte._x/_y)
+//   权威依据 (两处互相印证):
+//     428 帧 8 为字面量 `_root.carte._x -= 8; _root.carte._y -= 6;`
+//     185 帧 2/4 为字面量 `_root.carte._x += 6 / += 7; _root.carte._y -= 10 / += 7;`
+//     (428 帧 2/4/6 的宿主名被混淆, 但 185 与 428 的 destruction 脚本同为逐字相同的代码,
+//      且 185 帧 6 保留字面量 `_x -= 5 / _y += 9`, 据此确定 6 组数值)
+//   => 六组位移之和 = (0,0) —— 确定性"抖动后归位", 不是漂移
+const DEATH_SHAKE = [
+  [6, -10],   // 帧 2
+  [7, 7],     // 帧 4
+  [-5, 9],    // 帧 6
+  [-8, -6],   // 帧 8
+  [4, 7],     // 帧 10
+  [-4, -7],   // 帧 12
+];
+// 相对 destruction 起始帧(=帧2)的帧偏移 0,2,4,6,8,10 → 折算到 H5 30fps 的 tick
+const DEATH_SHAKE_TICKS = [0, 2, 4, 6, 8, 10].map(f => Math.round(f * 24 / 30));
+// 每帧重算阵亡镜头抖动。
+//   原版把位移累加到 _root.carte._x/_y (舞台像素), 六组之和恰为 0 → 序列结束自然归位。
+//   H5 的 carte 语义由世界→屏幕变换承担, 故把偏移加在 shake 上 (w2s*/s2w* 统一承担),
+//   不动 cam (cam 是滚动/小地图/钳制的基准)。
+function updateDeathShake() {
+  let ox = 0, oy = 0;
+  for (const arr of [G.units, G.turrets]) {
+    for (const e of arr) {
+      if (!(e.dying > 0)) continue;
+      const t = DEATH_TICKS - e.dying;   // 已播 tick 数
+      for (let i = 0; i < DEATH_SHAKE_TICKS.length; i++) {
+        if (t >= DEATH_SHAKE_TICKS[i]) { ox += DEATH_SHAKE[i][0]; oy += DEATH_SHAKE[i][1]; }
+      }
+    }
+  }
+  shake.x = ox; shake.y = oy;
+}
 
 // ---------------- 爆炸动画 + BGM ----------------
 // 注: 旧的 86 库单帧方案 (TURRET_SRC/TURRET_IMG) 已删除 —— 经 FFDec 导出核实,
@@ -1358,6 +1397,7 @@ function tick() {
   if (G.lost || G.won) return;
   G.frame++;
   scrollCamera();
+  updateDeathShake();   // 阵亡镜头抖动 (原版 destruction 段改 _root.carte._x/_y; 差值之和为 0)
   su37Update();
   playBirds(performance.now());
   computeVisibility();
