@@ -742,12 +742,17 @@ console.log("--- 车队链表 ---");
   const gapA = Math.abs(dcA.m[3]) * dcA.nat[1];
   a.x = b.x + gapA * 0.5 * Math.cos(b.rot); a.y = b.y + gapA * 0.5 * Math.sin(b.rot);
   a.v = 0; a.rot = b.rot;
-  b.v = 2.89;
+  b.v = 2.8928;                       // camion1 巡航
+  const DECEL = (1 / 14) * 1.8 * (24 / 30);   // 0.1029 px/tick (原版每帧 1/14×1.8)
   const dd = Math.hypot(b.devant.x - b.x, b.devant.y - b.y);
-  const braked = dd < gapA ? Math.min(b.v, a.v) : b.v;
-  console.log("前车制动: 间距=前车渲染高度 camion1=" + gapA.toFixed(1) + "px (原版 unitDevant._height)," +
-    " 距离=" + dd.toFixed(1) + " → v " + b.v.toFixed(2) + "→" + braked.toFixed(2) + " (钳到前车=0)");
-  // 舰的间距 = 舰渲染高度 (原版 CONST_ELOIGNEMENT=4 亦落在 _height 语义内)
+  // 渐近减速 N tick 后硬停: v_N = max(0, v0 - N×DECEL), <0.1 → 0
+  let v = b.v, ticks = 0;
+  while (v > 0 && ticks < 200) { v = Math.max(0, v - DECEL); if (v < 0.1) v = 0; ticks++; }
+  const stopDist = b.v * b.v / (2 * DECEL);
+  console.log("前车制动: 间距=前车渲染高度 camion1=" + gapA.toFixed(1) + "px," +
+    " 减速步长=" + DECEL.toFixed(4) + " px/tick, 刹停滑行=" + stopDist.toFixed(1) +
+    "px (" + (stopDist < gapA ? "< 间距 原版常数自洽" : ">=间距!") + "), 硬停用 " + ticks + " tick");
+  // 舰的间距 = 舰渲染高度
   const dcN = CHASSIS_ART['navire'];
   console.log("舰间距=渲染高度 navire=" + (Math.abs(dcN.m[3]) * dcN.nat[1]).toFixed(1) + "px");
   // 拆链: 前车死亡 → 后车脱离

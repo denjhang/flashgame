@@ -1268,9 +1268,10 @@ class Unit {
     const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
     this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
     // 原版车队链表制动 (roule pcode 常数池解码后的权威公式):
-    //   if (dist < unitDevant._height) { 减速 1/14×CONST_ELOIGNEMENT 每帧; 近停时 _rotation=0 }
+    //   if (dist < unitDevant._height) { 每帧减速 1/14×CONST_ELOIGNEMENT; 低于阈值硬停 }
     //   即比较长度 = 【前车精灵的渲染高度】(camion1≈42px, 舰≈150px), 非固定常数。
-    //   H5 等价实现: 距离 < 前车渲染高度 → 本车速度钳到前车当前速度 (不超越不穿透)。
+    //   步长换算: 1/14×1.8 = 0.1286 px/帧@24 → ×0.8 = 0.1029 px/tick@30。
+    //   自洽性: 从巡航 2.89 px/tick 刹停滑行 v²/2a ≈ 40.7px < 间距 42.2px —— 原版常数精确自洽。
     //   前车已亡/到达则拆链 (等价原版 frame_39 的双向 unlink)。
     if (this.devant) {
       if (this.devant.dead || this.devant.reached || this.devant.hp <= 0 || this.devant.dying > 0) {
@@ -1279,7 +1280,10 @@ class Unit {
         const dc = CHASSIS_ART[this.devant.type];
         const gap = dc ? Math.abs(dc.m[3]) * dc.nat[1] : 18;   // 前车渲染高度 (pattern d×nat)
         const dd = Math.hypot(this.devant.x - this.x, this.devant.y - this.y);
-        if (dd < gap) this.v = Math.min(this.v, this.devant.v);
+        if (dd < gap) {
+          this.v = Math.max(0, this.v - (1 / 14) * 1.8 * (24 / 30));
+          if (this.v < 0.1) this.v = 0;   // 原版 near-stop 硬停
+        }
       }
     }
     this.x += Math.cos(this.rot) * this.v;
