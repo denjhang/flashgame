@@ -1064,29 +1064,6 @@ console.log("--- 索敌节奏 ---");
   G.units.length = 0; G.turrets.length = 0;
   G.lost = sv.lost; G.losses = sv.losses;
 }
-// ---- 雷达快照 (原版 refreshRadar 1Hz + radar/radarMobile 排除, N+53) ----
-console.log("--- 雷达快照 ---");
-{
-  const sv = { units: G.units.length, turrets: G.turrets.length, lost: G.lost, losses: G.losses };
-  G.units.length = 0; G.turrets.length = 0;
-  G.turrets.push(new Turret('m60', 100, 100));
-  G.turrets.push(new Turret('radar', 200, 100));       // 雷达塔 → 不上小地图
-  const c3 = new Unit('camion3', 'radarMobile', 'parcourt1');   // type=camion3 → 上小地图
-  const fake = new Unit('camion1', 'null', 'parcourt1');
-  fake.type = 'radarMobile';                            // 字面排除条件
-  G.units.push(c3, fake);
-  refreshRadar();
-  console.log("雷达塔排除出小地图=%s (radarA=%d)", !G.radarA.some(t => t.id === 'radar'), G.radarA.length);
-  console.log("camion3(radarMobile武器, type=camion3) 在点集=%s, type=='radarMobile' 字面排除=%s",
-    G.radarE.includes(c3), !G.radarE.includes(fake));
-  const late = new Unit('camion1', 'null', 'parcourt1');
-  G.units.push(late);
-  console.log("快照后新出生不在点集 (≤1s 延迟)=%s", !G.radarE.includes(late));
-  refreshRadar();
-  console.log("下一次刷新 (1s) 后进入点集=%s", G.radarE.includes(late));
-  G.units.length = 0; G.turrets.length = 0;
-  G.lost = sv.lost; G.losses = sv.losses;
-}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {

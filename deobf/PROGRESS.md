@@ -1,5 +1,53 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+55 轮成果（2026-09-29, H5 领土防御·getDistance 雷达门控重大发现 + N+53 误读回滚）
+
+**（权威 = 174 getDistance 全函数 + 327 createUnit 的 unit.type 赋值（r22=tourelle）+
+blip 挂载点）**
+
+### 1. 【★ 勘误：N+53 的小地图改动建立在错误解读上，已回滚】
+
+逐行重解后确认：
+- `refreshRadar` 数组 = 每侧**只含 radar/radarMobile 类型单元**（= 雷达网络成员表），
+  **不是小地图数据源**（N+53 把过滤极性读反了）
+- 小地图 blip（chid52）是 createUnit 时**逐单位无条件挂载**的 → 小地图显示全部单位
+  （含雷达塔）；blip clip 无可见性逻辑（N+54 的"全情报"结论仍成立）
+- H5 已回滚：小地图恢复实时绘制 G.turrets + G.units（全部存活单位，绿/红统一色），
+  删除 refreshRadar 快照机制与 radar 塔排除
+
+### 2. 【★ 重大发现：getDistance 是"雷达网络可锁定门控"，不是纯距离】
+
+getDistance(obj1=候选目标, obj2=射击者)（AS2 逆序压栈，getTarget 调用点实证）：
+
+- obj1.type 是 **MLRS/pluton** → 直接返回欧氏距离（**大杀器豁免门控**）
+- 其余武器：遍历**候选目标自己一侧**的雷达网络数组（unitsAllieesRadar/unitsEnnemiesRadar，
+  即雷达塔/radarMobile camion），若候选处于**任一己方雷达单元的 distanceOfFire** 内 →
+  返回真实距离；否则 **return 1000000**（超出一切射程 → getTarget 判不可锁定）
+- **unit.type = 武器名**（createUnit: `.type = register22(tourelle)`）—— camion3+radarMobile
+  的 type 就是 'radarMobile'，构成敌方雷达网络 ✓ 系统自洽
+- 附带解码：obj1.side=='ennemy' 时距离计算带 (unitEtat 全局位 − 车体全局位)/4 的提前量偏置
+
+**即：原版雷达塔/雷达车的真实用途是"照亮可打击的敌人"——只有处于己方雷达覆盖内的
+敌人才能被锁定，雷达车的武器射程即其覆盖半径（radarMobile 的 typeData[1]）。**
+
+### 3. 【H5 本轮未接线 —— 存在待解悖论，如实记录】
+
+门控若直接接线，会出现**早期波次悖论**：敌方雷达网络仅在 wave 4+ 有 radarMobile camion，
+wave 1-3 的敌人在此模型下不可锁定（原版玩家却能正常防御）；而 radar 塔在 m27 才解锁、
+也无法解释我方侧。说明仍有缺失环节（候选极性/调用点穷举未完成）。在解开悖论之前
+**不接线**——错误接线会破坏整个游戏的可玩性。现有 H5 索敌模型（N+51/52）保持。
+
+### 4. 验证（node 冒烟，无浏览器）
+
+- 回滚后 109 项 `=true`；450 帧 sim 正常（塔 15/15 / lost=false）；`node --check` 通过
+
+### 5. 本轮仍未做（如实记录）
+
+- **雷达网络门控的完整语义**（上节悖论）—— 头号待解项：需穷举 getDistance 全部调用点 +
+  弄清 noTarget/getFirstEA 与雷达数组的关系后再决定 H5 接线方式
+- getDistance 的 /4 提前量偏置未接线（仅影响测距几 px）
+- m26 edithStart 音乐 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+54 轮成果（2026-09-28, H5 领土防御·小地图敌点改原版全情报语义）
 
 **（权威 = blip clip chid52 pointUnitRadar 全脚本（仅两帧 stop()，无可见性逻辑）+
