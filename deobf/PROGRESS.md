@@ -1,5 +1,47 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+47 轮成果（2026-09-28, H5 领土防御·失败判定审计一致 + 倒计时条可点击跳过 + interwave 补全长）
+
+**（顺 N+46 遗留两项计时量化做收尾审计；权威 = 428_unit changeCheckpoint pcode +
+frame_6/PlaceObject2_1176_624 on(press) + 327/329 池映射）**
+
+### 1. 【漏怪/失败判定链路审计 —— H5 与原版一致，零改动】
+
+- 428_unit 的 `changeCheckpoint`（常数池全 74 目解码）：
+  `curIPoint++` 后 `if (curIPoint >= checkpoints.length) master_scenario.activePerdu()` ——
+  **一辆车越过最后路点（r10 基地）即立刻判负**（activePerdu → perdu 界面 + pauseMusic + aPerdu=true）。
+- H5 现状 `u.reached → dead + losses++ + G.lost=true`（tick 早退冻结）—— 语义一致，无需改动。
+- 327 的 `activePerduViaInterval`（4s 延迟变体）：函数体只出现在定义处，全库无调用点 ——
+  原版死代码，H5 不建模，结清。
+
+### 2. 【★ 新发现：1176 倒计时条也有 on(press) —— 原版可点击跳过倒计时】
+
+`frame_6/PlaceObject2_1176_624 on(press)`：守卫 → 条移出屏（offscreenY=-900）→
+`instructions.haloNoir.gotoAndStop(1)`（停掉 953 调度时间线）→ `creationUnite` 音效 →
+`master_scenario.startMission()`。即**非简报波的 "start in N" 条同样可点击，点了立即开波**。
+
+H5 实现：`briefBarPress()` 统一入口（简报态 → briefingGo；数字态且 !waveActive/!panelOpen →
+收条 + creationUnite + startWave）；条 CSS 两种状态都 pointer。
+
+### 3. 【interwave 补全长：281 → 317 tick】
+
+haloNoir(953, 实例在 instructions 内) 从清场后播 f1→f183 = 182 帧@24fps = 7.583s（此前只算了
+f30→f183 的 6.375s，漏掉 f1→f30 的 1.2s）。合计 3000 + 7583 = 10583ms = **317 tick**
+（3s 轮询量化维持不建模，确定性近似）。倒计时数字段仍为最后 168 tick。
+
+### 4. 验证（node 冒烟，无浏览器）
+
+- 新增断言全绿：`倒计时点条跳过 (1176 on press) → 第10波开启=true`、
+  `INTERWAVE_TICKS=317=true`；既有简报/倒计时/路线断言无回归
+- 94 项 `=true`；450 帧 sim 正常（击杀 14 / 塔 15/15 / lost=false）
+
+### 5. 本轮仍未做（如实记录）
+
+- 3s 轮询量化不建模（已明确为确定性近似，结清不再列）
+- haloNoir 由 startInstructions 重启的精确调用语句未逐行解出（329 巨型池解析受限）——
+  对 H5 无影响：interwave 总长只依赖 3000ms + 182 帧，两者均已钉死
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
 ## 第 N+46 轮成果（2026-09-28, H5 领土防御·简报暂停波 "start mission" + "start in N" 倒计时条）
 
 **（N+45 遗留第一项。权威 = DefineSprite_953 frame_30 DoAction + frame_6/PlaceObject2_1106_548

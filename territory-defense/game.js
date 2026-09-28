@@ -1707,10 +1707,11 @@ function createEclat(x, y, power) {
 
 // ---------------- 波次调度 (startMission) ----------------
 // 波间节奏 (原版): 清场 → activeDeclencheur = setInterval(declencheMissionSuivante, 3000)
-//   (327 pcode) → startInstructions → 953 倒计时 f30→f183 = 153 帧@24fps = 6.375s
-//   → frame_183 调 master_scenario.startMission()。合计 ≈ 9.4s = 281 tick@30fps。
-//   (countUnitsEnnemies 每 3s 轮询引入的 0~3s 量化未建模)
-const INTERWAVE_TICKS = 281;
+//   (327 pcode) → startInstructions → haloNoir(953, 实例在 instructions 内) 播 f1→f183 =
+//   182 帧@24fps = 7.583s → frame_183 调 master_scenario.startMission()。
+//   合计 3000 + 7583 = 10583ms = 317 tick@30fps (countUnitsEnnemies 每 3s 轮询的 0~3s 量化
+//   未建模 — 确定性近似)
+const INTERWAVE_TICKS = 317;
 // 原版 953 frame_30: 12 个简报波显示 chid1106 "start mission" 黑条按钮, 953 gotoAndStop(1),
 //   等玩家 on(press) → 隐藏 + creationUnite 音效 + master_scenario.startMission() (逐字见
 //   frame_6/PlaceObject2_1106_548 on(press)); 其余波显示 chid1176 "start in 8..1" 倒计时
@@ -1771,6 +1772,17 @@ function briefingGo() {
   G.briefing = false; briefState = null; applyBriefBar();
   playSfx('creationUnite', 0.45);
   startWave();
+}
+// 出兵条点击统一入口: 简报态走 1106 on(press); 倒计时数字态走 1176 on(press)
+//   (frame_6/PlaceObject2_1176_624: 守卫 → 条移出屏 + instructions.haloNoir.gotoAndStop(1)
+//    + creationUnite + startMission —— 原版允许点 "start in N" 跳过倒计时立即开波)
+function briefBarPress() {
+  if (G.briefing) { briefingGo(); return; }
+  if (briefState !== null && !G.waveActive && !G.panelOpen && !G.briefing) {
+    briefState = null; applyBriefBar();
+    playSfx('creationUnite', 0.45);
+    startWave();
+  }
 }
 
 // ---------------- 原版解锁机制 (unlockNextWeapon / showPanelForUnlock) ----------------
@@ -2827,10 +2839,10 @@ refreshToggleBtns();
 buildShop();
 hud();
 // 原版第 1 波即简报暂停波 (953 frame_30: 波 1 在 startMissionPause 列表) — 开局显示
-// "start mission" 条等点击, 不自动倒计时; on(press) 接线见下
+// "start mission" 条等点击, 不自动倒计时; 条点击 = 1106/1176 两套 on(press) 的统一入口
 {
   const bb = document.getElementById('briefBar');
-  if (bb) bb.onclick = briefingGo;
+  if (bb) bb.onclick = briefBarPress;
   if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
 }
 setInterval(tick, 1000 / 30);

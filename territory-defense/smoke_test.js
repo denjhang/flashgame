@@ -869,8 +869,8 @@ console.log("--- 波次路线 + 整波生成 ---");
   console.log("整波即时生成: 第1波单位数=%d (期望 %d)=%s", G.units.length, wv.length, nOk);
   console.log("出生点 route[0]=(%s,%s) y+=60j 全对=%s x 全对=%s (60px>车高42.2 初始不制动)", r0[0], r0[1], ysOk, xsOk);
   console.log("车队链表: 首车 devant=null, 后车依次互链=%s", chainOk);
-  console.log("波间节奏 INTERWAVE_TICKS=%d (期望 281 = declencheur 3000ms + 953 倒计时 153帧@24fps)=%s",
-    INTERWAVE_TICKS, INTERWAVE_TICKS === 281);
+  console.log("波间节奏 INTERWAVE_TICKS=%d (期望 317 = declencheur 3000ms + haloNoir f1→f183 182帧@24fps)=%s",
+    INTERWAVE_TICKS, INTERWAVE_TICKS === 317);
   G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.interWave = sv.iw;
 }
 // ---- 简报暂停波 (原版 953 frame_30: 12 波点击 "start mission" 才开波; 其余 "start in N" 倒计时) ----
@@ -895,7 +895,7 @@ console.log("--- 简报暂停波 ---");
   G.wave = 1; G.waveActive = true; G.units.length = 0; G.briefing = false;
   G.units.push(new Unit('camion1', 'null', 'parcourt1')); G.units[0].reached = true;
   endWave();
-  console.log("第1波清场 → 非简报波进倒计时 interWave=%d (期望 %d)=%s",
+  console.log("第1波清场 → 非简报波进倒计时 interWave=%d (期望 %d = 3000ms + haloNoir f1→f183 182帧@24fps)=%s",
     G.interWave, INTERWAVE_TICKS, G.interWave === INTERWAVE_TICKS && !G.briefing);
   // 倒计时数字 (1176 f2..f9 = "start in 8..1", 每 21 tick 一格; tick 先自减再取数字)
   G.units.length = 0;                     // 清场: reached 单位在 tick 里会置 G.lost 令 tick 早退
@@ -905,6 +905,12 @@ console.log("--- 简报暂停波 ---");
   G.interWave = 2; tick();
   const s1 = briefState;
   console.log("倒计时数字: interWave 169→%s (期望 8), 2→%s (期望 1) 一致=%s", s8, s1, s8 === 8 && s1 === 1);
+  // 1176 on(press): 倒计时中点条 → 跳过倒计时立即开波
+  G.wave = 9; G.waveActive = false; G.units.length = 0; G.panelOpen = false; G.briefing = false;
+  G.interWave = 200; briefState = 5;      // "start in 5" 显示中
+  briefBarPress();
+  console.log("倒计时点条跳过 (1176 on press) → 第%d波开启=%s (期望 10, 3 单位)", G.wave,
+    G.waveActive === true && G.wave === 10 && G.units.length === WAVES[9].length);
   // 面板与简报重叠 (31/37): 二选一面板关闭后接简报暂停
   G.wave = 30; G.panelOpen = false; G.briefing = false;
   closeUnlockPanel();
