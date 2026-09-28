@@ -930,6 +930,31 @@ function refreshMusicPanel() {            // 音乐面板按钮状态
   const pp = document.getElementById('mPlay');
   if (pp) pp.textContent = isPause ? '▶ 播放' : '⏸ 播放中';
 }
+// ---------------- bgSound 段落音乐 (原版 1085 时间线, N+62) ----------------
+//   原版四段 = DefineSound 1081(vent)/1082(edith)/1083(gameover)/1084(bgscenario),
+//   经 1085 单播放头时间线启停; 每任务开始 (953 frame_2) bgScenarioStop 全停;
+//   m26 事件 edithStart; 败局 gameOverStart; 终战 Yamato() 仅 pauseMusic。
+//   文件取证: bgm3.mp3 ≡ 1084, bgm2/bgm_alt ≡ 1082 (md5 实证) → 新命名 bgscenario/edith
+const SEGMENT_FILES = { bgscenario: 'bgscenario.mp3', edith: 'edith.mp3', gameover: 'gameover.mp3' };
+let segmentAudio = null, segmentName = null;
+function playSegment(name, loop = true) {  // 段落播放 (原版 bgscenario/edith loops=0x7fff, gameover 单次)
+  try {
+    if (segmentName === name && segmentAudio) return;   // 已在播 (27-30 简报不重启 edith)
+    if (!segmentAudio) segmentAudio = new Audio();
+    segmentAudio.pause();
+    segmentAudio.src = 'assets/music/' + SEGMENT_FILES[name];
+    segmentAudio.loop = loop;
+    segmentAudio.volume = 0.5;
+    segmentAudio.play().catch(() => {});
+    segmentName = name;
+  } catch (e) {}
+}
+function stopSegment() {                  // 953 frame_2 bgScenarioStop: 播放头跳走全停
+  try {
+    if (segmentAudio) { segmentAudio.pause(); segmentAudio.currentTime = 0; }
+    segmentName = null;
+  } catch (e) {}
+}
 function wireMusicPanel() {               // 原版 1151 面板按钮
   for (let i = 0; i < 3; i++) {
     const b = document.getElementById('m' + i);
@@ -1783,12 +1808,15 @@ const BRIEF_COUNT_TICKS = 8 * BRIEF_DIGIT_TICKS;     // 倒计时数字段 168 t
 let briefState = null;   // null=隐藏 | 'mission'=等待点击 | 1..8 = "start in N"
 function startWave() {
   if (G.wave >= WAVES.length) return;
-  // 原版 yamatoBattle: 终波 Yamato 出场切换战斗音乐
+  // 原版 newEvents m44: master_sounds.Yamato() = yamatoBattle=true + pauseMusic()
+  //   (终战静场 — 播放列表在原版本就被裁成静音, 这里只停音乐, N+62 勘误旧 bgm_alt 切换)
   const isYamatoWave = WAVES[G.wave].some(u => u.type === 'Yamato');
-  if (isYamatoWave && bgmAudio) {
-    bgmAudio.src = 'assets/music/bgm_alt.mp3';
-    bgmAudio.play().catch(() => {});
+  if (isYamatoWave) {
+    pauseMusic();
+    stopSegment();
   }
+  // 953 frame_2 (每次任务开始): bgScenarioStop — 播放头跳走, 段落音乐全停
+  stopSegment();
   const wave = WAVES[G.wave];
   // 原版路线: unitsMissions 每波外层数组第二元素显式给出 (missions.json), 不是猜测
   const routeName = WAVE_ROUTES[G.wave];
@@ -1925,6 +1953,12 @@ function endWave() {
   // 953 frame_30: 简报波显示 "start mission" 等点击, 其余进 "start in N" 倒计时
   if (G.wave < WAVES.length && BRIEFING_WAVES.includes(nextWave)) briefingShow();
   else G.interWave = INTERWAVE_TICKS;
+  // 段落音乐 (startInstructions: 任务 ∉[26,30] → bgScenarioStart; m26 事件 → edithStart;
+  //   27-30 简报静默 = edith 延续)
+  if (G.wave < WAVES.length) {
+    if (nextWave === 26) playSegment('edith');
+    else if (!(nextWave >= 27 && nextWave <= 30)) playSegment('bgscenario');
+  }
   if (G.wave >= WAVES.length && G.units.every(u => u.dead)) {
     G.won = true;
   }
@@ -1966,7 +2000,7 @@ function tick() {
 
   for (const u of G.units) {
     u.update();
-    if (u.reached && !u.dead) { u.dead = true; G.losses++; G.lost = true; }  // 抵达基地 = 失败
+    if (u.reached && !u.dead) { u.dead = true; G.losses++; G.lost = true; playSegment('gameover', false); }  // 抵达基地 = 失败 (原版 activePerdu → gameOverStart, 单次)
   }
   G.units = G.units.filter(u => !u.dead);
   for (const t of G.turrets) t.update();

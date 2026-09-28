@@ -1,5 +1,41 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+62 轮成果（2026-09-29, H5 领土防御·★ 音乐系统全解 + 段落音乐四处接线 —— edith 项完成）
+
+**（权威 = 1085 内部 StartSound 标签（小端 SoundId 实证）+ DefineSound 1081-1084 提取 +
+6_430 播放器伪码 + newEvents m26/m44）**
+
+### 1. 【★ N+61 的"内嵌流"定性有误：四段是 DefineSound，且早已在 H5 素材里】
+
+1085 帧内是 **StartSound 标签**，SoundId 为**小端**：`39 04`=1081、`3a 04`=1082、
+`3b 04`=1083、`3c 04`=1084 —— **md5 实证 H5 的 bgm2.mp3/bgm_alt.mp3 ≡ 1082(edith)、
+bgm3.mp3 ≡ 1084(bgscenario)**（此前提取时用错了文件名）。播放列表 musics[0..2]
+attachSound("actOfInstinct"/"hellMarch"/"justDoItUp") 的导出名在 SWF 中**不存在**
+（音乐被裁）→ 原版 ♪ 播放列表实际静音，真正的游戏内音乐 = 1085 时间线四段。
+
+### 2. 【段落音乐忠实接线（playSegment/stopSegment 独立于 ♪ 播放器）】
+
+| 时机 (原版) | 行为 | H5 |
+|---|---|---|
+| 简报期 (startInstructions: 任务 ∉[26,30] → bgScenarioStart) | bgscenario 循环 | endWave: nextWave ∉[27,30] → bgscenario |
+| newEvents m26 → edithStart | edith 循环 (loops=0x7fff) | nextWave==26 → edith |
+| 953 frame_2 (每任务开始) → bgScenarioStop | 播放头跳走全停 | startWave → stopSegment() |
+| newEvents m44 → Yamato() = yamatoBattle+pauseMusic | **终战静场**（非切曲！） | pauseMusic+stopSegment（勘误旧 bgm_alt 切换） |
+| activePerdu → gameOverStart | gameover 单次 | G.lost → playSegment('gameover', false) |
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `段落音频三件存在=true`；`第26波简报=edith=true`、`第25波简报=bgscenario=true`、
+  `任务开始全停=true`
+- 118 项 `=true`；450 帧 sim 正常；headless Audio stub 补齐 pause/currentTime
+
+### 4. 本轮仍未做（如实记录）
+
+- vent(1081) 风声段未接线（触发时机 ventStart 无调用点——原版也未启用）
+- 雷达门控 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+- ♪ 播放器三文件的真实身份已勘误入档（bgm2=edith, bgm3=bgscenario, bgm_main=1157
+  来源不明——原版播放列表被裁成静音），按钮保留为 H5 增补功能
+
 ## 第 N+61 轮成果（2026-09-29, H5 领土防御·bgSound 帧标签解码 —— edith 音乐项定性收口）
 
 **（权威 = DefineSprite_1085 帧标签（sprite_frames.py 提取，已入 sprite_frames.json）+

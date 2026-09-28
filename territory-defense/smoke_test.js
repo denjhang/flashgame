@@ -20,7 +20,7 @@ global.document = {
 };
 global.window = { addEventListener() {}, innerWidth: 1280, innerHeight: 720 };
 global.Image = class { constructor() { this.src = ""; } };
-global.Audio = class { constructor() {} play() { return { catch() {} }; } };
+global.Audio = class { constructor() { this.src = ''; this.currentTime = 0; this.loop = false; this.volume = 1; this.muted = false; } play() { return { catch() {} }; } pause() {} };
 
 let src = fs.readFileSync("./data.js", "utf-8") + "\n" + fs.readFileSync("./game.js", "utf-8");
 const cvCode = 'const cv = { width: 960, height: 480, addEventListener() {}, getBoundingClientRect() { return { left: 0, top: 0 }; } };';
@@ -1097,6 +1097,27 @@ console.log("--- chassisData 全表 ---");
   console.log("CHASSIS 12 型×5列 (速度/转弯/转向/血量/赏金) 与原版 chassisData 一致=%s" + (bad.length ? " 偏差:" + bad : ""),
     bad.length === 0);
   console.log("tigre 巡航 3 (原版, 曾误 3.2 快 6.7%%), Yamato 20000 血/0 赏金, navire 1000 赏金");
+}
+// ---- bgSound 段落音乐 (原版 1085/1081-1084 + newEvents, N+62) ----
+console.log("--- 段落音乐 ---");
+{
+  const fsx = require('fs');
+  for (const f of ['bgscenario.mp3', 'edith.mp3', 'gameover.mp3']) {
+    const ok = fsx.existsSync('assets/music/' + f) && fsx.statSync('assets/music/' + f).size > 10000;
+    console.log("段落音频 %s 存在=%s", f, ok);
+  }
+  const sv = { wave: G.wave, wa: G.waveActive, n: G.units.length, lost: G.lost, losses: G.losses, br: G.briefing };
+  G.wave = 25; G.waveActive = false; G.units.length = 0; G.briefing = false;
+  endWave();   // 下一波 26: newEvents m26 → edithStart
+  console.log("第26波简报: 段落=edith (newEvents m26)=%s", segmentName === 'edith');
+  G.wave = 24; G.waveActive = true; G.units.length = 0; G.briefing = false;
+  G.units.push(new Unit('camion1', 'null', 'parcourt1')); G.units[0].reached = true;
+  endWave();   // 下一波 25: 简报 → bgScenarioStart
+  console.log("第25波简报: 段落=bgscenario=%s", segmentName === 'bgscenario');
+  startWave(); // 953 frame_2 bgScenarioStop: 播放头跳走, 段落全停
+  console.log("任务开始段落全停 (bgScenarioStop 语义)=%s", segmentName === null);
+  G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.lost = sv.lost;
+  G.losses = sv.losses; G.briefing = sv.br;
 }
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
