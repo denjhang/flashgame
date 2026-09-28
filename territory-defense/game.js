@@ -423,7 +423,7 @@ const SHELL_KIND = {
   canon125: 'obusLourd', '125mmT90': 'obusLourd',
   crotale: 'missile', crotaleAbrams: 'missile', crotaleTigre: 'missile',
   MLRS: 'missile2', pluton: 'missile3', navireCrotale: 'missileUnder',
-  Yamato460: 'obusLourd', MTHEL: 'obusLeger',
+  Yamato460: 'obusLourd', MTHEL: 'laser',   // 原版 sprite83: createObus("laser",...) -> obus frame13
 };
 // ---------------- 炮塔外观: 173 库整帧渲染 (原版权威) ----------------
 // 结论依据 (deobf/turret_layout.py + 模板匹配双证):
@@ -1163,6 +1163,7 @@ const G = {
   dt: 1000 / 30,           // 本 tick 毫秒数 (固定 30fps 主循环; OCEEF 冷却按毫秒计)
   units: [], turrets: [], shells: [], effects: [], sparks: [],
   muzzle: [], casings: [],   // 枪口焰 / 弹壳 (原版 obus sprite 内的子件)
+  beams: [],                 // MTHEL 激光束 (原版 obus frame13 chid399: _height=目标距离)
   spawnQueue: [],          // 本波待生成 [unitType, weapon, route, delayTicks]
   spawnTimer: 0,
   waveActive: false, interWave: 120,
@@ -1471,7 +1472,7 @@ const MUZZLE_DY = {
 //   missile(crotale)/missile2(MLRS): v=50×fpsc, acc=1×fpsc (慢起步)
 //   missile3(pluton): v=40×fpsc, acc=0.05×fpsc (长加速弧)
 //   missileUnder: v=40×fpsc, acc=1×fpsc;  missileUnderSu37: v=40, acc=40
-//   laser(MTHEL): frame13 stop() 即发即中, H5 以通用速近似 (如实记录)
+//   laser(MTHEL): 即发即中, 见 spawnShell 的 beams 分支 (frame13 chid399 load 权威)
 const SHELL_SPEED = (() => {
   const V = 50 * FPSC * 0.8, V40 = 40 * FPSC * 0.8, A1 = 1 * FPSC * 0.8, A05 = 0.05 * FPSC * 0.8;
   const generic = { v: V, a: V };
@@ -1481,7 +1482,6 @@ const SHELL_SPEED = (() => {
     obusLeger: generic, obusMoyen: generic, obusLourd: generic,
     missile: { v: V, a: A1 }, missile2: { v: V, a: A1 },
     missile3: { v: V40, a: A05 }, missileUnder: { v: V40, a: A1 },
-    laser: generic,
   };
 })();
 function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
@@ -1498,6 +1498,15 @@ function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   // 弹速模型 (原版 obus 各帧 DoAction 权威, 乱码行亦解出):
   //   vitesse = 弹速上限(px/帧@24), curVitesse 初值 = acc, 每帧 +acc 封顶 vitesse
   //   换算: px/tick@30 = px/帧×0.8; 加速度数值保持 (px/tick², 推导见 smoke)
+  // laser (MTHEL) = 即发即中 (obus frame13 的 chid399 load 权威):
+  //   光束子件 load 时 this._height = 目标距离, 同帧 fireOnEnnemi(target 位置) 结算,
+  //   之后只播光束动画 —— 无飞行过程。
+  if (SHELL_KIND[turretId] === 'laser') {
+    shellHit({ x: target.x, y: target.y, target, w, side, turretId });
+    G.beams.push({ x: mx, y: my, ang, len: Math.hypot(target.x - mx, target.y - my),
+                   life: 12, life0: 12 });
+    return;
+  }
   const K = SHELL_SPEED[turretId] || SHELL_SPEED._generic;
   G.shells.push({ x: mx, y: my, target, w, side, turretId,
     speed: K.v, curV: K.a, acc: K.a, vmax: K.v, trail: 0, born: G.frame });
@@ -1873,6 +1882,7 @@ function tick() {
   for (const sp of G.sparks) sp.life--;
   G.sparks = G.sparks.filter(sp => sp.life > 0);
   if (G.muzzle) { for (const m of G.muzzle) m.life--; G.muzzle = G.muzzle.filter(m => m.life > 0); }
+  if (G.beams) { for (const bm of G.beams) bm.life--; G.beams = G.beams.filter(bm => bm.life > 0); }
   if (G.casings) { for (const c of G.casings) c.life--; G.casings = G.casings.filter(c => c.life > 0); }
 
   // 炮塔全毁不算输 (原版只有基地被突破才输)
@@ -2266,6 +2276,22 @@ function draw() {
       ctx.drawImage(im, 0, -im.naturalHeight / 2);
       ctx.restore();
     }
+  }
+  // MTHEL 激光束 (原版 chid399: 从炮口拉伸到目标距离的光束, 逐帧动画后消失)
+  for (const bm of G.beams) {
+    if (!isVisible(bm.x, bm.y)) continue;
+    const sx = w2sX(bm.x), sy = w2sY(bm.y);
+    const a = bm.life / bm.life0;
+    ctx.save();
+    ctx.translate(sx, sy); ctx.rotate(bm.ang);
+    ctx.scale(zoom, zoom);
+    ctx.globalAlpha = 0.25 * a;
+    ctx.strokeStyle = '#8cf'; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(bm.len, 0); ctx.stroke();
+    ctx.globalAlpha = 0.9 * a;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(bm.len, 0); ctx.stroke();
+    ctx.restore();
   }
   // Su37 空袭 (飞行中的战机, 在迷雾之前绘制)
   su37Draw();

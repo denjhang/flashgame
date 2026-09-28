@@ -751,6 +751,30 @@ console.log("--- 弹速模型 ---");
   console.log("missile 慢起步: 首帧移动 curV=" + sh.curV.toFixed(3) + " (=acc, 原版 load: curVitesse=acc," +
     " enterFrame 先移动后加速)");
 }
+// ---- MTHEL 激光即发即中 (obus frame13 chid399 load 权威: _height=目标距离, 同帧结算) ----
+console.log("--- MTHEL 激光 ---");
+{
+  G.units.length = 0; G.shells = []; G.beams = []; G.muzzle = []; G.casings = [];
+  const tgt = { x: 480 + 300, y: 0, hp: 100, aa: false, maxHp: 100 };
+  G.units.push(tgt);
+  const hp0 = tgt.hp;
+  // MTHEL = laser: spawnShell 应即时结算 (无飞行弹) + 产生光束特效
+  spawnShell(480, 0, tgt, [4, 800, 150, 1, 120, 2], 'ally', 'MTHEL', 0, 0);
+  const dealt = hp0 - tgt.hp;
+  console.log("激光即发即中: 目标当帧掉血=" + dealt + " (期望 120, MTHEL 单发威力) > 0=" + (dealt > 0));
+  console.log("无飞行弹 (shells=0)=" + (G.shells.length === 0) + ", 光束特效=" + G.beams.length +
+    " (期望 1, 原版 chid399 光束动画)");
+  if (G.beams.length) {
+    const bm = G.beams[0];
+    // 原版 chid399 load: distance = round(parent.distance) - parent.decalY (laser decalY=10)
+    console.log("光束长度=" + bm.len.toFixed(1) + "px (期望 290 = 目标距离 300 - decalY 10, 原版公式) 一致=" +
+      (Math.abs(bm.len - 290) < 1));
+  }
+  // 光束 12 tick 后消失
+  for (let i = 0; i < 13; i++) { if (G.beams.length) { G.beams[0].life--; if (G.beams[0].life <= 0) G.beams.shift(); } }
+  console.log("光束 12 tick 后消失=" + (G.beams.length === 0));
+  G.beams = []; G.units.length = 0; G.shells = []; G.muzzle = []; G.casings = [];
+}
 // ---- 车队链表 (原版 createUnit unitDevant/unitDerriere + frame_39 拆链) ----
 console.log("--- 车队链表 ---");
 {

@@ -1,5 +1,49 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+44 轮成果（2026-09-28, H5 领土防御·MTHEL 激光即发即中 + 光束特效）
+
+**（N+43 遗留项第一项：laser 即发即中链路解码 —— 本轮完整解出并实现）**
+
+### 1. 【权威解码：obus frame13 的 chid399 load】
+
+```
+distance = round(parent.distance) - parent.decalY   // 光束长度 = 目标距离 - 炮口前推
+puissance / portee / target 从 parent 取
+this._height = distance                              // 光束拉伸到目标距离
+if (target._x != undefined)
+    fireOnEnnemi(target._x, target._y, portee, puissance, side)   // 同帧结算伤害
+this.gotoAndPlay(2)                                  // 之后只播光束动画
+```
+
+⇒ **MTHEL 激光 = 即发即中（hitscan）**：无飞行过程，开火同帧对【锁定的目标位置】
+结算伤害；光束长度 = 目标距离 − decalY(10)。
+
+### 2. 【连带发现：SHELL_KIND 映射错误】
+
+原版 sprite83 调 `createObus("laser", ...)`，obus 帧 13 的标签也是 `laser`。
+H5 的 SHELL_KIND 把 MTHEL 映射成了 `'obusLeger'` —— 音效、弹速、飞行全错。
+已改为 `MTHEL: 'laser'`。
+
+### 3. H5 实现
+
+- `spawnShell`：laser 分支 → 构造伪 shell 直接 `shellHit`（当帧结算溅射/伤害），
+  同时 `G.beams.push({muzzle 位置, ang, len = 距目标距离, life:12})`，**不产生飞行弹**
+- 光束绘制：从炮口沿炮管角拉伸 `len`，外层 #8cf 7px + 内芯 #fff 2.5px，随 life 淡出
+- `G.beams` 生命周期 12 tick（chid399 光束动画帧数近似）
+
+### 4. 验证（node 冒烟）
+
+- `激光即发即中: 目标当帧掉血=120 (=MTHEL 单发威力) > 0=true`
+- `无飞行弹 (shells=0)=true, 光束特效=1`
+- `光束长度=290.0px (期望 290 = 目标距离 300 − decalY 10, 原版公式) 一致=true`
+- `光束 12 tick 后消失=true`；81 项断言全绿；450 帧 sim 正常
+
+### 5. 本轮仍未做（如实记录）
+
+- 原版弹道锁定开火瞬间距离直线飞行 vs H5 追踪当前目标（维持现状，已有注释）
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
+## 第 N+43 轮成果（2026-09-28, H5 领土防御·弹速/加速度模型对齐原版）
 ## 第 N+43 轮成果（2026-09-28, H5 领土防御·弹速/加速度模型对齐原版）
 
 **（新子系统审计：弹道飞行。权威 = obus 各帧 DoAction 的 vitesse/acc，乱码行亦解出）**
