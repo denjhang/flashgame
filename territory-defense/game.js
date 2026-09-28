@@ -1457,15 +1457,23 @@ function spawnMuzzleFx(x, y, ang, side, kind) {
   const m = muzzleFor(kind);
   G.muzzle.push({ x, y, ang, life: m.ticks, life0: m.ticks, kind: (kind || '') });
   // 弹壳 (douille, 29 帧抛体) —— 原版每次开火都抛一枚
+  //   ★弹壳也分两系 (原版 obus 帧库, 权威):
+  //     chid 304 ← f1/f2/f3  obusLeger/Moyen/Lourd (炮弹类)
+  //     chid 391 ← f4..f7    bullet/bulletLourde*  (曳光弹类)
+  //   两者画布同为 107x51 / 29 帧, 但逐帧位移不同 (实测 26/29 帧不同)
   if (!G.casings) G.casings = [];
-  G.casings.push({ x, y, ang, life: CASING_TICKS, life0: CASING_TICKS });
+  G.casings.push({ x, y, ang, life: CASING_TICKS, life0: CASING_TICKS,
+                   kind: (kind || ''), bullet: !!(kind && MUZZLE365_KINDS[kind]) });
 }
-// 弹壳帧 (chid 304 douille, 107x51, 29 帧; 帧内位移即抛出轨迹)
-const CASING_FRAMES = [];
+// 弹壳帧: 两系 (chid 304 炮弹 / chid 391 曳光弹), 均 107x51 / 29 帧; 帧内位移即抛出轨迹
+const CASING_FRAMES = [], CASING_BULLET_FRAMES = [];
 for (let i = 1; i <= 29; i++) {
-  const im = new Image();
-  im.src = 'assets/casing/' + i + '.png';
-  CASING_FRAMES.push(im);
+  const a = new Image(); a.src = 'assets/casing/' + i + '.png'; CASING_FRAMES.push(a);
+  const b = new Image(); b.src = 'assets/casing_bullet/' + i + '.png'; CASING_BULLET_FRAMES.push(b);
+}
+function casingFrame(c, fi) {
+  const arr = c.bullet ? CASING_BULLET_FRAMES : CASING_FRAMES;
+  return arr[Math.max(0, Math.min(arr.length - 1, fi))];
 }
 
 function shellHit(s) {
@@ -2115,12 +2123,13 @@ function draw() {
     }
   }
   // 弹壳 (原版 douille, 29 帧: 由炮口向右后抛出 → 下落 → 变暗消失)
+  //   两系: 炮弹类用 chid 304, 曳光弹类用 chid 391 (帧内位移不同)
   for (const c of G.casings) {
     if (!isVisible(c.x, c.y)) continue;
     const sx = w2sX(c.x), sy = w2sY(c.y);
     const t = (c.life0 - c.life) / c.life0;             // 0..1 进度
     const fi = Math.min(28, Math.floor(t * 29));
-    const im = CASING_FRAMES[fi];
+    const im = casingFrame(c, fi);
     if (im && im.complete && im.naturalWidth) {
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(c.ang - Math.PI / 2); ctx.scale(zoom, zoom);
       // douille 画布 107x51, 弹壳起点在 (0,23): 以画布原点摆放, 由帧内位移完成抛出轨迹

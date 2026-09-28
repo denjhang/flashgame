@@ -270,6 +270,15 @@ console.log("--- 开火细节 ---");
     spawnMuzzleFx(0, 0, 0, 'ally', 'bullet');
     const is365 = G.muzzle.length === 1 && G.muzzle[0].life0 === MUZZLE365_TICKS;
     console.log("曳光弹开火确实用 365 (旧实现是死代码)=" + is365);
+    // ★ 弹壳两系 (原版 obus f1-f3 用 chid304, f4-f7 用 chid391)
+    G.muzzle = []; G.casings = []; G.shells = [];
+    spawnMuzzleFx(0, 0, 0, 'ally', 'bullet');
+    spawnMuzzleFx(0, 0, 0, 'ally', 'obusLourd');
+    const cb = G.casings.map(c => c.bullet);
+    console.log("弹壳两系: 曳光弹→391=" + (cb[0] === true) + ", 炮弹→304=" + (cb[1] === false) +
+      " (帧表 304=" + CASING_FRAMES.length + " / 391=" + CASING_BULLET_FRAMES.length + ")");
+    const im1 = casingFrame({ bullet: true }, 0), im2 = casingFrame({ bullet: false }, 0);
+    console.log("casingFrame 分流正确=" + (im1 !== im2 && !!im1 && !!im2));
     G.muzzle = []; G.casings = []; G.shells = [];
   }
   const expected = { camion1:2, camion2:2, camion3:2, jeep:2, bradley:2, amx10:4,
