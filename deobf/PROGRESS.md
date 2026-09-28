@@ -1,5 +1,37 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+64 轮成果（2026-09-29, H5 领土防御·★ Su37 投弹重写：单点爆炸 → 16 枚毯式连投）
+
+**（权威 = 793/frame_1 的 4 个挂架剪辑（786_1/11/21/31 load: ordre=missile1..4,
+nMissile=4, decalX=+20/+10/−10）+ 786 frame_2/6 的链式触发脚本 + 793_23 enterFrame
+各边越界离场）**
+
+### 1. 【原版投弹模式解码】
+
+- Su37 挂 **4 个挂架**（missile1..4），每架 `nMissile=4` → **单次通场 16 枚**
+- 触发为**链式**：missile1 开火 → missile2 → missile3 → missile4（786 frame_2/6 DoAction）
+- 每枚 puissance=500 + impact=260 三段溅射 → 单次通场理论总伤 8000
+- 飞机**通场**：飞越目标后继续原方向出图（793_23 enterFrame 各边越界检测后移除）
+
+### 2. H5 重写（旧版 = 到达目标点单次爆炸伤 3 个）
+
+- 距目标 ≤340px 开启投弹窗，**1 枚/tick 连投 16 枚**，落点沿冻结航向 ±300px 毯式分布
+  （间距 40px）；触发时冻结投弹航向（`dropRot`），飞机直线通场、投完越过 400px 或
+  出图后离场
+- 每枚：boom + impact 260 三段溅射（SPLIT 同 shellHit）+ createEclat + killUnit 扫荡
+- 修复两处实现 bug：dropN 未初始化（`undefined < 16` 恒 false）；过点后 rot 逐帧翻转
+  导致悬停（改冻结航向直线通场）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `Su37 毯式投弹: 16 枚 (期望 16)=true, 4 单位全灭=true`（目标簇 4 辆 abrams 全灭）
+- 120 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- 挂架横向 decalX（+20/+10/−10）在落点上的横向散布未建模（当前毯式为纯纵向线分布）
+- chargeBombes 乱码即时重置条件 / 雷达门控 / 容器 bbox / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+63 轮成果（2026-09-29, H5 领土防御·★ Su37 冷却勘误：2 秒 → 60 秒）
 
 **（权威 = 785_17 的 activeDisponibilite / chargeBombes / zone on(press) 全函数解码）**

@@ -90,9 +90,11 @@ src += `
 G.frame = 0;
 G.unlocker.su37 = true;
 const su0 = { avail: SU37.available, cool: SU37.cool };
-// 放一队敌人在目标点附近, 验证炸弹伤害
+// 放一簇敌人在目标点附近, 验证 16 枚毯式连投 (原版 4 挂架 × 4 弹链式)
 G.units.length = 0;
-[0,1,2].forEach(i => { const u = new Unit('abrams', '105mmAbrams', 'parcourt1'); u.x = 800 + i*30; u.y = 200; G.units.push(u); });
+[[790,190],[820,230],[850,205],[820,190]].forEach(pt => {
+  const u = new Unit('abrams', '105mmAbrams', 'parcourt1'); u.x = pt[0]; u.y = pt[1]; G.units.push(u);
+});
 const hp0 = G.units.map(u => u.hp);
 const okStart = su37Start();
 const aiming = G.su37Aiming;
@@ -100,13 +102,17 @@ const p0 = SU37.pending ? { side: SU37.pending.side, x: Math.round(SU37.pending.
 su37Launch(820, 210);
 const planeAfter = !!SU37.plane;
 const availAfterLaunch = SU37.available;
+let booms = 0; const _bt = boomTyped; boomTyped = (x, y, r, t) => { booms++; _bt(x, y, r, t); };
 let guard = 0;
-while (SU37.plane && guard++ < 400) su37Update();
+while (SU37.plane && guard++ < 600) su37Update();
+boomTyped = _bt;
 const hp1 = G.units.map(u => u.hp);
-const dmg = hp0.map((h, i) => h - hp1[i]);
+const totalLoss = hp0.reduce((a, h, i) => a + (h - hp1[i]), 0);
+const dead = hp1.filter(h => h <= 0).length;
 console.log("Su37: start=%s aiming=%s 边=%s 起飞=%s 起飞后available=%s",
   okStart, aiming, p0 && p0.side, planeAfter, availAfterLaunch);
-console.log("Su37 投弹: 3 敌HP损伤=%j 爆炸特效=%d", dmg, G.effects.length);
+console.log("Su37 毯式投弹: %d 枚 (期望 16)=%s, 4 单位全灭=%s, 总损失=%d (死亡后 HP 为负故超过 3520)",
+  booms, booms === 16, dead === 4, totalLoss);
 // 瞄准区标记 (原版 zoneBombardement chid 785, 替代 CSS 近似)
 console.log("瞄准区: img=%s origin=(%s,%s) 154.3px (原版 785, FFDec 导出)",
   ZONE_IMG && ZONE_IMG.src, ZONE_ORIGIN.x, ZONE_ORIGIN.y);

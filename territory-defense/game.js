@@ -793,6 +793,9 @@ const SU37 = {
   POWER: 500,       // 原版 puissance
   IMPACT: 260,      // 原版 impact (溅射范围)
   SCALE: 0.4946,    // 原版 PlaceObject2 矩阵 scaleX/Y (SWF 二进制权威解码)
+  DROPS: 16,        // 原版 4 挂架 × nMissile=4 (786_1/11/21/31 load)
+  SPACING: 40,      // 毯式落点间距 (沿航向)
+  DROP_START: 340,  // 进入投弹窗口的距离 (16 弹 × 40px 的一半略余)
 };
 const SU37_IMG_SRC = 'assets/su37/DefineSprite_793/1.png';
 // ---------------- Su37 瞄准区标记 (原版 zoneBombardement chid 785) ----------------
@@ -846,26 +849,40 @@ function su37Update() {
   if (!p) return;
   const dx = p.tx - p.x, dy = p.ty - p.y;
   const d = Math.hypot(dx, dy);
-  const turn = Math.min(Math.abs(0) , 0);
   p.rot = Math.atan2(dy, dx);
-  if (d < SU37.SPEED) {
-    // 抵达目标 → 投弹 (原版 793_23: 到达 zone 后引爆, impact=260 溅射)
-    if (!p.dropped) {
-      p.dropped = true;
-      boomTyped(p.tx, p.ty, 40, 'large');
-      playSfx('explosionLarge', 0.6);
+  // 投弹窗口: 距目标 ≤ DROP_START → 开始 16 枚毯式连投 (原版 4 挂架 × nMissile=4,
+  //   missile1→missile2→missile3→missile4 链式触发, 786_1/11/21/31 load 权威;
+  //   每枚 puissance=500 + impact=260 三段溅射, 沿航向 ±300px 毯式落点)
+  if (!p.dropped && d <= SU37.DROP_START) {
+    p.dropped = true; p.dropN = 0; p.dropRot = p.rot;   // 冻结投弹航向 (通场直线)
+  }
+  if (p.dropped && p.dropN < SU37.DROPS) {
+    p.dropN++;
+    const off = (p.dropN - 8.5) * SU37.SPACING;
+    const bx = p.tx + Math.cos(p.dropRot) * off;
+    const by = p.ty + Math.sin(p.dropRot) * off;
+    boomTyped(bx, by, 40, 'large');
+    for (const [rr, pm] of SPLIT) {
       for (const u of G.units) {
         if (u.hp <= 0) continue;
-        const dd = Math.hypot(u.x - p.tx, u.y - p.ty);
-        if (dd <= SU37.IMPACT) u.hp -= SU37.POWER * (dd <= SU37.IMPACT / 3 ? 1 : 0.5);
+        const dd = Math.hypot(u.x - bx, u.y - by);
+        if (dd <= SU37.IMPACT * rr) u.hp -= SU37.POWER * pm * (u.aa ? ANTI_AIR_MULT : 1);
       }
-      for (const u of G.units) killUnit(u);
     }
-    SU37.plane = null;   // 投弹后离场
-    return;
+    createEclat(bx, by, SU37.POWER);
+    for (const u of G.units) killUnit(u);
   }
-  p.x += dx / d * SU37.SPEED;
-  p.y += dy / d * SU37.SPEED;
+  // 通场: 投弹窗开启后沿冻结航向直线飞越, 投完且越过 400px (或飞出地图) → 离场
+  //   (原版 793_23 enterFrame: 各边越界检测后移除)
+  const dr = p.dropped ? p.dropRot : p.rot;
+  p.x += Math.cos(dr) * SU37.SPEED;
+  p.y += Math.sin(dr) * SU37.SPEED;
+  const dro = p.dropRot || 0;
+  const proj = (p.x - p.tx) * Math.cos(dro) + (p.y - p.ty) * Math.sin(dro);
+  if (p.dropped && p.dropN >= SU37.DROPS &&
+      (proj >= 400 || p.x < -300 || p.x > 2400 || p.y < -1800 || p.y > 800)) {
+    SU37.plane = null;
+  }
 }
 function su37Draw() {
   const p = SU37.plane;
