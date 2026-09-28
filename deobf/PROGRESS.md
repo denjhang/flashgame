@@ -1,5 +1,30 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+57 轮成果（2026-09-29, H5 领土防御·血条子系统审计对齐 + fireOnEnnemi 解码）
+
+**（权威 = 428_unit enterFrame 的 etatJauge 段 + 6_1 load/keyDown + 327 fireOnEnnemi）**
+
+### 1. 【血条子系统审计 —— H5 已对齐，零改动】
+
+原版 428_unit enterFrame 逐行解码：
+- `if (!master_clavier.afficheEtat) etatJauge._x = -500;`（H 键关闭 → 藏掉）
+- 开启时：`jauge._xscale = etat / maxEtat × 100`（血量比例条）+ 逐帧跟随单位 `_x/_y`
+- `afficheEtat` 默认 **true**（6_1 load）
+
+H5 现状：`showHp` 默认 true、H 键开关、存活时绘制 —— 三件套全部一致 ✓，零改动结清。
+
+### 2. 【fireOnEnnemi 部分解码（327）】
+
+`fireOnEnnemi(xpos, ypos, range, power, side)`：按 side 选遍历数组（'ennemy' →
+unitsEnnemies），对 `|_x − xpos| < range×2 + _height` 的单位施加 power 伤害的水平邻近
+判定。**唯一调用点 = 329 的 iMission≥45 终局分支**（power=1000000 清场演出）。
+H5 终局流程无此演出，不接线，如实记录。
+
+### 3. 本轮仍未做（如实记录）
+
+- 雷达门控语义（N+56 列待真机观察，维持）
+- m26 edithStart 音乐 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+56 轮成果（2026-09-29, H5 领土防御·雷达门控悖论定量证伪 —— 静态分析穷尽，列搁置）
 
 **（N+55 头号待解项的收官轮：不接线决策维持，证据链全部落档）**
