@@ -1,5 +1,46 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+51 轮成果（2026-09-28, H5 领土防御·炮塔索敌规则对齐原版 getTarget）
+
+**（权威 = DefineSprite_174/frame_1/PlaceObject2_173_1 的 getTarget/getDistance/noTarget
+pcode + OCEEF 保持检查 + porteeAcq 初始化 loc16b5/loc16c4）**
+
+### 1. 【原版索敌模型（逐段解码）】
+
+- **获取**：`setInterval(getTarget, 500)` —— 每 500ms 扫一次，取**最近且 ≤ 射程(100%)** 者；
+  获取成功后 **clearInterval + blockInterval=true → 停止轮询**（锁定期间出现更近的敌人也不切换）
+- **解锁**（getTarget 末尾）：目标距离 > distanceOfFire → target=null（另有死亡/移除）
+- **保持半径**（OCEEF 每帧）：距离 > 射程 × porteeAcq 时**并不清 target**，而是
+  **重新 setInterval(getTarget,500) 恢复轮询** —— 旧目标继续挨打直到下次轮询按 ≤100% 重取
+  （同一目标仍在 100% 内就再锁上）。porteeAcq：**ally 塔 0.6 / ennemy 单位 0.8**
+- **战场边界**：获取时跳过 `_x<0` 或 `_y>477` 的目标 —— **舰船在海上（e1 x=−182）、
+  南口 y>477 的出生堆叠单位不可索敌**
+- **对空**：目标为直升机 (chassis=="tigre") 时只有 **crotale / m60 / gatling** 三型可打
+
+### 2. H5 修正（Turret.update 与 Unit.update 两处）
+
+- 每 tick 全扫 → **500ms 轮询 + 锁定后停轮询**（粘滞：更近新敌人不切换）
+- 保持半径语义修正为"恢复轮询而非弃标"（初版实现误做 0.6× 硬弃——会错杀 0.6-1.0×
+  环带的持续火力；重读 OCEEF 分支后纠正）
+- 补 `y>477` 获取过滤（原有 x<0）；敌方目标的移除检测 (`!G.turrets.includes(target)`)
+  对应原版 `target._parent==undefined`
+- AA 三型表 H5 `AA_WEAPONS=['m60','gatling','crotale']` 与原版逐字一致 ✓（U 升级是
+  用户确认的基准扩展，保留）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 新增 7 项断言全绿：0.5× 获取 / **锁定期间不切换（0.1× 新敌人也不换）** / 0.6-1.0×
+  环带恢复轮询但保持锁定 / 轮询重取同一目标 / 超 100% 解锁 / y>477 不可获取 /
+  敌方 0.85× 保持锁定 → 超 100% 解锁
+- 109 项 `=true`；450 帧 sim 正常（击杀 14 / 塔 15/15 / lost=false）
+
+### 4. 本轮仍未做（如实记录）
+
+- 原版解锁后 ≤500ms 内仍朝旧目标开火（OCEEF 无开火距离门）的"僵尸锁定开火"未复刻
+  （H5 在 >100% 时立即停火；差 ≤500ms 的尾焰，视觉影响极小）
+- getTarget 的 noTarget(side) 起始索引优化未逐行对齐（行为等价：都是全扫取最近）
+- m26 edithStart 音乐 / 容器 bbox 炮管动态外扩 / 多 chid 合成器覆盖率 24%（均搁置）
+
 ## 第 N+50 轮成果（2026-09-28, H5 领土防御·解锁计划全表审计一致 + 补 m25 奖金 2400）
 
 **（权威 = DefineSprite_834/frame_1/PlaceObject2_773_189 的 newEvents 事件表（池 41 目全解）

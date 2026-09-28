@@ -1314,7 +1314,26 @@ class Unit {
       this.cool -= G.dt;      // 毫秒冷却 (原版 OCEEF 43ms 循环模型)
       if (this.fireT > 0) this.fireT--;
       tickBurst(this);        // 连发队列推进 (帧位到点即 spawnShell)
-      const t = nearestTurret(this.x, this.y, this.weapon[1]);
+      // 索敌 (原版 getTarget 同一套, ennemy 侧 porteeAcq=0.8, 174 loc16c4 权威):
+      //   锁定后停止轮询 (不切换更近目标); 死亡/抵达/超 100% 射程才解锁;
+      //   超 0.8×射程只恢复 500ms 轮询 (旧目标继续挨打, 原版不解锁)
+      const utD = (t) => Math.hypot(t.x - this.x, t.y - this.y);
+      if (this.target && (this.target.hp <= 0 || this.target.dying > 0 || this.target.dead ||
+                          !G.turrets.includes(this.target) || utD(this.target) > this.weapon[1])) {
+        // 原版 OCEEF: target._parent == undefined (clip 已移除) → 视同无目标
+        this.target = null;
+      }
+      if (this.target && utD(this.target) > this.weapon[1] * 0.8) this.pollArmed = true;
+      if (!this.target || this.pollArmed) {
+        this.retargetT = (this.retargetT === undefined) ? 0 : this.retargetT;
+        this.retargetT -= G.dt;
+        if (this.retargetT <= 0) {
+          this.retargetT = 500;
+          this.target = nearestTurret(this.x, this.y, this.weapon[1]);
+          this.pollArmed = false;
+        }
+      }
+      let t = this.target;
       if (!this._tRotInit) { this.tRot = this.rot; this._tRotInit = true; }   // 初始与车体同向
       if (t) {
         // 目标方位 (世界系) → 塔头逐帧转向 (rate = typeData[0] × fpsc, 与玩家塔同一系数)
@@ -1343,6 +1362,7 @@ function nearestTurret(x, y, range) {
   let best = null, bd = range;
   for (const t of G.turrets) {
     if (t.hp <= 0) continue;   // 已摧毁的塔不再被索敌 (含阵亡序列播放中)
+    if (t.x < 0 || t.y > 477) continue;   // 原版 getTarget 战场边界 (_x<0 / _y>477 不可索敌)
     const d = Math.hypot(t.x - x, t.y - y);
     if (d < bd) { bd = d; best = t; }
   }
@@ -1416,16 +1436,37 @@ class Turret {
     }
     if (!this.w || this.w[0] === 0) return;   // radar: 零属性 (原版鸡肋, 忠实还原)
     if (this.cool > 0) { this.cool -= G.dt; }   // 毫秒冷却 (原版 OCEEF 43ms 循环)
-    // 索敌 (getTarget): 有效目标 + 对空限制 + 迷雾可见 + 最近
-    let best = null, bd = Infinity;
-    for (const u of G.units) {
-      if (u.hp <= 0 || u.x < 0 || u.reached) continue;
-      if (u.aa && !this.aa) continue;               // 直升机需对空能力
-      if (!isVisible(u.x, u.y)) continue;           // 迷雾中的敌人不可锁定
-      const d = Math.hypot(u.x - this.x, u.y - this.y);
-      if (d < bd && d <= this.w[1]) { bd = d; best = u; }
+    // 索敌 (原版 getTarget + OCEEF 保持检查, DefineSprite_174 pcode):
+    //   锁定: 无目标时每 500ms 扫一次 (setInterval(getTarget,500)), 取最近且 ≤ 射程(100%)者;
+    //         锁定后【停止轮询】(getTarget 末尾 clearInterval + blockInterval=true) ——
+    //         期间即使出现更近的新敌人也不切换
+    //   解锁: 目标死亡/到达/距离 > 射程 (getTarget 的 >distanceOfFire → null)
+    //   保持半径: 距离 > 射程×porteeAcq(0.6, ally) 时【恢复 500ms 轮询】(OCEEF 重新
+    //         setInterval) —— 原版此时【不解锁】, 旧目标继续挨打直到下次轮询按 ≤100% 重取;
+    //         H5 忠实实现之。跳过 _x<0/_y>477 (舰船在海上、南口堆叠单位不可索敌)
+    const twD = (u) => Math.hypot(u.x - this.x, u.y - this.y);
+    if (this.target && (this.target.hp <= 0 || this.target.reached || twD(this.target) > this.w[1])) {
+      this.target = null;
     }
-    this.target = best;
+    if (this.target && twD(this.target) > this.w[1] * 0.6) this.pollArmed = true;
+    if (!this.target || this.pollArmed) {
+      this.retargetT = (this.retargetT === undefined) ? 0 : this.retargetT;
+      this.retargetT -= G.dt;
+      if (this.retargetT <= 0) {
+        this.retargetT = 500;
+        let best = null, bd = Infinity;
+        for (const u of G.units) {
+          if (u.hp <= 0 || u.x < 0 || u.y > 477 || u.reached) continue;
+          if (u.aa && !this.aa) continue;               // 直升机需对空能力
+          if (!isVisible(u.x, u.y)) continue;           // 迷雾中的敌人不可锁定
+          const d = twD(u);
+          if (d < bd && d <= this.w[1]) { bd = d; best = u; }
+        }
+        this.target = best;
+        this.pollArmed = false;
+      }
+    }
+    const best = this.target;
     if (best) {
       // 转向 (rotateSpeed 因子越小越快)
       const want = Math.atan2(best.y - this.y, best.x - this.x);
@@ -1442,7 +1483,7 @@ class Turret {
       //   ⇒ 实际开火间隔 = floor(typeData[2] / fpsc) × 43ms  (毫秒制, 与帧率无关)
       //   H5 之前用 `w[2] * 1.15` 帧 (按 30fps 折算), 既非毫秒制、又对 m60 偏慢;
       //   改为毫秒冷却计数 (G.dt), 与 fpsc 解耦。
-      if (Math.abs(da) < 3 * Math.PI / 180 && this.cool <= 0 && bd <= this.w[1]) {   // 原版 3° 开火门
+      if (Math.abs(da) < 3 * Math.PI / 180 && this.cool <= 0) {   // 原版 3° 开火门
         this.cool = fireCooldownMs(this.w[2]);
         const gunId = PLAYER_ETURRET[this.id] || this.id;
         this.fireT = fireTicksFor(gunId);   // 播完整开火动画

@@ -1008,6 +1008,55 @@ console.log("--- 简报暂停波 ---");
   G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.interWave = sv.iw;
   G.briefing = sv.br; briefState = null; G.lost = sv.lost; G.losses = sv.losses;
 }
+// ---- 索敌节奏 (原版 174 getTarget: 500ms 轮询 + 锁定后停轮询 + porteeAcq 恢复轮询 + 战场边界) ----
+console.log("--- 索敌节奏 ---");
+{
+  const sv = { units: G.units.length, lost: G.lost, losses: G.losses };
+  G.units.length = 0; G.turrets.length = 0; G.lost = false;
+  VIS = [{ x: 1000, y: 300, r: 5000 }];
+  const tw = new Turret('m60', 1000, 300);
+  G.turrets.push(tw);
+  const R = WEAPONS.m60[1];
+  const u = new Unit('camion1', 'null', 'parcourt1');
+  u.x = 1000 + R * 0.5; u.y = 300;
+  G.units.push(u);
+  tw.update();
+  console.log("获取: 0.5×射程内敌人 (首次 tick 即轮询)=%s", tw.target === u);
+  // 锁定期间停止轮询: 出现更近的新敌人也不切换
+  const u2 = new Unit('camion1', 'null', 'parcourt1');
+  u2.x = 1000 + R * 0.1; u2.y = 300;
+  G.units.push(u2);
+  tw.retargetT = 1; tw.update();
+  console.log("锁定期间不切换 (新敌人 0.1×射程也不换)=%s", tw.target === u);
+  // 保持半径 0.6: 移走更近的 u2, 目标退到 0.7×射程 → 恢复轮询但【不解锁】, 重取仍是它
+  G.units.splice(G.units.indexOf(u2), 1);
+  u.x = 1000 + R * 0.7;
+  tw.retargetT = 1; tw.update();
+  const annulus = tw.target === u;
+  tw.retargetT = 1; tw.update();
+  const relocked = tw.target === u;
+  console.log("0.6-1.0× 环带: 恢复轮询但保持锁定=%s, 轮询重取仍是同一目标=%s", annulus, relocked);
+  // 解锁: 目标超出 100% 射程
+  u.x = 1000 + R * 1.05;
+  tw.update();
+  console.log("超 100% 射程解锁 (无他目标 → null)=%s", tw.target === null);
+  // 战场边界 (获取侧): 唯一单位在 y>477 → 无法获取
+  u.x = 1000; u.y = 500;
+  tw.retargetT = 1; tw.update();
+  console.log("战场边界 y>477 不可获取 (南口堆叠期)=%s", tw.target === null);
+  // 敌方侧 porteeAcq=0.8 (174 loc16c4): 环带保持锁定, 超 100% 解锁
+  const en = new Unit('t90', '125mmT90', 'parcourt1');
+  en.hp = 99999; en.x = 100; en.y = 100;
+  const twr = new Turret('canon105', 200, 100);
+  G.units.push(en); G.turrets.push(twr);
+  const er = WEAPONS['125mmT90'][1];
+  en.retargetT = 1; en.x = 200 - er * 0.85; en.update();
+  const kept85 = en.target === twr;
+  en.x = 200 - er * 1.05; en.update();
+  console.log("敌方 0.85× 射程保持锁定=%s → 超 100%% 解锁=%s", kept85, en.target === null);
+  G.units.length = 0; G.turrets.length = 0;
+  G.lost = sv.lost; G.losses = sv.losses;
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {
