@@ -56,14 +56,31 @@ function exploredToScreen() {   // 探索记忆 → 屏幕绘制参数
            w: expW / EXPLORED_SCALE * zoom, h: expH / EXPLORED_SCALE * zoom };
 }
 
-// 建造菜单 —— 顺序按原版 menu.constructionCont 子件顺序 (frame_6/PlaceObject2_6_333)
-// 解锁不再看波数阈值, 全部走原版 unlocker 表 + 二选一面板
-const SHOP = [
-  { id:'m60'       }, { id:'gatling'   }, { id:'canon75'   },
-  { id:'canon105'  }, { id:'canon105D' }, { id:'radar'     },
-  { id:'crotale'   }, { id:'canon125'  }, { id:'MLRS'      },
-  { id:'MTHEL'     }, { id:'pluton'    },
+// 建造菜单 —— 严格按原版 constructionCont (chid 1027) 的 3 页 x 4 格结构。
+// 权威依据 (FFDec SVG 逐帧导出 DefineSprite_1027):
+//   f1: m60 / gatling / canon75 / canon105        (槽位 (0,0)(1,0)(0,1)(1,1))
+//   f2: canon105D / radar / crotale / canon125
+//   f3: MLRS / MTHEL / pluton / Su37
+//   (每格是 chid 1026 菜单项, 内含 chid 1025 图; 槽位间距 = 77.1 x 64.45 原版像素)
+// ★ Su37 是【建造菜单第 3 页的一格】(原版 1027 f3 id="Su37"), 不是独立按钮 ——
+//   之前把它放到右侧开关面板是错的, 现归回菜单。
+const SHOP_PAGES = [
+  ['m60', 'gatling', 'canon75', 'canon105'],
+  ['canon105D', 'radar', 'crotale', 'canon125'],
+  ['MLRS', 'MTHEL', 'pluton', 'su37'],
 ];
+// 当前页 (原版 curPanel, 1..3; turnConstruction("left"/"right") 循环切换)
+//   权威依据 DefineSprite_1079/frame_1/DoAction 的 turnConstruction:
+//     left : curPanel>1 ? curPanel-- : curPanel=3
+//     right: curPanel<3 ? curPanel++ : curPanel=1
+let SHOP_PANEL = 1;
+function turnConstruction(dir) {
+  if (dir === 'left') SHOP_PANEL = SHOP_PANEL > 1 ? SHOP_PANEL - 1 : 3;
+  else SHOP_PANEL = SHOP_PANEL < 3 ? SHOP_PANEL + 1 : 1;
+  playSfx('boutonScroll', 0.35);
+  buildShop();
+  return true;
+}
 // 原版解锁时间线 (DefineSprite_834/frame_1/PlaceObject2_773_189 newEvents, 关卡号=波号):
 //   m7 → canon75 / m11 → canon105 / m16 → canon105D  (自动解锁)
 //   m27 → radar / m31 → su37                          (自动解锁 + 开二选一面板)
@@ -727,7 +744,7 @@ function refreshMusicPanel() {            // 音乐面板按钮状态
     const b = document.getElementById('m' + i);
     if (b) {
       b.classList.toggle('on', i === imusic && !isPause);
-      b.textContent = BGM_NAMES[i];   // 原版 1151 按钮显示曲名
+      b.textContent = BGM_NAMES[i];   // 原版 1151 按钮显示曲名 (class="song" 在 HTML 里给, 小字不撑高面板)
     }
   }
   const pp = document.getElementById('mPlay');
@@ -740,8 +757,6 @@ function wireMusicPanel() {               // 原版 1151 面板按钮
   }
   const pp = document.getElementById('mPlay');
   if (pp) pp.onclick = () => { if (isPause) playMusic(); else pauseMusic(); refreshMusicPanel(); };
-  const pa = document.getElementById('mPause');
-  if (pa) pa.onclick = () => pauseMusic();
   const mu = document.getElementById('mMute');
   if (mu) mu.onclick = () => { bgmMuted = !bgmMuted; if (bgmAudio) bgmAudio.muted = bgmMuted;
                                mu.textContent = bgmMuted ? '🔇 已静音' : '🔇'; };
@@ -970,7 +985,10 @@ const G = {
   spawnTimer: 0,
   waveActive: false, interWave: 120,
   lost: false, won: false, losses: 0,
-  shopSel: 'm60', placing: null,
+  // 建造模式: 原版 carte.viseurConstruction 初值为 false
+  //   (DefineSprite_834/frame_1/PlaceObject2_6_321 onClipEvent(load): set("viseurConstruction",false))
+  //   → 开局不在建造模式, 必须点菜单项才进入。旧代码默认 'm60' 会导致一进游戏就跟随建造光标。
+  shopSel: null, placing: null,
   showHp: true,            // 原版 H 键开关
   mouseScroll: true,       // 原版 M 键开关 (鼠标边缘滚屏)
   showBuildArea: false,    // 原版 C 键开关 (可建区域显示)
@@ -1803,7 +1821,7 @@ function draw() {
     }
     ctx.fillStyle = ok ? '#cfc' : '#f88';
     ctx.font = '11px monospace';
-    ctx.fillText((ok ? '可建 ' : '不可建 ') + (SHOP.find(s => s.id === G.shopSel) || {}).id, 8, H - 8);
+    ctx.fillText((ok ? '可建 ' : '不可建 ') + G.shopSel, 8, H - 8);
   }
 
   // ---- 战争迷雾 (最后绘制, 视野源换算到屏幕坐标) ----
@@ -1966,26 +1984,58 @@ function preloadTurretArt() {
 function buildShop() {
   const el = document.getElementById('shop');
   el.innerHTML = '';
-  for (const s of SHOP) {
-    const locked = !G.unlocker[s.id];
+  const page = SHOP_PAGES[SHOP_PANEL - 1] || SHOP_PAGES[0];
+  for (const id of page) {
+    const isSu37 = id === 'su37';
+    // su37 的解锁门与原版一致 (unlocker.su37); 其余塔看 unlocker[id]
+    const locked = isSu37 ? !G.unlocker.su37 : !G.unlocker[id];
     const sp = document.createElement('span');
-    sp.className = 'sel' + (locked ? ' lock' : '') + (G.shopSel === s.id ? ' on' : '');
+    sp.className = 'sel' + (locked ? ' lock' : '') + (G.shopSel === id ? ' on' : '');
     // 原版建造菜单武器照片 (1025 帧库)
     const im = document.createElement('img');
-    im.src = 'assets/menu/' + s.id + '.png';
+    im.src = 'assets/menu/' + id + '.png';
     sp.appendChild(im);
     const nm = document.createElement('div');
     nm.className = 'nm';
-    nm.textContent = s.id;
+    nm.textContent = id;
     sp.appendChild(nm);
-    const pr = document.createElement('div');
-    pr.className = 'price';
-    pr.textContent = '$' + STRUCTURES[s.id].cost;
-    sp.appendChild(pr);
-    if (!locked) sp.onclick = () => { G.shopSel = s.id; playSfx('boutonScroll', 0.35); buildShop(); };
+    if (isSu37) {
+      // Su37 无"造价"概念 (是空袭技能), 显示冷却状态 (原版 compteur EditText: "ready" / ".. wait")
+      const cd = document.createElement('div');
+      cd.className = 'price';
+      cd.textContent = !G.unlocker.su37 ? 'locked'
+        : SU37.available ? 'ready' : Math.ceil(SU37.cool / 30) + 's';
+      sp.appendChild(cd);
+      if (SU37.available && G.unlocker.su37) {
+        sp.onclick = () => { su37Start(); buildShop(); };
+      }
+    } else {
+      const pr = document.createElement('div');
+      pr.className = 'price';
+      pr.textContent = '$' + STRUCTURES[id].cost;
+      sp.appendChild(pr);
+      if (!locked) sp.onclick = () => { G.shopSel = id; playSfx('boutonScroll', 0.35); buildShop(); };
+    }
     el.appendChild(sp);
   }
+  // 高亮当前页码点 (3 页)
+  const dots = document.querySelectorAll('#pageDots i');
+  dots.forEach((d, i) => d.classList.toggle('on', i === SHOP_PANEL - 1));
+  const t = document.getElementById('shopTitle');
+  if (t) t.textContent = 'UNIT / BUILD MENU  ' + SHOP_PANEL + '/3';
 }
+// 翻页箭头接线 (原版 arrowL/arrowR chid 1078 on(press) -> turnConstruction)
+{
+  const L = document.getElementById('pageL'), R = document.getElementById('pageR');
+  if (L) L.onclick = () => turnConstruction('left');
+  if (R) R.onclick = () => turnConstruction('right');
+}
+// 键盘翻页 (原版 turnConstruction 只由箭头触发; H5 额外给 [,] / Q,E 方便操作, 如实记录)
+window.addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if (k === 'q' || k === '[') { turnConstruction('left'); e.preventDefault(); }
+  if (k === 'e' || k === ']') { turnConstruction('right'); e.preventDefault(); }
+});
 
 // ---------------- 输入 (原版 master_clavier: 方向键持续滚动 + 边缘滚屏, 无 WASD) ----------------
 cv.addEventListener('mousemove', (e) => {
@@ -2041,16 +2091,15 @@ function mmJump(e) {
 function refreshToggleBtns() {
   const set = (id, on) => { const b = document.getElementById(id); if (b) b.classList.toggle('on', on); };
   set('tHp', G.showHp); set('tScroll', G.mouseScroll); set('tArea', G.showBuildArea); set('tZoom', zoom < 1);
-  // Su37 按钮: 冷却中禁用并显示剩余秒数 (原版 compteur.text = ".. wait" / "ready")
-  const b = document.getElementById('tSu37');
-  if (b) {
-    // 原版: su37 要在 m31 解锁后才出现在建造菜单 (unlocker.su37)
-    const unlocked = G.unlocker.su37;
-    b.disabled = !unlocked || !SU37.available;
-    b.classList.toggle('on', G.su37Aiming);
-    b.textContent = !unlocked ? 'Su37 未解锁'
-      : SU37.available ? 'Su37 空袭'
-      : 'Su37 ' + Math.ceil(SU37.cool / 30) + 's';
+  // Su37 现在住在建造菜单第 3 页 (原版 1027 f3), 不再有独立按钮;
+  //   它的冷却/就绪状态在菜单格上显示, 这里只在该页可见时刷新一次文案。
+  if (SHOP_PANEL === 3) {
+    const el = document.getElementById('shop');
+    if (el && el.children.length) {
+      const cell = el.children[3];   // 第 3 页的 Su37 槽位
+      const cd = cell && cell.querySelector('.price');
+      if (cd && G.unlocker.su37) cd.textContent = SU37.available ? 'ready' : Math.ceil(SU37.cool / 30) + 's';
+    }
   }
 }
 function bindToggle(id, fn) {
@@ -2061,7 +2110,6 @@ bindToggle('tHp', () => G.showHp = !G.showHp);
 bindToggle('tScroll', () => G.mouseScroll = !G.mouseScroll);
 bindToggle('tArea', () => G.showBuildArea = !G.showBuildArea);
 bindToggle('tZoom', () => toggleZoom());
-bindToggle('tSu37', () => su37Start());
 // 二选一面板按钮 (原版 sprite 989 两个按钮的 on(press))
 {
   const b1 = document.getElementById('upUnlock');
@@ -2141,7 +2189,25 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') { G.shopSel = null; G.selected = null; e.preventDefault(); buildShop(); }
 });
 
+// ---------------- 现代窗口适配 ----------------
+// 原版是固定 800x600 的 Flash 舞台。H5 之前直接硬编码 800x600, 在 1280x720 等窗口里
+// 既不居中、底部 HUD 还会溢出到视口外。这里按窗口大小对 #fit (800x648: 舞台+HUD)
+// 做等比缩放 + 居中, 保持原版画面比例不变。
+// 注意: 用 CSS transform 缩放, 不改 canvas 的 width/height 属性 ——
+//   渲染分辨率仍是 635x600 (原版分辨率), 只是显示时缩放; 鼠标换算靠 getBoundingClientRect
+//   自动带上 scale, 因此 s2wX/s2wY 无需改动。
+function fitStage() {
+  const fit = document.getElementById('fit');
+  if (!fit) return;
+  const BW = 800, BH = 648;                 // 逻辑尺寸
+  const s = Math.min(window.innerWidth / BW, window.innerHeight / BH);
+  fit.style.transform = 'scale(' + s + ')';
+  // transform-origin: center center + flex 居中 → 缩放后仍居中, 无需手算偏移
+}
+window.addEventListener('resize', fitStage);
+
 // ---------------- 启动 ----------------
+fitStage();           // 先适配窗口 (避免首帧错位)
 preloadTurretArt();   // 预载炮塔素材, 避免首座塔在 PNG 到位前渲染成兜底色块
 refreshToggleBtns();
 buildShop();

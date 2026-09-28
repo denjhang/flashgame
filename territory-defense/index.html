@@ -2,48 +2,71 @@
 <html lang="zh">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>领土防御 Territory Defense</title>
 <style>
-  body { background:#000; margin:0; display:flex; font-family:monospace; user-select:none; }
+  html, body { height:100%; }
+  body { background:#000; margin:0; display:flex; align-items:center; justify-content:center;
+         font-family:monospace; user-select:none; overflow:hidden; }
+
+  /* 缩放容器: 原版舞台 800x600 + 底部 HUD, 按窗口大小整体等比缩放 (见 fitStage()) */
+  #fit { width:800px; height:648px; position:relative; transform-origin:center center; flex:none; }
+
   /* 原版 800x600 舞台: 地图区 635 + 右侧栏 165 */
-  #stage { width:800px; height:600px; position:relative; background:#000; overflow:hidden; }
+  #stage { position:absolute; left:0; top:0; width:800px; height:600px; background:#000; overflow:hidden; }
   #cv { position:absolute; left:0; top:0; cursor:crosshair; }
-  /* 原版右侧栏 (frames/6.png) */
+  /* 原版右侧栏 (frames/6.png) —— 高度必须锁在 600px, 否则会像之前那样把 INFO 挤出舞台 */
   #side { position:absolute; right:0; top:0; width:165px; height:600px;
-          background:#4a4a4a; display:flex; flex-direction:column; }
-  #minimapBox { height:152px; border-bottom:2px solid #222; background:#000; }
-  #minimap { display:block; cursor:pointer; width:165px; height:152px; }
+          background:#4a4a4a; display:flex; flex-direction:column; overflow:hidden; }
+  #minimapBox { height:152px; border-bottom:2px solid #222; background:#000; flex:none; }
+  #minimap { display:block; cursor:pointer; width:165px; height:150px; }
   .panelTitle { background:#333; color:#ddd; text-align:center; font-weight:bold;
-                font-size:12px; padding:4px 0; letter-spacing:1px; border-top:1px solid #666;
+                font-size:11px; padding:3px 0; letter-spacing:1px; border-top:1px solid #666;
                 border-bottom:1px solid #111; }
-  #shop { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:5px; background:#c8c8c8; }
-  .sel { border:2px solid #999; background:#d8d8d8; cursor:pointer; position:relative; }
-  .sel img { width:100%; height:56px; object-fit:cover; display:block; }
+  /* 建造菜单: 原版 constructionCont(chid 1027) 是 3 页 x 4 格 (2x2), 不是单页长列表 */
+  #shop { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px;
+          background:#c8c8c8; flex:none; }
+  .sel { border:2px solid #999; background:#d8d8d8; cursor:pointer; position:relative; height:62px; }
+  .sel img { width:100%; height:48px; object-fit:cover; display:block; }
   .sel.on { border-color:#e80; }
   .sel.lock { opacity:.30; cursor:not-allowed; }
-  .sel .nm { position:absolute; left:2px; top:0; font-size:10px; font-weight:bold; color:#111;
+  .sel .nm { position:absolute; left:1px; top:0; font-size:9px; font-weight:bold; color:#111;
              background:rgba(255,255,255,.65); padding:0 2px; }
-  .sel .price { position:absolute; right:1px; bottom:0; font-size:11px; font-weight:bold; color:#040;
+  .sel .price { position:absolute; right:1px; bottom:0; font-size:10px; font-weight:bold; color:#040;
                 background:rgba(255,255,255,.75); padding:0 2px; }
-  .panelHead { display:flex; }
+  .sel .cd { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center;
+             justify-content:center; background:rgba(0,0,0,.55); color:#fc6; font-size:10px; }
+  .panelHead { display:flex; flex:none; }
   .panelHead .panelTitle { flex:1; border-top:none; }
-  .panelHead .arrow { background:#555; color:#ddd; width:26px; text-align:center; font-size:12px;
-                      padding:4px 0; cursor:default; border-bottom:1px solid #111; }
-  #infoBox { background:#101010; color:#9f9; font-size:11px; min-height:96px; padding:5px; flex:1; }
+  /* 翻页箭头 (原版 arrowL/arrowR chid 1078 -> turnConstruction("left"/"right")) */
+  .panelHead .arrow { background:#555; color:#ddd; width:24px; text-align:center; font-size:11px;
+                      padding:3px 0; cursor:pointer; border-bottom:1px solid #111; user-select:none; }
+  .panelHead .arrow:hover { background:#6a6a4a; color:#ff8; }
+  .panelHead .arrow:active { background:#7a7a3a; }
+  /* 页码点 (3 页) */
+  #pageDots { display:flex; gap:3px; justify-content:center; padding:2px 0; background:#333;
+              border-bottom:1px solid #111; flex:none; }
+  #pageDots i { width:6px; height:6px; border-radius:50%; background:#666; display:block; }
+  #pageDots i.on { background:#e80; }
+  #infoBox { background:#101010; color:#9f9; font-size:10.5px; line-height:1.35;
+             padding:4px; flex:1 1 auto; min-height:0; overflow:hidden; }
   #infoBox b { color:#cf9; }
-  #lossBox { background:#0a0a0a; padding:4px 5px; font-size:12px; }
+  #lossBox { background:#0a0a0a; padding:3px 5px; font-size:11px; flex:none; }
   #lossBox .losses { color:#daa; }
-  #lossBox .cash { color:#ee8; display:block; margin-top:3px; }
+  #lossBox .cash { color:#ee8; display:block; }
   #lossBox .interest { color:#aa8; font-size:10px; }
-  /* 音乐面板 (原版 1151: 三曲选择 + 播放/暂停) */
-  #musicBox { background:#2a2a2a; padding:4px; display:flex; flex-direction:column; gap:3px; }
+  /* 音乐/开关面板 (原版 1151 三曲选择) */
+  #musicBox { background:#2a2a2a; padding:3px; display:flex; flex-direction:column; gap:2px; flex:none; }
   #musicBox button { background:#444; color:#ccc; border:1px solid #666; font-size:10px;
-                     font-family:monospace; padding:2px; cursor:pointer; text-align:left; }
+                     font-family:monospace; padding:1px 2px; cursor:pointer; text-align:left; }
   #musicBox button.on { background:#6a6a3a; color:#ff8; }
-  #musicBox .row { display:flex; gap:3px; }
+  #musicBox button:disabled { opacity:.4; cursor:not-allowed; }
+  #musicBox .row { display:flex; gap:2px; }
   #musicBox .row button { flex:1; text-align:center; }
+  /* 三个曲名按钮: 原版曲名较长 ("Act of instinct" 等), 小字 + 允许折行, 避免撑高面板 */
+  #musicBox .row button.song { font-size:9px; line-height:1.15; padding:2px 1px; word-break:break-word; }
   /* 波间二选一面板 (原版 sprite 989 debloquerArme, 舞台居中 _x=400 _y=300) */
-  #unlockPanel { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  #unlockPanel { position:absolute; left:400px; top:300px; transform:translate(-50%,-50%);
                  width:300px; background:#3a3a3a; border:3px solid #888;
                  box-shadow:0 0 0 3px #111, 0 6px 22px rgba(0,0,0,.7);
                  display:none; z-index:50; padding:10px; }
@@ -58,60 +81,63 @@
   #unlockPanel button:disabled { opacity:.35; cursor:not-allowed; }
   #unlockPanel button.int { background:#3a4a5a; }
   #unlockPanel button.int:hover:not(:disabled) { background:#4a5a6a; }
+  #hud { position:absolute; left:0; top:602px; width:800px; color:#cfc; font-size:12px;
+         padding:2px 6px; box-sizing:border-box; }
+  #hud .hint { color:#9aa; font-size:11px; }
 </style>
 </head>
 <body>
-<div id="stage">
-  <canvas id="cv" width="635" height="600"></canvas>
-  <div id="side">
-    <div id="minimapBox"><canvas id="minimap" width="161" height="150"></canvas></div>
-    <div class="panelTitle">UNIT / BUILD MENU</div>
-    <div id="shop"></div>
-    <div class="panelHead">
-      <div class="panelTitle">INFO</div>
-      <div class="arrow">◀</div><div class="arrow">▶</div>
+<div id="fit">
+  <div id="stage">
+    <canvas id="cv" width="635" height="600"></canvas>
+    <div id="side">
+      <div id="minimapBox"><canvas id="minimap" width="161" height="150"></canvas></div>
+      <div class="panelTitle" id="shopTitle">UNIT / BUILD MENU</div>
+      <div id="shop"></div>
+      <div id="pageDots"><i></i><i></i><i></i></div>
+      <div class="panelHead">
+        <div class="arrow" id="pageL" title="上一页">◀</div>
+        <div class="panelTitle">INFO</div>
+        <div class="arrow" id="pageR" title="下一页">▶</div>
+      </div>
+      <div id="infoBox">点选炮塔查看属性</div>
+      <div id="musicBox">
+        <div class="row" id="toggles">
+          <button id="tHp">血条 H</button>
+          <button id="tScroll">滚屏 M</button>
+          <button id="tArea">建区 C</button>
+        </div>
+        <div class="row">
+          <button id="tZoom">全图 G</button>
+          <button id="mPlay" title="播放/暂停">▶</button>
+          <button id="mMute" title="静音">🔇</button>
+        </div>
+        <div class="row">
+          <button id="m0" class="song">♪1</button>
+          <button id="m1" class="song">♪2</button>
+          <button id="m2" class="song">♪3</button>
+        </div>
+      </div>
+      <div id="lossBox">
+        <span class="losses" id="hLoss">LOSSES 0</span>
+        <span class="cash" id="hCash"></span>
+        <span class="interest" id="hInt2"></span>
+      </div>
     </div>
-    <div id="infoBox">点选炮塔查看属性</div>
-    <div id="musicBox">
-      <div class="row" id="toggles">
-        <button id="tHp">血条 H</button>
-        <button id="tScroll">滚屏 M</button>
-        <button id="tArea">建区 C</button>
+    <div id="unlockPanel">
+      <div id="upInfo"></div>
+      <div class="btns">
+        <button id="upUnlock">解锁下一件武器</button>
+        <button id="upInterest" class="int">提高利率</button>
       </div>
-      <div class="row">
-        <button id="tZoom">全图 G</button>
-        <button id="tSu37">Su37 空袭</button>
-      </div>
-      <div class="row">
-        <button id="m0">♪1</button>
-        <button id="m1">♪2</button>
-        <button id="m2">♪3</button>
-      </div>
-      <div class="row">
-        <button id="mPlay">▶</button>
-        <button id="mPause">⏸</button>
-        <button id="mMute">🔇</button>
-      </div>
-    </div>
-    <div id="lossBox">
-      <span class="losses" id="hLoss">LOSSES 0</span>
-      <span class="cash" id="hCash"></span>
-      <span class="interest" id="hInt2"></span>
     </div>
   </div>
-  <div id="unlockPanel">
-    <div id="upInfo"></div>
-    <div class="btns">
-      <button id="upUnlock">解锁下一件武器</button>
-      <button id="upInterest" class="int">提高利率</button>
-    </div>
+  <div id="hud">
+    金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> (丢塔数) |
+    <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<div id="hud" style="position:absolute; left:8px; top:604px; color:#cfc; font-size:13px;">
-  金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> (丢塔数) |
-  <span style="color:#9aa">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空</span>
-</div>
-<script src="data.js?v=1790550942"></script>
-<script src="game.js?v=1790550942"></script>
+<script src="data.js?v=1790550945"></script>
+<script src="game.js?v=1790550945"></script>
 </body>
 </html>

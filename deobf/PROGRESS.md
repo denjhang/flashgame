@@ -1,5 +1,91 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+25 轮成果（2026-09-28, H5 领土防御·UI 重构: 还原建造菜单 3 页结构 + 侧栏溢出 + 现代窗口适配）
+
+**用户当面指出三个 UI 问题，全部属实，且根因是同一个：我把原版 3 页菜单拍平成了单页
+11 项长列表。本轮按原版结构重做。**
+
+### 1. 【用户三问 · 逐条核实】
+
+| 用户批评 | 核实结果 |
+|---|---|
+| ①「UI 为什么都不适应现代浏览器窗口」 | 属实。`#stage` 硬编码 `800x600`，在 1280x720 窗口里既不居中（靠左上），底部 HUD（`top:604px`）还会溢出视口 |
+| ②「生产建筑一栏直接把 info 信息栏挤掉了」 | 属实且可量化。实测 `#side` 容器高 600px，但内容 `scrollHeight = 850px`；`#shop` 单页占 390px，把 INFO(106) + 音乐(100) + LOSS(52) 全推出舞台外（渲染在 850px 处，不可见） |
+| ③「武器应该是可以翻越的，不止这些，又遗漏了什么」 | 属实 —— 这是最关键的一条。原版建造菜单是 **3 页 × 4 格**，我只做了 11 项单页；**且 Su37 原版就在第 3 页菜单里**，我错把它做成了右侧独立按钮 |
+
+### 2. 【权威依据】原版建造菜单 = chid 1027 `constructionCont`，3 页 × 4 格
+
+FFDec 逐帧 SVG 导出 `DefineSprite_1027`（画布 126.45×152.1，槽位间距 77.1×64.45）：
+
+| 帧 | 槽位1 | 槽位2 | 槽位3 | 槽位4 |
+|---|---|---|---|---|
+| f1 | m60 | gatling | canon75 | canon105 |
+| f2 | canon105D | radar | crotale | canon125 |
+| f3 | MLRS | MTHEL | pluton | **Su37** |
+
+（注：f3 的 MTHEL/pluton 在 SVG 里按 `t=` 顺序是 MLRS(-76,-63) / MTHEL(1.1,-63) /
+pluton(-76,1.4) / Su37(1.1,1.4)；早期 dump 的 tag 序把它记成 MLRS/pluton/MTHEL/Su37，
+本轮以 SVG 的槽位坐标为准。）
+
+**翻页逻辑**（`DefineSprite_1079/frame_1/DoAction` 的 `turnConstruction(dir)`，逐行）：
+```
+left : curPanel>1 ? curPanel-- : curPanel=3
+right: curPanel<3 ? curPanel++ : curPanel=1
+constructionCont.gotoAndStop(curPanel)
+```
+箭头是 `chid 1078` 的 `arrowL`/`arrowR`（`on(press)` → `_parent.turnConstruction(...)`），
+与 `informations`(1074)、`constructionCont`(1027) 在 1079 里是**同级独立层**。
+
+### 3. H5 实现
+
+- **菜单**: `SHOP_PAGES = [[4 项],[4 项],[4 项]]` 严格照抄原版分组；`SHOP_PANEL`(1..3) +
+  `turnConstruction(dir)` 照抄原版循环；◀▶ 箭头接线；页码点指示 3 页
+- **Su37 回归菜单**: 删掉右侧独立按钮，改为第 3 页第 4 格。菜单格里显示 `ready` /
+  `Ns` 冷却 / `locked`（对应原版 `compteur` EditText 的 "ready"/".. wait"）；
+  解锁门仍是 `unlocker.su37`
+- **侧栏**: `#side` 加 `overflow:hidden` + 各块 `flex:none`，菜单固定为 2×2 四格
+  （`.sel` 高 62px），把内容总高压回 600px 内；INFO 用 `flex:1 1 auto; min-height:0`
+  吸收剩余空间
+- **现代窗口适配**: 新增 `#fit`(800×648 = 舞台+HUD) + `fitStage()`：
+  `scale = min(innerW/800, innerH/648)`，`transform-origin:center` + body flex 居中，
+  监听 `resize`。**不改 canvas 的 width/height 属性**（渲染分辨率仍是原版 635×600），
+  鼠标换算靠 `getBoundingClientRect()` 自动带上 scale，故 `s2wX/s2wY` 无需改动
+- **顺带修正**: `G.shopSel` 初值原为 `'m60'`，导致一进游戏就处于建造模式（截图里会显示
+  "press spacebar to cancel build mode"）。原版 `viseurConstruction` 初值是 **false**
+  （`DefineSprite_834/frame_1/PlaceObject2_6_321 onClipEvent(load)`），已改为 `null`
+- 音乐面板: 曲名按钮改小字 + 折行；播放/暂停合并为一个按钮（原版是无独立 ⏸ 的）
+
+### 4. 真机验证
+
+- 冒烟测试新增断言全绿：
+  ```
+  页数=3 每页格数=[4,4,4] (原版 1027: 3 页 x 4 格)
+  全部武器 12 件, 无重复=true
+  3 页分组与原版逐页一致=true
+  Su37 在建造菜单内=true (位于第 3 页)
+  翻页: 1--left-->3 (应3)  3--right-->1 (应1)  1--right-->2 (应2) 全部=true
+  ```
+- 浏览器**真点击**箭头：▶ 后 `SHOP_PANEL 1→2`，格子变为 `canon105D/radar/crotale/canon125`，
+  页码点跟到第 2 个；◀ 回到第 1 页
+- 侧栏溢出量化修复：`scrollHeight 850 → 600`，`sideOverflow=false`，
+  `allPanelsVisible=true`（minimap/shop/INFO/音乐/LOSS 全在容器内）
+- **四种窗口尺寸**全部通过（居中 + 无溢出 + 面板完整）：
+  `1280x720` / `1920x1080` / `1024x768` / `900x500`
+- 三页截图逐一确认：第 3 页可见 `MLRS / MTHEL / pluton / su37(ready)`
+
+### 5. 本轮如实说明
+
+- 我额外给翻页加了键盘 `Q/E`（及 `[`/`]`）快捷键。原版**只有**箭头点击能翻页，这是
+  H5 的便利性增补，非原版行为，如实记录。
+- 原版 `1027 f3` 的槽位顺序在早期 `swf_dump` 与 SVG 坐标间存在不一致（MTHEL/pluton 谁在
+  左列）。我以 **SVG 的 transform 坐标**为准（这是 FFDec 按 depth 解析后的结果，比 dump
+  的 tag 出现顺序更可靠）。若日后发现原版实际排列相反，需再核。
+- 现代窗口适配用的是 **CSS transform 缩放**，因此在高分屏上画面会被浏览器按显示尺寸放大，
+  像素会比原版 1:1 更"软"一点（非点对点）。要做到严格的整数倍像素缩放需要改成
+  canvas 内 resize 或 `image-rendering: pixelated`，本轮未做，如实记录。
+- 用户批评里「不止这些」我理解为指武器页数，本轮已按原版 3 页补齐（12 格含 Su37）。
+  如果用户另有所指（例如还有别的被遗漏的建造项），需要用户再指明。
+
 ## 第 N+24 轮成果（2026-09-28, H5 领土防御·敌方武器塔独立索敌转向）
 
 **本轮补上一处明显可见的行为缺失：敌方车辆的炮塔此前永远焊在车体上，不会转向目标。

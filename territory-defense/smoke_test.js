@@ -12,12 +12,13 @@ const ctxStub = new Proxy(function () {}, {
 });
 global.__ctxStub = ctxStub;
 global.document = {
-  getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {} }, dataset: {}, addEventListener() {} }),
-  createElement: () => ({ onclick: null, classList: { toggle() {} }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {}, addEventListener() {} }),
+  getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {} }, dataset: {}, addEventListener() {}, children: [], querySelector: () => null, querySelectorAll: () => [] }),
+  createElement: () => ({ onclick: null, classList: { toggle() {} }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {}, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] }),
+  querySelectorAll: () => [],
   createTextNode: () => ({}),
   addEventListener() {},
 };
-global.window = { addEventListener() {} };
+global.window = { addEventListener() {}, innerWidth: 1280, innerHeight: 720 };
 global.Image = class { constructor() { this.src = ""; } };
 global.Audio = class { constructor() {} play() { return { catch() {} }; } };
 
@@ -265,8 +266,38 @@ console.log("--- 阵亡镜头抖动 ---");
     zero, Math.max(...DEATH_SHAKE.map(d => Math.abs(d[0]))), Math.max(...DEATH_SHAKE.map(d => Math.abs(d[1]))));
   G.units.length = 0; G.turrets.length = 0; updateDeathShake();
 }
-// 建造区遮罩 (原版 surfaceForBuild chid 768)
-console.log("建造预览: 光标帧=%d 取消提示帧=%d (原版 822/1161)", CURSOR_FRAMES.length, CANCEL_HINT.length);
+// ---- 建造菜单 3 页结构 (原版 constructionCont chid 1027) ----
+console.log("--- 建造菜单分页 ---");
+{
+  console.log("页数=%d 每页格数=%j (原版 1027: 3 页 x 4 格)",
+    SHOP_PAGES.length, SHOP_PAGES.map(p => p.length));
+  const all = SHOP_PAGES.flat();
+  console.log("全部武器 %d 件: %j", all.length, all);
+  const uniq = new Set(all);
+  console.log("无重复=%s (应有 12 件唯一)", uniq.size === all.length, all.length === 12);
+  // 原版权威分组 (FFDec SVG: DefineSprite_1027 帧 1/2/3)
+  const expect = [
+    ['m60', 'gatling', 'canon75', 'canon105'],
+    ['canon105D', 'radar', 'crotale', 'canon125'],
+    ['MLRS', 'MTHEL', 'pluton', 'su37'],
+  ];
+  let ok = true;
+  for (let i = 0; i < 3; i++) {
+    if (JSON.stringify(SHOP_PAGES[i].slice().sort()) !== JSON.stringify(expect[i].slice().sort())) {
+      ok = false; console.log("  第%d页不符: %j vs %j", i + 1, SHOP_PAGES[i], expect[i]);
+    }
+  }
+  console.log("3 页分组与原版逐页一致=%s", ok);
+  console.log("Su37 在建造菜单内=%s (原版 1027 f3 id=Su37, 非独立按钮, 位于第 3 页)",
+    all.includes('su37') && SHOP_PAGES[2].includes('su37'));
+  // 翻页循环 (原版 turnConstruction: left 1→3, right 3→1, 中间页逐页走)
+  SHOP_PANEL = 1; turnConstruction('left');   const wrapL = SHOP_PANEL;   // 期望 3
+  SHOP_PANEL = 3; turnConstruction('right');  const wrapR = SHOP_PANEL;   // 期望 1
+  SHOP_PANEL = 1; turnConstruction('right');  const midR = SHOP_PANEL;    // 期望 2
+  console.log("翻页: 1--left-->%d (应3)  3--right-->%d (应1)  1--right-->%d (应2) 全部=%s",
+    wrapL, wrapR, midR, wrapL === 3 && wrapR === 1 && midR === 2);
+  SHOP_PANEL = 1;
+}
 {
   G.turrets.length = 0;   // 清空已有塔, 隔离测试
   const R1 = ROUTES.parcourt1;
