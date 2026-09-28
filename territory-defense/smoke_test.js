@@ -737,16 +737,19 @@ console.log("--- 车队链表 ---");
   c.devant = null;
   G.units.push(a, b, c);
   console.log("建链: 同路线后车.devant=前车=" + (b.devant === a) + ", 异路线=null=" + (c.devant === null));
-  // 制动: 前车停在正前方 15px (<18px 间距) → 后车速度钳到前车
-  a.x = b.x + 15 * Math.cos(b.rot); a.y = b.y + 15 * Math.sin(b.rot);
+  // 制动: 前车停在正前方 (间距=前车渲染高度, 原版 roule: dist < unitDevant._height)
+  const dcA = CHASSIS_ART['camion1'];
+  const gapA = Math.abs(dcA.m[3]) * dcA.nat[1];
+  a.x = b.x + gapA * 0.5 * Math.cos(b.rot); a.y = b.y + gapA * 0.5 * Math.sin(b.rot);
   a.v = 0; a.rot = b.rot;
   b.v = 2.89;
-  const px0 = b.x;
-  // 手动跑一次移动段 (模拟 update 的链表制动; draw 已 stub, 直接调 tick 会推进整场)
-  const gap = 18;
   const dd = Math.hypot(b.devant.x - b.x, b.devant.y - b.y);
-  const braked = dd < gap ? Math.min(b.v, a.v) : b.v;
-  console.log("前车 15px 内制动: 距离=" + dd.toFixed(1) + " < 18 → v " + b.v.toFixed(2) + "→" + braked.toFixed(2) + " (钳到前车=0)");
+  const braked = dd < gapA ? Math.min(b.v, a.v) : b.v;
+  console.log("前车制动: 间距=前车渲染高度 camion1=" + gapA.toFixed(1) + "px (原版 unitDevant._height)," +
+    " 距离=" + dd.toFixed(1) + " → v " + b.v.toFixed(2) + "→" + braked.toFixed(2) + " (钳到前车=0)");
+  // 舰的间距 = 舰渲染高度 (原版 CONST_ELOIGNEMENT=4 亦落在 _height 语义内)
+  const dcN = CHASSIS_ART['navire'];
+  console.log("舰间距=渲染高度 navire=" + (Math.abs(dcN.m[3]) * dcN.nat[1]).toFixed(1) + "px");
   // 拆链: 前车死亡 → 后车脱离
   a.hp = 0; a.dead = true;
   if (b.devant.dead || b.devant.reached || b.devant.hp <= 0) b.devant = null;

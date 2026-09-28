@@ -1267,15 +1267,17 @@ class Unit {
     //   当前速度以 freinVirage 为步长渐变 (原版 vitesse ±= freinVirage 的加减速模型)
     const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
     this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
-    // 原版车队链表制动 (GAME_LOGIC.md B: 维持车距 CONST_ELOIGNEMENT=1.8/舰4):
-    //   前车在本车前方 CONVOY_GAP 内时不超越 —— 本车速度钳到前车当前速度。
+    // 原版车队链表制动 (roule pcode 常数池解码后的权威公式):
+    //   if (dist < unitDevant._height) { 减速 1/14×CONST_ELOIGNEMENT 每帧; 近停时 _rotation=0 }
+    //   即比较长度 = 【前车精灵的渲染高度】(camion1≈42px, 舰≈150px), 非固定常数。
+    //   H5 等价实现: 距离 < 前车渲染高度 → 本车速度钳到前车当前速度 (不超越不穿透)。
     //   前车已亡/到达则拆链 (等价原版 frame_39 的双向 unlink)。
-    //   注: 精确比较倍率无法从混淆 pcode 解出, 取 1.8×10=18px (舰 4×10=40px, 与车长同量级)
     if (this.devant) {
       if (this.devant.dead || this.devant.reached || this.devant.hp <= 0 || this.devant.dying > 0) {
         this.devant = null;
       } else {
-        const gap = (this.type === 'navire' || this.type === 'Yamato') ? 40 : 18;
+        const dc = CHASSIS_ART[this.devant.type];
+        const gap = dc ? Math.abs(dc.m[3]) * dc.nat[1] : 18;   // 前车渲染高度 (pattern d×nat)
         const dd = Math.hypot(this.devant.x - this.x, this.devant.y - this.y);
         if (dd < gap) this.v = Math.min(this.v, this.devant.v);
       }

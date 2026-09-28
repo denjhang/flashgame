@@ -1,5 +1,47 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+41 轮成果（2026-09-28, H5 领土防御·常数池解码 —— 车距公式权威解出）
+
+**（N+40 遗留项「车距常数精确倍率待从常数池解析确认」—— 本轮解出，纯离线）**
+
+### 1. 【方法：解析 pcode 的 ConstantPool 标签】
+
+pcode 函数体里的 `constantN` 是常数池索引，`ConstantPool` 标签按序列出全部字符串。
+逐字符解析出 74 条池目（含 `constant40='unitDevant'`、
+`constant42='CONST_ELOIGNEMENT'`），代入 roule 函数体后整段可读。
+
+### 2. 【车距制动权威公式（解码结果）】
+
+```
+if (dist < unitDevant._height) {          // 距离 < 前车精灵渲染高度
+   _rotation = 0;
+   if (sin > 0.1) sin -= 0.07142857 × CONST_ELOIGNEMENT;   // 1/14 × 1.8 ≈ 0.129/帧减速
+}
+```
+
+**比较长度 = `unitDevant._height`（前车精灵的渲染高度），不是固定常数倍率**：
+camion1≈42px、舰≈150px（N+40 的 ×10 标定被更权威的语义替代）。
+减速步长 1/14 × 1.8 ≈ 0.129 px/帧（near-stop 时 `_rotation=0` 硬停）。
+
+### 3. H5 修正
+
+- 间距从固定 18/40px 改为 **前车渲染高度**：`|CHASSIS_ART[type].m[3]| × nat[1]`
+  （camion1=42.2px、navire=150.3px），制动规则保持"距离内速度钳到前车"
+- 冒烟断言同步更新并记录原版公式出处
+
+### 4. 验证（node 冒烟）
+
+- `建链/异路null=true`、`前车制动: 间距=42.2px 距离21.1 → v 2.89→0.00`、
+  `舰间距=150.3px`、`死亡拆链=true`
+- 76 项断言全绿；450 帧波次 sim 正常
+
+### 5. 本轮仍未做（如实记录）
+
+- 原版减速是"每帧步长 1/14×ELOIGNEMENT"的渐近减速 + near-stop 硬停语义；
+  H5 用"钳到前车速度"近似（无穿透效果相同，减速曲线不同）—— 如实记录
+- 多 chid 合成器真值帧覆盖率 24%（暂缓）；真机目视/听感项（搁置）
+
+## 第 N+40 轮成果（2026-09-28, H5 领土防御·车队链表 unitDevant/unitDerriere）
 ## 第 N+40 轮成果（2026-09-28, H5 领土防御·车队链表 unitDevant/unitDerriere）
 
 **（N+39 遗留项第一项。权威依据：frame_6/329 createUnit 建链 pcode +
