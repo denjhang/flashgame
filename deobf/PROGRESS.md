@@ -59,12 +59,69 @@ this._x += _parent.decalX;      // 并联炮管横向错开
 
 ### 4. 本轮仍未做（队列下推，如实记录）
 
-- **并联炮管的多发齐射**：原版 canon105D/105mmDAbrams/gatlingDT90/gatlingDTigre/Yamato460
-  是**每个炮管各 createObus 一次**（decalX 分别为 ±6/±2/−4+2/−9+9/±5±10），
-  H5 目前仍是**单发 + 单点 decalY**。需要把 TURRET_GUNS 的每根炮管映射成独立的
-  生成点（含 decalX 横向错开），本轮只做了"主轴前推"，**未做多管齐射**
+- **并联炮管的多发齐射**：原版是**每发轮换到下一根炮管**，只有那根炮管生成炮弹
+  （`askPermissionOfFire`: canonToFire 自增、越界归 1）。**已在 N+29 完成**
 - 飞行弹体的**尾焰动画**（obus 帧 1~7 的 chid 365 火焰 + 302 烟）未接入 ——
   H5 目前只用静态首帧贴图飞完全程
+- 原版舞台背景色 `#441100`（SWF header 21-23 字节，已核实）未还原
+
+## 第 N+29 轮成果（2026-09-28, H5 领土防御·并联炮管轮换开火）
+
+**（N+28 自己记录的下推项，本轮补齐）**
+
+### 1. 【★ 发现：多管武器的齐射机制】
+
+原版 `DefineSprite_174/frame_1/PlaceObject2_173_1` 的 `askPermissionOfFire`（pcode 权威）：
+```
+if(canonToFire < nCanons) canonToFire++   else canonToFire = 1
+numberOfRequest = 0;  return true
+```
+开火处（同文件 pcode）：
+```
+canon["canon" + canonToFire].gotoAndPlay("fire")
+```
+⇒ **每发炮弹轮换到下一根炮管**，且**只有那一根炮管播开火动画并生成自己的炮弹**。
+`canonToFire` 初值 1 且先自增，故 4 管 Yamato460 的首四发依次是 **canon2, canon3, canon4, canon1**。
+
+`nCanons` = `typeData[type][3]`（`weapons.json` 已含该字段）：
+canon105D / 105mmDAbrams / gatlingDT90 / gatlingDTigre = **2**，Yamato460 = **4**，其余 = 1。
+
+### 2. 【并联炮管的横向错开 decalX】
+
+`createObus` 第 4 实参 `decalX` 来自 173 库各帧子件的 `this.decalX`：
+
+| 武器 | 173 帧 | 各炮管 decalX |
+|---|---|---|
+| canon105D | f6 | canon1=**−6**, canon2=**+6** |
+| 105mmDAbrams | f19 | canon1=**−2**, canon2=**+2** |
+| gatlingDT90 | f22 | canon1=**+2**, canon2=**−4** |
+| gatlingDTigre | f23 | canon1=**+9**, canon2=**−9** |
+| Yamato460 | f26 | canon1=**−10**, canon2=**+10**, canon3=**+5**, canon4=**−5** |
+
+### 3. H5 实现
+
+- 新增 `MUZZLE_DX`（**按炮管名 `canon1..canon4` 索引**，与 `TURRET_GUNS` 的 `n` 字段对应，
+  **不依赖数组顺序** —— 因为 `TURRET_GUNS.Yamato460` 的槽位序是 `[canon4, canon1, canon2, canon3]`，
+  按顺序索引会整体错位）
+- `nextBarrel(obj, id)`：照抄原版"先自增、越界归 1"的轮换
+- `barrelDecalX(id, guns, k)`：槽位下标 → 炮管名 → decalX
+- `spawnShell` 新增 `barrelIdx` 形参：炮口点 = 塔心 + 炮轴×decalY + **垂直炮轴×decalX**
+  （侧向 = 炮管局部 +x，世界方向 = `(−sin ang, cos ang)`）
+- 两处调用点（玩家塔 / 敌方单位）均传 `nextBarrel(this, gunId)`
+
+### 4. 真机验证
+
+- 冒烟测试新增：`MUZZLE_DX 并联炮管 5 型一致=true`、
+  `Yamato460 轮换序列=[2,3,4,1] (期望 [2,3,4,1])`、
+  `canon105D 轮换序列=[2,1,2] (期望 [2,1,2])`、`炮口生成点(朝北) y=-79 x=0`
+- 浏览器实测逐槽位核对 Yamato460 四根炮管：
+  `canon4→−5 / canon1→−10 / canon2→+10 / canon3→+5` **全部 ok=true**；
+  canon105D 连发实测炮管下标 **1,0,1,0 交替**（canon2/canon1），横向偏移 **±6**
+
+### 5. 本轮仍未做（队列下推，如实记录）
+
+- **飞行弹体的尾焰动画**：obus 帧 1~7 含 chid 365（火焰）+ chid 302（烟）——
+  H5 现在仍只用静态首帧贴图飞完全程
 - 原版舞台背景色 `#441100`（SWF header 21-23 字节，已核实）未还原
 
 ## 第 N+27 轮成果（2026-09-28, H5 领土防御·车头灯点亮路面 + 车体/影子放置矩阵修正）

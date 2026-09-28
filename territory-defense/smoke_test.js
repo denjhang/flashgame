@@ -229,6 +229,30 @@ console.log("--- 开火细节 ---");
     let bad = [];
     for (const k in exp) if (MUZZLE_DY[k] !== exp[k]) bad.push(k + "=" + MUZZLE_DY[k]);
     console.log("MUZZLE_DY 权威表 11 项一致=" + (bad.length === 0) + (bad.length ? " 偏差:" + bad.join(",") : ""));
+    // ★ 并联炮管轮换 (原版 askPermissionOfFire: canonToFire<nCanons ? ++ : =1)
+    const AUTH_DX = {
+      canon105D:      { canon1:-6, canon2:6 },
+      '105mmDAbrams': { canon1:-2, canon2:2 },
+      gatlingDT90:    { canon1:2,  canon2:-4 },
+      gatlingDTigre:  { canon1:9,  canon2:-9 },
+      Yamato460:      { canon1:-10, canon2:10, canon3:5, canon4:-5 },
+    };
+    let dxbad = [];
+    for (const id in AUTH_DX) {
+      const guns = TURRET_GUNS[id];
+      if (!guns) { dxbad.push(id + ":无炮管表"); continue; }
+      const got = guns.map(g => MUZZLE_DX[id][g.n]);
+      const want = guns.map(g => AUTH_DX[id][g.n]);
+      if (JSON.stringify(got) !== JSON.stringify(want)) dxbad.push(id + " got=" + got + " want=" + want);
+    }
+    console.log("MUZZLE_DX 并联炮管 5 型一致=" + (dxbad.length === 0) + (dxbad.length ? " 偏差:" + dxbad.join("; ") : ""));
+    // 轮换: Yamato460 4 管 → 首轮 2,3,4,1 (原版 canonToFire 初值 1 后先自增)
+    const dummy = {};
+    const seq = [1,2,3,4].map(() => nextBarrel(dummy, 'Yamato460') + 1);
+    console.log("Yamato460 轮换序列=" + JSON.stringify(seq) + " (期望 [2,3,4,1])");
+    const dummy2 = {};
+    const seq2 = [1,2,3].map(() => nextBarrel(dummy2, 'canon105D') + 1);
+    console.log("canon105D 轮换序列=" + JSON.stringify(seq2) + " (期望 [2,1,2])");
     G.shells = []; G.muzzle = []; G.casings = [];
   }
   console.log("弹壳帧数=" + CASING_FRAMES.length + " (原版 douille chid304 = 29 帧) 时长=" + CASING_TICKS + " tick");

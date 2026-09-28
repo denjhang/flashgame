@@ -1210,7 +1210,8 @@ class Unit {
           // 敌方冷却同用 OCEEF 模型 (原版 174 对 ally/ennemy 是同一套 numberOfRequestForPermission)
           this.cool = fireCooldownMs(this.weapon[2]);
           this.fireT = fireTicksFor(this.weaponId);
-          spawnShell(this.x, this.y, t, this.weapon, 'ennemy', this.weaponId, this.tRot);
+          spawnShell(this.x, this.y, t, this.weapon, 'ennemy', this.weaponId, this.tRot,
+                     nextBarrel(this, this.weaponId));
         }
       }
     }
@@ -1324,7 +1325,7 @@ class Turret {
         const gunId = PLAYER_ETURRET[this.id] || this.id;
         this.fireT = fireTicksFor(gunId);   // 播完整开火动画
         // 从炮口生成 (原版 obus 放在炮管世界坐标; barrelAng = 炮塔朝向)
-        spawnShell(this.x, this.y, best, this.w, 'ally', gunId, this.rot);
+        spawnShell(this.x, this.y, best, this.w, 'ally', gunId, this.rot, nextBarrel(this, gunId));
       }
     }
   }
@@ -1357,17 +1358,53 @@ const MUZZLE_DY = {
   gatlingDT90: 60, gatlingDTigre: 60, crotaleTigre: 0, navireCrotale: 0,
   Yamato460: 79,
 };
-function spawnShell(x, y, target, w, side, turretId, barrelAng) {
+function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   // 朝目标的角度 (无 barrelAng 时的回退; 原版 obus._rotation 取炮管朝向)
   const ang = (barrelAng === undefined)
     ? Math.atan2(target.y - y, target.x - x) : barrelAng;
-  // 沿炮管轴前推到炮口
+  // 沿炮管轴前推到炮口 (decalY) + 并联炮管的横向错开 (decalX)
+  //   原版 createObus 第 4 实参 decalX; obus 内层子件 `this._x += _parent.decalX`
+  //   侧向 = 炮管局部 +x, 世界方向 = 垂直炮轴: (-sin ang, cos ang)
   const dy = MUZZLE_DY[turretId] || 0;
-  const mx = x + Math.cos(ang) * dy, my = y + Math.sin(ang) * dy;
+  const dx = barrelDecalX(turretId, TURRET_GUNS[turretId], barrelIdx || 0);
+  const ca = Math.cos(ang), sa = Math.sin(ang);
+  const mx = x + ca * dy - sa * dx, my = y + sa * dy + ca * dx;
   G.shells.push({ x: mx, y: my, target, w, side, turretId,
     speed: 9, trail: 0 });
   // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件 303/304, 都在炮口)
   spawnMuzzleFx(mx, my, ang, side);
+}
+// ★并联炮管的横向错开 (原版 createObus 第 4 实参 decalX; 173 库各帧子件的 this.decalX)
+//   按【炮管名】索引 (canon1..canon4), 与 TURRET_GUNS 的 n 字段严格对应
+//     canon105D      canon1=-6  canon2=+6      (173 f6  PlaceObject2_108_1/_5)
+//     105mmDAbrams   canon2=+2  canon1=-2      (173 f19 PlaceObject2_108_1/_5)
+//     gatlingDT90    canon2=-4  canon1=+2      (173 f22 PlaceObject2_153_30/_34)
+//     gatlingDTigre  canon2=-9  canon1=+9      (173 f23 PlaceObject2_153_30/_34)
+//     Yamato460      canon4=-5  canon1=-10  canon2=+10  canon3=+5
+//                                              (173 f26 PlaceObject2_167_3/10/17/24)
+//   nCanons (weapons.json typeData[3]) 与之吻合: canon105D/105mmDAbrams/gatlingDT90=2, Yamato460=4
+const MUZZLE_DX = {
+  canon105D:      { canon1: -6, canon2: 6 },
+  '105mmDAbrams': { canon1: -2, canon2: 2 },
+  gatlingDT90:    { canon1: 2, canon2: -4 },
+  gatlingDTigre:  { canon1: 9, canon2: -9 },
+  Yamato460:      { canon1: -10, canon2: 10, canon3: 5, canon4: -5 },
+};
+// 每次开火轮换炮管 (原版 askPermissionOfFire: canonToFire < nCanons ? ++ : =1;
+//   初次 canonToFire=1 → 首轮递增为 2 → 首发打 canon2; 4 管时为 canon2,canon3,canon4,canon1)
+//   返回该次开火使用的炮管下标 (TURRET_GUNS 数组序)
+function nextBarrel(obj, id) {
+  const guns = TURRET_GUNS[id] || [];
+  const n = guns.length || 1;
+  if (!obj.barrelIdx) obj.barrelIdx = 0;
+  obj.barrelIdx = (obj.barrelIdx + 1) % n;
+  return obj.barrelIdx;
+}
+// 该武器第 k 根炮管的横向错开量 (无并联炮管的武器恒为 0)
+function barrelDecalX(id, guns, k) {
+  const tbl = MUZZLE_DX[id];
+  if (!tbl || !guns || !guns[k]) return 0;
+  return tbl[guns[k].n] || 0;
 }
 // 枪口焰 (chid 303/365) + 白色光斑 (chid 78): 原版在弹体 sprite 内, 开火瞬间出现
 const MUZZLE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => {
