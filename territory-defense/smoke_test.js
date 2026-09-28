@@ -495,12 +495,72 @@ console.log("--- 建造菜单分页 ---");
 }
 {
   G.turrets.length = 0;   // 清空已有塔, 隔离测试
-  const R1 = ROUTES.parcourt1;
-  const onRoad = R1[3];               // 真实路点上 (599,87)
-  const offRoad = [1600, 400];        // 离最近路线 208px 的草地
-  console.log("可建判定(回退路径): 路点%j上=%s (应false)  草地%j=%s (应true)",
-    [Math.round(onRoad[0]), Math.round(onRoad[1])], buildAllowedAt(onRoad[0], onRoad[1]),
-    offRoad, buildAllowedAt(offRoad[0], offRoad[1]));
+  // ---- 建造区掩码 (原版 768 surfaceForBuild, N+48 权威对齐) ----
+  // 用与"开火序列无空帧"相同的 PNG 解码法载入掩码 alpha, 注入 setBuildMaskData 走真实判定
+  const fsx = require('fs'), zlx = require('zlib');
+  function decodePngAlpha(p) {
+    const d = fsx.readFileSync(p);
+    let off = 8; const idats = []; let w = 0, h = 0;
+    while (off < d.length) {
+      const ln = d.readUInt32BE(off); const typ = d.toString('latin1', off + 4, off + 8);
+      if (typ === 'IHDR') { w = d.readUInt32BE(off + 8); h = d.readUInt32BE(off + 12); }
+      if (typ === 'IDAT') idats.push(d.subarray(off + 8, off + 8 + ln));
+      off += 12 + ln;
+      if (typ === 'IEND') break;
+    }
+    const raw = zlx.inflateSync(Buffer.concat(idats));
+    const BPP = 4, stride = w * BPP;
+    const out = Buffer.alloc(stride * h);
+    let pos = 0;
+    for (let y = 0; y < h; y++) {
+      const ft = raw[pos++];
+      const row = raw.subarray(pos, pos + stride); pos += stride;
+      const prev = y ? out.subarray((y - 1) * stride, y * stride) : Buffer.alloc(stride);
+      const cur = out.subarray(y * stride, (y + 1) * stride);
+      for (let x = 0; x < stride; x++) {
+        const a = x >= BPP ? cur[x - BPP] : 0, b = prev[x], c = x >= BPP ? prev[x - BPP] : 0;
+        let v = row[x];
+        if (ft === 1) v += a; else if (ft === 2) v += b; else if (ft === 3) v += (a + b) >> 1;
+        else if (ft === 4) { const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c); v += (pa <= pb && pa <= pc) ? a : (pb <= pc ? b : c); }
+        cur[x] = v & 255;
+      }
+    }
+    const alpha = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) alpha[i] = out[i * 4 + 3];
+    return { w, h, alpha };
+  }
+  const m = decodePngAlpha('assets/build_ui/surfaceForBuild.png');
+  setBuildMaskData(m.w, m.h, m.alpha);
+  const built = m.alpha.reduce((s, v) => s + (v > 10 ? 1 : 0), 0);
+  console.log("掩码加载: %dx%d, 可建地块像素 %s%% (cairosvg 栅格化 768 白形)",
+    m.w, m.h, (100 * built / (m.w * m.h)).toFixed(1));
+  console.log("掩码画布原点世界坐标=(%s, %s) (期望 ≈9.31, -1430.06) 一致=%s",
+    BUILD_MASK_ORIGIN.x.toFixed(2), BUILD_MASK_ORIGIN.y.toFixed(2),
+    Math.abs(BUILD_MASK_ORIGIN.x - 9.31) < 0.1 && Math.abs(BUILD_MASK_ORIGIN.y + 1430.06) < 0.1);
+  // 路中心采样可建率 (手描容差应 ≈2% 内)
+  let onIn = 0, onTot = 0;
+  for (const rn in ROUTES) {
+    const r = ROUTES[rn];
+    for (let i = 0; i + 1 < r.length; i++)
+      for (const t of [0.2, 0.5, 0.8]) {
+        onTot++;
+        if (buildAllowedAt(r[i][0] + (r[i + 1][0] - r[i][0]) * t, r[i][1] + (r[i + 1][1] - r[i][1]) * t)) onIn++;
+      }
+  }
+  console.log("路中心采样可建率=%s% (%d/%d, 手描容差, 原版地块语义)", (onIn / onTot * 100).toFixed(1), onIn, onTot);
+  // 权威样点: 地块内部 (python 网格扫描所得) 可建; 路点 [599,87] 与地图外草地 [1600,400] 不可建
+  const p1 = buildAllowedAt(847.3, -67.1), p2 = buildAllowedAt(1238.3, -472.1);
+  console.log("地块内部 (847.3,-67.1)=%s (应true)  (1238.3,-472.1)=%s (应true)=%s",
+    p1, p2, p1 && p2);
+  console.log("路点[599,87]可建=%s (应false)  地图外草地[1600,400]可建=%s (应false, 768地块不覆盖)=%s",
+    buildAllowedAt(599, 87), buildAllowedAt(1600, 400),
+    !buildAllowedAt(599, 87) && !buildAllowedAt(1600, 400));
+  // 塔重叠层: 地块内近塔不可建
+  G.turrets.push(new Turret('m60', 847.3, -67.1));
+  console.log("地块内 26px 有塔 → 可建=%s (应false)=%s", buildAllowedAt(847.3, -67.1),
+    buildAllowedAt(847.3, -67.1) === false);
+  G.turrets.length = 0;
+  BUILD_MASK_DATA = null;               // 还原未加载态 (无头其余块维持旧行为: 放行)
 }
 console.log("鸟叫: %d 个音效, 10s节流触发 %d 次 %j", birdKeys.length, Object.keys(birdLog).length, Object.keys(birdLog));
 console.log("阴影: %d 单位映射, alpha=%s offset=%s, 缺映射 %j",

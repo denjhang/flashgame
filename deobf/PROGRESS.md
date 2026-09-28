@@ -1,5 +1,46 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+48 轮成果（2026-09-28, H5 领土防御·可建区判定改原版 768 手描地块掩码 —— N+12 悬案告破）
+
+**（权威 = 834/frame_1/PlaceObject2_822_226 on(press) + SWF 位流解码的 768 放置矩阵 +
+FFDec SVG/cairosvg 栅格化 + keyDown C 键处理器）**
+
+### 1. 【★ N+12 悬案告破：768 放置矩阵解码错误是失败根因】
+
+- 直接从 SWF 位流解出 `surfaceForBuild`(chid 768, dpt 3) 的 PlaceObject2 矩阵：
+  **a=d=1.00003, tx=166.1, ty=−18.1**（N+12 当时用的 ty=391.5 是错值，导致一切对齐失败）。
+  映射：`u = (wx−166.1)/1.00003 + 156.8; v = (wy+18.1)/1.00003 + 1411.95`
+  （后者是 FFDec SVG root 平移）。掩码画布原点世界坐标 = (9.31, −1430.09)。
+- **语义修正**：768 不是"道路缓冲带"，是**设计师手描的若干块可建地块**（可视化证实：
+  道路在地块之间的暗带里，地块内还有方形/圆形孔洞 = 障碍物）。原版放置 =
+  `surfaceForBuild.hitTest(x,y,true)` 像素级形状测试 —— 即"只能在这几块地里建"。
+
+### 2. H5 实现（替换 45px 道路缓冲近似）
+
+- `assets/build_ui/surfaceForBuild.png`：cairosvg 栅格化 768 白形（1838×1730，可建像素 24.7%）
+- `buildMaskHit(wx,wy)`：掩码 alpha 查表 ≡ `hitTest(x,y,true)`；浏览器 Image→canvas 惰性建，
+  测试经 `setBuildMaskData()` 注入同一 PNG 的解码结果
+- `buildAllowedAt` = 塔重叠层（26px，原版 viseur↔塔 clip hitTest 的近似，如实）+ 掩码层；
+  钱的检查仍在调用方（原版同序）。删除 `roadBlocked` 与重复定义的 `buildAllowedAt`/`repairPrice`
+- C 键显示：直接铺真实掩码（白，alpha 0.35；C 键处理器 142-149 行 `_alpha 0↔35` 权威），
+  不再是 90px 红描线
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `掩码画布原点世界坐标=(9.30, -1430.09) 一致=true`
+- `路中心采样可建率=2.8% (4/141)`（手描容差，与 python 端 1.7% 同量级）
+- `地块内部 (847.3,-67.1)/(1238.3,-472.1)=true`；`路点[599,87]=false`；
+  `地图外草地[1600,400]=false`（旧行为是 true —— 现在与原版一致：地块外不可建）
+- `地块内 26px 有塔 → false`；97 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- 塔重叠层保持 26px 半径近似（原版是 viseurConstruction(822) 与 178_etat 容器的 bbox
+  hitTest，容器尺寸随塔型/炮管变化，精确复现需逐型 bbox，收益低）
+- `surfaceForBuildZoom`（PO3, dpt562）属原版 2x 缩放视图（menuZoom），其矩阵在缩放视图
+  坐标系；H5 无 2x 模式，未建模
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
 ## 第 N+47 轮成果（2026-09-28, H5 领土防御·失败判定审计一致 + 倒计时条可点击跳过 + interwave 补全长）
 
 **（顺 N+46 遗留两项计时量化做收尾审计；权威 = 428_unit changeCheckpoint pcode +

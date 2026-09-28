@@ -947,16 +947,52 @@ wireMusicPanel();
 // ---------------- 游戏状态 ----------------
 
 // ---------------- 音效 (原版 soundsFx; 轮换池避免重叠切断) ----------------
-// 建造区判定: 原版用 carte.surfaceForBuild(768) 的 shape hitTest
-//   (DefineSprite_834/frame_1/PlaceObject2_822_226 on(press):
-//    `if (surfaceForBuild.hitTest(x,y,true)) {...允许建...}`)
-// 【未完成】尝试用 768 遮罩位图复现该判定失败: 遮罩 1838x1730 的几何基准无法用
-//   世界坐标 + PlaceObject2 矩阵(translate 166.1,391.5) 对齐 (多种变换组合均不吻合,
-//   见 PROGRESS 记录)。故仍用道路缓冲近似作为可建判定 (逻辑正确、与遮罩意图一致)
+// 建造区判定 (原版 DefineSprite_834/frame_1/PlaceObject2_822_226 on(press)):
+//   `if (surfaceForBuild.hitTest(x,y,true)) { 与既有塔 hitTest 不重叠 + euros 够 → 建造 }`
+// surfaceForBuild = chid 768: 手描可建地块形状 (1838.05×1730.45 画布, 白色填充单路径)。
+//   语义 = 设计师描出的若干"可建地块", 地块间暗带是道路、地块内孔洞是障碍 —— 不是道路距离
+//   公式 (N+48 可视化证实; N+12 的对齐失败源于放置矩阵 ty 取值错误)。
+//   放置矩阵 (SWF 位流解码): a=d=1.00003, tx=166.1, ty=-18.1 (carte 系);
+//   FFDec SVG root 平移 (156.8, 1411.95)。hitTest(x,y,true) ≡ 掩码位图 alpha 查表。
+const BUILD_MASK_S = 1.00003, BUILD_MASK_TX = 166.1, BUILD_MASK_TY = -18.1;
+const BUILD_MASK_OX = 156.8, BUILD_MASK_OY = 1411.95;
+const BUILD_MASK_W = 1838, BUILD_MASK_H = 1730;
+// 掩码画布 (0,0) 的世界坐标: world = (canvas - O) * S + T
+const BUILD_MASK_ORIGIN = {
+  x: (0 - BUILD_MASK_OX) * BUILD_MASK_S + BUILD_MASK_TX,
+  y: (0 - BUILD_MASK_OY) * BUILD_MASK_S + BUILD_MASK_TY,
+};
+const BUILD_MASK_IMG = new Image();
+BUILD_MASK_IMG.src = 'assets/build_ui/surfaceForBuild.png';
+let BUILD_MASK_DATA = null;   // {w,h,a:Uint8Alpha} — 浏览器惰性建; 测试经 setBuildMaskData 注入
+function setBuildMaskData(w, h, alpha) { BUILD_MASK_DATA = { w, h, a: alpha }; }
+function ensureBuildMaskData() {
+  if (BUILD_MASK_DATA || !BUILD_MASK_IMG.complete || !BUILD_MASK_IMG.naturalWidth) return;
+  const cv = document.createElement('canvas');
+  cv.width = BUILD_MASK_IMG.naturalWidth; cv.height = BUILD_MASK_IMG.naturalHeight;
+  const c2 = cv.getContext('2d');
+  c2.drawImage(BUILD_MASK_IMG, 0, 0);
+  const id = c2.getImageData(0, 0, cv.width, cv.height).data;
+  const a = new Uint8Array(cv.width * cv.height);
+  for (let i = 0; i < a.length; i++) a[i] = id[i * 4 + 3];
+  setBuildMaskData(cv.width, cv.height, a);
+}
+// (wx,wy) 是否落在原版可建地块内 (hitTest(x,y,true) 的查表等价; null=掩码未就绪)
+function buildMaskHit(wx, wy) {
+  ensureBuildMaskData();
+  if (!BUILD_MASK_DATA) return null;
+  const u = Math.round((wx - BUILD_MASK_TX) / BUILD_MASK_S + BUILD_MASK_OX);
+  const v = Math.round((wy - BUILD_MASK_TY) / BUILD_MASK_S + BUILD_MASK_OY);
+  if (u < 0 || v < 0 || u >= BUILD_MASK_DATA.w || v >= BUILD_MASK_DATA.h) return false;
+  return BUILD_MASK_DATA.a[v * BUILD_MASK_DATA.w + u] > 10;
+}
+// 完整可建判定 (原版 822_226 on(press) 前两层; 钱的检查由调用方在之后做)
 function buildAllowedAt(wx, wy) {
   for (const t of G.turrets)
-    if (Math.hypot(t.x - wx, t.y - wy) < 26) return false;
-  return !roadBlocked(wx, wy);
+    if (Math.hypot(t.x - wx, t.y - wy) < 26) return false;   // viseur↔既有塔 hitTest 的近似
+  const hit = buildMaskHit(wx, wy);
+  if (hit === null) return true;   // 掩码未加载 (无头/首帧): 与旧行为一致放行
+  return hit;
 }
 
 // 建造预览光标 (原版 carte.viseurConstruction, chid 822, 3 帧):
@@ -975,34 +1011,7 @@ const CANCEL_HINT = [1, 2].map(i => {
   return im;
 });
 
-// 建造区判定: 原版用 carte.surfaceForBuild(768) 的 shape hitTest
-//   (DefineSprite_834/frame_1/PlaceObject2_822_226 on(press):
-//    `if (surfaceForBuild.hitTest(x,y,true)) {...允许建...}`)
-// 【未完成·如实记录, 见 PROGRESS 第 N+12 轮】尝试用 768 遮罩位图(1838x1730)复现该判定:
-//   已穷尽: 结构解码(767 bounds 1838x1730) + SVG transform 权威值(322.9,1803.45)
-//   + 离线穷举 17 种坐标组合 + 图像互相关对齐(最优 offset 时 mask 内 94% 为草地)。
-//   但全部方案下"路点上仍有 16-28% 被判可建"(理想 0%) → 说明遮罩语义不是"道路禁建",
-//   而是更细的"可建平地"(含地形/建筑等多重限制), 无法用路点距离或草地图层近似复现。
-//   → H5 保留 45px 道路缓冲近似 (行为与遮罩意图一致: 道路上不可建), 属设计取舍, 非还原完成。
-function roadBlocked(wx, wy) {
-  for (const rn in ROUTES) {
-    const r = ROUTES[rn];
-    for (let i = 0; i < r.length - 1; i++) {
-      const ax = r[i][0], ay = r[i][1], bx = r[i+1][0], by = r[i+1][1];
-      const L2 = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
-      let t2 = ((wx - ax) * (bx - ax) + (wy - ay) * (by - ay)) / L2;
-      t2 = Math.max(0, Math.min(1, t2));
-      if (Math.hypot(wx - (ax + (bx - ax) * t2), wy - (ay + (by - ay) * t2)) < 45) return true;
-    }
-  }
-  return false;
-}
-// 完整可建判定 (原版 822_226 on(press)): 不与已有塔重叠 + 非道路
-function buildAllowedAt(wx, wy) {
-  for (const t of G.turrets)
-    if (Math.hypot(t.x - wx, t.y - wy) < 26) return false;
-  return !roadBlocked(wx, wy);
-}
+// 完整可建判定 buildAllowedAt 定义在音效段之后 (掩码版, 唯一定义)
 
 // 修理面板 (原版 819 barreReparation = 814 base(236x21) + 813 repairPrice(EditText) + 818 autor + 184 repairLogo)
 // 注意: FFDec 把 814/818 里 EditText 的示例文字("repair for 1000000$")烧进了导出位图, 不可直接用;
@@ -1971,18 +1980,13 @@ function draw() {
   // 地图背景: 位图左上角放在世界 (MAP_ORIGIN.x, MAP_ORIGIN.y=-1440=北缘), Flash 屏幕系直接铺
   ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W * zoom, MAP_H * zoom);
 
-  // 建造区显示 (原版 C 键: surfaceForBuild alpha=35) — 道路缓冲带外可建
-  if (G.showBuildArea) {
+  // 建造区显示 (原版 C 键: carte.surfaceForBuild._alpha 0↔35, keyDown 142-149 权威):
+  // 直接铺 768 手描地块掩码 (白色填充, 35% 透明度), 不再是道路描线近似
+  if (G.showBuildArea && BUILD_MASK_IMG.complete && BUILD_MASK_IMG.naturalWidth) {
     ctx.save();
     ctx.globalAlpha = 0.35;
-    ctx.strokeStyle = '#f64'; ctx.lineWidth = 90 * zoom; ctx.lineCap = 'round';
-    for (const rn in ROUTES) {
-      const r = ROUTES[rn];
-      ctx.beginPath();
-      ctx.moveTo(w2sX(r[0][0]), w2sY(r[0][1]));
-      for (let i = 1; i < r.length; i++) ctx.lineTo(w2sX(r[i][0]), w2sY(r[i][1]));
-      ctx.stroke();
-    }
+    ctx.drawImage(BUILD_MASK_IMG, w2sX(BUILD_MASK_ORIGIN.x), w2sY(BUILD_MASK_ORIGIN.y),
+                  BUILD_MASK_W * BUILD_MASK_S * zoom, BUILD_MASK_H * BUILD_MASK_S * zoom);
     ctx.restore();
   }
 
