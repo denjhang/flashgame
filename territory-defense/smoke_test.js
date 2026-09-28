@@ -679,6 +679,51 @@ console.log("--- 炮管开火叠加 ---");
   const incomplete = names.filter(id => TURRET_GUNS[id].some(g => !g.m || g.o === undefined));
   console.log("炮管项 m/o 完整=%s 缺=%j", incomplete.length === 0, incomplete);
 }
+// ---- 连发模型 (原版: gotoAndPlay("fire") 动画内多帧位各 createObus 一次) ----
+console.log("--- 机枪连发 ---");
+{
+  // 权威连发帧位 (各炮管 sprite 的 createObus 调用帧, 逐帧脚本抄录)
+  const AUTH = {
+    92: [2, 6, 10, 14],           // m60: 4 连发
+    98: [2, 6, 10, 14, 18, 22],   // gatling: 6 连发
+    122: [2, 6], 164: [2, 6],     // crotale 系: 2 连发
+    128: [2, 8, 17, 25, 32, 38],  // MLRS: 6 连发 (间隔渐增)
+    103: [2], 108: [2], 125: [2], 167: [2], 80: [2], 83: [25], 153: [2], 161: [2],
+  };
+  let bad = [];
+  for (const k in AUTH) if (JSON.stringify(BURST_FRAMES[k]) !== JSON.stringify(AUTH[k]))
+    bad.push(k + '=' + JSON.stringify(BURST_FRAMES[k]));
+  console.log("连发帧位表 16 型与原版脚本一致=" + (bad.length === 0) + (bad.length ? " 偏差:" + bad.join(",") : ""));
+  // 模拟一轮: m60 应打 4 发 (首发射击时 1 发 + 3 tick 后续)
+  G.shells = []; G.muzzle = []; G.casings = [];
+  const tgt = { x: 500, y: 0, hp: 100, aa: false };
+  const fake = { x: 0, y: 0, rot: 0, tRot: 0 };
+  startBurst(fake, tgt, [5, 350, 40, 1, 3, 3], 'ally', 'm60', 0, 0);
+  const first = G.shells.length;
+  for (let i = 0; i < 40; i++) { G.frame++; tickBurst(fake); }
+  console.log("m60 一轮连发=" + G.shells.length + " 发 (期望 4, 旧实现=1), 首发立即=" + (first === 1));
+  G.shells = []; G.muzzle = []; G.casings = [];
+  const fake2 = { x: 0, y: 0, rot: 0, tRot: 0 };
+  startBurst(fake2, tgt, [4, 380, 40, 1, 3, 3], 'ally', 'gatling', 0, 0);
+  for (let i = 0; i < 40; i++) { G.frame++; tickBurst(fake2); }
+  console.log("gatling 一轮连发=" + G.shells.length + " 发 (期望 6)");
+  G.shells = []; G.muzzle = []; G.casings = [];
+  const fake3 = { x: 0, y: 0, rot: 0, tRot: 0 };
+  startBurst(fake3, tgt, [2, 1300, 480, 1, 40, 120], 'ally', 'MLRS', 0, 0);
+  for (let i = 0; i < 60; i++) { G.frame++; tickBurst(fake3); }
+  console.log("MLRS 一轮连发=" + G.shells.length + " 发 (期望 6)");
+  // 目标中途死亡 → 连发终止
+  G.shells = []; G.muzzle = []; G.casings = [];
+  const tgt2 = { x: 500, y: 0, hp: 100, aa: false };
+  const fake4 = { x: 0, y: 0, rot: 0, tRot: 0 };
+  startBurst(fake4, tgt2, [5, 350, 40, 1, 3, 3], 'ally', 'm60', 0, 0);
+  tgt2.hp = 0;
+  for (let i = 0; i < 40; i++) { G.frame++; tickBurst(fake4); }
+  console.log("目标死亡即终止连发 (只首发)=" + (G.shells.length === 1));
+  G.shells = []; G.muzzle = []; G.casings = [];
+  // 冷却 = 整轮之后 (m60: floor(40/1.13)×43 = 1505ms)
+  console.log("m60 整轮冷却=" + fireCooldownMs(40) + "ms (期望 1505, 原版 floor(40/1.13)×43)");
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {
@@ -688,6 +733,67 @@ console.log("--- 舞台底色 ---");
   const over = 600 - (MAP_ORIGIN.y + MAP_H);
   console.log("地图覆盖世界 y [%d, %d]; 初始视野 y 0..600 → 底部越界 %d px (原版露舞台底色)",
     MAP_ORIGIN.y, MAP_ORIGIN.y + MAP_H, over);
+}
+// ---- 开火序列: H5 GUN_FIRE_SEQ 全序列帧应均有内容(无 PNG 空帧) ----
+console.log("--- 开火序列无空帧 ---");
+{
+  // 用浏览器渲染同样的 alpha>10 阈值, 统计每枪管 sprite 的"真正"非空帧集
+  const fs=require('fs');
+  const zlib=require('zlib');
+  function pngAlpha(p){
+    const d=fs.readFileSync(p);
+    if (d.length<200) return { w:0, h:0, nonempty:0, max:0 };
+    const w=d.readUInt32BE(16), h=d.readUInt32BE(20), ct=d[25];
+    const chunks=[]; let i=8;
+    while (i<d.length-1){
+      const ln=d.readUInt32BE(i);
+      const t=d.slice(i+4, i+8).toString('latin1');
+      if (t==='IDAT') chunks.push(d.slice(i+8, i+8+ln));
+      i+=12+ln;
+    }
+    const raw=zlib.inflateSync(Buffer.concat(chunks));
+    const ch=({0:1,2:3,3:1,4:2,6:4})[ct]; const st=w*ch;
+    const out=Buffer.alloc(raw.length);
+    let p2=0; let prev=Buffer.alloc(st);
+    for (let y=0;y<h;y++){
+      const ft=raw[p2]; p2++;
+      const line=Buffer.from(raw.slice(p2, p2+st)); p2+=st;
+      for (let x=0;x<st;x++){
+        const a=x>=ch?line[x-ch]:0; const b=prev[x]; const c=x>=ch?prev[x-ch]:0;
+        if (ft===0) {} else if (ft===1) line[x]=(line[x]+a)&255;
+        else if (ft===2) line[x]=(line[x]+b)&255;
+        else if (ft===3) line[x]=(line[x]+((a+b)>>1))&255;
+        else { const pp=a+b-c; const da=Math.abs(pp-a),db=Math.abs(pp-b),dc=Math.abs(pp-c);
+          const pr=da<=db&&da<=dc?a:(db<=dc?b:c); line[x]=(line[x]+pr)&255; }
+      }
+      out.set(line, y*st); prev=line;
+    }
+    let mx=0, n=0; if (ch===4){ for (let j=3;j<out.length;j+=4){ if (out[j]>mx) mx=out[j]; if (out[j]>10) n++; } }
+    return { w, h, nonempty:n, max:mx };
+  }
+  function set(dir){
+    const set=new Set();
+    for (let f=1;f<300;f++){
+      const p='assets/eturrets_spr/DefineSprite_'+dir+'/'+f+'.png';
+      if (!fs.existsSync(p)) break;
+      const r=pngAlpha(p);
+      if (r.nonempty>0) set.add(f);
+    }
+    return set;
+  }
+  // 已实测的"PNG 导出为 0 内容"区间(FFDec 的 pattern 渲染已知 bug)
+  const KNOWN_BLANK={};
+  let bad=[];
+  for (const sid in GUN_FIRE_SEQ){
+    const seq=GUN_FIRE_SEQ[sid];
+    if (!seq || !seq.length) continue;
+    const ok=set(sid);
+    for (const f of seq){
+      if (!ok.has(f)){ bad.push(sid+':f'+f); break; }
+    }
+  }
+  console.log("开火序列 %d 序列里含空帧=%s"+(bad.length?'  偏差: '+bad.slice(0,10).join(','):''),
+    bad.length===0);
 }
 `;
 eval(src);

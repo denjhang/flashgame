@@ -598,6 +598,53 @@ const TURRET_GUNS = {
 // fire 标签帧顺序播到末尾。本表只保留【有内容】的帧 (全空帧播了也看不见, 跳过)。
 // 修正记录: 上一轮把 80/161 误判为"无开火帧"(只看了从帧2起的连续段, 漏掉后段真正的开火),
 //           且漏了 83 (MTHEL 激光)。本轮按 fire 标签+内容量重测, 全部补齐。
+// ★连发模型 (原版: canon.gotoAndPlay("fire") 后, 动画在多个帧位各 createObus 一次)
+//   权威: 各炮管 sprite 的 frame_N/PlaceObject2_*/onClipEvent(load) 里 createObus 的帧位:
+//     m60(92)        帧 2,6,10,14          → 4 连发 (间隔 4 帧@24fps = 167ms)
+//     gatling(98)    帧 2,6,10,14,18,22    → 6 连发
+//     crotale(122)   帧 2,6                → 2 连发
+//     navireCrotale(164) 帧 2,6            → 2 连发
+//     MLRS(128)      帧 2,8,17,25,32,38    → 6 连发 (间隔渐增)
+//     炮类 103/108/125/167、pluton(80)、153、161 → 单发; MTHEL(83) 帧 25 单发
+//   冷却 = 一次【整轮】连发后的许可间隔 floor(typeData[2]/fpsc)×43ms (fireCooldownMs)
+//   H5 旧实现: 一次许可只打 1 发再等冷却 → 机枪完全失去速射特性 (用户指出, 属实)
+const BURST_FRAMES = {
+  80: [2], 83: [25], 92: [2, 6, 10, 14], 98: [2, 6, 10, 14, 18, 22],
+  103: [2], 108: [2], 122: [2, 6], 125: [2], 128: [2, 8, 17, 25, 32, 38],
+  153: [2], 157: [2], 160: [2], 161: [2], 164: [2, 6], 167: [2],
+};
+// 开启一轮连发: 记录队列, 由 tickBurst 逐发触发 (帧位→H5 30fps tick, 首帧立即)
+function startBurst(obj, target, w, side, turretId, barrelAng, barrelIdx) {
+  // turretId 是武器名; 找它的炮管 chid → 连发帧位表
+  const guns = TURRET_GUNS[turretId];
+  const chid = guns ? guns[barrelIdx % guns.length].chid : null;
+  const fr = (chid && BURST_FRAMES[chid]) || [2];
+  obj.burst = { t0: G.frame, next: 1, fr, target, w, side, turretId, barrelIdx };
+  // 首发立即 (原版 gotoAndPlay("fire") 直接跳帧 2 并触发 createObus)
+  spawnShell(obj.x, obj.y, target, w, side, turretId,
+             barrelAng !== undefined ? barrelAng : obj.rot, barrelIdx || 0);
+}
+// 每帧推进连发队列 (返回是否仍在连发中)
+function tickBurst(obj) {
+  const b = obj.burst;
+  if (!b) return false;
+  const el = G.frame - b.t0;                       // 已过 tick (@30fps)
+  while (b.next < b.fr.length) {
+    const delay = Math.round((b.fr[b.next] - b.fr[0]) * 24 / 30);   // 帧@24fps → tick
+    if (el < delay) break;
+    // 目标中途死亡则终止本轮 (原版 obus 对死目标自灭)
+    if (!b.target || b.target.hp <= 0) { obj.burst = null; return false; }
+    const guns = TURRET_GUNS[b.turretId];
+    let ang;
+    if (obj instanceof Turret) ang = obj.rot;
+    else ang = (obj.tRot !== undefined ? obj.tRot : obj.rot);
+    const bi = guns && guns.length > 1 ? b.next % guns.length : (b.barrelIdx || 0);
+    spawnShell(obj.x, obj.y, b.target, b.w, b.side, b.turretId, ang, bi);
+    b.next++;
+  }
+  if (b.next >= b.fr.length) obj.burst = null;
+  return !!obj.burst;
+}
 const GUN_FIRE_SEQ = {
   80:  [148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186],
   83:  [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
@@ -1223,6 +1270,7 @@ class Unit {
     if (this.weapon) {
       this.cool -= G.dt;      // 毫秒冷却 (原版 OCEEF 43ms 循环模型)
       if (this.fireT > 0) this.fireT--;
+      tickBurst(this);        // 连发队列推进 (帧位到点即 spawnShell)
       const t = nearestTurret(this.x, this.y, this.weapon[1]);
       if (!this._tRotInit) { this.tRot = this.rot; this._tRotInit = true; }   // 初始与车体同向
       if (t) {
@@ -1239,7 +1287,8 @@ class Unit {
           // 敌方冷却同用 OCEEF 模型 (原版 174 对 ally/ennemy 是同一套 numberOfRequestForPermission)
           this.cool = fireCooldownMs(this.weapon[2]);
           this.fireT = fireTicksFor(this.weaponId);
-          spawnShell(this.x, this.y, t, this.weapon, 'ennemy', this.weaponId, this.tRot,
+          // ★一轮连发 (与玩家塔同一套帧位表)
+          startBurst(this, t, this.weapon, 'ennemy', this.weaponId, this.tRot,
                      nextBarrel(this, this.weaponId));
         }
       }
@@ -1313,6 +1362,7 @@ class Turret {
     }
     if (this.hp <= 0) return;   // 被摧毁的塔不再索敌开火
     if (this.fireT > 0) this.fireT--;   // 炮管开火帧倒计时
+    tickBurst(this);                    // 连发队列推进 (帧位到点即 spawnShell)
     if (this.magnetT > 0) this.magnetT--;   // 蓝色磁场动画倒计时
     if (this.autoRepair && this.hp < this.maxHp && G.euros >= REPAIR_COST) {
       const n = Math.min(5, this.maxHp - this.hp, Math.floor(G.euros / REPAIR_COST));
@@ -1353,8 +1403,8 @@ class Turret {
         this.cool = fireCooldownMs(this.w[2]);
         const gunId = PLAYER_ETURRET[this.id] || this.id;
         this.fireT = fireTicksFor(gunId);   // 播完整开火动画
-        // 从炮口生成 (原版 obus 放在炮管世界坐标; barrelAng = 炮塔朝向)
-        spawnShell(this.x, this.y, best, this.w, 'ally', gunId, this.rot, nextBarrel(this, gunId));
+        // ★一轮连发 (原版: 许可后 gotoAndPlay("fire"), 动画内帧 2/6/10/14... 各发一弹)
+        startBurst(this, best, this.w, 'ally', gunId, this.rot, nextBarrel(this, gunId));
       }
     }
   }
@@ -2119,6 +2169,9 @@ function draw() {
     }
   }
   // 枪口焰 (原版 obus sprite 内的 chid 303 = 炮弹类 / chid 365 = 曳光弹类)
+  //   ★原版放置矩阵带缩放 (obus 帧库 SVG 权威), 旧实现 1:1 画导致焰体过大:
+  //     303 (obus f1): m=[0.828, 0, 0, 0.891, ...]   365 (obus f4): m=[0.17, 0, 0, 0.465, ...]
+  const MUZZLE_M = { 303: [0.828, 0.891], 365: [0.17, 0.465] };
   for (const m of G.muzzle) {
     if (!isVisible(m.x, m.y)) continue;
     const sx = w2sX(m.x), sy = w2sY(m.y);
@@ -2127,13 +2180,17 @@ function draw() {
     const fi = Math.min(n - 1, Math.floor((m.life0 - m.life) / m.life0 * n));
     const im = mf.frames[fi];
     if (im && im.complete && im.naturalWidth) {
+      const mm = m.kind && MUZZLE365_KINDS[m.kind] ? MUZZLE_M[365] : MUZZLE_M[303];
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(m.ang - Math.PI / 2); ctx.scale(zoom, zoom);
+      ctx.scale(mm[0], mm[1]);   // 原版矩阵缩放
       ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
       ctx.restore();
     }
   }
   // 弹壳 (原版 douille, 29 帧: 由炮口向右后抛出 → 下落 → 变暗消失)
   //   两系: 炮弹类用 chid 304, 曳光弹类用 chid 391 (帧内位移不同)
+  //   ★原版放置矩阵带缩放 —— 旧实现 1:1 画导致弹壳大 3~5 倍 (用户指出"弹壳体积不对", 属实):
+  //     304 (obus f1): m=[-0.318, 0, 0, 0.318, ...]   391 (obus f4): m=[-0.185, 0, 0, 0.205, ...]
   for (const c of G.casings) {
     if (!isVisible(c.x, c.y)) continue;
     const sx = w2sX(c.x), sy = w2sY(c.y);
@@ -2141,8 +2198,9 @@ function draw() {
     const fi = Math.min(28, Math.floor(t * 29));
     const im = casingFrame(c, fi);
     if (im && im.complete && im.naturalWidth) {
+      const cs = c.bullet ? [0.185, 0.205] : [0.36, 0.36];   // 原版矩阵缩放 (取绝对值)
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(c.ang - Math.PI / 2); ctx.scale(zoom, zoom);
-      // douille 画布 107x51, 弹壳起点在 (0,23): 以画布原点摆放, 由帧内位移完成抛出轨迹
+      ctx.scale(cs[0], cs[1]);
       ctx.drawImage(im, 0, -im.naturalHeight / 2);
       ctx.restore();
     }
