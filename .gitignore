@@ -10,3 +10,11 @@ ffdec.zip
 *.swf
 *.log
 __pycache__/
+# 各游戏反编译导出 (按游戏归档, 不入库)
+paper-war/export_scripts/
+rise-of-the-tower/scripts/
+rise-of-the-colony/scripts/
+tower-bloxx/scripts/
+tower-bloxx/*-dec.swf
+tower-bloxx/j2me/jars/
+tower-bloxx/j2me/src/

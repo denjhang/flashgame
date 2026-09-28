@@ -26,6 +26,11 @@ flashgame/
 │   ├── GAME_LOGIC.md    # 玩法逻辑清单
 │   ├── PROGRESS.md      # 资源还原看板
 │   └── data/            # 权威对号数据 JSON (武器/路点/炮塔帧/声音/精灵)
+├── tower-bloxx/         # 《都市摩天楼 Tower Bloxx》反编译 (AS2, bz.esg.game 包, 未混淆)
+├── paper-war/           # 《Paper Defense》反编译 (AS3, 276 类, 未混淆)
+├── rise-of-the-tower/   # 《Rise of the Tower》反编译 (AS3, 已混淆 §_-xx§)
+├── rise-of-the-colony/  # 《Rise of the Colony》反编译 (AS3, 328 类, 未混淆)
+├── vk1939/              # 《VK 1939》审计工程 (见其 README)
 ├── swf_dump.txt         # FFDec -dumpSWF 权威 dump (deobf 脚本引用, 保留根目录)
 └── .gitignore           # decompiled/ deobf输出 ffdec/ *.swf 等大体积产物
 ```

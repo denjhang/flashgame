@@ -1,5 +1,35 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+59 轮成果（2026-09-29, H5 领土防御·WEAPONS 表全列审计 —— 26 型 × 6 列零偏差）
+
+**（权威 = 173/174 load 的 typeData 全表 + createObus 伪码 + obus 命中脚本）**
+
+### 1. 【WEAPONS 表全列比对 —— 完美移植，零改动】
+
+原版 typeData（174 load 逐行）vs H5 WEAPONS：**26 型 × 6 列程序化比对，偏差 0、
+无缺失、无多余**。列语义全部在消费端验证过：[0]=rotateSpeed（N+39）、[1]=射程
+（range 圈/索敌）、[2]=许可计数（1505ms 冷却等）、[3]=并联炮管数（N+29）、
+[4]=puissance 伤害、[5]=impact 溅射。
+
+### 2. 【impact（第 6 列）消费链完整验证】
+
+- 174：`impact = typeData[type][5]`
+- createObus（伪码逐行）：`obus.portee = 射击者的 impact` —— 溅射参数名虽叫
+  portee，**值是 impact 列**
+- obus 命中（400/frame_1 等）：`fireOnEnnemi(XPos, YPos, portee, puissance, side)`；
+  pluton 弹（frame_10）三段：portee/4 全伤 + portee/2 半伤（H5 的 SPLIT 三段环同构）
+- H5 shellHit 用 `s.w[5]` 做溅射半径 ✓ 完全一致；Su37 炸弹 impact=260 硬编码 ✓
+  （H5 IMPACT: 260 一致）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 本轮零代码改动（审计全绿）；109 项断言全绿维持
+
+### 4. 本轮仍未做（如实记录）
+
+- 雷达门控语义（N+56 待真机观察，维持）
+- m26 edithStart 音乐 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+58 轮成果（2026-09-29, H5 领土防御·★ 经济表勘误：建造价/满血两列用反了）
 
 **（权威 = 185/frame_1/PlaceObject2_86_1 load 的 structureData 全表 + 1027 商店 12 槽位
