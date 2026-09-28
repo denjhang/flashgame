@@ -1865,11 +1865,15 @@ function refreshPanelButtons() {
 }
 
 function endWave() {
+  const nextWave = G.wave + 1;
+  // 原版 953 时序: frame_2 调 _root.events() → frame_30 才 giveIntrest()。
+  // newEvents m25 分支: master_menuItems.euros += 2400 (navire 战前奖金) —— 发生在
+  // 计息之前, 因此这笔奖金也吃当波利息
+  if (nextWave === 25) G.euros += 2400;
   // 利息 (giveIntrest, 953/frame_30): euros = floor(euros × (1 + interest/100)); 第 1 波后不给
   if (G.wave > 1) G.euros = Math.floor(G.euros * (1 + G.interest / 100));
   G.waveActive = false;
   // 原版两波之间的剧情段调用 _root.events() (953/frame_2), 此时 mR = 即将开始的波号
-  const nextWave = G.wave + 1;
   autoUnlockForWave(nextWave);
   if (shouldShowUnlockPanel(nextWave)) { showPanelForUnlock(); return; }   // 面板期间不推进 interWave
   // 953 frame_30: 简报波显示 "start mission" 等点击, 其余进 "start in N" 倒计时

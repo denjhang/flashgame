@@ -608,6 +608,29 @@ console.log("lockItem=true 时点击无效: interest 仍=%d (应 %d) 一致=%s",
 G.unlocker = { m60:true, gatling:true, canon75:false, canon105:false, canon105D:false,
                radar:false, crotale:false, canon125:false, MLRS:false, pluton:false, MTHEL:false, su37:false };
 G.iUnlock = 0; G.panelOpen = false; G.lockItem = true;
+// ---- 解锁计划全表 (原版 333 load + 834/773_189 newEvents, N+50 权威) ----
+console.log("WEAPONS_TO_UNLOCK 顺序与原版 333 一致=%s",
+  JSON.stringify(WEAPONS_TO_UNLOCK) === JSON.stringify(['crotale','canon125','MLRS','MTHEL','pluton']));
+console.log("AUTO_UNLOCK 波次表与原版 newEvents 一致=%s",
+  JSON.stringify(Object.entries(AUTO_UNLOCK)) === JSON.stringify([["7","canon75"],["11","canon105"],["16","canon105D"],["27","radar"],["31","su37"]]));
+console.log("PANEL_WAVES 与原版 showPanelForUnlock 波集一致=%s",
+  JSON.stringify(PANEL_WAVES) === JSON.stringify([18,20,27,31,37,39]));
+// m25 奖金: newEvents m25 → euros += 2400, 发生在 giveIntrest 之前 (953 f2 → f30) → 也吃利息
+{
+  const sv = { wave: G.wave, wa: G.waveActive, n: G.units.length, lost: G.lost, losses: G.losses };
+  G.wave = 24; G.waveActive = true; G.units.length = 0; G.euros = 1000; G.interest = 6;
+  G.units.push(new Unit('camion1', 'null', 'parcourt1')); G.units[0].reached = true;
+  endWave();
+  console.log("m25 奖金: 第24波清场 euros 1000 → %d (期望 floor((1000+2400)×1.06)=3604)=%s",
+    G.euros, G.euros === 3604);
+  G.wave = 25; G.waveActive = true; G.units.length = 0; G.euros = 1000;
+  G.units.push(new Unit('camion1', 'null', 'parcourt1')); G.units[0].reached = true;
+  endWave();
+  console.log("无奖金对照: 第25波清场 euros 1000 → %d (期望 floor(1000×1.06)=1060)=%s",
+    G.euros, G.euros === 1060);
+  G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n;
+  G.lost = sv.lost; G.losses = sv.losses;
+}
 
 // ==== M2b: 自动修理蓝色磁场 (sprite 183) ====
 console.log("--- 自动修理磁场 ---");

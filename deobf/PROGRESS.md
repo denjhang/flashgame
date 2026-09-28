@@ -1,5 +1,43 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+50 轮成果（2026-09-28, H5 领土防御·解锁计划全表审计一致 + 补 m25 奖金 2400）
+
+**（权威 = DefineSprite_834/frame_1/PlaceObject2_773_189 的 newEvents 事件表（池 41 目全解）
++ frame_6/333 load 的 unlocker 初始态与 weaponsToUnlock 队列）**
+
+### 1. 【原版解锁机制全貌（newEvents 按 mR=任务号分派）】
+
+- **事件自动解锁**：m7→canon75、m11→canon105（含 cookie 三开关判定）、m16→canon105D、
+  m27→radar、m31→su37；解锁后菜单 constructionCont 跳到对应项
+- **二选一面板**（showPanelForUnlock）：m18/20/27/31/37/39；可选项 = weaponsToUnlock 队列
+  `["crotale","canon125","MLRS","MTHEL","pluton"]`（iUnlock 递增）或 interest+3
+- **m25 奖金**：`master_menuItems.euros += 2400`（navire 战前）
+- **m26**：bgSound gotoAndPlay("edithStart")（直升机波音乐）；**m44**：master_sounds.Yamato(0)
+- 初始 unlocker：仅 m60+gatling，其余全锁（含 su37）—— H5 G 初始化逐字一致 ✓
+
+### 2. 【审计结论：三张表早已对齐，唯一缺口 = m25 奖金】
+
+- `AUTO_UNLOCK = {7:canon75, 11:canon105, 16:canon105D, 27:radar, 31:su37}` ✓
+- `WEAPONS_TO_UNLOCK = [crotale, canon125, MLRS, MTHEL, pluton]`（顺序敏感）✓
+- `PANEL_WAVES = [18,20,27,31,37,39]` ✓
+- **补实现**：endWave 在计息**之前**给 nextWave==25 加 2400 —— 原版 953 时序是 frame_2
+  调 events()（+2400）→ frame_30 才 giveIntrest()，即**奖金也吃当波利息**（1000+2400 →
+  floor(3400×1.06)=3604）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `WEAPONS_TO_UNLOCK 顺序与原版 333 一致=true`、`AUTO_UNLOCK 波次表一致=true`、
+  `PANEL_WAVES 波集一致=true`
+- `m25 奖金: 1000 → 3604 (期望 3604)=true`；`无奖金对照 (第25波清场): 1000 → 1060=true`
+- 103 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- m26 edithStart 音乐切换（H5 BGM 三段已有映射，"edith" 段对应哪首未逐一对号，归入
+  真机听感搁置项）；m44 Yamato 音效调用未建模（H5 已有终波 bgm_alt 切换近似）
+- 容器 bbox 炮管动态外扩 / 画质档（N+49 遗留，维持）
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
 ## 第 N+49 轮成果（2026-09-28, H5 领土防御·keyDown 全面审计 — G 键身份澄清 + 塔重叠改原版 bbox 判定）
 
 **（权威 = frame_6/PlaceObject2_6_1 onClipEvent(keyDown) 全文逐行 + 822/86 画布实测）**
