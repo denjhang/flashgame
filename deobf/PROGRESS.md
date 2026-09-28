@@ -1,5 +1,59 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+45 轮成果（2026-09-28, H5 领土防御·波次路线/出兵模型/波间节奏对齐原版）
+
+**（新子系统审计：missions/unitsMissions 波次数据 + startMission 出兵链路。
+权威 = deobf/data/missions.json + frame_6/329 pcode + DefineSprite_953 逐帧 DoAction）**
+
+### 1. 【★ 16/44 波进攻路线错误：H5 在猜，原版是显式表】
+
+- unitsMissions 每波外层数组第二元素就是路线（missions.json `waves[i].route`）——
+  逐波显式给定，不是规则推导。
+- 旧 `guessRoute`（舰→p4 / 直升机→p3 / 其余 wave%3→p2 否则 p1）与原版 **16/44 波不一致**
+  （第 6 波应 p1 猜成 p2、第 8/14/23/29/41/43 波应 p2 猜成 p1 等）。
+- 修正：data.js 新增 `WAVE_ROUTES`（44 项逐字照抄 missions.json），startWave 改用显式表。
+  路线方向佐证：parcourt1 begin(126,580)→r10(93,-1563) 向北行进。
+
+### 2. 【★ 出兵模型：H5"逐个 40 tick 滴流" → 原版"整波一次性生成 + y+=60×j 堆叠"】
+
+startMission pcode（frame_6/329, loc03e6..loc0533）解码：
+
+- **同步 for 循环一次 createUnit 全波，无任何逐个延迟**（H5 旧 spawnQueue delay+=40 是自造）。
+- 出生点 = route[0]（checkpoints 首点），`ypos += j×60`（register5×60×register6）纵向堆叠；
+  x 偏移项 register7 仅当 `wave[r3].length==13`（parcourt2 路点数）且 iUnitsE==0 时为 1，
+  而 createUnit 每建一个单位 iUnitsE++，第 3 波起恒 >0 → x 偏移实战恒 0，统一 `y+=60j`。
+- 与车队制动自洽：60px 出厂间距 > camion1 车高 42.2px → 列队出发不触发制动，与 N+41/42 的
+  刹停滑行 40.7px < 42.2px 证明链互洽。
+- H5 修正：startWave 立即 `new Unit` 全波，`y = route[0][1] + 60*j`，依次互链 devant；
+  删除 spawnQueue/spawnTimer/guessRoute；tick() 出兵分支只剩清场判定。
+
+### 3. 【波间节奏量化】
+
+- 清场 → `activeDeclencheur = setInterval(declencheMissionSuivante, 3000)`（327 pcode）
+  → startInstructions → 953 倒计时 f30→f183 = **153 帧@24fps = 6.375s** → frame_183 调
+  `master_scenario.startMission()`。合计 ≈ 9.4s = **281 tick@30fps**（H5 旧 200）。
+- giveIntrest 复核一致（953 frame_30 + 329 pcode）：`euros = floor(euros×(1+interest/100))`，
+  im!=1 才给；H5 已实现，未改。
+
+### 4. 验证（node 冒烟，无浏览器）
+
+- 新增断言全绿：`WAVE_ROUTES 44 波与 missions.json 逐波一致=true`、
+  `旧猜错波抽查 6p1/8p2/9p1/14p2/23p2/43p2/44p4=true`、
+  `整波即时生成 9/9=true`、`出生点 route[0] y+=60j 全对 / x 全对=true`、
+  `车队链表 首车devant=null 后车互链=true`、`INTERWAVE_TICKS=281=true`
+- 450 帧波次 sim 正常（第 1 波 9 车一次入场成列，击杀 14 / 塔 15/15 / lost=false）
+- 顺带修复一处**过期诊断**（stash 对照确认在 N+44 基线就已是 false，非本轮回归）：
+  "塔头与车体解耦 |tRot−rot|>1.0" 在 N+39 移动模型改版后失效（车体沿路点转向后与塔头
+  方位相近），改为打印 tRot/rot 实际值 + 世界方位收敛残差判据（0.0352 < 0.06）
+
+### 5. 本轮仍未做（如实记录）
+
+- 原版 953 frame_30 的 `startMissionPause`（波 **1,5,9,11,15,16,19,26,31,37,41,44** 点击暂停，
+  疑似简报/剧情停顿）与 H5 的二选一面板 `PANEL_WAVES=[18,20,27,31,37,39]`（源自解锁事件）
+  是两套机制；H5 未实现"简报暂停"，波号集合也未对齐 —— 待议
+- countUnitsEnnemies 每 3s 轮询引入的 0~3s 量化未建模（波间实际 9.4~12.4s，H5 取 9.4s）
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
 ## 第 N+44 轮成果（2026-09-28, H5 领土防御·MTHEL 激光即发即中 + 光束特效）
 
 **（N+43 遗留项第一项：laser 即发即中链路解码 —— 本轮完整解出并实现）**

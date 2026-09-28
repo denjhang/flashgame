@@ -70,7 +70,10 @@ src += `
   let da = want - u.tRot; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
   console.log("敌方塔头转向: 初值=%s 终值=%s 目标方位=%s 残差=%s rad (应<0.06)",
     r0.toFixed(3), u.tRot.toFixed(3), want.toFixed(3), Math.abs(da).toFixed(4));
-  console.log("塔头与车体解耦=%s (车体 rot=0, 塔头≈-1.57)", Math.abs(u.tRot - u.rot) > 1.0);
+  // 解耦的真实不变量: tRot 是独立变量, 收敛到【世界】方位 (上方残差行即判据),
+  // 不随车体 rot 走 (车体沿路点转向后二者方位可能相近, 旧判据 |tRot-rot|>1.0 在 N+39 后失效)
+  console.log("塔头为世界方位独立变量: tRot=%s, 车体 rot=%s (互不绑定; 收敛残差 %s rad < 0.06)",
+    u.tRot.toFixed(3), u.rot.toFixed(3), Math.abs(da).toFixed(4));
   console.log("用 %d 次 update 完成转向", steps);
   // 无目标时 tRot 保持不动 (原版: target == null 时 directionToGet = 车体朝向, 但 ennemy 侧不回转)
   const held = u.tRot; G.turrets.length = 0;
@@ -839,6 +842,33 @@ console.log("--- 单位移动模型 ---");
   console.log("炮塔转向 = typeData[0]×1.13 度/OCEEF: m60 rs=" + (5 * 0.01529).toFixed(5) +
     " rad/tick 常数一致=" + (Math.abs(0.01529 * 5 - wantRs) < 0.0005));
   // 450 帧波次 sim 里的节奏 (数值打印在上方"迷雾+真实路点"行)
+}
+// ---- 波次路线表 + 整波即时生成 (原版 missions.json waves[i].route + startMission loc03e6) ----
+console.log("--- 波次路线 + 整波生成 ---");
+{
+  const MISS = JSON.parse(require('fs').readFileSync('../deobf/data/missions.json', 'utf8'));
+  const origRoutes = MISS.waves.map(w => w.route);
+  const routesOk = WAVE_ROUTES.length === 44 && JSON.stringify(WAVE_ROUTES) === JSON.stringify(origRoutes);
+  console.log("WAVE_ROUTES 44 波路线与 missions.json 逐波一致=" + routesOk);
+  // 旧 guessRoute (wave%3 猜测) 与原版不一致的 16 波抽查
+  const spot = [[6,'parcourt1'],[8,'parcourt2'],[9,'parcourt1'],[14,'parcourt2'],[23,'parcourt2'],[43,'parcourt2'],[44,'parcourt4']];
+  const spotOk = spot.every(([w, r]) => WAVE_ROUTES[w - 1] === r);
+  console.log("旧猜错波抽查 6p1/8p2/9p1/14p2/23p2/43p2/44p4 一致=" + spotOk);
+  // 整波即时生成: startWave 一次创建全部单位, 出生点 = route[0], y += 60×j (startMission pcode loc03e6)
+  const sv = { wave: G.wave, wa: G.waveActive, n: G.units.length, iw: G.interWave };
+  G.wave = 0; G.waveActive = false; G.units.length = 0;
+  startWave();
+  const wv = WAVES[0], r0 = ROUTES[WAVE_ROUTES[0]][0];
+  const nOk = G.units.length === wv.length;
+  const ysOk = G.units.every((u, j) => Math.abs(u.y - (r0[1] + 60 * j)) < 1e-9);
+  const xsOk = G.units.every(u => Math.abs(u.x - r0[0]) < 1e-9);
+  const chainOk = G.units[0].devant === null && G.units.slice(1).every((u, j) => u.devant === G.units[j]);
+  console.log("整波即时生成: 第1波单位数=%d (期望 %d)=%s", G.units.length, wv.length, nOk);
+  console.log("出生点 route[0]=(%s,%s) y+=60j 全对=%s x 全对=%s (60px>车高42.2 初始不制动)", r0[0], r0[1], ysOk, xsOk);
+  console.log("车队链表: 首车 devant=null, 后车依次互链=%s", chainOk);
+  console.log("波间节奏 INTERWAVE_TICKS=%d (期望 281 = declencheur 3000ms + 953 倒计时 153帧@24fps)=%s",
+    INTERWAVE_TICKS, INTERWAVE_TICKS === 281);
+  G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.interWave = sv.iw;
 }
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");

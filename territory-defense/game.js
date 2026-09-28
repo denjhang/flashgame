@@ -1164,8 +1164,6 @@ const G = {
   units: [], turrets: [], shells: [], effects: [], sparks: [],
   muzzle: [], casings: [],   // 枪口焰 / 弹壳 (原版 obus sprite 内的子件)
   beams: [],                 // MTHEL 激光束 (原版 obus frame13 chid399: _height=目标距离)
-  spawnQueue: [],          // 本波待生成 [unitType, weapon, route, delayTicks]
-  spawnTimer: 0,
   waveActive: false, interWave: 120,
   lost: false, won: false, losses: 0,
   // 建造模式: 原版 carte.viseurConstruction 初值为 false
@@ -1708,6 +1706,11 @@ function createEclat(x, y, power) {
 }
 
 // ---------------- 波次调度 (startMission) ----------------
+// 波间节奏 (原版): 清场 → activeDeclencheur = setInterval(declencheMissionSuivante, 3000)
+//   (327 pcode) → startInstructions → 953 倒计时 f30→f183 = 153 帧@24fps = 6.375s
+//   → frame_183 调 master_scenario.startMission()。合计 ≈ 9.4s = 281 tick@30fps。
+//   (countUnitsEnnemies 每 3s 轮询引入的 0~3s 量化未建模)
+const INTERWAVE_TICKS = 281;
 function startWave() {
   if (G.wave >= WAVES.length) return;
   // 原版 yamatoBattle: 终波 Yamato 出场切换战斗音乐
@@ -1717,28 +1720,28 @@ function startWave() {
     bgmAudio.play().catch(() => {});
   }
   const wave = WAVES[G.wave];
+  // 原版路线: unitsMissions 每波外层数组第二元素显式给出 (missions.json), 不是猜测
+  const routeName = WAVE_ROUTES[G.wave];
   G.wave++;
-  const routeName = 'parcourt' + (wave[0] && JSON.stringify(ROUTES).includes('p') ? guessRoute(wave) : 1);
-  let delay = 0;
-  for (const u of wave) {
-    const type = u.type, weapon = u.weapon;
-    G.spawnQueue.push({ type, weapon, route: guessRoute(wave), delay });
-    delay += 40;                            // 原版 20px 间隔 ≈ 出车间隔
-  }
+  // 原版 startMission (frame_6/329 pcode loc03e6..loc0533): 整波一次性同步生成,
+  //   无逐个延迟; 出生点 = 路线首点 + ypos += j×60 (register5×60×register6;
+  //   x 偏移项 register7 仅在 route.length==13 且 iUnitsE==0 时为 1, 实战恒 0)。
+  //   parcourt1 向北行进 (+y 为队尾方向) → 领头车在 route[0], 后车 60px 纵向堆叠,
+  //   由车队制动 (unitDevant) 维持车距; 60px > camion1 车高 42.2px, 初始不触发制动
+  wave.forEach((u, j) => {
+    const nu = new Unit(u.type, u.weapon, routeName);
+    nu.y = nu.route[0][1] + 60 * j;
+    // 车队链表: unitDevant = 上一个出场的同路线单位, 首个为 "null" (frame_39 双向拆链在 killUnit)
+    const prev = G.units.filter(x => x.route === nu.route && !x.dead && !x.reached).pop();
+    nu.devant = prev || null;
+    G.units.push(nu);
+  });
   G.waveActive = true;
   const dirNames = { parcourt1: '南方公路', parcourt2: '西侧小路', parcourt3: '北面空降', parcourt4: '海上航线' };
-  const dirs = [...new Set(G.spawnQueue.map(s => s.route))];
-  showBanner('第 ' + G.wave + ' / 44 波来袭 — ' + dirs.map(d => dirNames[d]).join(' + '));
+  showBanner('第 ' + G.wave + ' / 44 波来袭 — ' + dirNames[routeName]);
   // 原版 startInstructions: 简报期间 pauseMusic, 出兵后恢复
   if (!isPause) { pauseMusic(); setTimeout(() => { if (isPause) playMusic(); refreshMusicPanel(); }, 3200); }
   hud();
-}
-
-function guessRoute(wave) {
-  // 原版按波配置路线: 舰艇海线, 直升机空降线, 其余南/西线交替
-  if (wave.some(u => u[0] === 'navire' || u[0] === 'Yamato')) return 'parcourt4';
-  if (wave.some(u => u[0] === 'tigre')) return 'parcourt3';
-  return (G.wave % 3 === 0) ? 'parcourt2' : 'parcourt1';
 }
 
 // ---------------- 原版解锁机制 (unlockNextWeapon / showPanelForUnlock) ----------------
@@ -1783,7 +1786,7 @@ function panelPickInterest() {
 }
 function closeUnlockPanel() {
   G.panelOpen = false;
-  G.interWave = 200;
+  G.interWave = INTERWAVE_TICKS;
   hud();
 }
 function refreshPanelButtons() {
@@ -1811,7 +1814,7 @@ function endWave() {
   const nextWave = G.wave + 1;
   autoUnlockForWave(nextWave);
   if (shouldShowUnlockPanel(nextWave)) { showPanelForUnlock(); return; }   // 面板期间不推进 interWave
-  G.interWave = 200;
+  G.interWave = INTERWAVE_TICKS;
   if (G.wave >= WAVES.length && G.units.every(u => u.dead)) {
     G.won = true;
   }
@@ -1829,21 +1832,9 @@ function tick() {
   computeVisibility();
   revealExplored();
 
-  // 出兵
+  // 出兵 (原版 startMission 整波即时生成, 无 spawnQueue)
   if (G.waveActive) {
-    if (G.spawnQueue.length) {
-      G.spawnTimer++;
-      if (G.spawnTimer >= G.spawnQueue[0].delay) {
-        const s = G.spawnQueue.shift();
-        const nu = new Unit(s.type, s.weapon, s.route);
-        // 原版车队链表 (frame_6/329 createUnit): unitDevant = 上一个出场的同路线单位,
-        //   首个为 "null"; 被移除时(frame_39)双向拆链。H5 按 route 引用同路即同队。
-        const prev = G.units.filter(u => u.route === nu.route && !u.dead && !u.reached).pop();
-        nu.devant = prev || null;
-        G.units.push(nu);
-        G.spawnTimer = 0;
-      }
-    } else if (G.units.every(u => u.dead || u.reached)) {
+    if (G.units.every(u => u.dead || u.reached)) {
       // 注: 阵亡序列播放中 (dying>0) 的单位不算"已清场" —— 等它播完才结束本波
       endWave();
     }
