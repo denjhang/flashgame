@@ -1,5 +1,27 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+54 轮成果（2026-09-28, H5 领土防御·小地图敌点改原版全情报语义）
+
+**（权威 = blip clip chid52 pointUnitRadar 全脚本（仅两帧 stop()，无可见性逻辑）+
+refreshRadar 无条件复制全部敌人）**
+
+### 1. 【小地图敌点可见性结清（N+53 遗留项）】
+
+blip 剪辑 pointUnitRadar（chid 52，attachMovie 挂到雷达图）的全部脚本只有两帧
+`stop()` —— 没有任何可见性/迷雾判断；refreshRadar 也无条件复制全部敌人。
+⇒ **原版小地图 = 全情报：所有敌点恒显**。H5 之前的 `isVisible` 过滤是偏离，
+已移除（敌点只要活着就在小地图上；主地图的迷雾/视野系统不受影响）。
+
+### 2. 验证（node 冒烟，无浏览器）
+
+- 113 项 `=true`；450 帧 sim 正常（塔 15/15 / lost=false）；`node --check` 通过
+
+### 3. 本轮仍未做（如实记录）
+
+- blip 的逐帧定位器（读 radarE[i]._x 的雷达显示循环）所在 clip 未定位（不影响 H5：
+  位置本就实时绘制）
+- m26 edithStart 音乐 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器覆盖率 / 真机听感（均搁置）
+
 ## 第 N+53 轮成果（2026-09-28, H5 领土防御·雷达快照 refreshRadar 1Hz + noTarget 结清）
 
 **（权威 = 327 pcode 的 refreshRadar / noTarget 函数体逐行解码）**

@@ -2536,7 +2536,9 @@ function drawMinimap() {
     ctx.fillRect(mx(t.x) - 1.5, my(t.y) - 1.5, 3, 3);
   }
   for (const u of G.radarE || []) {
-    if (u.hp <= 0 || !isVisible(u.x, u.y)) continue;
+    // 原版小地图 = 全情报: refreshRadar 无条件复制全部敌人, blip clip (chid52) 只有
+    // stop() 无可见性逻辑 → 敌点恒显 (主地图迷雾不受此影响)
+    if (u.hp <= 0) continue;
     ctx.fillStyle = '#f44';
     ctx.fillRect(mx(u.x) - 1.5, my(u.y) - 1.5, 3, 3);
   }
