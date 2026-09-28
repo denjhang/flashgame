@@ -1,5 +1,35 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+63 轮成果（2026-09-29, H5 领土防御·★ Su37 冷却勘误：2 秒 → 60 秒）
+
+**（权威 = 785_17 的 activeDisponibilite / chargeBombes / zone on(press) 全函数解码）**
+
+### 1. 【Su37 冷却系统全解】
+
+- 点击落点：`Su37.disponible=false` + `activeDisponibilite()` →
+  `idDispo = setInterval(this, <chargeBombes>, **1000ms**)`
+- `chargeBombes`：comptDispo ≤ 0 时**重装 60** + `disponible=true` + clearInterval +
+  compteur 显示 "ready"；等待期显示 `comptDispo + " .. wait"` 并递减
+- **冷却 = 60 × 1000ms = 60 秒**（不是 43ms 间隔——旧注释把 174 的 OCEEF 间隔错套到了
+  这里，快了 23 倍）
+- 附带：出场边随机 bas/gauche/droit/haut、出生点在地图边缘（y=±600/-1600, x=-100/2100）、
+  Su37S 音效、zone 光标隐藏 —— H5 均已一致
+
+### 2. H5 修正
+
+- `COOL_FRAMES=60` → `COOL_MS=60000`，冷却改毫秒递减（G.dt）；等待期 UI 文案改为
+  原版式 `"N .. wait"`（原 'Ns'）；smoke 断言更新（1800 tick 精确命中）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `Su37 冷却: 60000 ms 跑到恢复用了 1800 tick (期望 ~1800)=true`
+- 119 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- chargeBombes 的即时重置条件 `if (Su37.<garbled>.<garbled>)` 未解（乱码成员语义不明）
+- 雷达门控 / 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+62 轮成果（2026-09-29, H5 领土防御·★ 音乐系统全解 + 段落音乐四处接线 —— edith 项完成）
 
 **（权威 = 1085 内部 StartSound 标签（小端 SoundId 实证）+ DefineSound 1081-1084 提取 +

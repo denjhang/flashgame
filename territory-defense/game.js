@@ -778,13 +778,15 @@ const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
 //   disponible=false 时播 cannot 音并拒绝; 否则按 4 边随机选进入边 (bas/gauch/droit/haut),
 //   进入点: bas=(rand*2200, 600) haut=(rand*2200, -1600) gauche=(-100, rand*2200) droit=(2100, rand*2200)
 //   机头朝点击点 (zone = 鼠标位置), 播 Su37S 音效, disponible=false 并启动冷却
-//   冷却 = comptDispo=60 次 chargeBombes 调用 (原版 setInterval 43ms → ≈2.6s/次 → ~2.6s 总计)
+//   冷却 = comptDispo=60 次 chargeBombes, 每次 = setInterval 1000ms (785_17
+//   activeDisponibilite 权威) → **60 秒**; 等待期 compteur 显示 "N .. wait", 归零 "ready"
+//   (N+63 勘误: 旧注释误作 43ms 间隔 → 2.6s, 快了 23 倍)
 //   弹体属性 (793_23 load): speed=28, puissance=500, impact=260
 const SU37 = {
   img: null,
   available: true,
-  dt: 1000 / 30,    // 本 tick 毫秒数 (固定 30fps 主循环; OCEEF 冷却按毫秒计)
-  COOL_FRAMES: 60,  // 原版 comptDispo 初值
+  dt: 1000 / 30,    // 本 tick 毫秒数 (固定 30fps 主循环; 冷却按毫秒计)
+  COOL_MS: 60000,   // 原版 comptDispo=60 × chargeBombes 间隔 1000ms = 60 秒
   pending: false,   // 已选边待点击落点
   plane: null,      // 飞行中的飞机 {x,y,rot,side,tx,ty,phase}
   SPEED: 28 * 0.45, // 原版 speed=28 (每帧) → H5 tick 折算
@@ -833,11 +835,12 @@ function su37Launch(tx, ty) {   // 玩家点击地图落点 → 起飞
   SU37.pending = null; G.su37Aiming = false;
   playSfx('Su37', 0.55);       // 原版 master_sounds.Su37S.start()
   SU37.available = false;
-  SU37.cool = SU37.COOL_FRAMES;
+  SU37.cool = SU37.COOL_MS;
 }
 function su37Update() {
   if (!SU37.available && SU37.cool > 0) {
-    if (--SU37.cool === 0) SU37.available = true;
+    SU37.cool -= G.dt;
+    if (SU37.cool <= 0) { SU37.cool = 0; SU37.available = true; }
   }
   const p = SU37.plane;
   if (!p) return;
@@ -2663,7 +2666,7 @@ function buildShop() {
       const cd = document.createElement('div');
       cd.className = 'price';
       cd.textContent = !G.unlocker.su37 ? 'locked'
-        : SU37.available ? 'ready' : Math.ceil(SU37.cool / 30) + 's';
+        : SU37.available ? 'ready' : Math.ceil(SU37.cool / 1000) + ' .. wait';
       sp.appendChild(cd);
       if (SU37.available && G.unlocker.su37) {
         sp.onclick = () => { su37Start(); buildShop(); };

@@ -156,10 +156,11 @@ console.log("--- 阵亡序列 ---");
   console.log("活单位 killUnit 无效=%s (dying=%d, 应 0)", alive.dying === 0, alive.dying);
   G.euros = e0; G.score = s0;
 }
-// 冷却: 从 COOL_FRAMES 起逐帧跑到恢复
-SU37.available = false; SU37.cool = SU37.COOL_FRAMES;
-let f = 0; while (!SU37.available && f++ < 200) su37Update();
-console.log("Su37 冷却: 从 %d 跑到恢复用了 %d 帧 (期望 %d)", SU37.COOL_FRAMES, f, SU37.COOL_FRAMES);
+// 冷却 (原版 785_17 activeDisponibilite: comptDispo=60 × setInterval 1000ms = 60 秒, N+63)
+SU37.available = false; SU37.cool = SU37.COOL_MS;
+let f = 0; while (!SU37.available && f++ < 2000) su37Update();
+console.log("Su37 冷却: %d ms 跑到恢复用了 %d tick (期望 ~1800 = 60s@30fps)=%s",
+  SU37.COOL_MS, f, Math.abs(f - 1800) <= 1);
 // ---- E: 命中音概率 + 音效文件存在性 ----
 const fs2 = require('fs');
 const played = {};
