@@ -1,5 +1,99 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+21 轮成果（2026-09-28, H5 领土防御·玩家塔阵亡序列，删除灰色色块占位 + 修 nearestTurret 索敌 bug）
+
+**本轮修掉一处直接违反"不允许任何占位/近似/色块"硬性要求的实现：被摧毁的玩家塔此前
+画成一个灰色 `#333` 方块。原版其实有完整的 39 帧阵亡序列。**
+
+### 1. 【违规发现】H5 用灰色方块表示"塔已被摧毁"
+
+`game.js` 渲染循环里：
+
+```javascript
+if (t.hp <= 0) { ctx.fillStyle = '#333'; ctx.fillRect(-10, -10, 20, 20); ctx.restore(); continue; }
+```
+
+这既是占位色块（违反纪律），也与原版行为不符。N+20 已经为**单位**（428）做了阵亡序列，
+但**玩家塔**（185）当时没一起查 —— 本轮补上。
+
+### 2. 原版 185 的 destruction 与 428 同构（逐字对照）
+
+`deobf/scripts/DefineSprite_185_structure/frame_1/PlaceObject2_178_etat_26 onClipEvent(load)`：
+
+```actionscript
+function destruction() {
+   removeMovieClip(_parent.ptRadar);
+   removeMovieClip(_parent.etatJauge);   // 血条
+   removeMovieClip(_parent.ombre);       // 阴影
+   _parent.tourelle.play();
+   _parent.gotoAndPlay("destruction");
+}
+```
+
+与 428 的 `destruction()` **函数体逐字相同**。185 的 tag 序（`swf_dump.txt`）：
+- 帧 2 = `FrameLabel (name: destruction)`，库共 **39 帧**（与 428 一致）
+- 帧 2 移除 dpt31(repairLogo) 与 dpt1(86)，**重新放入** 86 与 178，再放 dpt31 的 chid6
+- 帧 4 放 dpt33 的 chid6；帧 7 放 dpt35 的 chid6 —— **同样是帧 2/4/7 三点爆炸**
+- 帧 39 `DoAction`：`removeMovieClip(this); stop();`
+
+### 3. 【关键差异】塔【没有车体漂移】—— 86 结构层逐帧完全不变
+
+逐帧 SVG 实测 185 的 destruction 段：
+- `chid 86`（structureDeco）的 transform **恒定** `(-38.25, -35.60)`，39 帧全等
+- 我把 86 那一层 def body 做了逐帧 **MD5**：`618a886623` —— **39 帧全部同一哈希**
+
+结论：原版塔在阵亡期间**外观完全不变**，表现完全来自叠加的三处 explosion+flame；
+这与单位 428（chassis 逐帧漂移 12px）不同。故 H5 塔阵亡时**继续正常绘制塔体**，
+不引入任何变形。
+
+### 4. H5 实现
+
+- `Turret` 新增 `dying` / `dyingFired` / `dead`（与 `Unit` 同款字段）
+- `Turret.update()`：`dying>0` 时**先于** `hp<=0` 判断进入阵亡分支 —— 在 0/2/5 tick
+  各生成一对 `death`(chid279, 3 tick) + `flame`(chid637, 27 tick) 特效（±10px 抖动），
+  **无漂移**；归零后 `dead = true`
+- `killTurret(t)`：随机 `explosion1..6` 音；**不改 euros**（185 的 destruction 段无 euros 变更，
+  与 428 给赏金不同 —— 已核实）
+- 渲染：删除 `#333` 色块分支，照常画塔；阵亡中不画对空标记/磁场/血条
+  （对应 `destruction()` 的三个 `removeMovieClip`）
+- 主循环：`G.turrets = G.turrets.filter(t => !t.dead)`（对应帧 39 `removeMovieClip(this)`），
+  并清空指向已毁塔的 `G.selected`
+
+### 5. 【顺带修掉一个真实 bug】nearestTurret 不过滤已毁塔
+
+```javascript
+function nearestTurret(x, y, range) {
+  for (const t of G.turrets) {                    // ← 原实现没有 hp 判断
+```
+
+敌方单位索敌时会把**已被摧毁的塔**当成目标，持续朝废墟开火。本轮加 `if (t.hp <= 0) continue;`。
+（`Turret.update()` 自身有 `hp<=0` 早退，所以塔不会反击；但敌人这一侧此前是错的。）
+
+### 6. 真机验证
+
+- 冒烟测试新增断言全绿：
+  ```
+  killTurret: dying=31 (期望 31) 随机音=explosion1
+  塔阵亡不改 euros=true (5732→5732); 阵亡中重复 killTurret 无效=true
+  序列 31 tick 一致=true; 三点爆炸 3 一致=true; 火焰 3 一致=true; 结束 dead=true
+  塔无漂移属性=true (drift=undefined)
+  已毁塔不被 nearestTurret 选中=true
+  ```
+- 浏览器截图：活塔外观正常（canon105/crotale/radar 三座并排，与上一版无差别）；
+  tick 4 时塔身叠加真实火光（不再是灰色方块）；序列结束后塔被移除、屏幕恢复干净
+- **真实玩法闭环**：放一座 m60（hp=4）到 parcourt1 路线旁，让 t90 沿路开火打它 ——
+  tick 46 进入 `dying` → tick 77 `dead` 且从 `G.turrets` 移除（**差 31 tick，与 DEATH_TICKS 一致**）
+
+### 7. 本轮如实说明
+
+- 185 的 destruction 段里同样有 `_root.carte._x/_y` 的镜头抖动（帧 2/4/8 DoAction，
+  ±6~10px），与 N+20 记录的 428 情况相同，H5 未接入（相机模型不同），如实记录。
+- 185 帧 2 的 DoAction 只做镜头抖动，**没有** 428 帧 2 那样的 `euros += prixRevient` +
+  随机爆炸音。我用随机爆炸音是为了与 428 一致的表现；严格说 185 的摧毁音来源未在
+  frame_2 找到（可能在其他帧的脚本里），如实记录此推断。
+- `FrameLabel` 里 185 还有 `special`/`obusLeger`/… 等标签（那是 185 作为"砲塔+炮弹库"
+  的多用途帧标签，与 destruction 无关），本轮未涉及。
+
 ## 第 N+20 轮成果（2026-09-28, H5 领土防御·补原版单位阵亡序列 destruction + markFlame 三点爆炸）
 
 **本轮把 N+18 记录为"未做"的 markFlame 彻底查清并接入，过程中发现它牵出的是一个

@@ -198,21 +198,6 @@ const DEATH_FLAME_TICKS = Math.round(DEATH_FLAME_FRAMES.length * 24 / 30);   // 
 // 即"停在一帧上", 但该帧内的子精灵自带动画。H5 无此嵌套, 改为 4 帧快播后消失 (视觉近似, 如实记录)
 const DEATH_BOOM_TICKS_LOCAL = Math.round(4 * 24 / 30);   // 4帧@24fps → 3 tick
 
-// ---------------- 单位阵亡 → 启动阵亡序列 (替代原来的"立即移除") ----------------
-// 权威依据 deobf/scripts/DefineSprite_428_unit/frame_2/DoAction_2.as:
-//   euros += prixRevient; master_units.removeUnits("E", this);
-//   var ie = Math.floor(Math.random()*6)+1; master_sounds["explosion"+ie].start();
-// 即: 赏金在阵亡瞬间结算, 并随机播放 6 种爆炸音之一 (与命中音不同, 这是"车辆被摧毁"音)
-function killUnit(u) {
-  if (u.hp > 0 || u.dead || u.dying > 0) return;   // 只在"血已尽且未在阵亡中"时启动序列
-  G.euros += u.bounty;
-  G.score += u.bounty;
-  u.dying = DEATH_TICKS;
-  u.dyingFired = 0;
-  // 原版: master_sounds["explosion" + (1..6)].start()
-  playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
-}
-
 // ---------------- 爆炸动画 + BGM ----------------
 // 注: 旧的 86 库单帧方案 (TURRET_SRC/TURRET_IMG) 已删除 —— 经 FFDec 导出核实,
 //     DefineSprite_86 是黑色线框标记层 (箭头/十字/方框), 不是炮塔外观。
@@ -1052,6 +1037,7 @@ class Unit {
 function nearestTurret(x, y, range) {
   let best = null, bd = range;
   for (const t of G.turrets) {
+    if (t.hp <= 0) continue;   // 已摧毁的塔不再被索敌 (含阵亡序列播放中)
     const d = Math.hypot(t.x - x, t.y - y);
     if (d < bd) { bd = d; best = t; }
   }
@@ -1075,6 +1061,14 @@ class Turret {
     this.autoRepair = false;
     this.magnetT = 0;      // 蓝色磁场剩余帧 (原版 repairLogo.light.gotoAndPlay(1), 7 帧)
     this.aa = AA_WEAPONS.includes(id);   // 机枪/导弹天生对空; 其余可付费升级
+    // 阵亡序列 (原版 185 structure 的 "destruction" 标签, 39 帧, 与单位 428 同构)
+    //   权威依据 deobf/scripts/DefineSprite_185_structure/frame_1/PlaceObject2_178_etat_26 onClipEvent(load):
+    //     与 428 完全相同的 destruction(): removeClip(ptRadar/etatJauge/ombre) + gotoAndPlay("destruction")
+    //   185 destruction 段 (逐帧 SVG 实测): 86 结构层【保持原位不动】(t 恒为 -38.25,-35.60),
+    //     帧 2/4/7 各放一个 chid 6 (markFlame) → 触发 createExplosion; 帧 39 removeMovieClip(this)
+    //   → 与单位不同: 塔没有"车体漂移", 但同样的三点爆炸
+    this.dying = 0;
+    this.dyingFired = 0;
   }
   aaUpgradeCost() { return Math.floor(this.cost * AA_UP_RATIO); }
   upgradeAA() {
@@ -1086,6 +1080,24 @@ class Turret {
     return true;
   }
   update() {
+    // 阵亡序列 (原版 185 gotoAndPlay("destruction")): 与单位同构, 但【无漂移】
+    //   (逐帧 SVG 实测 86 结构层 t 恒为 -38.25,-35.60 不变)
+    // 注: 必须放在 hp<=0 判断之前 —— 被毁的塔 hp 已 <=0, 但序列仍要推进
+    if (this.dying > 0) {
+      this.dying--;
+      while (this.dyingFired < 3 &&
+             (DEATH_TICKS - this.dying) >= DEATH_BOOM_TICKS[this.dyingFired]) {
+        const jx = Math.random() * 20 - 10, jy = Math.random() * 20 - 10;
+        const ex = this.x + jx, ey = this.y + jy;
+        G.effects.push({ x: ex, y: ey, type: 'death',
+                         life: DEATH_BOOM_TICKS_LOCAL, life0: DEATH_BOOM_TICKS_LOCAL });
+        G.effects.push({ x: ex, y: ey, type: 'flame',
+                         life: DEATH_FLAME_TICKS, life0: DEATH_FLAME_TICKS });
+        this.dyingFired++;
+      }
+      if (this.dying === 0) this.dead = true;   // 原版 frame_39: removeMovieClip(this)
+      return;
+    }
     if (this.hp <= 0) return;   // 被摧毁的塔不再索敌开火
     if (this.fireT > 0) this.fireT--;   // 炮管开火帧倒计时
     if (this.magnetT > 0) this.magnetT--;   // 蓝色磁场动画倒计时
@@ -1160,7 +1172,10 @@ function shellHit(s) {
   } else {
     for (const t of victims) {
       if (t.hp <= 0) continue;
-      if (Math.hypot(t.x - tx, t.y - ty) <= range * 2) t.hp -= power;
+      if (Math.hypot(t.x - tx, t.y - ty) <= range * 2) {
+        t.hp -= power;
+        if (t.hp <= 0) killTurret(t);   // 塔被毁 → 启动阵亡序列 (原版 unitEtat 同款 destruction)
+      }
     }
   }
   // 命中爆型 (原版: crotale弹→392, MLRS→394, pluton/Yamato重炮→395/396, 普通→390)
@@ -1199,6 +1214,13 @@ function killUnit(u) {
   u.dying = DEATH_TICKS;
   u.dyingFired = 0;
   // 原版: master_sounds["explosion" + (1..6)].start()
+  playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
+}
+// 玩家塔阵亡 → 启动阵亡序列 (原版 185 的 destruction 与 428 同构: 三点爆炸, 但结构层不漂移)
+function killTurret(t) {
+  if (t.hp > 0 || t.dying > 0) return;
+  t.dying = DEATH_TICKS;
+  t.dyingFired = 0;
   playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
 }
 function boomTyped(x, y, r, type) {
@@ -1365,6 +1387,9 @@ function tick() {
   }
   G.units = G.units.filter(u => !u.dead);
   for (const t of G.turrets) t.update();
+  // 阵亡序列播完的塔移除 (原版 185 frame_39 removeMovieClip(this))
+  G.turrets = G.turrets.filter(t => !t.dead);
+  if (G.selected && G.selected.dead) G.selected = null;   // 选中项被摧毁 → 清空选中
 
   for (const s of G.shells) {
     const t = s.target;
@@ -1431,16 +1456,10 @@ function draw() {
     const sx = w2sX(t.x), sy = w2sY(t.y);
     if (sx < -60 * zoom || sx > W + 60 * zoom || sy < -60 * zoom || sy > H + 60 * zoom) continue;
     ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
-    if (t.hp <= 0) {
-      ctx.fillStyle = '#333';
-      ctx.fillRect(-10, -10, 20, 20);
-      ctx.restore(); continue;
-    }
-    // 玩家塔分层渲染 (原版 structure(185) 结构):
-    //   86 库结构层 (structureDeco, dpt1)  —— 不随瞄准旋转 (原版 185 内无 _rotation 赋值)
-    //   173 库塔体层 (tourelle->173, dpt24) —— 随 t.rot 旋转, 含炮管与开火帧
-    //   两层共用同一武器局部坐标系 (185 内均为 identity) → 各自画布原点直接叠加
-    //   (86 库每帧另含 d1 透明占位件 shape53, alpha=0 不可见, 不渲染 —— 见上方说明)
+    // 注意: 被摧毁的塔不再用灰色色块占位 (违反"无占位/近似/色块"要求, 且与原版不符)。
+    // 原版 185 destruction 段的 86 结构层 body 逐帧哈希完全相同 (实测 39 帧全等),
+    // 即塔的外观【不变】, 只是叠三处爆炸并最终 removeMovieClip。
+    // 因此这里继续正常绘制塔体, 阵亡表现完全交给 G.effects 的 death+flame 特效。
     const libId = PLAYER_ETURRET[t.id] || t.id;
     const bimg = turretBaseImg(libId);
     if (bimg && bimg.complete && bimg.naturalWidth) {
@@ -1481,11 +1500,11 @@ function draw() {
       ctx.fillRect(0, -3, 18, 6);
       ctx.restore();
     }
-    // 对空标记 (蓝色小点)
-    if (t.aa) { ctx.fillStyle = '#6cf'; ctx.fillRect(6, -14, 4, 4); }
+    // 对空标记 (蓝色小点; 阵亡序列中不显示)
+    if (t.aa && t.dying === 0) { ctx.fillStyle = '#6cf'; ctx.fillRect(6, -14, 4, 4); }
     // 自动修理蓝色磁场 (原版 repairLogo dpt=31 > tourelle dpt=24, 画在塔身之上)
-    //   7 帧 24fps, frame7 为空白帧, 播完自然消失
-    if (t.magnetT > 0) {
+    //   7 帧 24fps, frame7 为空白帧, 播完自然消失; 阵亡序列中不显示
+    if (t.magnetT > 0 && t.dying === 0) {
       // magnetT: MAGNET_TICKS..1 → 映射到精灵帧 1..7
       const done = MAGNET_TICKS - t.magnetT;              // 0..TICKS-1
       const idx = Math.floor(done / MAGNET_TICKS * MAGNET_FRAMES.length);
@@ -1496,8 +1515,8 @@ function draw() {
                       im.naturalWidth * s, im.naturalHeight * s);
       }
     }
-    // 血条 (原版 H 键开关)
-    if (G.showHp) {
+    // 血条 (原版 H 键开关; 阵亡序列中不显示 —— 对应 destruction() 里 removeMovieClip(etatJauge))
+    if (G.showHp && t.dying === 0) {
       ctx.fillStyle = '#300'; ctx.fillRect(-10, -16, 20, 3);
       ctx.fillStyle = '#4f4'; ctx.fillRect(-10, -16, 20 * t.hp / t.maxHp, 3);
     }

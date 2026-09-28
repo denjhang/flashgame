@@ -168,6 +168,40 @@ playSfx = _ps;
   console.log("swithRepair: autoRepair=%s", t2.autoRepair);
   G.euros = e0;
 }
+// ---- 玩家塔阵亡序列 (原版 185 "destruction" 39帧, 与单位 428 同构; 无漂移) ----
+console.log("--- 玩家塔阵亡序列 ---");
+{
+  G.effects.length = 0;
+  const t = new Turret('canon105', 0, 0);
+  t.hp = 0;
+  let sfx = null;
+  const _p3 = playSfx; playSfx = (n) => { if (sfx === null) sfx = n; };
+  killTurret(t);
+  playSfx = _p3;
+  console.log("killTurret: dying=%d (期望 %d) 随机音=%s", t.dying, DEATH_TICKS, sfx);
+  // 原版 185 destruction 段只做 removeMovieClip, 不改 euros (与单位 428 不同 —— 428 给赏金)
+  const eBefore = G.euros;
+  killTurret(t);   // 已在阵亡中, 应无效
+  console.log("塔阵亡不改 euros=%s (%d→%d); 阵亡中重复 killTurret 无效=%s",
+    G.euros === eBefore, eBefore, G.euros, t.dying === DEATH_TICKS || t.dying > 0);
+  let booms = 0, flames = 0, ticks = 0;
+  while (t.dying > 0 && ticks++ < 100) {
+    const before = G.effects.length;
+    t.update();
+    for (let i = before; i < G.effects.length; i++) {
+      if (G.effects[i].type === 'death') booms++;
+      if (G.effects[i].type === 'flame') flames++;
+    }
+  }
+  console.log("序列 %d tick (期望 %d) 一致=%s; 三点爆炸 %d 一致=%s; 火焰 %d 一致=%s; 结束 dead=%s",
+    ticks, DEATH_TICKS, ticks === DEATH_TICKS, booms, booms === 3, flames, flames === 3, t.dead);
+  // 塔【无漂移】—— 与单位不同 (原版 185 的 86 结构层 t 恒为 -38.25,-35.60)
+  console.log("塔无漂移属性=%s (drift=%s)", t.drift === undefined, t.drift);
+  // 已摧毁的塔不被索敌
+  G.turrets.length = 0; G.turrets.push(t);
+  console.log("已毁塔不被 nearestTurret 选中=%s", nearestTurret(0, 0, 1000) === null);
+  G.turrets.length = 0; G.effects.length = 0;
+}
 // 建造区遮罩 (原版 surfaceForBuild chid 768)
 console.log("建造预览: 光标帧=%d 取消提示帧=%d (原版 822/1161)", CURSOR_FRAMES.length, CANCEL_HINT.length);
 {
