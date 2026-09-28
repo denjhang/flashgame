@@ -986,10 +986,16 @@ function buildMaskHit(wx, wy) {
   if (u < 0 || v < 0 || u >= BUILD_MASK_DATA.w || v >= BUILD_MASK_DATA.h) return false;
   return BUILD_MASK_DATA.a[v * BUILD_MASK_DATA.w + u] > 10;
 }
+// 塔重叠层 (原版 822_226 on(press): this.hitTest(unitsAlliees[i]) = 【bbox 相交】):
+//   viseur(822) 画布 40×40 (±20) + 塔容器 86 库结构画布 76×76 (TURRET_BASE_ORIGIN ±38)
+//   → |dx|<58 且 |dy|<58 拒绝。注: Flash 容器 bbox 还随炮管朝向动态外扩 (基座是下限),
+//   H5 取基座 bbox, 如实记录
+const VISEUR_HALF = 20, TOWER_BASE_HALF = 38;
 // 完整可建判定 (原版 822_226 on(press) 前两层; 钱的检查由调用方在之后做)
 function buildAllowedAt(wx, wy) {
   for (const t of G.turrets)
-    if (Math.hypot(t.x - wx, t.y - wy) < 26) return false;   // viseur↔既有塔 hitTest 的近似
+    if (Math.abs(t.x - wx) < VISEUR_HALF + TOWER_BASE_HALF &&
+        Math.abs(t.y - wy) < VISEUR_HALF + TOWER_BASE_HALF) return false;
   const hit = buildMaskHit(wx, wy);
   if (hit === null) return true;   // 掩码未加载 (无头/首帧): 与旧行为一致放行
   return hit;

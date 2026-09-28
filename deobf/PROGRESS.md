@@ -1,5 +1,50 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+49 轮成果（2026-09-28, H5 领土防御·keyDown 全面审计 — G 键身份澄清 + 塔重叠改原版 bbox 判定）
+
+**（权威 = frame_6/PlaceObject2_6_1 onClipEvent(keyDown) 全文逐行 + 822/86 画布实测）**
+
+### 1. 【keyDown 全键位逐行审计 — 除一项外全部已对齐】
+
+| 键 | 原版行为 (逐行) | H5 状态 |
+|---|---|---|
+| 方向键 | keyPressed/keyPressedS 双槽 + decalMap | ✓ |
+| H | afficheEtat 血条开关 + menuHealth on/off | ✓ |
+| M | mouseScroll 开关 | ✓ |
+| 空格 | depressSpace() | ✓ |
+| R | barreReparation.base.repairIfCan()（需修理条可见） | ✓ |
+| **S** | **卖出价 = floor(etatC/etatM × (price×0.75))** + destruction() | ✓（`sellPrice()` 已是同式） |
+| G | 见下节 | ✓（39% 全图已有） |
+| Q | changeQuality()（Flash 画质档） | N/A（canvas 无画质档，如实） |
+| C | surfaceForBuild._alpha 0↔35 | ✓（N+48） |
+
+### 2. 【★ G 键身份澄清：原版"zoom"就是 39% 全图，N+48 的"2x 缩放"注记有误】
+
+keyDown 83-121 行：G 键 `carte._xscale=39; _yscale=31.7; _x=0; _y=452` + realposmap 记忆 +
+血条 ×200 补偿 + `zoneDezoom` 全图接点击 —— **这就是 H5 已有的 G 全图(39%)**。
+`surfaceForBuildZoom`(dpt562) 只是 39% 视图下 768 掩码的 _root 副本（Flash hitTest 需要
+同坐标系的 clip）；H5 的世界坐标掩码天然覆盖任意缩放视图，**无需单独建模，该项关闭**。
+（G 模式下 H5 可正常建塔：鼠标→世界换算与掩码判定均与 zoom 无关。）
+
+### 3. 【★ 塔重叠层从 26px 半径改为原版 bbox 相交】
+
+原版 `this.hitTest(unitsAlliees[i])`（无 shapeflag）= **bbox 相交**：
+viseur(822) 画布 40×40（±20）+ 塔容器 86 库结构画布 76×76（±38）→
+**|dx|<58 且 |dy|<58 拒绝**。旧 26px 半径明显偏松（原版塔不能密集堆叠）。
+注：Flash 容器 bbox 随炮管朝向动态外扩（基座是下限），H5 取基座 bbox，如实记录。
+
+### 4. 验证（node 冒烟，无浏览器）
+
+- `bbox 边界: (57,0)=false (59,0)=true (0,57)=false (0,59)=true (期望 f,t,f,t)=true`
+- `地块内 58px bbox 有塔 → false`；既有掩码/样点断言无回归
+- 98 项 `=true`；450 帧 sim 正常（击杀 14 / 塔 15/15 / lost=false）
+
+### 5. 本轮仍未做（如实记录）
+
+- 容器 bbox 的炮管动态外扩未建模（基座 bbox 是原版判定的下限）
+- Flash 容器质量档（Q 键 changeQuality）对 canvas 渲染无对应物，不建模
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
 ## 第 N+48 轮成果（2026-09-28, H5 领土防御·可建区判定改原版 768 手描地块掩码 —— N+12 悬案告破）
 
 **（权威 = 834/frame_1/PlaceObject2_822_226 on(press) + SWF 位流解码的 768 放置矩阵 +

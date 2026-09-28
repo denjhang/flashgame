@@ -555,10 +555,16 @@ console.log("--- 建造菜单分页 ---");
   console.log("路点[599,87]可建=%s (应false)  地图外草地[1600,400]可建=%s (应false, 768地块不覆盖)=%s",
     buildAllowedAt(599, 87), buildAllowedAt(1600, 400),
     !buildAllowedAt(599, 87) && !buildAllowedAt(1600, 400));
-  // 塔重叠层: 地块内近塔不可建
+  // 塔重叠层: 原版 hitTest = bbox 相交 (viseur 40×40 + 基座 76×76 → |dx|<58 且 |dy|<58)
+  //   暂时摘掉掩码层, 纯验重叠几何边界
   G.turrets.push(new Turret('m60', 847.3, -67.1));
-  console.log("地块内 26px 有塔 → 可建=%s (应false)=%s", buildAllowedAt(847.3, -67.1),
+  console.log("地块内 58px bbox 有塔 → 可建=%s (应false)=%s", buildAllowedAt(847.3, -67.1),
     buildAllowedAt(847.3, -67.1) === false);
+  BUILD_MASK_DATA = null;
+  G.turrets.push(new Turret('m60', 0, 0));
+  const ov = [buildAllowedAt(57, 0), buildAllowedAt(59, 0), buildAllowedAt(0, 57), buildAllowedAt(0, 59)];
+  console.log("bbox 边界: (57,0)=%s (59,0)=%s (0,57)=%s (0,59)=%s (期望 f,t,f,t)=%s",
+    ov[0], ov[1], ov[2], ov[3], !ov[0] && ov[1] && !ov[2] && ov[3]);
   G.turrets.length = 0;
   BUILD_MASK_DATA = null;               // 还原未加载态 (无头其余块维持旧行为: 放行)
 }
