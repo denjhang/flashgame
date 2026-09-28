@@ -1,5 +1,46 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+46 轮成果（2026-09-28, H5 领土防御·简报暂停波 "start mission" + "start in N" 倒计时条）
+
+**（N+45 遗留第一项。权威 = DefineSprite_953 frame_30 DoAction + frame_6/PlaceObject2_1106_548
+on(press) pcode + FFDec 导出 chid1106/1176 原版像素）**
+
+### 1. 【权威解码：原版波间两种出兵条】
+
+- **953 frame_30**：`im != 1 → giveIntrest()` 后分两支 —— 波 **1,5,9,11,15,16,19,26,31,37,41,44**
+  显示 `startMissionPause`(chid1106) 于 y=400 且 **953 自身 gotoAndStop(1)**（时间线冻结，等点击）；
+  其余波显示 `startMissionDelay`(chid1176) 并走倒计时。
+- **1106 on(press)**（逐字 pcode）：守卫 → 卡片移出屏（offscreenY=-900）→
+  `creationUnite` 音效 → **`master_scenario.startMission()` 直接开波**。
+- **chid1106** = 125×35 黑条白字 "**start mission**" 按钮；**chid1176** = 同尺寸 10 帧，
+  f1="start mission"、f2..f9="start in 8..1"、f10 空帧（953 frame_183 开波时 gotoAndStop(10) 隐藏）。
+  953 f47..f166 每 17 帧@24fps 调 `startMissionDelay.gotoAndStop(2..9)` 驱动数字。
+
+### 2. H5 实现
+
+- `BRIEFING_WAVES = [1,5,9,11,15,16,19,26,31,37,41,44]`（953 frame_30 逐字）
+- `briefingShow()/briefingGo()`：简报波清场后显示 "start mission" 原版 PNG 条（舞台 y=400 居中，
+  可点击）；点击 → 守卫 → `creationUnite` 音效 → `startWave()`（对应 on(press) 三步）
+- 非简报波：interWave 倒计时最后 168 tick（8×21，21=17帧@24fps）显示 "start in 8..1" 原版
+  PNG 数字条，开波时收条（对应 f183 gotoAndStop(10)）
+- `endWave`/`closeUnlockPanel`：下一波 ∈ BRIEFING → 简报暂停（31/37 两波与二选一面板重叠：
+  先面板后简报）；**开局即显示**（原版第 1 波就是暂停波，不再 120 tick 自动开波）
+- 素材：FFDec 导出 1106/1176 → `assets/briefing/start_mission.png` + `start_in_1..8.png`
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 新增断言全绿：`BRIEFING_WAVES 与 953 frame_30 暂停列表一致=true`、
+  `第4波清场 → 简报暂停 true/mission=true`、`点击 → 第5波 7 单位即时入场=true`、
+  `非简报波进倒计时 interWave=281=true`、`倒计时数字 169→8 / 2→1=true`、
+  `面板关闭接简报(下一波31)=true`；boot 行 `briefingGo 生效 第1波单位=9`
+- 93 项 `=true`；450 帧 sim 正常（击杀 14 / 塔 15/15 / lost=false）
+
+### 4. 本轮仍未做（如实记录）
+
+- countUnitsEnnemies 每 3s 轮询的 0~3s 量化未建模（上一轮遗留，维持）
+- 953 f1→f30 段（开条前 ~1.2s）未单独建模（并入 281 tick 的取整，实际 9.4~10.6s vs H5 9.4s）
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
 ## 第 N+45 轮成果（2026-09-28, H5 领土防御·波次路线/出兵模型/波间节奏对齐原版）
 
 **（新子系统审计：missions/unitsMissions 波次数据 + startMission 出兵链路。

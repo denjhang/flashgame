@@ -1164,7 +1164,7 @@ const G = {
   units: [], turrets: [], shells: [], effects: [], sparks: [],
   muzzle: [], casings: [],   // 枪口焰 / 弹壳 (原版 obus sprite 内的子件)
   beams: [],                 // MTHEL 激光束 (原版 obus frame13 chid399: _height=目标距离)
-  waveActive: false, interWave: 120,
+  waveActive: false, interWave: 120, briefing: false,
   lost: false, won: false, losses: 0,
   // 建造模式: 原版 carte.viseurConstruction 初值为 false
   //   (DefineSprite_834/frame_1/PlaceObject2_6_321 onClipEvent(load): set("viseurConstruction",false))
@@ -1711,6 +1711,14 @@ function createEclat(x, y, power) {
 //   → frame_183 调 master_scenario.startMission()。合计 ≈ 9.4s = 281 tick@30fps。
 //   (countUnitsEnnemies 每 3s 轮询引入的 0~3s 量化未建模)
 const INTERWAVE_TICKS = 281;
+// 原版 953 frame_30: 12 个简报波显示 chid1106 "start mission" 黑条按钮, 953 gotoAndStop(1),
+//   等玩家 on(press) → 隐藏 + creationUnite 音效 + master_scenario.startMission() (逐字见
+//   frame_6/PlaceObject2_1106_548 on(press)); 其余波显示 chid1176 "start in 8..1" 倒计时
+//   (953 f47..f166 每 17帧@24fps 跳一格, f183 开波并 gotoAndStop(10)=空帧隐藏)
+const BRIEFING_WAVES = [1, 5, 9, 11, 15, 16, 19, 26, 31, 37, 41, 44];
+const BRIEF_DIGIT_TICKS = 21;                        // 17帧@24fps = 21.25 tick@30
+const BRIEF_COUNT_TICKS = 8 * BRIEF_DIGIT_TICKS;     // 倒计时数字段 168 tick (digits 8..1)
+let briefState = null;   // null=隐藏 | 'mission'=等待点击 | 1..8 = "start in N"
 function startWave() {
   if (G.wave >= WAVES.length) return;
   // 原版 yamatoBattle: 终波 Yamato 出场切换战斗音乐
@@ -1737,11 +1745,32 @@ function startWave() {
     G.units.push(nu);
   });
   G.waveActive = true;
+  briefState = null; applyBriefBar();   // 开波即收条 (对应原版 f183 gotoAndStop(10) 空帧)
   const dirNames = { parcourt1: '南方公路', parcourt2: '西侧小路', parcourt3: '北面空降', parcourt4: '海上航线' };
   showBanner('第 ' + G.wave + ' / 44 波来袭 — ' + dirNames[routeName]);
   // 原版 startInstructions: 简报期间 pauseMusic, 出兵后恢复
   if (!isPause) { pauseMusic(); setTimeout(() => { if (isPause) playMusic(); refreshMusicPanel(); }, 3200); }
   hud();
+}
+
+// ---------------- 简报暂停 (953 frame_30 + 1106 on press) ----------------
+function applyBriefBar() {
+  const bar = document.getElementById('briefBar'), img = document.getElementById('briefImg');
+  if (!bar || !img) return;
+  if (briefState === null) { bar.style.display = 'none'; bar.className = ''; return; }
+  bar.style.display = 'block';
+  bar.className = briefState === 'mission' ? 'clickable' : '';
+  img.src = briefState === 'mission' ? 'assets/briefing/start_mission.png'
+                                     : 'assets/briefing/start_in_' + briefState + '.png';
+}
+// 暂停分支: 显示 "start mission" 条 (1106), 波次调度冻结直到点击
+function briefingShow() { G.briefing = true; briefState = 'mission'; applyBriefBar(); }
+// 1106 on(press): 守卫 → 隐藏 + creationUnite 音效 + startMission()
+function briefingGo() {
+  if (!G.briefing) return;
+  G.briefing = false; briefState = null; applyBriefBar();
+  playSfx('creationUnite', 0.45);
+  startWave();
 }
 
 // ---------------- 原版解锁机制 (unlockNextWeapon / showPanelForUnlock) ----------------
@@ -1786,7 +1815,9 @@ function panelPickInterest() {
 }
 function closeUnlockPanel() {
   G.panelOpen = false;
-  G.interWave = INTERWAVE_TICKS;
+  // 面板后接简报暂停 (31/37 两波既在 PANEL_WAVES 也在 BRIEFING_WAVES: 先二选一, 再点击开波)
+  if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
+  else G.interWave = INTERWAVE_TICKS;
   hud();
 }
 function refreshPanelButtons() {
@@ -1814,7 +1845,9 @@ function endWave() {
   const nextWave = G.wave + 1;
   autoUnlockForWave(nextWave);
   if (shouldShowUnlockPanel(nextWave)) { showPanelForUnlock(); return; }   // 面板期间不推进 interWave
-  G.interWave = INTERWAVE_TICKS;
+  // 953 frame_30: 简报波显示 "start mission" 等点击, 其余进 "start in N" 倒计时
+  if (G.wave < WAVES.length && BRIEFING_WAVES.includes(nextWave)) briefingShow();
+  else G.interWave = INTERWAVE_TICKS;
   if (G.wave >= WAVES.length && G.units.every(u => u.dead)) {
     G.won = true;
   }
@@ -1840,7 +1873,18 @@ function tick() {
     }
   } else {
     // 二选一面板打开时冻结波次调度 (原版 startMissionPause 期间不推进)
-    if (!G.panelOpen && --G.interWave <= 0) startWave();
+    if (!G.panelOpen) {
+      if (G.briefing) {
+        // 简报波: 等 "start mission" 点击 (briefingGo), 不推进倒计时
+      } else if (--G.interWave <= 0) {
+        startWave();
+      } else {
+        // 953 f47..f166: "start in 8..1" 倒计时条 (chid1176, 每 21 tick 一格), f183 收条开波
+        const st = G.interWave <= BRIEF_COUNT_TICKS
+          ? Math.max(1, Math.ceil(G.interWave / BRIEF_DIGIT_TICKS)) : null;
+        if (st !== briefState) { briefState = st; applyBriefBar(); }
+      }
+    }
   }
 
   for (const u of G.units) {
@@ -2782,4 +2826,11 @@ preloadTurretArt();   // 预载炮塔素材, 避免首座塔在 PNG 到位前渲
 refreshToggleBtns();
 buildShop();
 hud();
+// 原版第 1 波即简报暂停波 (953 frame_30: 波 1 在 startMissionPause 列表) — 开局显示
+// "start mission" 条等点击, 不自动倒计时; on(press) 接线见下
+{
+  const bb = document.getElementById('briefBar');
+  if (bb) bb.onclick = briefingGo;
+  if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
+}
 setInterval(tick, 1000 / 30);

@@ -40,6 +40,9 @@ src += "\nG.turrets.push(new Turret('radar', R1[6][0], R1[6][1] + 120));";
 src += "\nconst R4 = ROUTES.parcourt4;";
 src += "\nG.turrets.push(new Turret('canon105', R4[4][0], R4[4][1] + 60));";
 src += "\nG.turrets.push(new Turret('crotale', R4[6][0] + 60, R4[6][1] + 40));";
+src += "\nif (!G.briefing || briefState !== 'mission') console.log('boot 简报异常: briefing=%s briefState=%s (期望 true/mission)', G.briefing, briefState);";
+src += "\nbriefingGo();   // 模拟点击原版 start mission 按钮 (第 1 波为简报暂停波)";
+src += "\nconsole.log('boot 点击开波: 第1波单位=%d (期望 9, briefingGo 生效)', G.units.length);";
 src += "\nfor (let i = 0; i < 450; i++) tick();";
 src += '\nconsole.log("迷雾+真实路点 450帧: 波次=%d 金钱=%d 场上敌=%d 击杀=%d 塔存=%d/%d lost=%s won=%s",';
 src += '  G.wave, G.euros, G.units.filter(u=>u.hp>0).length,';
@@ -869,6 +872,46 @@ console.log("--- 波次路线 + 整波生成 ---");
   console.log("波间节奏 INTERWAVE_TICKS=%d (期望 281 = declencheur 3000ms + 953 倒计时 153帧@24fps)=%s",
     INTERWAVE_TICKS, INTERWAVE_TICKS === 281);
   G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.interWave = sv.iw;
+}
+// ---- 简报暂停波 (原版 953 frame_30: 12 波点击 "start mission" 才开波; 其余 "start in N" 倒计时) ----
+console.log("--- 简报暂停波 ---");
+{
+  const WANT = [1, 5, 9, 11, 15, 16, 19, 26, 31, 37, 41, 44];
+  console.log("BRIEFING_WAVES 与 953 frame_30 暂停列表一致=" +
+    (JSON.stringify(BRIEFING_WAVES) === JSON.stringify(WANT)));
+  const sv = { wave: G.wave, wa: G.waveActive, n: G.units.length, iw: G.interWave, br: G.briefing,
+               lost: G.lost, losses: G.losses };
+  // 第 4 波清场 → 下一波 5 是简报波: 显示 start mission 条, 不进倒计时
+  G.wave = 4; G.waveActive = true; G.units.length = 0; G.briefing = false;
+  G.units.push(new Unit('camion1', 'null', 'parcourt1')); G.units[0].reached = true;
+  endWave();
+  console.log("第4波清场 → 简报暂停 G.briefing=%s briefState=%s (期望 true/mission)=" + (G.briefing === true && briefState === 'mission'),
+    G.briefing, briefState);
+  G.units.length = 0;                     // 只数新入场单位 (reached 残留会在 tick 里触发 G.lost)
+  briefingGo();
+  console.log("点击 start mission → 第%d波开启, %d 单位即时入场 (期望 5 波 %d 单位)=%s",
+    G.wave, G.units.length, WAVES[4].length, G.waveActive === true && G.wave === 5 && G.units.length === WAVES[4].length);
+  // 第 1 波清场 → 下一波 2 非简报: 倒计时 281
+  G.wave = 1; G.waveActive = true; G.units.length = 0; G.briefing = false;
+  G.units.push(new Unit('camion1', 'null', 'parcourt1')); G.units[0].reached = true;
+  endWave();
+  console.log("第1波清场 → 非简报波进倒计时 interWave=%d (期望 %d)=%s",
+    G.interWave, INTERWAVE_TICKS, G.interWave === INTERWAVE_TICKS && !G.briefing);
+  // 倒计时数字 (1176 f2..f9 = "start in 8..1", 每 21 tick 一格; tick 先自减再取数字)
+  G.units.length = 0;                     // 清场: reached 单位在 tick 里会置 G.lost 令 tick 早退
+  G.briefing = false;
+  G.interWave = 169; tick();
+  const s8 = briefState;
+  G.interWave = 2; tick();
+  const s1 = briefState;
+  console.log("倒计时数字: interWave 169→%s (期望 8), 2→%s (期望 1) 一致=%s", s8, s1, s8 === 8 && s1 === 1);
+  // 面板与简报重叠 (31/37): 二选一面板关闭后接简报暂停
+  G.wave = 30; G.panelOpen = false; G.briefing = false;
+  closeUnlockPanel();
+  console.log("面板关闭接简报 (下一波 31∈BRIEFING): G.briefing=%s briefState=%s=" + (G.briefing === true && briefState === 'mission'),
+    G.briefing, briefState);
+  G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.interWave = sv.iw;
+  G.briefing = sv.br; briefState = null; G.lost = sv.lost; G.losses = sv.losses;
 }
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
