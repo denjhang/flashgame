@@ -1,5 +1,35 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+61 轮成果（2026-09-29, H5 领土防御·bgSound 帧标签解码 —— edith 音乐项定性收口）
+
+**（权威 = DefineSprite_1085 帧标签（sprite_frames.py 提取，已入 sprite_frames.json）+
+FFDec 导出实验 + edithStart 唯一调用点 6_564）**
+
+### 1. 【bgSound(1085) 结构解码】
+
+9 帧时间线，8 个标签 = 四对启停段：`ventStop/ventStart`（风声）、`edithStop/edithStart`、
+`gameOverStop/gameOverStart`、`bgScenarioStop/bgScenarioStart`；各帧承载
+**SoundStreamHead2 内嵌音频流**（流式音频，非独立 DefineSound 资产）。
+
+### 2. 【edithStart 定性：音频内容无法离线提取，维持搁置】
+
+- 唯一调用点：6_564（newEvents 所在 clip）`_root.bgSound.gotoAndPlay("edithStart")`
+  —— m26（首批直升机波）切换到 edith 段 ✓ 与 H5 侧推断一致
+- `edithStop` 全库无调用 → edith 段自然播完（流式时间线走到尾）
+- FFDec `-format sound:mp3/wav` 对 sprite 内嵌流导出为空（流是逐帧 SoundStreamBlock，
+  需手工按 SoundStreamHead2 重组 MP3 帧）——离线提取成本高、且无真机听感佐证内容
+- **结论**：m26 音乐切换维持搁置（需先重组 edith 音频资产），已从"听感未知"细化为
+  "资产缺失"
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 本轮仅数据落档（sprite_frames.json 新增 1085 帧/标签）+ 文档；109+ 断言全绿维持
+
+### 4. 本轮仍未做（如实记录）
+
+- edith 音频流重组（要播放得先有音频文件）
+- 雷达门控语义（待真机观察）/ 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+60 轮成果（2026-09-29, H5 领土防御·chassisData 全表审计 —— 修正 tigre 巡航速度）
 
 **（权威 = 428_unit load 的 chassisData 全表 12 型 × 5 列；乱码键 u228Wu132=navire、

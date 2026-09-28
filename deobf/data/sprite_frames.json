@@ -4168,5 +4168,57 @@
     "objs": []
    }
   ]
+ },
+ "1085": {
+  "total": 9,
+  "frames": [
+   {
+    "f": 1,
+    "label": "ventStop",
+    "objs": [
+     1080
+    ]
+   },
+   {
+    "f": 2,
+    "label": "ventStart",
+    "objs": []
+   },
+   {
+    "f": 3,
+    "label": "edithStop",
+    "objs": []
+   },
+   {
+    "f": 4,
+    "label": "edithStart",
+    "objs": []
+   },
+   {
+    "f": 5,
+    "label": "gameOverStop",
+    "objs": []
+   },
+   {
+    "f": 6,
+    "label": "gameOverStart",
+    "objs": []
+   },
+   {
+    "f": 7,
+    "label": "bgScenarioStop",
+    "objs": []
+   },
+   {
+    "f": 8,
+    "label": "bgScenarioStart",
+    "objs": []
+   },
+   {
+    "f": 9,
+    "label": null,
+    "objs": []
+   }
+  ]
  }
 }
