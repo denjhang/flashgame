@@ -724,6 +724,34 @@ console.log("--- 机枪连发 ---");
   // 冷却 = 整轮之后 (m60: floor(40/1.13)×43 = 1505ms)
   console.log("m60 整轮冷却=" + fireCooldownMs(40) + "ms (期望 1505, 原版 floor(40/1.13)×43)");
 }
+// ---- 单位移动模型 (原版 428_unit: 速度=chassis[0]×fpsc px/帧@24, 转向=chassis[2] 度/帧) ----
+console.log("--- 单位移动模型 ---");
+{
+  // 换算: px/tick@30 = 原版 × 24/30; 度/帧@24 → rad/tick@30 同比例
+  const K = FPSC * (24 / 30);
+  let bad = [];
+  const cases = { camion1: 3.2, jeep: 3.2, bradley: 3, abrams: 3, t90: 3,
+                  navire: 1, Yamato: 0.5, camionBlinde: 3 };
+  for (const t in cases) {
+    const u = new Unit(t, 'null', 'parcourt1');
+    const want = cases[t] * K;
+    if (Math.abs(u.speed - want) > 1e-9) bad.push(t + '=' + u.speed.toFixed(4));
+  }
+  console.log("单位巡航速度 = chassis[0]×1.13×0.8 px/tick: 8 车型一致=" + (bad.length === 0) +
+    (bad.length ? " 偏差:" + bad.join(",") : "") +
+    " (camion1=" + (new Unit('camion1','null','parcourt1')).speed.toFixed(4) + " px/tick = " +
+    (3.2 * FPSC * 24).toFixed(1) + " px/s, 原版同式)");
+  // 转向: camion1 chassis[2]=3 度/帧@24 → 3×0.8×π/180 rad/tick
+  const u2 = new Unit('camion1', 'null', 'parcourt1');
+  console.log("单位转向 = chassis[2] 度/帧换算: camion1=" + u2.rotateSpeed.toFixed(5) +
+    " rad/tick (期望 " + (3 * (Math.PI/180) * 0.8).toFixed(5) + ", 旧 0.09 快 6.4 倍)");
+  // 炮塔转向: typeData[0]×1.13 度/43ms(OCEEF) → rad/tick
+  const tt = new Turret('m60', 0, 0);
+  const wantRs = 5 * FPSC * (Math.PI/180) * (1000/43) / 30;   // 度/OCEEF -> rad/秒 -> rad/tick@30
+  console.log("炮塔转向 = typeData[0]×1.13 度/OCEEF: m60 rs=" + (5 * 0.01529).toFixed(5) +
+    " rad/tick 常数一致=" + (Math.abs(0.01529 * 5 - wantRs) < 0.0005));
+  // 450 帧波次 sim 里的节奏 (数值打印在上方"迷雾+真实路点"行)
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {

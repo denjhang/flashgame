@@ -1202,9 +1202,15 @@ class Unit {
     //   H5 之前用 u.rot (车体) 画武器塔 → 敌方塔头永远焊在车体上, 不会转向目标
     this.tRot = 0;                 // 武器塔世界朝向 (弧度)
     this._tRotInit = false;
-    // 原版: 速度 = chassis[0] × fpsc; 此处 tick 制, ×2.2 平衡
-    this.speed = c[0] * 0.45;
-    this.rotateSpeed = c[2] * 0.09;
+    // 原版速度模型 (GAME_LOGIC.md B / 428_unit load + roule, 权威):
+    //   巡航速度 = chassis[0] × fpsc (px/帧@24fps); 转弯减速 vitesseFrein = chassis[1]
+    //   旋转速度 = chassis[2] (度/帧@24fps)
+    //   换算到 H5 30fps tick: px/帧@24 → px/tick@30 乘 24/30=0.8
+    //   旧实现 c[0]*0.45 = 原版一半 (注释自承"×2.2平衡"的拍脑袋值), c[2]*0.09 快 6.4 倍 —— 已修正
+    this.speed = c[0] * FPSC * (24 / 30);                    // 巡航 px/tick
+    this.turnSpeed = c[1] * FPSC * (24 / 30);                // 转弯中速度目标 (vitesseFrein)
+    this.rotateSpeed = c[2] * (Math.PI / 180) * (24 / 30);   // 度/帧@24 → rad/tick@30
+    this.v = this.speed;                                     // 当前速度 (转弯/直行间渐变)
     this.hp = this.maxHp = c[3];
     this.bounty = c[4];
     this.aa = (type === 'tigre');             // 直升机
@@ -1257,11 +1263,15 @@ class Unit {
     while (da < -Math.PI) da += 2 * Math.PI;
     const turn = Math.min(Math.abs(da), this.rotateSpeed);
     this.rot += Math.sign(da) * turn;
-    this.x += Math.cos(this.rot) * this.speed;
-    this.y += Math.sin(this.rot) * this.speed;
+    // 原版 roule(): 转向中 (Δ>3°) 速度目标降为 vitesseFrein(chassis[1]), 直行恢复巡航(chassis[0]);
+    //   当前速度以 freinVirage 为步长渐变 (原版 vitesse ±= freinVirage 的加减速模型)
+    const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
+    this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
+    this.x += Math.cos(this.rot) * this.v;
+    this.y += Math.sin(this.rot) * this.v;
     // 行进音 (原版 roule(): 按底盘随机播车体音; 节流到每 12 帧, 且仅在视野内)
     if (G.frame % 12 === 0 && isVisible(this.x, this.y)) rouleSfx(this.type);
-    if (d < Math.max(12, this.speed * 5)) {
+    if (d < Math.max(12, this.v * 5)) {
       this.pt++;
       if (this.pt >= this.route.length) this.reached = true;
     }
@@ -1279,11 +1289,11 @@ class Unit {
         let da = want - this.tRot;
         while (da > Math.PI) da -= 2 * Math.PI;
         while (da < -Math.PI) da += 2 * Math.PI;
-        const rs = this.weapon[0] * 0.0198;   // 原版 typeData[type][0] × fpsc (与玩家塔同源)
+        const rs = this.weapon[0] * 0.01529;   // 原版 typeData[0]×1.13 度/43ms(OCEEF) → rad/tick@30 = ×0.01529 (旧 0.0198 快 29%)
         if (Math.abs(da) > 3 * Math.PI / 180) {   // 原版 3° 死区
           this.tRot += Math.sign(da) * Math.min(Math.abs(da), rs);
         }
-        if (this.cool <= 0 && Math.abs(da) < 0.3) {
+        if (this.cool <= 0 && Math.abs(da) < 3 * Math.PI / 180) {   // 原版 3° 开火门 (pcode: abs(rot-dir)%360 > 3 不开火)
           // 敌方冷却同用 OCEEF 模型 (原版 174 对 ally/ennemy 是同一套 numberOfRequestForPermission)
           this.cool = fireCooldownMs(this.weapon[2]);
           this.fireT = fireTicksFor(this.weaponId);
@@ -1389,7 +1399,7 @@ class Turret {
       let da = want - this.rot;
       while (da > Math.PI) da -= 2 * Math.PI;
       while (da < -Math.PI) da += 2 * Math.PI;
-      const rs = this.w[0] * 0.0198;   // 原版: typeData[0] × fpsc 度/帧 → 弧度
+      const rs = this.w[0] * 0.01529;   // 原版 typeData[0]×1.13 度/43ms(OCEEF) → rad/tick@30 = ×0.01529 (旧 0.0198 快 29%)
       this.rot += Math.sign(da) * Math.min(Math.abs(da), rs);
       // 开火冷却
       //   原版机制 (DefineSprite_174/frame_1/PlaceObject2_173_1 onClipEvent(load)):
@@ -1399,7 +1409,7 @@ class Turret {
       //   ⇒ 实际开火间隔 = floor(typeData[2] / fpsc) × 43ms  (毫秒制, 与帧率无关)
       //   H5 之前用 `w[2] * 1.15` 帧 (按 30fps 折算), 既非毫秒制、又对 m60 偏慢;
       //   改为毫秒冷却计数 (G.dt), 与 fpsc 解耦。
-      if (Math.abs(da) < 0.3 && this.cool <= 0 && bd <= this.w[1]) {
+      if (Math.abs(da) < 3 * Math.PI / 180 && this.cool <= 0 && bd <= this.w[1]) {   // 原版 3° 开火门
         this.cool = fireCooldownMs(this.w[2]);
         const gunId = PLAYER_ETURRET[this.id] || this.id;
         this.fireT = fireTicksFor(gunId);   // 播完整开火动画
