@@ -994,6 +994,14 @@ class Unit {
     this.pt = 0;                              // 当前路点
     this.x = this.route[0][0]; this.y = this.route[0][1];
     this.rot = 0;
+    // 武器塔独立朝向 (原版 174/173 的 tourelle._rotation, 与车体 _rotation 分开)
+    //   权威依据 DefineSprite_174/frame_1/PlaceObject2_173_1 onClipEvent(load):
+    //     rotateSpeed = typeData[type][0] * _root.fpsc   ← 与玩家塔同一套武器转速
+    //     OCEEF(): directionToGet 由目标方位算出 (含 3° 死区), 逐帧 ±rotateSpeed 逼近
+    //     "ennemy" 侧特例: directionToGet 还要减去车体 _rotation (相对角)
+    //   H5 之前用 u.rot (车体) 画武器塔 → 敌方塔头永远焊在车体上, 不会转向目标
+    this.tRot = 0;                 // 武器塔世界朝向 (弧度)
+    this._tRotInit = false;
     // 原版: 速度 = chassis[0] × fpsc; 此处 tick 制, ×2.2 平衡
     this.speed = c[0] * 0.45;
     this.rotateSpeed = c[2] * 0.09;
@@ -1057,13 +1065,24 @@ class Unit {
       this.pt++;
       if (this.pt >= this.route.length) this.reached = true;
     }
-    // 敌方武器开火 (打我方炮塔)
+    // 敌方武器: 塔头独立索敌转向 + 开火 (打我方炮塔)
+    // 原版 174 的 OCEEF(): 每帧把 tourelle._rotation 朝目标方位逼进 (Δ>3° 才动), 然后 askPermissionOfFire
     if (this.weapon) {
       this.cool--;
       if (this.fireT > 0) this.fireT--;
-      if (this.cool <= 0) {
-        const t = nearestTurret(this.x, this.y, this.weapon[1]);
-        if (t) {
+      const t = nearestTurret(this.x, this.y, this.weapon[1]);
+      if (!this._tRotInit) { this.tRot = this.rot; this._tRotInit = true; }   // 初始与车体同向
+      if (t) {
+        // 目标方位 (世界系) → 塔头逐帧转向 (rate = typeData[0] × fpsc, 与玩家塔同一系数)
+        const want = Math.atan2(t.y - this.y, t.x - this.x);
+        let da = want - this.tRot;
+        while (da > Math.PI) da -= 2 * Math.PI;
+        while (da < -Math.PI) da += 2 * Math.PI;
+        const rs = this.weapon[0] * 0.0198;   // 原版 typeData[type][0] × fpsc (与玩家塔同源)
+        if (Math.abs(da) > 3 * Math.PI / 180) {   // 原版 3° 死区
+          this.tRot += Math.sign(da) * Math.min(Math.abs(da), rs);
+        }
+        if (this.cool <= 0 && Math.abs(da) < 0.3) {
           this.cool = this.weapon[2] * 3;
           this.fireT = fireTicksFor(this.weaponId);
           spawnShell(this.x, this.y, t, this.weapon, 'ennemy');
@@ -1626,13 +1645,15 @@ function draw() {
       ctx.fillRect(-8, -5, 16, 10);
     }
     ctx.restore();
-    // 武器塔整帧叠加 (173 库: 部件已按原版矩阵合成, 整帧随瞄准角旋转)
+    // 武器塔整帧叠加 (173 库: 部件已按原版矩阵合成, 整帧随【塔头朝向】旋转)
     // 注: 阵亡序列中不再绘制武器塔 (原版 destruction 段只保留 chassis, 塔已随 tourelle.play() 停止)
+    //     tRot 是塔头独立朝向 (原版 tourelle._rotation, 被 OCEEF 朝目标逐帧逼近);
+    //     无索敌目标时 tRot 停在最后朝向, 与车体解耦 —— 这正是原版观感
     if (u.weapon && u.dying === 0) {
       const im = turretLibImg(u.weaponId);
       if (im && im.complete && im.naturalWidth) {
         ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
-        ctx.rotate(u.rot + Math.PI / 2);
+        ctx.rotate(u.tRot + Math.PI / 2);
         if (LIB_SPIN[u.weaponId] || u.weaponId === 'radarMobile') {
           // A 类: 整帧即自转件
           if (u.weaponId === 'radarMobile') drawRadarMobileSpin();
@@ -1646,7 +1667,7 @@ function draw() {
         const sd = IDLE_SPIN[u.weaponId];
         if (sd) {
           ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
-          ctx.rotate(u.rot + Math.PI / 2);
+          ctx.rotate(u.tRot + Math.PI / 2);
           drawSpinDef(sd, (G.frame * sd.degPerSWFFrame * (24 / 30)) % 360);
           ctx.restore();
         }

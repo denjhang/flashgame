@@ -1,5 +1,86 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+24 轮成果（2026-09-28, H5 领土防御·敌方武器塔独立索敌转向）
+
+**本轮补上一处明显可见的行为缺失：敌方车辆的炮塔此前永远焊在车体上，不会转向目标。
+原版有一整套独立的塔头瞄准逻辑（174 的 OCEEF）。**
+
+### 1. 【缺口发现】H5 用 `u.rot`（车体朝向）画敌方武器塔
+
+`game.js` 渲染敌方武器塔时：
+```javascript
+ctx.rotate(u.rot + Math.PI / 2);   // ← u.rot 是车体朝向
+ctx.drawImage(im, TURRET_LIB_ORIGIN.x, TURRET_LIB_ORIGIN.y);
+```
+而敌方开火逻辑（`Unit.update`）只是「到冷却就朝最近塔 spawnShell」，**塔头不转**。
+后果：一辆沿路行驶的 t90 朝南走，炮口也就一直朝南，即使它在打东边的塔 —— 观感明显不对。
+
+### 2. 【权威依据】原版 174/173 的独立塔头瞄准
+
+`DefineSprite_174/frame_1/PlaceObject2_173_1 onClipEvent(load)`（raw AS）：
+```actionscript
+rotateSpeed = typeData[type][0] * _root.fpsc;     // ← 与玩家塔同一套武器转速系数
+```
+同脚本内的 `OCEEF()` 函数（伪代码 154-330 行）逐帧做：
+1. `getDistance` / `getTarget` 取目标
+2. `directionToGet = asin(Δx / distance) * 57.2957…`，按象限修正（`_parent._x > target._x` 取负、
+   `_parent._y < target._y + r10` 用 `π - r5`）
+3. `if (side == "ennemy") r11 = _parent._rotation`，并 `directionToGet = (360 - _parent._rotation) + directionToGet`
+   —— **敌方的目标角是相对车体的**
+4. `if (Math.abs((_rotation - directionToGet) % 360) > 3)` 才动 → **3° 死区**
+5. 朝 `directionToGet` 逐帧 `± rotateSpeed`
+
+关键结论：**`tourelle._rotation` 是独立于 `_parent._rotation`（车体）的另一个变量**，
+且两者用同一 `rotateSpeed` 系数。
+
+### 3. H5 实现
+
+- `Unit` 新增 `tRot`（塔头世界朝向）+ `_tRotInit`（首次初始化为车体朝向）
+- `Unit.update()` 的武器分支改为：先 `getTarget`（复用已有 `nearestTurret`），
+  再按原版算法把 `tRot` 朝目标方位逼进（`rate = weapon[0] × 0.0198`，与玩家塔同一系数），
+  **带 3° 死区**（`Math.abs(da) > 3π/180` 才动）；开火条件 `cool<=0 && |da|<0.3`
+- 渲染：`ctx.rotate(u.tRot + Math.PI/2)`（原为 `u.rot`），B 类自转件同样改用 `tRot`
+- 失去目标时 `tRot` **保持不动**（不回正）—— 与原版一致（原版此时 `directionToGet` 虽被设为车体朝向，
+  但 `side=="ennemy"` 分支不执行回转，实测保持）
+
+### 4. 真机验证
+
+- 冒烟测试新增断言全绿：
+  ```
+  敌方塔头转向: 初值=0.000 终值=-1.442 目标方位=-1.489 残差=0.0470 rad (应<0.06)
+  塔头与车体解耦=true (车体 rot=0, 塔头≈-1.57)
+  失去目标后塔头保持=true (-1.442 → -1.442)
+  ```
+  注：残差 0.047 rad = 2.7°，**正好落在原版 3° 死区内** —— 是忠于原版的结果，不是误差。
+- 浏览器实测（车体朝东、目标在正北）：`hull=-0.135 → -2.713`（沿路转向），
+  而 `tRot=-0.175 → -1.402`（独立指向目标），并成功发射 1 发炮弹
+- 三车不同车体朝向、目标同在南侧：`hull = -2.53 / -2.59 / 3.65`，`tRot = 1.35 / 1.57 / 1.68`
+  —— **塔头全部收敛到同一方位（南），与各自车体无关**
+- 视觉截图：t90 车体沿路朝西南（`hull=-2.23`），炮管却指向东南（`tRot=0.91`，对准我方塔），
+  车体与炮塔明显不同向 —— 与原版观感一致
+
+### 5. 本轮如实说明
+
+- **`directionToGet` 的符号链我没有逐分支移植**。原版 OCEEF 里有 6 个 `_rotation = _rotation ± rotateSpeed`
+  分支（处理 `_rotation` 正负 × 目标角正负 × 差是否 >180° 的组合），那是 Flash `_rotation`
+  以「度数、可累积到 ±360 外」为前提写的簿记。H5 用弧度 + `atan2` + 归一化到 (-π,π]，
+  数学等价但代码形态不同。我用「转向收敛到目标方位 + 3° 死区 + 与车体解耦」三条不变量
+  做了对照验证（上面实测全绿），但**未逐条对齐那 6 个分支的边界行为**。
+- 原版 `OCEEF` 还有 `numberOfRequest / numberOfRequestForPermission`（开火许可计数）
+  与 `blockInterval/idInterval`（setInterval 500ms 重新 getTarget）两套机制。
+  H5 沿用自己已有的冷却模型 + 每帧 `nearestTurret`，**未移植**这两套。如实记录。
+- 原版 `if (side=="ally")` 时还会把目标点加上 `unitEtat` 偏移的 1/4（瞄血条位置），
+  即**我方塔瞄准的是目标车体略偏上的点**。H5 我方塔直接瞄单位中心，未做该偏移（偏差约 2px），
+  如实记录。
+- 上一轮的候选（426 底盘 4 层合成）本轮做了完整核实但**未实施**：
+  - `426 f1` = `401`(小件) + **两个 `chid 154` 的 `mix-blend-mode: overlay` 层** + `403`(车体)
+  - `403` 不是位图，而是**以 402.png 为 pattern 填充**的 shape，`patternTransform` 缩放 0.7853/0.8114
+  - FFDec 的 PNG 导出把 `overlay` 混合烘平成了「车上方的黑色团块」（伪影）；
+    用浏览器渲染 SVG（支持 mix-blend-mode）才是真观感：一层**白色径向柔光叠加**
+  - 实测差异：单层位图 vs 4 层合成，在实景草地上 **16.0% 像素不同**（放大 4× 后 20800/129600）
+  - **未实施的原因**：12 种底盘 × 4 层 × 各自的矩阵/pattern 缩放，工作量大且要重构
+    `UNIT_IMG` 单图渲染路径；而柔光层属于"细节增强"而非"缺失主体"。如实列为后续候选。
+
 ## 第 N+23 轮成果（2026-09-28, H5 领土防御·修正 score 语义 + 消除首座塔的兜底色块）
 
 **本轮在做视觉审计时，意外发现 H5 把"分数"的含义搞反了 —— 原版 score 统计的是

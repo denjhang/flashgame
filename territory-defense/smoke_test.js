@@ -46,6 +46,38 @@ src += '  14 - G.turrets.length + G.turrets.filter(t=>t.hp>0).length, G.turrets.
 src += '\nconst aaT = G.turrets.find(t => !t.aa);';
 src += '\nif (aaT) { G.euros += 5000; const c0 = aaT.aaUpgradeCost(); const ok = aaT.upgradeAA(); console.log("对空升级: 花费=%d 成功=%s 可对空=%s", c0, ok, aaT.aa); }';
 src += '\nconsole.log("迷雾验证: 视野源数=", VIS.length, " 敌人在迷雾外不可见=", !isVisible(100000, 100000));';
+// ---- 敌方武器塔独立索敌转向 (原版 174 OCEEF: tourelle._rotation 朝目标逼近, 3° 死区) ----
+src += `
+{
+  G.units.length = 0; G.turrets.length = 0; G.effects.length = 0;
+  // 车体朝东 (rot=0), 目标塔放在车体正北 → 塔头应转到 -90° 左右, 与车体解耦
+  const u = new Unit('t90', '125mmT90', 'parcourt1');
+  u.x = 1000; u.y = 1000; u.rot = 0; u._tRotInit = false;
+  G.units.push(u);
+  const t = new Turret('canon105', 1000, 800);   // 正北 (世界 y 向下, 北 = y 小)
+  G.turrets.push(t);
+  const r0 = u.tRot;
+  // 视野: 手动塞一个视野源使目标可见
+  VIS = [{ x: 1000, y: 900, r: 5000 }];
+  let steps = 0;
+  while (steps++ < 200) {
+    const before = u.tRot;
+    u.update();
+    if (Math.abs(u.tRot - before) < 1e-9 && Math.abs(((Math.atan2(800 - u.y, 1000 - u.x) - u.tRot + Math.PI*3) % (2*Math.PI)) - Math.PI) < 0.06) break;
+  }
+  const want = Math.atan2(800 - u.y, 1000 - u.x);
+  let da = want - u.tRot; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
+  console.log("敌方塔头转向: 初值=%s 终值=%s 目标方位=%s 残差=%s rad (应<0.06)",
+    r0.toFixed(3), u.tRot.toFixed(3), want.toFixed(3), Math.abs(da).toFixed(4));
+  console.log("塔头与车体解耦=%s (车体 rot=0, 塔头≈-1.57)", Math.abs(u.tRot - u.rot) > 1.0);
+  console.log("用 %d 次 update 完成转向", steps);
+  // 无目标时 tRot 保持不动 (原版: target == null 时 directionToGet = 车体朝向, 但 ennemy 侧不回转)
+  const held = u.tRot; G.turrets.length = 0;
+  u.update(); u.update();
+  console.log("失去目标后塔头保持=%s (%s → %s)", Math.abs(u.tRot - held) < 1e-9, held.toFixed(3), u.tRot.toFixed(3));
+  G.units.length = 0;
+}
+`;
 // ---- Su37 空袭流程 (原版 m31 才解锁, 测试前先置 unlocker.su37 = true) ----
 src += `
 G.frame = 0;
