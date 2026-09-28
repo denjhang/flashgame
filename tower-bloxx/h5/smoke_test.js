@@ -1,0 +1,40 @@
+// 无头冒烟测试: 校验 H5 资产完整性 (node smoke_test.js)
+const fs = require('fs');
+const path = require('path');
+
+let fail = 0;
+const check = (cond, msg) => { console.log((cond ? 'PASS' : 'FAIL') + ' ' + msg); if (!cond) fail++; };
+
+const h5 = __dirname;
+for (const f of ['index.html', 'game.js', 'js/three.module.js', 'js/loaders/GLTFLoader.js',
+                 'js/utils/BufferGeometryUtils.js', 'assets/scene.glb', 'assets/image_12.png'])
+  check(fs.existsSync(path.join(h5, f)), `存在 ${f}`);
+
+// GLB 结构校验
+const d = fs.readFileSync(path.join(h5, 'assets/scene.glb'));
+check(d.readUInt32LE(0) === 0x46546C67, 'GLB magic');
+const jsonLen = d.readUInt32LE(12);
+const g = JSON.parse(d.slice(20, 20 + jsonLen).toString());
+check(g.meshes.length === 19, `19 个网格 (实际 ${g.meshes.length})`);
+check(g.images.length === 17, `17 张内嵌原版贴图 (实际 ${g.images.length})`);
+const binStart = 28 + jsonLen;
+const pngOk = g.images.every(im => {
+  const bv = g.bufferViews[im.bufferView];
+  return d.slice(binStart + bv.byteOffset, binStart + bv.byteOffset + 4).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47]));
+});
+check(pngOk, '全部内嵌贴图为合法 PNG');
+check(g.meshes.every(m => m.primitives.every(p =>
+  p.attributes.POSITION !== undefined && p.attributes.TEXCOORD_0 !== undefined)), '全部网格带 UV');
+const accOk = g.accessors.every(a => {
+  const bv = g.bufferViews[a.bufferView];
+  return binstartSafe(bv);
+  function binstartSafe(b) { return b.byteOffset + b.byteLength <= g.buffers[0].byteLength; }
+});
+check(accOk, 'accessor 越界检查');
+// 玩法常量对号 (Const.as)
+const src = fs.readFileSync(path.join(h5, 'game.js'), 'utf8');
+check(/const CRANE_DUR = 2600/.test(src), '摆钩周期 CRANE_DUR=2600 (Const.as)');
+check(/const BLOCK_H = 64/.test(src), '积木高 BLOCK_H=64 (Const.as)');
+check(/const NUM_TRIES = 3/.test(src), '3 条命 NUM_TRIES=3 (Const.as)');
+
+process.exit(fail ? 1 : 0);

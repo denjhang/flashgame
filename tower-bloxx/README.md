@@ -1,12 +1,27 @@
 # Tower Bloxx（都市摩天楼）
 
-Digital Chocolate 原版 Flash 游戏（Flash 7, AS2），反编译导出完成。
+Digital Chocolate 原版 Flash 游戏（Flash 7, AS2）+ Nokia/Digital Chocolate J2ME 3D 版，
+反编译导出完成，并基于 J2ME 原 3D 资产做了 H5 重制。
+
+## H5 重制（h5/）— 可玩
+
+- `h5/index.html` — 入口（640x480 舞台）
+- `h5/game.js` — 玩法逻辑，按 Flash 版 `Const.as/Tower.as/Crane.as/Tipper.as` 对号移植：
+  摆钩周期 CRANE_DUR=2600ms、摆幅随层数增长、落点判定（<32 落住 / >64 坠落 / 中间撞塔扣命）、
+  <4px 完美落地触发连击（窗口 5s-0.1×连击数）、人口 4/3/2/1 按偏移分级、
+  近 3 次落点均值驱动塔身摇晃、3 条命、30 层过关
+- `h5/assets/scene.glb` — 原版 J2ME `scene.m3g` 直转（19 网格 + 17 张原版贴图内嵌），
+  转换器 `tools/m3g_to_glb.py`（字段序以 J2ME-Loader 的 C 反序列化实现对号）
+- `h5/assets/image_*.png` — m3g 内嵌 Image2D 导出（吊钩 sprite 等）
+- 冒烟测试：`cd h5 && node smoke_test.js`
+- 本地运行：`cd h5 && python -m http.server 8200` → 打开 `http://127.0.0.1:8200/`
+- 已知未做：MIDI 音乐（浏览器原生不支持，需软音源）、城市建造模式、吊车 3D 模型挂接（现为贴图公告牌）
 
 ## 文件
 
-- `towerbloxx.swf` — 原始 SWF（CWS zlib 压缩）
-- `towerbloxx-dec.swf` — 解压后版本（FFDec 输入用）
-- `Tower-Bloxx_J2ME_EN_*.zip/.jar` — J2ME 手机版多个版本（原始压缩包，在 `j2me/jars/`）
+- `towerbloxx.swf` — 原始 Flash SWF
+- `towerbloxx-dec.swf` — 解压后版本
+- `Tower-Bloxx_J2ME_EN_*.zip/.jar` — J2ME 手机版原始压缩包（在 `j2me/jars/`）
 - `j2me/` — J2ME 反编译工程（见下）
 - `scripts/` — FFDec 导出的 AS（246 个文件，未入库）
 
