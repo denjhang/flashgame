@@ -9,13 +9,13 @@
   body { background:#000; margin:0; display:flex; align-items:center; justify-content:center;
          font-family:monospace; user-select:none; overflow:hidden; }
 
-  /* 缩放容器: 原版舞台 800x600 + 底部 HUD, 按窗口大小整体等比缩放 (见 fitStage()) */
-  #fit { width:800px; height:648px; position:relative; transform-origin:center center; flex:none; }
+  /* 缩放容器: 舞台(地图+侧栏) + 底部 HUD; 宽高与 transform 由 fitStage() 动态设置 */
+  #fit { position:relative; transform-origin:center center; flex:none; }
 
-  /* 原版 800x600 舞台: 地图区 635 + 右侧栏 165 */
-  #stage { position:absolute; left:0; top:0; width:800px; height:600px; background:#000; overflow:hidden; }
+  /* 舞台: 地图区 (宽度动态, 由 fitStage 设 canvas.width) + 右侧栏 165 */
+  #stage { position:relative; background:#000; overflow:hidden; }
   #cv { position:absolute; left:0; top:0; cursor:crosshair; }
-  /* 原版右侧栏 (frames/6.png) —— 高度必须锁在 600px, 否则会像之前那样把 INFO 挤出舞台 */
+  /* 原版右侧栏 (frames/6.png) —— 高度锁 600px, 否则会把 INFO 挤出舞台 (N+25 修过) */
   #side { position:absolute; right:0; top:0; width:165px; height:600px;
           background:#4a4a4a; display:flex; flex-direction:column; overflow:hidden; }
   #minimapBox { height:152px; border-bottom:2px solid #222; background:#000; flex:none; }
@@ -81,8 +81,9 @@
   #unlockPanel button:disabled { opacity:.35; cursor:not-allowed; }
   #unlockPanel button.int { background:#3a4a5a; }
   #unlockPanel button.int:hover:not(:disabled) { background:#4a5a6a; }
-  #hud { position:absolute; left:0; top:602px; width:800px; color:#cfc; font-size:12px;
-         padding:2px 6px; box-sizing:border-box; }
+  /* 底部 HUD: 宽度跟随舞台 (由 fitStage 设为 W+165) */
+  #hud { position:absolute; left:0; top:600px; width:100%; color:#cfc; font-size:12px;
+         padding:2px 6px; box-sizing:border-box; background:#000; }
   #hud .hint { color:#9aa; font-size:11px; }
 </style>
 </head>
@@ -137,7 +138,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790550945"></script>
-<script src="game.js?v=1790550945"></script>
+<script src="data.js?v=1790550947"></script>
+<script src="game.js?v=1790550947"></script>
 </body>
 </html>

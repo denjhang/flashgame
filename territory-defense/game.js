@@ -4,7 +4,11 @@
 
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
-const W = cv.width, H = cv.height;
+// W/H = 逻辑视口 = canvas 的 width/height 属性。原版固定 635x600; H5 为宽屏适配
+//   把 W 做成可变的 (H 固定 600), 让地图区横向铺满窗口剩余宽度 —— 这样不留黑边。
+//   坐标系语义不变: 一切仍是"逻辑像素", 只是逻辑视口变宽了。
+let W = cv.width;
+const H = cv.height;
 let zoom = 1;                // 原版 G 键: 1 ↔ 0.39 全图视图
 
 // ---------------- 原版机制参数 (GAME_LOGIC.md) ----------------
@@ -18,6 +22,19 @@ const RADAR_RANGE = 1200;       // 雷达站视野 (typeData radar distanceOfFir
 const VIS_MARGIN = 60;          // 防御塔视野 = 射程外一小圈
 const BASE_VIS = 150;           // 基地基础视野
 const AA_UP_RATIO = 0.6;        // 对空升级费 = 塔造价 × 0.6
+
+// ---------------- 射速 (原版 OCEEF 循环模型) ----------------
+// 权威依据 DefineSprite_174/frame_1/PlaceObject2_173_1 onClipEvent(load):
+//   setInterval(this, "OCEEF", 43);                                  ← 循环周期 43ms
+//   numberOfRequestForPermission = floor(typeData[type][2] / fpsc);  ← 需 N 次调用才放行
+// ⇒ 开火间隔 = floor(typeData[2] / fpsc) × 43ms。这是【毫秒】量, 与渲染帧率无关。
+//   fpsc = 1.13 (GAME_LOGIC.md: 全局速度倍率)
+const FPSC = 1.13;
+const OCEEF_INTERVAL_MS = 43;
+// 把 typeData[2] 换算成毫秒冷却 (H5 用毫秒计时, 与 30fps/60fps 解耦)
+function fireCooldownMs(t2) {
+  return Math.floor(t2 / FPSC) * OCEEF_INTERVAL_MS;
+}
 
 // ---------------- 战争迷雾 ----------------
 // 改设定: 全图默认迷雾; 视野源 = 各塔(射程+60)/雷达站(1200)/基地(150)。
@@ -603,7 +620,7 @@ const EXPLOSION_FRAMES = [1, 2, 3, 4].map(i => {
 const SU37 = {
   img: null,
   available: true,
-  cool: 0,          // 剩余冷却帧 (原版 comptDispo)
+  dt: 1000 / 30,    // 本 tick 毫秒数 (固定 30fps 主循环; OCEEF 冷却按毫秒计)
   COOL_FRAMES: 60,  // 原版 comptDispo 初值
   pending: false,   // 已选边待点击落点
   plane: null,      // 飞行中的飞机 {x,y,rot,side,tx,ty,phase}
@@ -980,6 +997,7 @@ function showBanner(text) { banner = { text, until: Date.now() + 3200 }; }
 const G = {
   euros: 850, interest: 6, score: 0,
   wave: 0,                 // 已开始的波数 (1..44)
+  dt: 1000 / 30,           // 本 tick 毫秒数 (固定 30fps 主循环; OCEEF 冷却按毫秒计)
   units: [], turrets: [], shells: [], effects: [], sparks: [],
   spawnQueue: [],          // 本波待生成 [unitType, weapon, route, delayTicks]
   spawnTimer: 0,
@@ -1086,7 +1104,7 @@ class Unit {
     // 敌方武器: 塔头独立索敌转向 + 开火 (打我方炮塔)
     // 原版 174 的 OCEEF(): 每帧把 tourelle._rotation 朝目标方位逼进 (Δ>3° 才动), 然后 askPermissionOfFire
     if (this.weapon) {
-      this.cool--;
+      this.cool -= G.dt;      // 毫秒冷却 (原版 OCEEF 43ms 循环模型)
       if (this.fireT > 0) this.fireT--;
       const t = nearestTurret(this.x, this.y, this.weapon[1]);
       if (!this._tRotInit) { this.tRot = this.rot; this._tRotInit = true; }   // 初始与车体同向
@@ -1101,7 +1119,8 @@ class Unit {
           this.tRot += Math.sign(da) * Math.min(Math.abs(da), rs);
         }
         if (this.cool <= 0 && Math.abs(da) < 0.3) {
-          this.cool = this.weapon[2] * 3;
+          // 敌方冷却同用 OCEEF 模型 (原版 174 对 ally/ennemy 是同一套 numberOfRequestForPermission)
+          this.cool = fireCooldownMs(this.weapon[2]);
           this.fireT = fireTicksFor(this.weaponId);
           spawnShell(this.x, this.y, t, this.weapon, 'ennemy');
         }
@@ -1185,7 +1204,7 @@ class Turret {
       if (this.magnetT === 0) this.magnetT = MAGNET_TICKS;
     }
     if (!this.w || this.w[0] === 0) return;   // radar: 零属性 (原版鸡肋, 忠实还原)
-    if (this.cool > 0) { this.cool--; }
+    if (this.cool > 0) { this.cool -= G.dt; }   // 毫秒冷却 (原版 OCEEF 43ms 循环)
     // 索敌 (getTarget): 有效目标 + 对空限制 + 迷雾可见 + 最近
     let best = null, bd = Infinity;
     for (const u of G.units) {
@@ -1204,9 +1223,16 @@ class Turret {
       while (da < -Math.PI) da += 2 * Math.PI;
       const rs = this.w[0] * 0.0198;   // 原版: typeData[0] × fpsc 度/帧 → 弧度
       this.rot += Math.sign(da) * Math.min(Math.abs(da), rs);
-      // 开火 (冷却 = 威力因子 × 系数) → 触发炮管开火帧 (fireT = 0..fireDur)
+      // 开火冷却
+      //   原版机制 (DefineSprite_174/frame_1/PlaceObject2_173_1 onClipEvent(load)):
+      //     setInterval(this, "OCEEF", 43);                        ← 索敌/开火循环每 43ms 一次
+      //     numberOfRequestForPermission = floor(typeData[type][2] / fpsc);
+      //     askPermissionOfFire(): 每次 OCEEF 递减, 归零才允许开火
+      //   ⇒ 实际开火间隔 = floor(typeData[2] / fpsc) × 43ms  (毫秒制, 与帧率无关)
+      //   H5 之前用 `w[2] * 1.15` 帧 (按 30fps 折算), 既非毫秒制、又对 m60 偏慢;
+      //   改为毫秒冷却计数 (G.dt), 与 fpsc 解耦。
       if (Math.abs(da) < 0.3 && this.cool <= 0 && bd <= this.w[1]) {
-        this.cool = this.w[2] * 1.15;
+        this.cool = fireCooldownMs(this.w[2]);
         this.fireT = fireTicksFor(PLAYER_ETURRET[this.id] || this.id);   // 播完整开火动画
         spawnShell(this.x, this.y, best, this.w, 'ally', this.id);
       }
@@ -1302,9 +1328,20 @@ function killUnit(u) {
 //     "Votre score est bien là : les pertes que vous aurez subi"
 //   而 428 (敌方单位) 只加 euros、【不加 score】—— H5 之前把 score 记成击杀赏金, 是错的。
 //   iMission < 45: H5 共 44 波, 恒成立, 故不加门限。
+// 玩家塔阵亡序列启动 (战斗被摧毁 与 S 键卖出 都走这里)。
+// 权威依据 (两条路径在原版里是同一个入口):
+//   战斗: frame_6/PlaceObject2_6_327 检测 etat<=0 → unitEtat.destruction()
+//   卖出: frame_6/PlaceObject2_6_1 keyDown(key==83) → euros+=priceOfSell; unitEtat.destruction()
+//   两个 destruction() 都是: gotoAndPlay("destruction") → 跳到 185 的帧 2
+//   185 帧 2 的 DoAction_2 内容:
+//     if (iMission < 45) score++;  master_units.removeUnits("A",this);
+//     var ie = floor(random()*6)+1; master_sounds["explosion"+ie].start();
+//   ⇒ 【两条路径都会 score++ 且都会播随机爆炸音】(H5 共 44 波, iMission<45 恒成立)
+//   之前 H5 的 S 键直接 filter 移除塔 → 无音效, 故用户听不到声音; 本轮统一到本函数。
 function killTurret(t) {
-  if (t.hp > 0 || t.dying > 0) return;
-  G.score++;              // 丢塔 → score++ (原版 185 frame_2 DoAction_2)
+  if (t.dying > 0) return;         // 已在阵亡中, 防重复触发
+  if (t.hp > 0 && !t.sold) return; // 战斗路径要求血已尽; 卖出路径由 t.sold 标记放行
+  G.score++;
   t.dying = DEATH_TICKS;
   t.dyingFired = 0;
   playSfx('explosion' + (1 + Math.floor(Math.random() * 6)), 0.5);
@@ -2055,6 +2092,30 @@ window.addEventListener('keyup', (e) => {
   const dir = map[e.key.toLowerCase()];
   if (dir) heldKeys.delete(dir);
 });
+// 侧栏是否被覆盖 (鼠标在右侧栏/小地图/二选一面板上, 不应触发主地图边缘滚屏 —— 这是
+//   原版 surMenu 的等价物; 原版 Flash 单 stage 共享坐标, 不存在此问题;
+//   H5 用 DOM 后必须显式跟踪)
+let cursorOverSide = false;
+const stageEl = document.getElementById('stage');
+const sideEl = document.getElementById('side');
+if (sideEl && stageEl) {
+  // 阶段: 在侧栏内移动 / 离开侧栏 都更新标志; 侧栏可点击按钮接 mousemove 即可触发
+  sideEl.addEventListener('mouseenter', () => { cursorOverSide = true; });
+  sideEl.addEventListener('mouseleave', () => { cursorOverSide = false; });
+  // 进入主舞台, 但在迷你图上: 算"在侧栏内" (迷你图是侧栏的子元素)
+  const mmEl = document.getElementById('minimapBox');
+  if (mmEl) {
+    mmEl.addEventListener('mouseenter', () => { cursorOverSide = true; });
+    mmEl.addEventListener('mouseleave', () => { cursorOverSide = false; });
+  }
+  // 二选一面板同上
+  const upEl = document.getElementById('unlockPanel');
+  if (upEl) {
+    upEl.addEventListener('mouseenter', () => { cursorOverSide = true; });
+    upEl.addEventListener('mouseleave', () => { cursorOverSide = false; });
+  }
+}
+
 function scrollCamera() {   // 每帧: 方向键 + (M 开启时) 鼠标边缘滚屏, 原版 6_321 enterFrame
   if (zoom < 1) return;     // 全图模式下锁定
   let dx = 0, dy = 0;       // dy 为世界坐标 (上=+)
@@ -2062,7 +2123,9 @@ function scrollCamera() {   // 每帧: 方向键 + (M 开启时) 鼠标边缘滚
   if (heldKeys.has('right')) dx += SCROLL_SPEED;
   if (heldKeys.has('up')) dy += SCROLL_SPEED;
   if (heldKeys.has('down')) dy -= SCROLL_SPEED;
-  if (G.mouseScroll && typeof G.mx === 'number' && !Number.isNaN(G.mx)) {
+  // 主地图边缘滚屏: 仅当鼠标在【主舞台区域内, 且不在侧栏/小地图/二选一面板上】
+  //   (原版 surMenu 语义; 否则鼠标在小地图上时会被解释为"右边缘", 视图右滚)
+  if (G.mouseScroll && !cursorOverSide && typeof G.mx === 'number' && !Number.isNaN(G.mx)) {
     const sx = w2sX(G.mx), sy = w2sY(G.my);
     if (sx < EDGE) dx -= SCROLL_SPEED; else if (sx > W - EDGE) dx += SCROLL_SPEED;
     if (sy < EDGE) dy += SCROLL_SPEED; else if (sy > H - EDGE) dy -= SCROLL_SPEED;
@@ -2164,7 +2227,17 @@ window.addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
   // 原版 keyDown 映射: S=卖出(按血量75%折价) R=修理 空格=取消 H=血条 M=滚屏 C=建造区 G=全图
   if (k === 's') {
-    if (sel) { G.euros += sel.sellPrice(); G.turrets = G.turrets.filter(t => t !== sel); G.selected = null; }
+    // 原版 (6_1 keyDown, key==83):
+    //   priceOfSell = floor(etatC/etatM * (price*0.75)); euros += priceOfSell;
+    //   afficheUnit._parent.unitEtat.destruction();     ← 走【同一套阵亡序列】
+    // 所以卖塔 = 结算折价 + 播 destruction（含随机爆炸音 + 三点爆炸），不是"瞬间消失"。
+    // 之前 H5 直接 filter 移除 → 无音效、无阵亡表现，故用户听不到声音。
+    if (sel && sel.hp > 0 && sel.dying === 0) {
+      G.euros += sel.sellPrice();
+      sel.sold = true;              // 放行 killTurret 的 hp 守卫 (卖出时塔是满血)
+      killTurret(sel);              // 内部含 playSfx('explosion1..6')
+      G.selected = null;
+    }
   }
   if (k === 'r') {   // 原版 819 repairIfCan(): 全额修复, 扣 repairPrice
     if (sel && sel.hp < sel.maxHp) {
@@ -2189,20 +2262,48 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') { G.shopSel = null; G.selected = null; e.preventDefault(); buildShop(); }
 });
 
-// ---------------- 现代窗口适配 ----------------
-// 原版是固定 800x600 的 Flash 舞台。H5 之前直接硬编码 800x600, 在 1280x720 等窗口里
-// 既不居中、底部 HUD 还会溢出到视口外。这里按窗口大小对 #fit (800x648: 舞台+HUD)
-// 做等比缩放 + 居中, 保持原版画面比例不变。
-// 注意: 用 CSS transform 缩放, 不改 canvas 的 width/height 属性 ——
-//   渲染分辨率仍是 635x600 (原版分辨率), 只是显示时缩放; 鼠标换算靠 getBoundingClientRect
-//   自动带上 scale, 因此 s2wX/s2wY 无需改动。
+// ---------------- 现代窗口适配 (宽屏不留黑边) ----------------
+// 原版是固定 800x600 的 Flash 舞台 (地图 635 + 侧栏 165)。
+// H5 目标: 地图区横向铺满窗口剩余宽度 (不留左右黑边), 侧栏保持 165 逻辑宽,
+//   整体只做【等比缩放】(scale 取两轴较小的那个), 于是竖直方向若有余量会有少量
+//   上下留白 —— 这是等比缩放不可避免的; 为了把它降到最小, 地图区宽度按窗口比例放大。
+// 做法:
+//   1) 按窗口宽高比算出地图区应有的逻辑宽度 mapW, 写入 canvas.width (重设尺寸会清空画布,
+//      故紧接着重建依赖 W/H 的离屏 fog/heavy 画布)
+//   2) 侧栏宽度固定 165 逻辑像素; 总逻辑尺寸 (mapW+165) x 600 记为 #fit
+//   3) #fit 用 CSS transform 等比缩放到刚好填满窗口 (取 min), 居中
 function fitStage() {
   const fit = document.getElementById('fit');
-  if (!fit) return;
-  const BW = 800, BH = 648;                 // 逻辑尺寸
-  const s = Math.min(window.innerWidth / BW, window.innerHeight / BH);
+  const stage = document.getElementById('stage');
+  const side = document.getElementById('side');
+  if (!fit || !stage || !side) return;
+  const SIDE_W = 165, H = 600;
+
+  // 目标: 让 (mapW + SIDE_W) / H 尽量贴近窗口的宽高比 → 等比缩放后黑边最小
+  const winW = window.innerWidth, winH = window.innerHeight;
+  const targetAspect = winW / winH;
+  let mapW = Math.round(H * targetAspect) - SIDE_W;
+  // 夹在合理区间: 不小于原版 635 (不缩水), 不大于 2.2x (避免超宽屏下车太小)
+  const MAP_MIN = 635, MAP_MAX = 1600;
+  mapW = Math.max(MAP_MIN, Math.min(MAP_MAX, mapW));
+
+  if (mapW !== W) {
+    W = mapW;
+    cv.width = W; cv.height = H;          // 重设 canvas 尺寸 (会清空)
+    fogCv.width = W; fogCv.height = H;    // 依赖 W/H 的离屏画布同步重建
+    heavyCv.width = W; heavyCv.height = H;
+  }
+  stage.style.width = (W + SIDE_W) + 'px';
+  stage.style.height = H + 'px';
+  // HUD 实际高度: 让它自然撑开 (不写死), 再据此算 #fit 高度, 避免底部多出一条黑带
+  const hudEl = document.getElementById('hud');
+  const hudH = hudEl ? (hudEl.offsetHeight || 26) : 26;
+  fit.style.width = (W + SIDE_W) + 'px';
+  fit.style.height = (H + hudH) + 'px';
+  const BW = W + SIDE_W, BH = H + hudH;
+  const s = Math.min(winW / BW, winH / BH);
   fit.style.transform = 'scale(' + s + ')';
-  // transform-origin: center center + flex 居中 → 缩放后仍居中, 无需手算偏移
+  clampCam();
 }
 window.addEventListener('resize', fitStage);
 

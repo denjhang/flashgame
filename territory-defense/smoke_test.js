@@ -203,6 +203,31 @@ playSfx = _ps;
   console.log("swithRepair: autoRepair=%s", t2.autoRepair);
   G.euros = e0;
 }
+// ---- 射速 (原版 174 OCEEF 循环模型) ----
+console.log("--- 射速 ---");
+{
+  const FPSC = 1.13, INTERVAL = 43;
+  const cases = [
+    { id: 'm60', t2: 40,    expect_ms: Math.floor(40/FPSC) * INTERVAL },
+    { id: 'gatling', t2: 40, expect_ms: Math.floor(40/FPSC) * INTERVAL },
+    { id: 'gatlingDT90', t2: 3,  expect_ms: Math.floor(3/FPSC) * INTERVAL },
+    { id: 'pluton', t2: 720,   expect_ms: Math.floor(720/FPSC) * INTERVAL },
+  ];
+  for (const c of cases) {
+    const got = fireCooldownMs(c.t2);
+    console.log("  " + c.id + " t2=" + c.t2 + " 冷却=" + got + " ms (期望 " + c.expect_ms + ", 一致=" + (got === c.expect_ms) + ") → " + (got/1000).toFixed(2) + " s/发");
+  }
+  // 跑一帧 (33.33ms) 测减扣
+  const t = new Turret('m60', 0, 0);
+  t.cool = 1505;
+  for (let i = 0; i < 30; i++) t.update();   // 1000ms 模拟
+  const dt = 1000/30;
+  const consumed = 1505 - t.cool;
+  console.log("m60 起始 1505ms 跑 30 tick(" + (30*dt).toFixed(0) + "ms) 后剩 " + t.cool + " ms (消耗 " + consumed + "ms, 应 ~" + (30*dt).toFixed(0) + "ms) 一致=" + (Math.abs(consumed - 30*dt) < 1));
+  // 关键: m60 与 gatlingDT90 的差异 (重机枪与速射机枪)
+  const m60_ms = fireCooldownMs(40), fast_ms = fireCooldownMs(3);
+  console.log("m60(" + m60_ms + "ms) / gatlingDT90(" + fast_ms + "ms) = " + (m60_ms/fast_ms).toFixed(1) + " 倍 (原版 ~17 倍, H5 修正后应接近)");
+}
 // ---- 玩家塔阵亡序列 (原版 185 "destruction" 39帧, 与单位 428 同构; 无漂移) ----
 console.log("--- 玩家塔阵亡序列 ---");
 {
@@ -219,6 +244,26 @@ console.log("--- 玩家塔阵亡序列 ---");
   //   原版台词佐证: "chaque fois que vous perdez une tourelle, votre score général en est grandement affecté"
   console.log("丢塔 score++=%s (%d→%d, 原版 185 score++) 一致=%s",
     G.score === scBefore + 1, scBefore, G.score, G.score === scBefore + 1);
+  // ★ S 键卖出走同一套 destruction (原版 6_1 keyDown: euros+=priceOfSell; unitEtat.destruction())
+  {
+    const tSell = new Turret('m60', 0, 0);
+    tSell.hp = tSell.maxHp;   // 满血 → 折价 = cost*0.75
+    G.turrets.length = 0; G.turrets.push(tSell);
+    G.selected = tSell;
+    const e0 = G.euros;
+    let snd = null;
+    const _ps = playSfx; playSfx = (n) => { if (snd === null) snd = n; };
+    // 直接调 sellPrice + killTurret, 与 keydown 's' 分支同一路径
+    G.euros += tSell.sellPrice();
+    tSell.sold = true;   // 与 keydown 's' 分支一致 (卖出时满血, 需放行)
+    killTurret(tSell);
+    playSfx = _ps;
+    console.log("S 卖出: 折价+%d (满血=80*0.75=60) 触发阵亡序列 dying=%d 播放音=%s",
+      G.euros - e0, tSell.dying, snd);
+    console.log("  卖出走 destruction(有爆炸音)=%s 音在1..6=%s",
+      tSell.dying > 0, /^explosion[1-6]$/.test(snd || ''));
+    G.turrets.length = 0;
+  }
   // 原版 185 destruction 段只做 removeMovieClip + score++, 不改 euros
   const eBefore = G.euros;
   killTurret(t);   // 已在阵亡中, 应无效
