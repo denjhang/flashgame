@@ -724,6 +724,33 @@ console.log("--- 机枪连发 ---");
   // 冷却 = 整轮之后 (m60: floor(40/1.13)×43 = 1505ms)
   console.log("m60 整轮冷却=" + fireCooldownMs(40) + "ms (期望 1505, 原版 floor(40/1.13)×43)");
 }
+// ---- 弹速模型 (原版 obus 各帧 DoAction: vitesse/acc) ----
+console.log("--- 弹速模型 ---");
+{
+  const V = 50 * FPSC * 0.8, V40 = 40 * FPSC * 0.8, A1 = 1 * FPSC * 0.8, A05 = 0.05 * FPSC * 0.8;
+  const cases = [
+    ['bullet', V, V, 'f4: 50×fpsc/50×fpsc (m60 音效)'],
+    ['obusLourd', V, V, 'f3: 50×fpsc (c125mm 音效)'],
+    ['missile', V, A1, 'f8: 50×fpsc, acc=1×fpsc (crotale 音效, 慢起步)'],
+    ['missile2', V, A1, 'f9: 50×fpsc, acc=1×fpsc (mlrs 音效)'],
+    ['missile3', V40, A05, 'f10: 40×fpsc, acc=0.05×fpsc (pluton 音效, 长加速弧)'],
+    ['missileUnder', V40, A1, 'f11: 40×fpsc, acc=1×fpsc (crotale 音效)'],
+  ];
+  let bad = [];
+  for (const [k, wv, wa, note] of cases) {
+    const sp = SHELL_SPEED[k];
+    if (!sp || Math.abs(sp.v - wv) > 1e-9 || Math.abs(sp.a - wa) > 1e-9)
+      bad.push(k + " v=" + (sp && sp.v.toFixed(2)) + " a=" + (sp && sp.a.toFixed(4)));
+  }
+  console.log("弹速表 6 型与 obus DoAction 一致=" + (bad.length === 0) + (bad.length ? " 偏差:" + bad.join(",") : ""));
+  console.log("通用弹速=" + V.toFixed(2) + " px/tick (" + (V * 30).toFixed(0) + " px/s; 旧实现 9 px/tick=270 px/s 慢 5 倍)");
+  console.log("pluton acc=" + A05.toFixed(4) + " px/tick² (原版 0.05×fpsc, 长加速弧)");
+  // 慢起步验证: missile 首帧 curV=acc=0.904, 第 40 tick 达 36.2
+  const sh = { x: 0, y: 0, target: { x: 5000, y: 0, hp: 10 }, speed: SHELL_SPEED.missile.v,
+               curV: SHELL_SPEED.missile.a, acc: SHELL_SPEED.missile.a, vmax: SHELL_SPEED.missile.v };
+  console.log("missile 慢起步: 首帧移动 curV=" + sh.curV.toFixed(3) + " (=acc, 原版 load: curVitesse=acc," +
+    " enterFrame 先移动后加速)");
+}
 // ---- 车队链表 (原版 createUnit unitDevant/unitDerriere + frame_39 拆链) ----
 console.log("--- 车队链表 ---");
 {

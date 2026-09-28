@@ -1466,6 +1466,24 @@ const MUZZLE_DY = {
   gatlingDT90: 60, gatlingDTigre: 60, crotaleTigre: 0, navireCrotale: 0,
   Yamato460: 79,
 };
+// 弹速表 (原版 obus 帧 DoAction: vitesse/acc, px/帧@24 × 0.8 → px/tick@30):
+//   通用(炮弹/曳光弹) 50×fpsc, acc=同值(首发即全速)
+//   missile(crotale)/missile2(MLRS): v=50×fpsc, acc=1×fpsc (慢起步)
+//   missile3(pluton): v=40×fpsc, acc=0.05×fpsc (长加速弧)
+//   missileUnder: v=40×fpsc, acc=1×fpsc;  missileUnderSu37: v=40, acc=40
+//   laser(MTHEL): frame13 stop() 即发即中, H5 以通用速近似 (如实记录)
+const SHELL_SPEED = (() => {
+  const V = 50 * FPSC * 0.8, V40 = 40 * FPSC * 0.8, A1 = 1 * FPSC * 0.8, A05 = 0.05 * FPSC * 0.8;
+  const generic = { v: V, a: V };
+  return {
+    _generic: generic,
+    bullet: generic, bulletLourde: generic,
+    obusLeger: generic, obusMoyen: generic, obusLourd: generic,
+    missile: { v: V, a: A1 }, missile2: { v: V, a: A1 },
+    missile3: { v: V40, a: A05 }, missileUnder: { v: V40, a: A1 },
+    laser: generic,
+  };
+})();
 function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   // 朝目标的角度 (无 barrelAng 时的回退; 原版 obus._rotation 取炮管朝向)
   const ang = (barrelAng === undefined)
@@ -1477,8 +1495,12 @@ function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   const dx = barrelDecalX(turretId, TURRET_GUNS[turretId], barrelIdx || 0);
   const ca = Math.cos(ang), sa = Math.sin(ang);
   const mx = x + ca * dy - sa * dx, my = y + sa * dy + ca * dx;
+  // 弹速模型 (原版 obus 各帧 DoAction 权威, 乱码行亦解出):
+  //   vitesse = 弹速上限(px/帧@24), curVitesse 初值 = acc, 每帧 +acc 封顶 vitesse
+  //   换算: px/tick@30 = px/帧×0.8; 加速度数值保持 (px/tick², 推导见 smoke)
+  const K = SHELL_SPEED[turretId] || SHELL_SPEED._generic;
   G.shells.push({ x: mx, y: my, target, w, side, turretId,
-    speed: 9, trail: 0, born: G.frame });
+    speed: K.v, curV: K.a, acc: K.a, vmax: K.v, trail: 0, born: G.frame });
   // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件, 都在炮口)
   //   枪口焰按弹型选 303/365 (见 muzzleFor)
   spawnMuzzleFx(mx, my, ang, side, SHELL_KIND[turretId] || 'bullet');
@@ -1834,10 +1856,16 @@ function tick() {
   for (const s of G.shells) {
     const t = s.target;
     if (!t || t.hp <= 0) { s.hit = true; continue; }
+    // 原版 obus enterFrame 时序: 先以 curV 移动 (step = min(剩余, curV)), 再 curV += acc 封顶 vmax
+    //   (load: curVitesse 初值 = acc —— 首帧走 acc 距离)
+    if (s.curV === undefined) s.curV = s.acc;            // 旧存档兼容
     const dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.hypot(dx, dy);
-    if (d < s.speed) { s.hit = true; shellHit(s); }
-    else { s.x += dx / d * s.speed; s.y += dy / d * s.speed; }
+    if (d <= s.curV) { s.hit = true; shellHit(s); }
+    else {
+      s.x += dx / d * s.curV; s.y += dy / d * s.curV;
+      s.curV = Math.min(s.curV + s.acc, s.vmax);
+    }
   }
   G.shells = G.shells.filter(s => !s.hit);
   for (const e of G.effects) e.life--;

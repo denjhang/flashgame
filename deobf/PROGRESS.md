@@ -1,5 +1,53 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+43 轮成果（2026-09-28, H5 领土防御·弹速/加速度模型对齐原版）
+
+**（新子系统审计：弹道飞行。权威 = obus 各帧 DoAction 的 vitesse/acc，乱码行亦解出）**
+
+### 1. 【★ 弹速慢 5 倍 + 加速模型缺失】
+
+原版 obus 弹速表（各帧 DoAction，音效交叉佐证弹型）：
+
+| obus 帧 | 弹型 | vitesse | acc | 音效 |
+|---|---|---|---|---|
+| f1/f2/f3 | obusLeger/Moyen/Lourd | 50×fpsc | 50×fpsc | c75mm/c105mm/c125mm |
+| f4/f5-f7 | bullet/bulletLourde | 50×fpsc | 50×fpsc | m60/gatling |
+| f8 | missile (crotale) | 50×fpsc | **1×fpsc** | crotale |
+| f9 | missile2 (MLRS) | 50×fpsc | **1×fpsc** | mlrs |
+| f10 | missile3 (pluton) | **40×fpsc** | **0.05×fpsc** | pluton |
+| f11 | missileUnder | **40×fpsc** | 1×fpsc | crotale |
+| f12 | missileUnderSu37 | 40×fpsc | 40×fpsc | — |
+| f13 | laser (MTHEL) | stop() 即发即中 | — | — |
+
+通用弹速 = 50×1.13 = 56.5 px/帧@24 = **1356 px/s**。H5 旧实现 `speed: 9` px/tick =
+270 px/s —— **慢 5 倍**；导弹类的慢加速起步（curVitesse 初值 = acc，逐帧 +acc 封顶）
+完全没建模。
+
+### 2. H5 修正
+
+- 新增 `SHELL_SPEED` 表（6 型，按上表 ×0.8 换算 px/tick@30）：
+  通用 45.2/45.2；missile/missile2 45.2/0.904；missile3 36.2/0.0452；
+  missileUnder 36.2/0.904
+- `spawnShell` 按 `SHELL_KIND[turretId]` 带 v/acc；shell 记录 `curV`（初值 = acc）
+- 更新循环对齐原版 enterFrame **时序**：先以 curV 移动（step = min(剩余, curV)），
+  再 `curV += acc` 封顶 vmax；命中判定 `d <= curV`
+- laser (MTHEL) 以通用速近似（原版 frame13 stop() 即发即中的完整链路未解码，如实记录）
+
+### 3. 验证（node 冒烟）
+
+- `弹速表 6 型与 obus DoAction 一致=true`
+- `通用弹速=45.20 px/tick (1356 px/s; 旧实现慢 5 倍)`
+- `missile 慢起步: 首帧移动 curV=0.904 (=acc)`
+- 77 项断言全绿；450 帧波次 sim 正常（击杀 14 / 塔 15/15 / lost=false）
+
+### 4. 本轮仍未做（如实记录）
+
+- laser (MTHEL) 的即发即中链路（frame13 stop 后伤害如何结算）未解码，H5 用飞行弹近似
+- 原版弹道按【开火瞬间锁定距离】直线飞行，H5 保持追踪当前目标位置的简化 —— 已有注释，
+  维持现状（对玩家手感影响：原版打提前量，H5 必中移动靶）
+- 多 chid 合成器覆盖率 24%（暂缓）；真机目视/听感（搁置）
+
+## 第 N+42 轮成果（2026-09-28, H5 领土防御·车队减速改为原版渐近步长 + 硬停）
 ## 第 N+42 轮成果（2026-09-28, H5 领土防御·车队减速改为原版渐近步长 + 硬停）
 
 **（N+41 遗留项：减速曲线从"钳到前车速度"近似改为原版的渐近步长语义）**
