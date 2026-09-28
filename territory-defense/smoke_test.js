@@ -914,7 +914,7 @@ console.log("--- 单位移动模型 ---");
   const K = FPSC * (24 / 30);
   let bad = [];
   const cases = { camion1: 3.2, jeep: 3.2, bradley: 3, abrams: 3, t90: 3,
-                  navire: 1, Yamato: 0.5, camionBlinde: 3 };
+                  navire: 1, Yamato: 0.5, camionBlinde: 3, tigre: 3 };
   for (const t in cases) {
     const u = new Unit(t, 'null', 'parcourt1');
     const want = cases[t] * K;
@@ -1082,6 +1082,21 @@ console.log("--- 经济表 ---");
   const t = new Turret('m60', 0, 0);
   console.log("满血 m60 卖出=%d (期望 90 = 75%%×建造价120)=%s, 半血=%d (期望 45)=%s",
     t.sellPrice(), t.sellPrice() === 90, Math.floor(t.sellPrice() / 2), Math.floor(t.sellPrice() / 2) === 45);
+}
+// ---- chassisData 全表 (原版 428 load 12 型×5列 — N+60) ----
+console.log("--- chassisData 全表 ---");
+{
+  const CD = { camion1:[3.2,1.8,3,160,50], camion2:[3.2,1.8,2.5,200,50], camion3:[3.2,1.8,2.5,200,50],
+    jeep:[3.2,1.8,4,140,60], bradley:[3,1.7,2.5,345,155], amx10:[3,1.7,2.5,440,250],
+    abrams:[3,1.7,2,880,340], t90:[3,1.7,1.5,1200,500], camionBlinde:[3,1.7,1.2,2800,250],
+    tigre:[3,1.8,5,400,500], navire:[1,0.3,0.8,1800,1000], Yamato:[0.5,0.2,0.2,20000,0] };
+  const bad = [];
+  for (const k in CD)
+    for (let c = 0; c < 5; c++)
+      if (CHASSIS[k][c] !== CD[k][c]) bad.push(k + '.col' + c);
+  console.log("CHASSIS 12 型×5列 (速度/转弯/转向/血量/赏金) 与原版 chassisData 一致=%s" + (bad.length ? " 偏差:" + bad : ""),
+    bad.length === 0);
+  console.log("tigre 巡航 3 (原版, 曾误 3.2 快 6.7%%), Yamato 20000 血/0 赏金, navire 1000 赏金");
 }
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
