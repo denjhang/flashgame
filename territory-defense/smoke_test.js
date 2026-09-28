@@ -203,6 +203,67 @@ playSfx = _ps;
   console.log("swithRepair: autoRepair=%s", t2.autoRepair);
   G.euros = e0;
 }
+// ---- 开火细节: 弹壳 / 枪口焰 / 车头灯 (原版 obus sprite 子件 + 426 的 chid154 层) ----
+console.log("--- 开火细节 ---");
+{
+  G.muzzle = []; G.casings = []; G.shells = [];
+  const tgt = { x: 100, y: 0, hp: 10, aa: false };
+  spawnShell(0, 0, tgt, [4, 380, 40, 1, 3, 3], 'ally', 'm60');
+  console.log("开火一次 → 弹壳 %d 枚 (期望1), 枪口焰 %d 个 (期望1), 弹体 %d",
+    G.casings.length, G.muzzle.length, G.shells.length);
+  console.log("弹壳帧数=" + CASING_FRAMES.length + " (原版 douille chid304 = 29 帧) 时长=" + CASING_TICKS + " tick");
+  console.log("枪口焰帧数=" + MUZZLE.length + " (原版 chid303 = 14 帧) 时长=" + MUZZLE_TICKS + " tick");
+  const expected = { camion1:2, camion2:2, camion3:2, jeep:2, bradley:2, amx10:4,
+                     abrams:2, t90:4, camionBlinde:2, navire:4, Yamato:5 };
+  let ok = true;
+  for (const k in expected) {
+    const got = (HEADLIGHTS[k] || []).length;
+    if (got !== expected[k]) { ok = false; console.log("  " + k + " 灯数 " + got + " != " + expected[k]); }
+  }
+  console.log("车头灯: 11 车型灯数与原版 426 一致=" + ok + " (tigre 无灯=" + !HEADLIGHTS.tigre + ")");
+  console.log("车头灯素材=" + (HEADLIGHT_IMG && HEADLIGHT_IMG.src.split('/').slice(-3).join('/')));
+  G.muzzle = []; G.casings = []; G.shells = [];
+}
+// ---- 车体放置 (原版 426 patternTransform 矩阵) + 影子矩形 ----
+console.log("--- 车体放置 ---");
+{
+  // 权威值 = 426 SVG patternTransform 与 ombre sprite root, 逐项核对
+  const AUTH = {
+    camion1:      [0.7853, 0.8114, -9.85, -30.2],
+    camion2:      [0.6428, 0.6189, -9.8, -39.3],
+    camion3:      [0.6188, 0.625, -10.05, -33.85],
+    jeep:         [0.6328, 0.6328, -9.55, -25.35],
+    bradley:      [0.7781, 0.7781, -14.25, -27.75],
+    amx10:        [0.6221, 0.6221, -10.8, -27.45],
+    abrams:       [0.6313, 0.6313, -14.95, -28.15],
+    t90:          [0.6356, 0.6356, -16.9, -30.55],
+    camionBlinde: [0.6195, 0.6195, -12.8, -35.75],
+    navire:       [0.6682, 0.6682, -20.75, -86.6],
+    Yamato:       [0.7649, 0.7649, -38.15, -146.85],
+  };
+  let bad = [];
+  for (const k in AUTH) {
+    const c = CHASSIS_ART[k];
+    if (!c) { bad.push(k + ":缺CHASSIS_ART"); continue; }
+    const v = [c.m[0], c.m[3], c.m[4], c.m[5]];
+    for (let i = 0; i < 4; i++) if (Math.abs(v[i] - AUTH[k][i]) > 1e-4) bad.push(k + "[" + i + "]=" + v[i]);
+    if (!SHADOW_RECT[k]) bad.push(k + ":缺SHADOW_RECT");
+  }
+  // navire/Yamato 有第二 pattern (119/120 甲板件) 被刻意排除: AUTH 只取主车体
+  console.log("车体矩阵: 11 车型与原版 426 patternTransform 一致=" + (bad.length === 0) + (bad.length ? " 偏差:" + bad.join(",") : ""));
+  console.log("影子矩形: " + Object.keys(SHADOW_RECT).length + " 车型 (原版 ombre sprite root)");
+  // 影子与车体"大体同尺寸"——各自 sprite 的 pattern 略异, 属原版真实数据而非硬约束
+  //   例: bradley 影子源 chid525 / t90 影子源 chid536, 与原车体 shape 不同 → 尺寸天然有别
+  let szbad = [];
+  for (const k in AUTH) {
+    const c = CHASSIS_ART[k], r = SHADOW_RECT[k];
+    const cw = Math.abs(c.m[0]) * c.nat[0], chh = Math.abs(c.m[3]) * c.nat[1];
+    if (Math.abs(cw - r.w) / cw > 0.25 || Math.abs(chh - r.h) / chh > 0.25)
+      szbad.push(k + " 车体" + cw.toFixed(1) + "x" + chh.toFixed(1) + " vs 影子" + r.w + "x" + r.h);
+  }
+  console.log("影子与车体尺寸偏差≤25%=" + (szbad.length === 0) + (szbad.length ? " 超差:" + szbad.join("; ") : " (bradley/t90 略小属原版真实数据)"));
+  console.log("tigre 无 CHASSIS_ART (原版 426 frame10 为透明占位)=" + !CHASSIS_ART.tigre);
+}
 // ---- 射速 (原版 174 OCEEF 循环模型) ----
 console.log("--- 射速 ---");
 {

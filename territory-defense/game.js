@@ -148,6 +148,40 @@ const UNIT_BMP = {
   abrams: 415, t90: 417, camionBlinde: 419, navire: 422, Yamato: 424,
   tigre: 'tigre',   // 直升机 (原版矢量 chid157 渲染图)
 };
+// ★车体位图放置矩阵 (原版 426 各帧 SVG 的 <pattern patternTransform>, 逐帧权威)
+//   原版车体不是"位图居中绘制": 它是把位图当 pattern 填充, 由 patternTransform 同时决定
+//   【缩放】与【落点】。旧实现按位图中心 1:1 绘制 → 尺寸大 1.3~1.6 倍且落点整体偏移。
+//   现直接使用原版矩阵: ctx.transform(...m) 后 drawImage(png, 0, 0, natW, natH)。
+//   nat = pattern 的 viewBox 尺寸, 与原位图 PNG 尺寸逐一相符 (已核)。
+const CHASSIS_ART = {
+  camion1:       { m: [0.7853, 0, 0, 0.8114, -9.85, -30.2],   nat: [25, 52] },
+  camion2:       { m: [0.6428, 0, 0, 0.6189, -9.8, -39.3],    nat: [30, 84] },
+  camion3:       { m: [0.6188, 0, 0, 0.625, -10.05, -33.85],  nat: [32, 80] },
+  jeep:          { m: [0.6328, 0, 0, 0.6328, -9.55, -25.35],  nat: [29, 58] },
+  bradley:       { m: [0.7781, 0, 0, 0.7781, -14.25, -27.75], nat: [36, 62] },
+  amx10:         { m: [0.6221, 0, 0, 0.6221, -10.8, -27.45],  nat: [33, 78] },
+  abrams:        { m: [0.6313, 0, 0, 0.6313, -14.95, -28.15], nat: [45, 74] },
+  t90:           { m: [0.6356, 0, 0, 0.6356, -16.9, -30.55],  nat: [53, 82] },
+  camionBlinde:  { m: [0.6195, 0, 0, 0.6195, -12.8, -35.75],  nat: [40, 93] },
+  navire:        { m: [0.6682, 0, 0, 0.6682, -20.75, -86.6],  nat: [55, 225] },
+  Yamato:        { m: [0.7649, 0, 0, 0.7649, -38.15, -146.85],nat: [103, 371] },
+};
+// ★影子 sprite 的放置矩形 (原版 ombre 精灵 root <g> 的 translate = 内容原点)
+//   影子 PNG 已是【最终尺寸】(其自身 root 就带 patternTransform),
+//   故按该矩形 1:1 绘制, 绝不可再乘车体缩放 (旧实现乘了 UNIT_SCALE → 影子偏小)。
+const SHADOW_RECT = {
+  abrams:       { x: -14.95, y: -28.15, w: 28.4,  h: 46.75 },
+  amx10:        { x: -10.65, y: -27.1,  w: 20.55, h: 48.55 },
+  bradley:      { x: -11.7,  y: -25.8,  w: 22.95, h: 44.65 },
+  camion1:      { x: -9.85,  y: -30.2,  w: 19.65, h: 42.2 },
+  camion2:      { x: -9.55,  y: -39.35, w: 19.3,  h: 52 },
+  camion3:      { x: -9.75,  y: -33.6,  w: 19.8,  h: 50 },
+  camionBlinde: { x: -12.8,  y: -35.75, w: 24.8,  h: 57.65 },
+  jeep:         { x: -9.55,  y: -25.35, w: 18.35, h: 36.7 },
+  navire:       { x: -20.75, y: -86.6,  w: 36.75, h: 150.35 },
+  t90:          { x: -16.65, y: -30.05, w: 33.05, h: 51.15 },
+  Yamato:       { x: -38.15, y: -146.85,w: 78.8,  h: 283.8 },
+};
 for (const k in UNIT_BMP) {
   const im = new Image();
   im.src = 'assets/units/' + UNIT_BMP[k] + '.png';
@@ -297,6 +331,59 @@ const SHELL_IMG = {};
 for (const k in SHELL_FRAMES) {
   const im = new Image(); im.src = SHELL_FRAMES[k].src; SHELL_IMG[k] = im;
 }
+
+// ---------------- 弹壳 / 枪口焰 / 车头灯 (原版细节三件套) ----------------
+// 权威依据 (DefineSprite_400_obus 的逐帧 SVG 导出, 以 f4 "bullet" 为例):
+//   元素清单 (chid / 位置 t / 缩放 s):
+//     chid 365  t=(-3.64,-39.38)  s=(0.170,0.465)   ← 枪口焰 (2 帧, 快速闪)
+//     chid 78   t=( 8.90,-26.95)  s=(0.000,0.000)   ← 枪口光斑 2 (缩为 0 = 不显示)
+//     chid 78   t=(-8.95,-35.45)  s=(0.058,0.100)   ← 枪口光斑 1 (椭圆白热光)
+//     chid 390  t=(-14.67,-14.61) s=(0.667,0.664)   ← 弹体本体
+//     chid 391  t=(-1.69,-2.45)   s=(-0.185,0.205)  ← 弹壳 (29 帧: 抛出→下落→消失)
+//   obusLeger/Moyen/Lourd 用 chid 303/304 一系的弹壳与焰 (见 frame1/2/3)
+//   > "抛弹壳" 观察属实: 弹壳是独立的 29 帧动画, 有真实抛体轨迹
+//   > "发射火焰" 观察属实: 枪口焰 + 白色光斑, 均在炮口处
+const CASING_TICKS = Math.round(29 * 24 / 30);   // 29 帧 @24fps → 30fps: 23 tick
+
+// ---------------- 车头灯 (原版 426 各帧的 chid 154 层) ----------------
+// 【重要纠正】N+23/N+25 我把它误判为"车体 overlay 高光"; 本轮查明它是【车头灯】:
+//   - chid 154 = 307x307 白色径向渐变 (中心 RGBA 255,255,255,255 → 边缘 alpha 5)
+//   - 在 426 各帧里位于车体【前方 30~40px】(y 更负 = 车头方向), 双边成对 (左右灯)
+//   - 各车型灯数与矩阵 (SVG 权威):
+//       camion1/2/3 jeep bradley abrams camionBlinde: 2 个
+//       amx10 / t90: 4 个 (远近光各一对)   navire: 4   Yamato: 5   tigre: 0
+//   - 各帧 scale 约 (0.04~0.08, 0.10~0.18) → 显示成【椭圆】(y 拉长), 正是"照在路面上的一小段椭圆光"
+const HEADLIGHT_IMG = (() => {
+  const im = new Image();
+  im.src = 'assets/headlight/DefineSprite_154/1.png';
+  return im;
+})();
+// 各车型车灯矩阵 = 426 SVG 里 chid154 的 <use transform>, 【原样照抄】
+//   说明: 154 的 307x307 画布原点在光斑中心 (307/2 = 153.5),
+//   原版矩阵已把该画布放好, 因此 H5 只需 ctx.transform(...m) + drawImage(im,0,0,307,307)。
+//   (旧实现把矩阵拆成"中心偏移+缩放", 再由 H5 以图心对齐重算 —— 基准错误, 已废弃)
+const HEADLIGHTS = {
+  camion1:      [[0.0687, 0, 0, 0.1397, -14.55, -65.65], [0.0687, 0, 0, 0.1397, -6.85, -65.4]],
+  camion2:      [[0.0687, 0, 0, 0.1619, -14.2, -83.2], [0.0687, 0, 0, 0.1619, -6.5, -82.9]],
+  camion3:      [[0.0687, 0, 0, 0.1619, -13.95, -78.25], [0.0687, 0, 0, 0.1619, -6.25, -77.95]],
+  jeep:         [[0.0435, 0, 0, 0.1135, -10.25, -55.65], [0.0435, 0, 0, 0.1135, -3.4, -55.4]],
+  bradley:      [[0.0687, 0, 0, 0.1619, -14.6, -67.05], [0.0687, 0, 0, 0.1619, -6.9, -66.75]],
+  amx10:        [[0.0645, 0, 0, 0.1518, -13.6, -63.65], [0.0645, 0, 0, 0.1518, -6.4, -63.35],
+                 [0.0472, 0, 0, 0.1775, -9.9, -74.5], [0.0472, 0, 0, 0.1775, -4.6, -74.15]],
+  abrams:       [[0.0801, 0, 0, 0.1198, -17.05, -58.3], [0.0801, 0, 0, 0.1198, -8.1, -58.1]],
+  t90:          [[0.0602, 0, 0, 0.1311, -15.3, -61.3], [0.0602, 0, 0, 0.1311, -3.5, -61.3],
+                 [0.0602, 0, 0, 0.1532, -15.3, -70.2], [0.0602, 0, 0, 0.1532, -3.5, -70.2]],
+  camionBlinde: [[0.0687, 0, 0, 0.1619, -15.05, -81], [0.0687, 0, 0, 0.1619, -7.35, -80.7]],
+  navire:       [[0.0236, -0.0287, 0.1249, 0.1026, -39.1, -70.4],
+                 [0.0168, -0.0332, 0.1443, 0.073, -48.35, 9.5],
+                 [-0.024, -0.0285, 0.1236, -0.104, 3.4, -0.7],
+                 [-0.0028, -0.0371, 0.161, -0.012, -1.4, 34.5]],
+  Yamato:       [[0.0314, -0.0383, 0.1662, 0.1364, -57.75, -91.05],
+                 [-0.0113, -0.0481, 0.209, -0.0492, -66.05, 30.5],
+                 [0.0155, -0.047, 0.2039, 0.0674, -0.45, -20.1],
+                 [-0.0079, -0.0488, 0.2119, -0.0346, 5.35, 71.35],
+                 [0.0421, 0.0257, -0.1115, 0.183, 32.35, -155.05]],
+};
 // 武器 → 弹型 (塔库帧→内部弹 sprite→createObus 类型, 逐一对号)
 const SHELL_KIND = {
   m60: 'bullet', gatling: 'bullet', m60Brad: 'bullet', gatlingAmx10: 'bullet',
@@ -999,6 +1086,7 @@ const G = {
   wave: 0,                 // 已开始的波数 (1..44)
   dt: 1000 / 30,           // 本 tick 毫秒数 (固定 30fps 主循环; OCEEF 冷却按毫秒计)
   units: [], turrets: [], shells: [], effects: [], sparks: [],
+  muzzle: [], casings: [],   // 枪口焰 / 弹壳 (原版 obus sprite 内的子件)
   spawnQueue: [],          // 本波待生成 [unitType, weapon, route, delayTicks]
   spawnTimer: 0,
   waveActive: false, interWave: 120,
@@ -1245,6 +1333,32 @@ class Turret {
 function spawnShell(x, y, target, w, side, turretId) {
   G.shells.push({ x, y, target, w, side, turretId,
     speed: 9, trail: 0 });
+  // 炮口细节: 枪口焰 + 弹壳 (原版 createObus 里 obus sprite 自带的子件)
+  //   开火朝向 = 指向目标 (原版 obus._rotation = 炮塔/车体朝向)
+  const ang = Math.atan2(target.y - y, target.x - x);
+  spawnMuzzleFx(x, y, ang, side);
+}
+// 枪口焰 (chid 303/365) + 白色光斑 (chid 78): 原版在弹体 sprite 内, 开火瞬间出现
+const MUZZLE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => {
+  const im = new Image(); im.src = 'assets/muzzle/DefineSprite_303/' + i + '.png'; return im;
+});
+const MUZZLE_TICKS = Math.round(14 * 24 / 30);   // 14 帧 → 11 tick
+const FLASH = [1, 2].map(i => {
+  const im = new Image(); im.src = 'assets/muzzle/DefineSprite_365/' + i + '.png'; return im;
+});
+function spawnMuzzleFx(x, y, ang, side) {
+  if (!G.muzzle) G.muzzle = [];
+  G.muzzle.push({ x, y, ang, life: MUZZLE_TICKS, life0: MUZZLE_TICKS });
+  // 弹壳 (douille, 29 帧抛体) —— 原版每次开火都抛一枚
+  if (!G.casings) G.casings = [];
+  G.casings.push({ x, y, ang, life: CASING_TICKS, life0: CASING_TICKS });
+}
+// 弹壳帧 (chid 304 douille, 107x51, 29 帧; 帧内位移即抛出轨迹)
+const CASING_FRAMES = [];
+for (let i = 1; i <= 29; i++) {
+  const im = new Image();
+  im.src = 'assets/casing/' + i + '.png';
+  CASING_FRAMES.push(im);
 }
 
 function shellHit(s) {
@@ -1528,6 +1642,8 @@ function tick() {
   G.effects = G.effects.filter(e => e.life > 0);
   for (const sp of G.sparks) sp.life--;
   G.sparks = G.sparks.filter(sp => sp.life > 0);
+  if (G.muzzle) { for (const m of G.muzzle) m.life--; G.muzzle = G.muzzle.filter(m => m.life > 0); }
+  if (G.casings) { for (const c of G.casings) c.life--; G.casings = G.casings.filter(c => c.life > 0); }
 
   // 炮塔全毁不算输 (原版只有基地被突破才输)
   draw();
@@ -1676,22 +1792,56 @@ function draw() {
     // colorTransform mult RGB=0 alpha=0.352 → 全黑半透明). 先画 = 在车体下方
     // 注: 原版 destruction() 里 removeMovieClip(_parent.ombre) —— 阵亡序列中阴影已移除
     const sim = u.dying > 0 ? null : SHADOW_IMG[u.type];
-    if (sim && sim.complete && sim.naturalWidth) {
+    const srect = SHADOW_RECT[u.type];
+    if (sim && srect && sim.complete && sim.naturalWidth) {
       ctx.save();
       ctx.translate(sx + SHADOW_OFFSET * zoom, sy + SHADOW_OFFSET * zoom);   // y-down 世界系, +4=屏幕右下
       ctx.scale(zoom, zoom);
       ctx.rotate(u.rot + Math.PI / 2);
       ctx.globalAlpha = SHADOW_ALPHA;
       ctx.globalCompositeOperation = 'source-over';
-      // 原版 426 帧库: 所有车体 scale=(1,1) 原生尺寸 (Yamato 亦为 1.0, 无放大)
-      ctx.drawImage(sim, -sim.naturalWidth / 2, -sim.naturalHeight / 2);
+      // 影子 PNG 已是最终尺寸 (其 sprite root 自身带 patternTransform), 按原版矩形 1:1 绘制
+      ctx.drawImage(sim, srect.x, srect.y, srect.w, srect.h);
       ctx.restore();
+    }
+    // 车头灯 (原版 426 各帧 chid 154 层): 白色径向椭圆光斑, 在车头前方【点亮路面】
+    //   画在车体【之前】= 光在地面上 (原版 depth 10/12 < 车体 14)
+    //   ★混合模式: 原版 FFDec 的 SVG 导出明确带 style="mix-blend-mode: overlay"
+    //     → Flash 的 layer "Overlay" 混合: base<0.5 时 2·base·src, base≥0.5 时 1-2(1-base)(1-src)
+    //     源为纯白 (255,255,255) 时等价于把底色亮度按 alpha 提亮, 【底色纹理完整保留】——
+    //     这正是"点亮路面"而不是"糊一块白斑"。
+    //   Canvas 2D 原生支持 'overlay', 与 Flash 语义一致。
+    //   (曾用 'lighter' 加法混合 → 饱和度截断成纯白色块, 是错的)
+    {
+      const lights = u.dying > 0 ? null : HEADLIGHTS[u.type];
+      if (lights && HEADLIGHT_IMG.complete && HEADLIGHT_IMG.naturalWidth) {
+        const im = HEADLIGHT_IMG;
+        ctx.save();
+        ctx.translate(sx, sy); ctx.scale(zoom, zoom);
+        ctx.rotate(u.rot + Math.PI / 2);        // 与车体同向 (原版 426 帧内灯与车体同坐标)
+        ctx.globalCompositeOperation = 'overlay';
+        for (const m of lights) {
+          ctx.save();
+          ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);   // 原版 <use> 矩阵原样施加
+          ctx.drawImage(im, 0, 0, 307, 307);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
     }
     ctx.save(); ctx.translate(sx, sy); ctx.scale(zoom, zoom);
     const img = UNIT_IMG[u.type];
-    if (img && img.complete && img.naturalWidth) {
+    const ch = CHASSIS_ART[u.type];
+    if (img && img.complete && img.naturalWidth && ch) {
       ctx.rotate(u.rot + Math.PI / 2);
-      // 原版 426 帧库: 所有车体 scale=(1,1) 原生尺寸 (Yamato 亦为 1.0)
+      // 原版 426: 车体由 patternTransform 放置 (缩放+落点一体), 原样施加
+      const m = ch.m;
+      ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+      ctx.drawImage(img, 0, 0, ch.nat[0], ch.nat[1]);
+    } else if (img && img.complete && img.naturalWidth) {
+      // 无 CHASSIS 帧的车型 (直升机 tigre): 原版 426 frame10 只有 chid421 = 完全透明占位
+      //   → 机体由自身 chid157 渲染图提供, 沿用居中 1:1 (保留既有行为)
+      ctx.rotate(u.rot + Math.PI / 2);
       ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
     } else {
       ctx.rotate(-u.rot);
@@ -1812,6 +1962,32 @@ function draw() {
       ctx.save();
       ctx.translate(sx, sy); ctx.rotate(sp.rot); ctx.scale(zoom, zoom);
       ctx.drawImage(im, SPARK_ORIGIN.x, SPARK_ORIGIN.y);
+      ctx.restore();
+    }
+  }
+  // 枪口焰 (原版 obus sprite 内的 chid 303, 14 帧) + 白色光斑 (chid 78, 压扁成椭圆)
+  for (const m of G.muzzle) {
+    if (!isVisible(m.x, m.y)) continue;
+    const sx = w2sX(m.x), sy = w2sY(m.y);
+    const fi = Math.min(MUZZLE.length - 1, Math.floor((m.life0 - m.life) / m.life0 * MUZZLE.length));
+    const im = MUZZLE[fi];
+    if (im && im.complete && im.naturalWidth) {
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(m.ang - Math.PI / 2); ctx.scale(zoom, zoom);
+      ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+      ctx.restore();
+    }
+  }
+  // 弹壳 (原版 douille, 29 帧: 由炮口向右后抛出 → 下落 → 变暗消失)
+  for (const c of G.casings) {
+    if (!isVisible(c.x, c.y)) continue;
+    const sx = w2sX(c.x), sy = w2sY(c.y);
+    const t = (c.life0 - c.life) / c.life0;             // 0..1 进度
+    const fi = Math.min(28, Math.floor(t * 29));
+    const im = CASING_FRAMES[fi];
+    if (im && im.complete && im.naturalWidth) {
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(c.ang - Math.PI / 2); ctx.scale(zoom, zoom);
+      // douille 画布 107x51, 弹壳起点在 (0,23): 以画布原点摆放, 由帧内位移完成抛出轨迹
+      ctx.drawImage(im, 0, -im.naturalHeight / 2);
       ctx.restore();
     }
   }
