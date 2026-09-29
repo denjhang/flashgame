@@ -120,3 +120,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   dude/dudette 原版位图（chid 753/772），随 towerGroup 倾斜
 - miss 坠落小人（makeFallingPerson:296-310）；完美落地四角星形火花（makeSpark:311-317, chid 783）
 - smoke_test 16/16；遗留：28 种环境特效（ambient_spr 逐帧导出，下轮）
+
+## 第 12 轮（2026-09-29）— PARITY 推进 #4：人口增量文本 + 环境特效取证
+
+- 落块 "+N" 浮字（showPopChange, GameModel.as:168-171）；连击银行 "Combo bonus! +N" 3000ms
+  （showBonusPopulation:361-369 + MSG_COMBO）→ 第 4 节 HUD 全部闭环
+- 环境特效：ExportAssets ambient_spr=chid734 仅 5 帧整幅遮罩，28 种图形在更深层子剪辑，
+  按"成本/收益"记 [P2] 暂缓，状态机三表已抄录入档（PARITY.md）
+- smoke_test 16/16

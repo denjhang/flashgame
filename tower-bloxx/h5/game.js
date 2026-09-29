@@ -388,7 +388,9 @@ function swayAngle(dt) {
 // 落块人口 = floor(stackedBlocks/10 + inc); 连击期间银行 m_comboPopulation += floor(mult*(2+stacked/10*2))
 function changePopulation(inc) {
   if (G.comboMult > 0) G.comboBank += Math.floor(G.comboMult * (2 + G.stacked / 10 * 2));
-  G.population += Math.floor(G.stacked / 10 + inc);
+  const gain = Math.floor(G.stacked / 10 + inc);
+  G.population += gain;
+  popFloat('+' + gain); // showPopChange: 人口 HUD 增量文本 (GameModel.as:168-171)
 }
 // ---- combo: ComboTimer.as:28-46 (setTimer/addToTimer, 上限 TIMER_MAX+1 秒) + perfectLanding 公式 (Tower.as:330-334) ----
 function comboSetTimer() {
@@ -402,13 +404,27 @@ function comboAddTimer(amt) {
   G.comboT = Math.min((TIMER_MAX + 1) * 1000 - 1, Math.max(G.comboT, 0) + amt * 1000);
 }
 function finishCombo() { // GameModel.finishCombo: 支付连击银行人口
-  if (G.comboBank > 0) { G.population += G.comboBank; showMsg('+' + G.comboBank, '#ffd700'); G.comboBank = 0; }
+  if (G.comboBank > 0) {
+    G.population += G.comboBank;
+    popFloat('Combo bonus! +' + G.comboBank, 3000); // MSG_COMBO + showBonusPopulation(3000ms)
+    G.comboBank = 0;
+  }
   G.comboMult = 0; G.comboT = 0;
 }
 
 function panUp() { // Path DELAY_PAN_UP
   G.camTarget = Math.max(0, G.landingY - STAGE_H/2 + 3 * BLOCK_H);
 }
+function popFloat(txt, life = 1200) { // bonus_spr 在 (321,31) 人口 HUD 中心, 生命 1200/3000ms
+  const m = document.createElement('div');
+  m.textContent = txt;
+  m.style.cssText = `position:absolute;top:64px;right:52px;color:#ffe27a;font-size:16px;font-weight:bold;` +
+    `text-shadow:1px 1px 2px #000;transition:opacity ${life}ms;`;
+  hud.appendChild(m);
+  setTimeout(() => { m.style.opacity = '0'; }, life * 0.3);
+  setTimeout(() => m.remove(), life + 50);
+}
+
 function showMsg(txt, color) {
   const m = document.createElement('div');
   m.textContent = txt; m.style.cssText = `position:absolute;top:30%;left:50%;transform:translateX(-50%);color:${color};font-size:28px;font-weight:bold;text-shadow:1px 1px 2px #000;transition:all .8s;opacity:1;`;

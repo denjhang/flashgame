@@ -54,7 +54,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   （ComboTimer.setSecs:50-56）
 - ✅ 音乐/音效/退出按钮（GameSprites.buildGameSprites:99-101 坐标 594,20/50/80；开关先存偏好，
   音频落地后生效；退出暂回模式入口）
-- ⬜ 人口增量弹出文本（showPopChange/showBonusPopulation）→ 归入视觉层轮次
+- ✅ 人口增量弹出文本：落块 "+实得"（GameModel.changePopulation:168-171 showPopChange）；
+  连击银行支付 "Combo bonus! +N" 3000ms（GameSprites.showBonusPopulation:361-369 + Const.MSG_COMBO）
 - ❌ 菜单流：splash→title→menu（GameState.as:53-257 状态机）、Instructions 三页、About、
   High Scores、Reset 确认弹窗——依赖城市模式，保持在清单末位
 - ❌ 菜单流：splash→title→menu（Build City/Quick Game/Instructions/High Scores/About），
@@ -68,8 +69,10 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 视差背景 3 层 bg2/3/4（FFDec 导出原版位图 640×2000/912/316，Tower.move:93-104
   `worldY = camY×(1-ratio)`，BG_RATIOS 0.05/0.1/0.2；bg4 纵向平铺 6 次覆盖太空段；
   原版无 bg5_spr，NUM_BGS 循环 2..4）
-- ⬜ 环境特效系统 28 种（AMBIENT_SPRS + EFFECT_PROBABILITIES*，GameSprites.generateEffect:209）
-  —— ambient_spr 为多帧 Flipbook 剪辑，需逐帧导出，下轮处理
+- ❌ [P2 遗留] 环境特效系统 28 种（AMBIENT_SPRS + EFFECT_PROBABILITIES*，GameSprites.generateEffect:209,
+  次数表 GameSprites.as:26）。取证：ExportAssets ambient_spr=chid734 仅 5 帧且为整幅遮罩，
+  28 种特效图形嵌在更深层子剪辑，逐帧还原需逐 clip 反汇编，成本/收益不匹配——暂缓，
+  状态机参数已记录在案（发生次数表 [8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1]）
 - ✅ 小人系统：落块居民走半步逼近入住（Person.as:24-66，出生 ±viewWidth/2、上方 rand(100,200)、
   步长 min(PEOPLE_MAX_MV±10, dist/2)、每 50ms、到达 250ms 淡出）、miss 小人坠落
   （makeFallingPerson:296-310 漂移±100/5s）、完美落地四角星形火花（makeSpark:311-317, speed=100）
