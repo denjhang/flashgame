@@ -81,13 +81,16 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 屋顶人口/特效触发（snd_stacked 音效待音频轮）
 - ❌ 音效触发视觉（snd_destroy 等与动画同步）
 
-## 6. 音频——❌ 整体缺失 [P1]
+## 6. 音频——✅ 闭环（2026-09-29）
 
-- 歌曲：sng_title / sng_tower / sng_city（GameState.playSong）；J2ME 版有 9 首 MIDI 原声可转
-- 音效：snd_combo / snd_foundation / snd_stacked / snd_destroy / snd_fanfare_bad / snd_guiselect /
-  snd_negative / snd_towerconstruct 等（PlaySound 调用点已 grep 全）
-- 音乐/音效开关（STT_MUSIC_TOGGLE / STT_SOUND_TOGGLE）
-- H5 方案：MIDI → 预渲染 OGG/MP3（需软音源），或 WebAudio 合成近似
+- ✅ 歌曲与音效全部为原版 SWF 内嵌音频，FFDec 整体导出（ExportAssets 1:1）：
+  sng_tower/sng_title/sng_city + snd_combo/click/city_milestone/destroy/foundation/stacked/
+  fanfare_bad/good/mediocre（共 12 个 mp3，h5/assets/audio/）
+- ✅ 触发点对号：snd_foundation 地基（Tower.as:203）、snd_combo 完美（:228）、snd_stacked
+  非完美堆叠（:222-248）、snd_destroy miss/撞塔（:139-167）、snd_fanfare_bad/good 胜负
+  （GameState.as:121-131）、playSong("sng_tower") 开局（GameState.as:102）、按钮 snd_click
+- ✅ 音乐/音效开关生效（STT_MUSIC_TOGGLE/STT_SOUND_TOGGLE, GameState.as:249-255）
+- 备注：J2ME 9 首 MIDI 为手机版曲目，与 Flash 版曲库不同源；Flash 版即权威，MIDI 不再转码
 
 ## 7. 存档/记录——❌ 缺失 [P1]
 

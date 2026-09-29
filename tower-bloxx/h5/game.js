@@ -52,6 +52,25 @@ const sun = new THREE.DirectionalLight(0xffffff, 1.2);
 sun.position.set(0.4, 1, 1.5);
 scene.add(sun);
 
+// ---- SoundManager: 音效/歌曲用 FFDec 从原版 SWF 导出的 mp3 (ExportAssets snd_*/sng_* 1:1) ----
+const SND = {};
+for (const n of ['snd_combo','snd_click','snd_city_milestone','snd_destroy','snd_foundation',
+                 'snd_stacked','snd_fanfare_bad','snd_fanfare_good','snd_fanfare_mediocre'])
+  SND[n] = new Audio(`./assets/audio/${n}.mp3`);
+const SONGS = { sng_tower: new Audio('./assets/audio/sng_tower.mp3'),
+                sng_title: new Audio('./assets/audio/sng_title.mp3'),
+                sng_city: new Audio('./assets/audio/sng_city.mp3') };
+for (const a of Object.values(SONGS)) a.loop = true;
+function playSound(name) { // GameState.playSound:293
+  if (G.soundOn && SND[name]) { SND[name].currentTime = 0; SND[name].play().catch(() => {}); }
+}
+function playSong(name) { // GameState.playSong:300
+  if (!G.musicOn) return;
+  for (const k in SONGS) if (k !== name) SONGS[k].pause();
+  SONGS[name].play().catch(() => {});
+}
+function stopSong() { for (const k in SONGS) SONGS[k].pause(); } // GameState.stopSong:312
+
 // ---- 资产载入 ----
 const templates = [];   // 各楼块 mesh 模板 (从 GLB 取)
 let hookPlane = null;   // 原版吊钩贴图 sprite
@@ -191,6 +210,7 @@ function startGame() {
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
+  playSong('sng_tower');                       // GameState.as:102 STT_PLAY playSong("sng_tower")
   addHud();
 }
 
@@ -199,6 +219,7 @@ function gameOver(won) {
   hud.msg.textContent = won ? 'Tower complete!' : 'Too many blocks missed!'; // Const.MSG_GAME_WON/MSG_GAME_LOST
   hud.msg.style.color = won ? '#ffd700' : '#ff6b6b';
   hud.msg.style.display = 'block';
+  playSound(won ? 'snd_fanfare_good' : 'snd_fanfare_bad'); // GameState.as:121-131
   if (won) showSummary();
   if (!won) {
     // 塔散架 (Tower.clearBlocks(topple))
@@ -258,14 +279,16 @@ function blockLanded(offset, releaseBdx) {
     // 撞塔: 弹飞 + 晃动加剧 + 顶部一块被撞掉 (Tower.as:150-167 finishCombo→bounceOffTower→knockNextBlock→decTries)
     finishCombo();
     tipperIncSway(offset);
+    playSound('snd_destroy');                    // Tower.as:162
     G.lives--; showMsg('-1', '#ff6b6b');
     if (G.blocks.length > 1) knockTopBlock();
     addHud();
     if (G.lives <= 0) gameOver(false);
     return;
   }
-  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145)
+  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145, snd_destroy 延迟触发此处直接播)
     finishCombo();
+    playSound('snd_destroy');
     G.lives--; showMsg('MISS', '#ff6b6b'); addHud();
     if (G.lives <= 0) gameOver(false);
     return;
@@ -285,10 +308,12 @@ function blockLanded(offset, releaseBdx) {
   const cx = G.currCtr + x;
   towerGroup.add(mesh);
   mesh.position.set(cx - tpl.userData.cx, G.landingY - tpl.userData.cy, 0);
+  if (onGround) playSound('snd_foundation');   // Tower.as:203 地基块
   // 连击: 落地时 comboMult!=0 → +1 (Tower.as:233); 完美落地重置计时 (perfectLanding→ComboTimer.setTimer)
   if (G.comboMult !== 0) { G.comboMult++; G.comboMax = Math.max(G.comboMax, G.comboMult); } // Tower.as:233 + GameModel.as:192
-  if (perfect) comboSetTimer();
-  else if (G.comboMult !== 0) comboAddTimer(-COMBO_ADJ); // Tower.as:222-224 addToTimer(-COMBO_ADJ_FACTOR)
+  if (perfect) { playSound('snd_combo'); comboSetTimer(); }   // Tower.as:228
+  else if (G.comboMult !== 0) { playSound('snd_stacked'); comboAddTimer(-COMBO_ADJ); } // Tower.as:222-224
+  else playSound('snd_stacked');                              // Tower.as:238/243/248
   // 人口 (Tower.makePeople:252-261): 地基块不结算; 屋顶块走 roof 换算
   let pop;
   if (onGround) pop = 0;
@@ -453,8 +478,10 @@ addEventListener('pointerdown', drop);
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
 // 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好
 G.musicOn = true; G.soundOn = true;
-hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4; };
-hud.btnSound.onclick = e => { e.stopPropagation(); G.soundOn = !G.soundOn; hud.btnSound.style.opacity = G.soundOn ? 1 : 0.4; };
+function sndClick() { if (G.soundOn && SND.snd_click) { SND.snd_click.currentTime = 0; SND.snd_click.play().catch(() => {}); } }
+hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4; sndClick();
+  if (!G.musicOn) stopSong(); else playSong('sng_tower'); };  // STT_MUSIC_TOGGLE toggleSongs
+hud.btnSound.onclick = e => { e.stopPropagation(); G.soundOn = !G.soundOn; hud.btnSound.style.opacity = G.soundOn ? 1 : 0.4; sndClick(); }; // STT_SOUND_TOGGLE
 hud.btnExit.onclick = e => { // BTN_EXIT_QUICK (GameState STT_EXIT_PLAY → 菜单; 菜单未实现, 先回模式入口)
   e.stopPropagation();
   location.href = location.pathname + (G.totalBlocks !== 999 ? '' : '?mode=tower');

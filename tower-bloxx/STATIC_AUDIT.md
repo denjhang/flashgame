@@ -128,3 +128,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 环境特效：ExportAssets ambient_spr=chid734 仅 5 帧整幅遮罩，28 种图形在更深层子剪辑，
   按"成本/收益"记 [P2] 暂缓，状态机三表已抄录入档（PARITY.md）
 - smoke_test 16/16
+
+## 第 13 轮（2026-09-29）— PARITY 推进 #5：音频闭环
+
+- FFDec 从原版 SWF 整体导出 ExportAssets 音频：3 首歌 + 9 音效（mp3, h5/assets/audio/）
+- SoundManager（GameState.playSound/playSong/stopSong 对号）+ 全部触发点接线：
+  foundation/combo/stacked/destroy/fanfare_bad/good/click
+- 音乐/音效按钮开关真实生效（toggleSongs/toggleSounds 对号）
+- J2ME MIDI 评估：与 Flash 曲库不同源，Flash 版即权威，不转码
+- smoke_test 16/16
