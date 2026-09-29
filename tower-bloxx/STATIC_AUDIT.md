@@ -94,3 +94,12 @@ Flash 版（同一玩法姊妹作，Const.as 全量可读）作权威源。后�
 ### 遗留清单（不变，4 项）
 
 roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画时长（P3）。
+
+## 第 9 轮（2026-09-29）— PARITY 推进 #1：屋顶块+目标高度+结算面板
+
+- 实现 `?mode=tower`：totalBlocks=(type+1)*10=10（CityMap.as:508），快速游戏仍 999 无尽
+- 屋顶块：needRoof→专用模板；人口 roof 换算公式（Tower.as:252-261）；trophyRoof 判定链
+  （Crane.setTarget + GameModel.updateCleanTower:181）
+- 结算面板：getSummary 三行 + New record! + MSG_RESTART 点击重开（GameSprites.showSummary）
+- comboMax/records 记录（GameModel.as:11-13,192）
+- smoke_test 16/16；PARITY.md 第 2 节标记闭环

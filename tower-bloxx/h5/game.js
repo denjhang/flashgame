@@ -15,7 +15,10 @@ const TOON_LIMIT_1 = 4, TOON_LIMIT_2 = 6, TOON_LIMIT_3 = 9; // Const.TOON_LIMIT_
 const MAX_LANDING_AMT = 30;     // Const.MAX_LANDING_AMT
 const COMBO_SECS = 5, COMBO_ADJ = 0.1; // Const.COMBO_SECS/COMBO_ADJ_FACTOR
 const NUM_TRIES = 3;            // Const.NUM_TRIES
-const TOTAL_BLOCKS = 999;       // quick game: GameState.as:97 totalBlocks=999 (无尽模式)
+// quick game: totalBlocks=999/currColor=3 (GameState.as:97-99); tower 模式: (type+1)*10 (CityMap.as:508)
+const TOTAL_BLOCKS = new URLSearchParams(location.search).get('mode') === 'tower' ? 10 : 999;
+const CURR_COLOR = TOTAL_BLOCKS === 999 ? 3 : 0;
+const TROPHY_POP_LIMITS = [70, 250, 550, 1000]; // Const.TROPHY_TOWER_POP_LIMITS
 const SWAY_MAX_ANGLE = 1;       // Const.SWAY_MAX_ANGLE (度, GameModel:239 上限)
 const TIMER_MAX = 5;            // Const.TIMER_MAX (ComboTimer 计时上限 TIMER_MAX+1 秒)
 const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
@@ -26,6 +29,7 @@ const stage = document.getElementById('stage');
 const hud = {
   pop: document.getElementById('pop'), lives: document.getElementById('lives'),
   combo: document.getElementById('combo'), msg: document.getElementById('msg'),
+  summary: document.getElementById('summary'),
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -86,10 +90,16 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   startGame();
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
 
+function needRoof(i) { // Crane.as:209: stacked>0 && stacked==totalBlocks-1
+  return G.totalBlocks !== 999 && i > 0 && i === G.totalBlocks - 1;
+}
 function blockTemplate(i) {
-  // 楼层外观按高度进阶 (对应原版 block00..03), 取 GLB 中四款方块网格
-  // 楼块网格 263/264/265/252, 8 层换一档 (GLB 节点名 = m3g 全局 id)
-  const want = ['mesh263','mesh264','mesh265','mesh252'][Math.floor(i / 8) % 4];
+  if (needRoof(i)) {
+    // 屋顶块: 奖杯屋顶 (cleanTower→trophyRoof, Crane.setTarget) 用放大 variant, 普通 frame3
+    return templates.find(t => t.name === (G.trophyRoof ? 'mesh254' : 'mesh253')) || templates[0];
+  }
+  // 楼层外观按 currColor 选款: block 款 263/264/265/252 ↔ currColor 0..3 (CityMap.as:160 currColor*4)
+  const want = ['mesh263','mesh264','mesh265','mesh252'][G.currColor % 4];
   return templates.find(t => t.name === want) || templates[0];
 }
 
@@ -109,6 +119,10 @@ const G = {
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
   over: false,
+  totalBlocks: TOTAL_BLOCKS, currColor: CURR_COLOR,
+  cleanTower: false, trophyRoof: false,          // GameModel.updateCleanTower / Crane.setTarget
+  comboMax: 0,                                    // GameModel.setComboMax
+  records: { populationRecord: 0, blockRecord: 0, comboRecord: 0 }, // GameModel.as:11-13
 };
 
 const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr._rotation)
@@ -134,6 +148,8 @@ function startGame() {
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
+  G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false;
+  hud.summary.style.display = 'none';
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
@@ -142,9 +158,10 @@ function startGame() {
 
 function gameOver(won) {
   G.over = true;
-  hud.msg.textContent = won ? '🏆 过关！' : '💥 塔倒了';
+  hud.msg.textContent = won ? 'Tower complete!' : 'Too many blocks missed!'; // Const.MSG_GAME_WON/MSG_GAME_LOST
   hud.msg.style.color = won ? '#ffd700' : '#ff6b6b';
   hud.msg.style.display = 'block';
+  if (won) showSummary();
   if (!won) {
     // 塔散架 (Tower.clearBlocks(topple))
     for (let i = G.blocks.length - 1; i >= 0; i--) {
@@ -155,7 +172,25 @@ function gameOver(won) {
     G.blocks = [];
   }
   // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
-  setTimeout(startGame, Math.min(3000, G.stacked * 250) + 1000);
+  // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
+  // 胜利时由结算面板 OK 按钮重启 (showSummary→okBtn, GameSprites.as:50-59)
+  if (!won) setTimeout(startGame, Math.min(3000, G.stacked * 250) + 1000);
+}
+
+// ---- 结算面板 (GameSprites.showSummary:48-59 + GameModel.getSummary:204-207 + Const.TIP_SUMMARY1-3/MSG_RESTART) ----
+function showSummary() {
+  G.records.populationRecord = Math.max(G.records.populationRecord, G.population); // GameModel.setPopulation
+  G.records.blockRecord = Math.max(G.records.blockRecord, G.stacked);              // setStackedBlocks
+  G.records.comboRecord = Math.max(G.records.comboRecord, G.comboMax);             // setComboMult
+  const line = (label, v, rec) => label + v + (rec ? '  New record!' : '');        // Const.TIP_SUMMARY_REC
+  hud.summary.innerHTML =
+    '<div class="t">' + hud.msg.textContent + '</div>' +
+    '<div>' + line('Population: ', G.population, G.population >= G.records.populationRecord && G.population > 0) + '</div>' +
+    '<div>' + line('Tower height:  ', G.stacked, G.stacked >= G.records.blockRecord && G.stacked > 0) + '</div>' +
+    '<div>' + line('Longest combo: ', G.comboMax, G.comboMax >= G.records.comboRecord && G.comboMax > 0) + '</div>' +
+    '<div class="ok">Click here to play again</div>';                               // Const.MSG_RESTART
+  hud.summary.style.display = 'block';
+  hud.summary.querySelector('.ok').onclick = () => { startGame(); };
 }
 const toppled = [];
 
@@ -200,8 +235,9 @@ function blockLanded(offset, releaseBdx) {
 
   // landOnTower (Tower.as:169-261)
   const onGround = G.landingY === 0;               // onGround: 地基块, 不结算人口
+  const isRoof = needRoof(G.stacked);              // 屋顶块 frame>=3 → _loc5_=false
   let x = offset;
-  const perfect = !onGround && abs < TOON_LIMIT_1; // _loc5_(frame<3) && |offset|<TOON_LIMIT_1
+  const perfect = !onGround && !isRoof && abs < TOON_LIMIT_1; // _loc5_(frame<3) && |offset|<TOON_LIMIT_1
   if (Math.abs(offset) < TOON_LIMIT_1) { x = 0; G.towerBdx = 0; } // 完美吸附: blockx=currCtr, 塔身倾斜清零 (Tower.as:208-210)
   else x = offset;
   const tpl = blockTemplate(G.stacked);
@@ -212,12 +248,20 @@ function blockLanded(offset, releaseBdx) {
   towerGroup.add(mesh);
   mesh.position.set(cx - tpl.userData.cx, G.landingY - tpl.userData.cy, 0);
   // 连击: 落地时 comboMult!=0 → +1 (Tower.as:233); 完美落地重置计时 (perfectLanding→ComboTimer.setTimer)
-  if (G.comboMult !== 0) G.comboMult++;
+  if (G.comboMult !== 0) { G.comboMult++; G.comboMax = Math.max(G.comboMax, G.comboMult); } // Tower.as:233 + GameModel.as:192
   if (perfect) comboSetTimer();
   else if (G.comboMult !== 0) comboAddTimer(-COMBO_ADJ); // Tower.as:222-224 addToTimer(-COMBO_ADJ_FACTOR)
-  // 人口: makePeople 4/3/2/1 按 |offset| 分级 (Tower.as:252-261); 地基块不结算
-  const pop = onGround ? 0 : perfect ? 4 : abs < TOON_LIMIT_2 ? 3 : abs < TOON_LIMIT_3 ? 2 : 1;
+  // 人口 (Tower.makePeople:252-261): 地基块不结算; 屋顶块走 roof 换算
+  let pop;
+  if (onGround) pop = 0;
+  else if (isRoof) {
+    let a = 128 - abs * 256 / BLOCK_H;                       // makePeople roof: aoff = 128 - aoff*256/BLOCK_H
+    pop = G.trophyRoof ? Math.floor(a * (G.currColor + 1) / 2)   // trophy: floor(aoff*(currColor+1)/2)
+                       : Math.floor(a / (5 - (G.currColor + 1))); // 普通: floor(aoff/(5-(currColor+1)))
+    pop = Math.max(0, pop);
+  } else pop = perfect ? 4 : abs < TOON_LIMIT_2 ? 3 : abs < TOON_LIMIT_3 ? 2 : 1;
   if (pop > 0) changePopulation(pop);
+  updateCleanTower();                            // GameModel.updateCleanTower
   tipperIncSway(offset);
   G.blocks.push({ mesh, cx: tpl.userData.cx, pop });
   G.landingY += BLOCK_H;
@@ -227,7 +271,7 @@ function blockLanded(offset, releaseBdx) {
   G.stacked++;
   panUp();
   addHud();
-  if (G.stacked >= TOTAL_BLOCKS) gameOver(true);
+  if (G.totalBlocks !== 999 && G.stacked >= G.totalBlocks) gameOver(true); // CityMap 目标高度
 }
 
 function knockTopBlock() { // Tower.knockNextBlock
@@ -239,6 +283,10 @@ function knockTopBlock() { // Tower.knockNextBlock
   const under = G.blocks[G.blocks.length - 1];
   if (under) G.currCtr = under.mesh.position.x + under.cx; // currCtr = 新顶块中心
   G.population = Math.max(0, G.population - (top.pop || 0));
+}
+
+function updateCleanTower() { // GameModel.as:181
+  G.cleanTower = G.currColor <= 0 || G.population >= TROPHY_POP_LIMITS[G.currColor];
 }
 
 // ---- Tipper.incSway / updateTower ----
@@ -269,6 +317,7 @@ function changePopulation(inc) {
 // ---- combo: ComboTimer.as:28-46 (setTimer/addToTimer, 上限 TIMER_MAX+1 秒) + perfectLanding 公式 (Tower.as:330-334) ----
 function comboSetTimer() {
   if (G.comboMult === 0) G.comboMult = 1;       // ComboTimer.setTimer
+  G.comboMax = Math.max(G.comboMax, G.comboMult); // GameModel.as:192 comboMax
   const secs = Math.max(COMBO_ADJ, COMBO_SECS - G.comboMult * COMBO_ADJ); // perfectLanding
   G.comboT = Math.min((TIMER_MAX + 1) * 1000 - 1, secs * 1000);
 }
@@ -360,6 +409,7 @@ function loop(now) {
 
     // 挂钩待放积木 (Crane.updateBlock: targetSpr 随钩, _rotation = -(endx-320)/5 度, 挂点 hook.y+100)
     if (ready && !G.falling && !G.over && G.hangingFor !== G.stacked) {
+      if (needRoof(G.stacked)) G.trophyRoof = G.cleanTower; // Crane.setTarget: trophyRoof = needRoof && cleanTower
       if (G.hanging) craneGroup.remove(G.hanging);
       const tpl = blockTemplate(G.stacked);
       G.hanging = tpl.clone();
@@ -368,7 +418,7 @@ function loop(now) {
       craneGroup.add(G.hanging);
     }
     if (G.hanging) {
-      G.hanging.position.set(-G.hanging.userData.cx ?? 0, -60 - (G.hanging.userData.cy || 0), 0);
+      G.hanging.position.set(-(G.hanging.userData.cx || 0), -60 - (G.hanging.userData.cy || 0), 0);
       G.hanging.rotation.z = THREE.MathUtils.degToRad(-((craneGroup.position.x + STAGE_W/2) - TOWER_START_X) / 5);
     }
 

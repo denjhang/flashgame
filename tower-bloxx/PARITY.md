@@ -20,16 +20,16 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 3 条命/miss/knock 扣命 | ✅ | Tower.as:139-176 / Const.NUM_TRIES | |
 | 无尽模式 totalBlocks=999 | ✅ | GameState.as:97 | |
 
-## 2. 塔楼目标与屋顶（quick/city 共用）——❌ 大部缺失 [P0]
+## 2. 塔楼目标与屋顶（quick/city 共用）——✅ 机制闭环（2026-09-29）
 
-- ❌ 目标高度：城市模式 `totalBlocks=(type+1)*10`（CityMap.as:508），HUD 左下显示目标高度
-- ❌ 屋顶块：`needRoof`（Crane.as:209 stacked==total-1）→ 块外观 frame3/4；落屋顶人口按
-  `aoff*128/BLOCK_H` 折算（Tower.as:252-261 roof 分支），放得越正人越多
-- ❌ 奖杯屋顶 trophyRoof：cleanTower（人口≥TROPHY_TOWER_POP_LIMITS[currColor]，Const:220）
-  时给特殊屋顶（frame4），人口加成（Tower.as:255-260）
-- ❌ GAME_WON 结算：塔完成 → panDown 展示全塔（Tower.as:152）→ 结算面板
-  （GameSprites.showSummary: 人口/塔高/最长连击 + "New record!"，Const.TIP_SUMMARY1-3）
-- ❌ tries 用尽但塔未达标：楼仍可无屋顶放入城市（TIP_OUT_OF_TRIES）
+- ✅ 目标高度：`?mode=tower` → `totalBlocks=(type+1)*10`（CityMap.as:508）；快速游戏仍 999 无尽
+- ✅ 屋顶块：needRoof（Crane.as:209）→ 专用模板 mesh253/254；人口按 `128-aoff*256/BLOCK_H`
+  折算（Tower.as:252-261 roof 分支，trophy 除数 (currColor+1)/2）
+- ✅ 奖杯屋顶 trophyRoof：needRoof && cleanTower（Crane.setTarget；cleanTower=人口≥
+  TROPHY_TOWER_POP_LIMITS[currColor]，GameModel.as:181）→ mesh254 放大 variant（3D 替代外观）
+- ✅ GAME_WON 结算：showSummary 面板 人口/塔高/最长连击 + New record!（GameSprites.showSummary:48-59,
+  GameModel.getSummary:204-207, Const.TIP_SUMMARY_REC/MSG_RESTART），OK 点击重开
+- ⬜ tries 用尽未达标仍可无屋顶入城（TIP_OUT_OF_TRIES）——依赖城市模式，归入第 3 节
 
 ## 3. Build City 城市模式——❌ 整体缺失 [P0]
 
