@@ -19,6 +19,14 @@ const NUM_TRIES = 3;            // Const.NUM_TRIES
 const TOTAL_BLOCKS = new URLSearchParams(location.search).get('mode') === 'tower' ? 10 : 999;
 const CURR_COLOR = TOTAL_BLOCKS === 999 ? 3 : 0;
 const TROPHY_POP_LIMITS = [70, 250, 550, 1000]; // Const.TROPHY_TOWER_POP_LIMITS
+const CITY_MODE = new URLSearchParams(location.search).get('mode') === 'city';
+const TOWER_GRID_TOWERS = 5, TOWER_GRID_PARAMS = 3;              // Const.TOWER_GRID_*
+const CITY_MAP_CELL = 52;                                        // Const.CITY_MAP_CELL_W/H
+const CITY_LEVEL_LIMITS = [0,75,150,250,400,600,800,1000,1400,1800,2200,3000,4000,5000,6500,8000,9500,11500,14000,17000,19000]; // Const
+const TOWER_UNLOCK_LIMITS = [0,3,6,10];                          // Const
+const CITY_TYPES = ['Tiny Town','Small Town','Town','Small City','Medium City','Big City','Capital','Metropolis','Megalopolis'];
+const TOWER_TYPE_NAMES = ['Residential Tower','Commercial Tower','Office Tower','Luxury Tower']; // Const.TOWER_TYPES
+const TOWER_TYPE_COLORS = ['#4a90d9','#d94a4a','#7aa04a','#d9c04a'];
 const SWAY_MAX_ANGLE = 1;       // Const.SWAY_MAX_ANGLE (度, GameModel:239 上限)
 const TIMER_MAX = 5;            // Const.TIMER_MAX (ComboTimer 计时上限 TIMER_MAX+1 秒)
 const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
@@ -26,6 +34,15 @@ const DROP_G = 0.0045;          // 落块加速度 (px/ms^2, 调校值, 对应�
 const CRANE_FPS = 30;           // Flash 帧率: blockDx 以 px/帧 计 (Crane.animate dx=endx-lastX)
 
 restoreModel();
+// sm_unlockedTowerType 由城市人口推导 (Const.TOWER_UNLOCK_LIMITS; GameModel.updateCityLevelAndUnlockedTypes)
+{
+  let pop = G.save.sm_totalPopulation || 0;
+  let lv = 0;
+  for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (pop >= CITY_LEVEL_LIMITS[i]) lv = i; // :286-293
+  G.sm_cityLevel = lv;
+  G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
+  G.sm_totalPopulation = pop;
+}
 
 const stage = document.getElementById('stage');
 const hud = {
@@ -35,6 +52,10 @@ const hud = {
   progress: document.getElementById('progress'), tries: document.getElementById('tries'),
   btnMusic: document.getElementById('btnMusic'), btnSound: document.getElementById('btnSound'),
   btnExit: document.getElementById('btnExit'),
+  city: document.getElementById('city'), cityGrid: document.getElementById('cityGrid'),
+  cityMenu: document.getElementById('cityMenu'), cityLevel: document.getElementById('cityLevel'),
+  cityPop: document.getElementById('cityPop'), cityProgressFill: document.getElementById('cityProgressFill'),
+  cityStatus: document.getElementById('cityStatus'), cityHint: document.getElementById('cityHint'),
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -150,10 +171,151 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   hookPlane.position.set(0, 0, 5);
   ready = true;
   window.__ready = true;
+  if (CITY_MODE) { stopGameVisual(); showCity(); playSong('sng_city'); } // GameState STT_CITY
   window.__tpl = templates.map(t => ({ n: t.name, s: +t.userData.s.toFixed(3), cx: +t.userData.cx.toFixed(1), cy: +t.userData.cy.toFixed(1), kid: t.geometry?.attributes?.position?.count }));
   window.__dbg = { drops: 0, lands: [] };
   startGame();
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
+
+// ---- Build City: CityMap/GameModel 对号 ----
+function getTowerColor(col, row) { // GameModel.as:48-52 (0=空, 1..4=色)
+  const v = G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 0];
+  return (v >= 0 && v < 5) ? v : 0;
+}
+function getTowerPop(col, row) { // GameModel.as:58-62
+  const v = G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 1];
+  return v < 0 ? 0 : (v || 0);
+}
+function setTowerInfo(col, row, pop, color, roof) { // GameModel.as:63-69 (color 存 type+1)
+  const i = (row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS;
+  G.save.sm_towerGridData[i + 1] = pop;
+  G.save.sm_towerGridData[i + 0] = color;
+  G.save.sm_towerGridData[i + 2] = roof;
+}
+function calcCityPop() { // CityMap.as:540-556
+  let sum = 0;
+  for (let r = 0; r < TOWER_GRID_TOWERS; r++)
+    for (let c = 0; c < TOWER_GRID_TOWERS; c++) sum += getTowerPop(c, r);
+  return sum;
+}
+function updateAllowedTowerTypes() { // CityMap.as:569-632: 邻接色 1/2/3 决定允许色
+  const has = [false, false, false];
+  for (let row = 0; row < TOWER_GRID_TOWERS; row++)
+    for (let col = 0; col < TOWER_GRID_TOWERS; col++) {
+      has[0] = has[1] = has[2] = false;
+      const nb = [];
+      if (col - 1 >= 0) nb.push(getTowerColor(col - 1, row));
+      if (col + 1 < TOWER_GRID_TOWERS) nb.push(getTowerColor(col + 1, row));
+      if (row - 1 >= 0) nb.push(getTowerColor(col, row - 1));
+      if (row + 1 < TOWER_GRID_TOWERS) nb.push(getTowerColor(col, row + 1));
+      for (const c of nb) if (c > 0 && c < 4) has[c - 1] = true;
+      let a = 0;
+      if (has[0] && has[1] && has[2]) a = 3;
+      else if (has[0] && has[1]) a = 2;
+      else if (has[0]) a = 1;
+      G.sm_towerGridTypesAllowed[row * TOWER_GRID_TOWERS + col] = a;
+    }
+}
+function isValid(col, row, color) { // CityMap.as:561-567
+  if (col < 0 || col >= 5 || row < 0 || row >= 5) return false;
+  return G.sm_towerGridTypesAllowed[row * TOWER_GRID_TOWERS + col] >= color;
+}
+function updateCityLevelAndUnlockedTypes() { // GameModel.as:281-293 + TOWER_UNLOCK_LIMITS
+  G.sm_totalPopulation = calcCityPop();
+  let lv = 0;
+  for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (G.sm_totalPopulation >= CITY_LEVEL_LIMITS[i]) lv = i;
+  G.sm_cityLevel = lv;
+  G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
+}
+// 进入城市视图 / 渲染
+function showCity() {
+  stopGameVisual();
+  updateAllowedTowerTypes();
+  updateCityLevelAndUnlockedTypes();
+  renderCity();
+  hud.city.style.display = 'block';
+}
+function renderCity() {
+  hud.cityLevel.textContent = 'Lv.' + G.sm_cityLevel + '/20 ' + (CITY_TYPES[Math.min(8, Math.floor(G.sm_cityLevel / 2.5))] || '');
+  hud.cityPop.textContent = '👥 ' + G.sm_totalPopulation;
+  const base = CITY_LEVEL_LIMITS[G.sm_cityLevel], next = CITY_LEVEL_LIMITS[Math.min(20, G.sm_cityLevel + 1)];
+  hud.cityProgressFill.style.width = G.sm_cityLevel >= 20 ? '100%'
+    : (100 * (G.sm_totalPopulation - base) / (next - base)) + '%'; // GameModel.as:299-311 (338px 条)
+  hud.cityGrid.innerHTML = '';
+  for (let row = 0; row < TOWER_GRID_TOWERS; row++)
+    for (let col = 0; col < TOWER_GRID_TOWERS; col++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const color = getTowerColor(col, row), pop = getTowerPop(col, row);
+      if (color > 0) {
+        const tw = document.createElement('div');
+        tw.className = 'tower';
+        tw.style.height = Math.min(48, 10 + Math.log2(1 + pop) * 6) + 'px';
+        tw.style.background = TOWER_TYPE_COLORS[color - 1];
+        tw.textContent = pop;
+        if (G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 2] > 0)
+          tw.textContent = '★' + pop; // 屋顶帧
+        cell.appendChild(tw);
+      } else if (isValid(col, row, G.selectedType) && G.selectedType >= 0) {
+        cell.classList.add('ok'); // updateCellHighlights: 可建格高亮
+      }
+      cell.onclick = () => cityCellClick(col, row);
+      hud.cityGrid.appendChild(cell);
+    }
+  hud.cityMenu.innerHTML = '';
+  for (let t = 0; t < 4; t++) {
+    const locked = t > G.sm_unlockedTowerType;
+    const sel = document.createElement('div');
+    sel.className = 'sel' + (locked ? ' locked' : '') + (G.selectedType === t ? ' active' : '');
+    sel.innerHTML = `<div class="sw" style="background:${TOWER_TYPE_COLORS[t]}"></div>` +
+      (locked ? '🔒 Lv.' + TOWER_UNLOCK_LIMITS[t] : TOWER_TYPE_NAMES[t].split(' ')[0]);
+    sel.onclick = () => {
+      if (locked) return;
+      sndClick();
+      G.selectedType = t;
+      renderCity();
+    };
+    hud.cityMenu.appendChild(sel);
+  }
+  hud.cityHint.textContent = '选塔型 → 点网格建造（目标 ' + '高度 ' + '10 层/塔）。邻接规则：红需蓝邻，绿需蓝+红，黄需蓝+红+绿（Const.STATUS_CITY_RULES）';
+}
+function cityCellClick(col, row) {
+  if (G.selectedType < 0) return;
+  if (!isValid(col, row, G.selectedType)) { showCityStatus("You can't place the tower here."); return; } // STATUS_PLACE_TOWER3
+  G.pendingCell = { col, row };
+  // buildTower (CityMap.as:505-513): totalBlocks=(type+1)*10, currColor=type
+  G.totalBlocks = (G.selectedType + 1) * 10;
+  G.currColor = G.selectedType;
+  hud.city.style.display = 'none';
+  startGame();
+}
+function showCityStatus(txt) {
+  hud.cityStatus.textContent = txt;
+  setTimeout(() => { hud.cityStatus.textContent = ''; }, 3000);
+}
+// 建造结束回城放置 (CityMap.placeInMap:411-460: setTowerInfo→calcCityPop→level/unlock→saveModel)
+function finishCityTower(won) {
+  if (!G.pendingCell) { startGame(); return; }
+  const { col, row } = G.pendingCell;
+  playSound(getTowerPop(col, row) === 0 ? 'snd_foundation' : 'snd_destroy'); // placeInMap:425-429
+  setTowerInfo(col, row, G.population, G.currColor + 1, won ? 1 : 0);        // 屋顶帧: 胜 1 败 0
+  const before = G.sm_totalPopulation;
+  G.sm_totalPopulation = calcCityPop();                                      // :447
+  const diff = G.sm_totalPopulation - before;
+  showCityStatus(diff > 0 ? 'Population increased by ' + diff + ' citizens!'
+    : diff < 0 ? 'Population decreased by ' + diff + ' citizens.'
+    : 'The new building had no effect on overall population.');              // STATUS_POP_INC*
+  updateCityLevelAndUnlockedTypes();
+  G.pendingCell = null; G.selectedType = -1;
+  saveModel();
+  hud.msg.style.display = 'none';
+  showCity();
+}
+// 城市模式下停掉玩法可视化 (原版 MODE_HIDE_CITY)
+function stopGameVisual() {
+  craneGroup.visible = false;
+  if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
+}
 
 function needRoof(i) { // Crane.as:209: stacked>0 && stacked==totalBlocks-1
   return G.totalBlocks !== 999 && i > 0 && i === G.totalBlocks - 1;
@@ -186,6 +348,10 @@ const G = {
   camY: 0,
   over: false,
   totalBlocks: TOTAL_BLOCKS, currColor: CURR_COLOR,
+  cityMode: CITY_MODE,
+  pendingCell: null, selectedType: -1,
+  sm_towerGridTypesAllowed: new Array(25).fill(0),
+  sm_cityLevel: 0, sm_unlockedTowerType: 0, sm_totalPopulation: 0,
   cleanTower: false, trophyRoof: false,          // GameModel.updateCleanTower / Crane.setTarget
   comboMax: 0,                                    // GameModel.setComboMax
   records: Object.assign({ populationRecord: 0, blockRecord: 0, comboRecord: 0 },
@@ -251,8 +417,11 @@ function gameOver(won) {
   }
   // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
   // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
-  // 胜利时由结算面板 OK 按钮重启 (showSummary→okBtn, GameSprites.as:50-59)
-  if (!won) setTimeout(startGame, Math.min(3000, G.stacked * 250) + 1000);
+  if (!won) {
+    if (G.cityMode && G.pendingCell) { // 0 命未达目标: 楼仍无屋顶入城 (TIP_OUT_OF_TRIES)
+      setTimeout(() => finishCityTower(false), Math.min(3000, G.stacked * 250) + 1000);
+    } else setTimeout(startGame, Math.min(3000, G.stacked * 250) + 1000);
+  }
 }
 
 // ---- 结算面板 (GameSprites.showSummary:48-59 + GameModel.getSummary:204-207 + Const.TIP_SUMMARY1-3/MSG_RESTART) ----
@@ -271,7 +440,9 @@ function showSummary() {
     '<div>' + line('Longest combo: ', G.comboMax, G.comboMax >= G.records.comboRecord && G.comboMax > 0) + '</div>' +
     '<div class="ok">Click here to play again</div>';                               // Const.MSG_RESTART
   hud.summary.style.display = 'block';
-  hud.summary.querySelector('.ok').onclick = () => { startGame(); };
+  hud.summary.querySelector('.ok').onclick = () => {
+    if (G.cityMode && G.pendingCell) finishCityTower(true); else startGame();
+  };
 }
 const toppled = [];
 
@@ -482,7 +653,7 @@ function showMsg(txt, color) {
 
 // ---- 输入 ----
 function drop() {
-  if (!ready || G.over || G.falling || !craneGroup.visible) return;
+  if (!ready || G.over || G.falling || !craneGroup.visible || hud.city.style.display === 'block') return;
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);

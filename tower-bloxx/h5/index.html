@@ -17,6 +17,24 @@
   #btns{position:absolute;top:14px;right:14px;pointer-events:auto;}
   #btns span{display:block;margin:6px 0;padding:2px 6px;background:#00000066;border-radius:4px;cursor:pointer;font-size:15px;}
   #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;}
+  #city{position:absolute;inset:0;background:#8fb6d8;display:none;}
+  #cityHead{position:absolute;top:0;left:0;right:0;padding:6px 10px;background:#00000033;font-size:14px;}
+  #cityProgressBar{position:absolute;top:12px;left:110px;width:338px;height:10px;background:#00000055;}
+  #cityProgressFill{height:100%;background:#f80;width:0;}
+  #cityStatus{position:absolute;top:30px;left:110px;right:10px;font-size:12px;color:#ffe27a;}
+  #cityGrid{position:absolute;left:64px;top:110px;display:grid;grid-template-columns:repeat(5,52px);
+    grid-template-rows:repeat(5,52px);gap:2px;cursor:pointer;}
+  #cityGrid .cell{background:#6f97b8;border:1px solid #467;position:relative;}
+  #cityGrid .cell.ok{outline:2px solid #ffd700;}
+  #cityGrid .tower{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:34px;
+    display:flex;align-items:flex-end;justify-content:center;font-size:9px;color:#fff;text-shadow:1px 1px 1px #000;}
+  #cityMenu{position:absolute;left:10px;bottom:20px;display:flex;gap:6px;}
+  #cityMenu .sel{width:64px;height:80px;border:2px solid #234;border-radius:4px;background:#dfe8f0;
+    cursor:pointer;text-align:center;font-size:11px;padding-top:4px;}
+  #cityMenu .sel .sw{width:26px;height:26px;margin:6px auto;border-radius:3px;}
+  #cityMenu .sel.locked{opacity:.35;cursor:default;}
+  #cityMenu .sel.active{border-color:#ffd700;}
+  #cityHint{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;opacity:.75;}
   #hint{position:absolute;bottom:8px;width:100%;text-align:center;font-size:13px;opacity:.7;}
 </style>
 <script>window.__errs=[];addEventListener('error',e=>__errs.push(e.message+' @ '+e.filename+':'+e.lineno));addEventListener('unhandledrejection',e=>__errs.push('rej: '+e.reason));</script>
@@ -37,6 +55,17 @@
     <div id="btns"><span id="btnMusic">♪</span><span id="btnSound">🔊</span><span id="btnExit">✕</span></div>
     <div id="msg"></div>
     <div id="hint">点击 / 空格 放下积木 · 还原自原版 Tower Bloxx（J2ME 3D 资产）</div>
+  </div>
+  <div id="city">
+    <div id="cityHead">
+      <span id="cityLevel">0/20</span>
+      <span id="cityPop">0</span>
+      <div id="cityProgressBar"><div id="cityProgressFill"></div></div>
+      <div id="cityStatus"></div>
+    </div>
+    <div id="cityGrid"></div>
+    <div id="cityMenu"></div>
+    <div id="cityHint"></div>
   </div>
 </div>
 <script type="module" src="./game.js"></script>

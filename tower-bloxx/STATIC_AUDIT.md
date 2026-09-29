@@ -144,3 +144,13 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   tipFlags, GameModel.restoreModel/saveModel:82-108）
 - 纪录三项持久化（twrblx_records; 原版仅会话内, H5 跨会话）+ 音乐/音效偏好持久化
 - smoke_test 16/16
+
+## 第 15 轮（2026-09-29）— PARITY 推进 #7：城市模式机制闭环
+
+- ?mode=city: 5×5 网格视图 + 塔型选择（4 型按城市等级解锁, TOWER_UNLOCK_LIMITS）+
+  邻接规则 allowed 表（CityMap.updateAllowedTowerTypes 全对号）+ isValid 校验
+- 建造流程: buildTower(totalBlocks=(type+1)*10) → 复用 3D 玩法 → 胜/负都入城放置
+  （胜负差: 屋顶帧; placeInMap 全链: setTowerInfo/calcCityPop/STATUS_POP_INC/saveModel）
+- 城市等级/进度条（CITY_LEVEL_LIMITS 20 级, GameModel.as:281-318）; 存档 sm_towerGridData 真实写入
+- 城市视图为 CSS 简排（city_spr 原版美术待导出, 已记 PARITY）
+- smoke_test 16/16

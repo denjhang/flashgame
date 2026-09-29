@@ -31,7 +31,21 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   GameModel.getSummary:204-207, Const.TIP_SUMMARY_REC/MSG_RESTART），OK 点击重开
 - ⬜ tries 用尽未达标仍可无屋顶入城（TIP_OUT_OF_TRIES）——依赖城市模式，归入第 3 节
 
-## 3. Build City 城市模式——❌ 整体缺失 [P0]
+## 3. Build City 城市模式——🟨 机制闭环（2026-09-29, 视觉用 CSS 简排, city_spr 原版美术待导）[P0]
+
+- ✅ 5×5 网格（CITY_MAP_CELL=52px）+ 放置校验 isValid（CityMap.as:561-567）
+- ✅ 邻接解锁 allowed 表（CityMap.updateAllowedTowerTypes:569-632: 红1需蓝邻, 绿2需蓝+红, 黄3需蓝+红+绿）
+- ✅ 塔型选择/锁（TOWER_UNLOCK_LIMITS=[0,3,6,10] 按城市等级, buildTower:505-513
+  totalBlocks=(type+1)*10, currColor=type）
+- ✅ placeInMap 全链（CityMap.as:411-460: setTowerInfo(color=type+1/roof帧)→calcCityPop→
+  增减人口状态文本(STATUS_POP_INC*)→updateCityLevelAndUnlockedTypes→saveModel→空地foundation/重建destroy音）
+- ✅ 城市等级/进度条（GameModel.as:281-318, CITY_LEVEL_LIMITS 20 级, 338px 条）
+- ✅ 0 命未达标 → 无屋顶入城（TIP_OUT_OF_TRIES）
+- ⬜ 升格称号提示（CITY_TYPES 9 级 + CITY_PROMOTION_LEVELS 提示队列）
+- ⬜ 20 里程碑提示（TIP_MS1a/MSa）
+- ⬜ 替换对比人口 UI（TIP_CITY_COMPARE）
+- ⬜ dozer 拆除位（placeInDozer:398）
+- ⬜ city_spr 原版美术（现为 CSS 简排）
 
 证据：CityMap.as 全文 + Const.as:67-71/103/117-119/216-220。
 
