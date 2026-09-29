@@ -47,6 +47,7 @@ const hud = {
   cityStatus: document.getElementById('cityStatus'), cityHint: document.getElementById('cityHint'),
   titleScr: document.getElementById('titleScr'), menuScr: document.getElementById('menuScr'),
   menuSub: document.getElementById('menuSub'),
+  hudEl: document.getElementById('hud'),   // 真实 HUD 容器 (浮字 append 用, hud 对象本身是引用表)
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -834,7 +835,7 @@ function popFloat(txt, life = 1200) { // bonus_spr 在 (321,31) 人口 HUD 中�
   m.textContent = txt;
   m.style.cssText = `position:absolute;top:64px;right:52px;color:#ffe27a;font-size:16px;font-weight:bold;` +
     `text-shadow:1px 1px 2px #000;transition:opacity ${life}ms;`;
-  hud.appendChild(m);
+  hud.hudEl.appendChild(m);
   setTimeout(() => { m.style.opacity = '0'; }, life * 0.3);
   setTimeout(() => m.remove(), life + 50);
 }
@@ -842,7 +843,7 @@ function popFloat(txt, life = 1200) { // bonus_spr 在 (321,31) 人口 HUD 中�
 function showMsg(txt, color) {
   const m = document.createElement('div');
   m.textContent = txt; m.style.cssText = `position:absolute;top:30%;left:50%;transform:translateX(-50%);color:${color};font-size:28px;font-weight:bold;text-shadow:1px 1px 2px #000;transition:all .8s;opacity:1;`;
-  hud.appendChild(m);
+  hud.hudEl.appendChild(m);
   requestAnimationFrame(() => { m.style.top = '15%'; m.style.opacity = '0'; });
   setTimeout(() => m.remove(), 900);
 }

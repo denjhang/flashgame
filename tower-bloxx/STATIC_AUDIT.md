@@ -201,3 +201,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - [P2] startGame 未清理上一局残留精灵 (people/sparks/fallingPeople/toppled) → 已清。
 - smoke_test 新增断言: `restoreModel()` 调用必须在 `const G` 声明之后 (17 项 PASS)。
 - 教训: 纯静态冒烟测不出加载期崩溃; 后续重大补丁后应尽量做模块级执行验证。
+
+## 第 21 轮（2026-09-29）— 模块级执行测试落地, 再修一个真 bug
+
+- 新增 h5/exec_test.js: stub DOM/WebGL(three 垫片覆盖 WebGLRenderer)/Audio/fetch(fs+Response)/
+  ImageLoader(img onload), 真正 import game.js 跑 1800+ 帧 + 模拟放块
+- 立刻抓到真 bug: popFloat/showMsg 用 hud.appendChild (hud 是引用表非 DOM 元素),
+  浏览器里首次成功落块即 TypeError → 修复为 hudEl(#hud) 容器
+- ?mode=tower 直入跑完整闭环: 10 块落地含屋顶/过关/结算, 无异常
+- smoke_test 17/17; 执行测试纳入验证体系 (node exec_test.js)
