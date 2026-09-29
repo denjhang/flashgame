@@ -72,11 +72,12 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   连击银行支付 "Combo bonus! +N" 3000ms（GameSprites.showBonusPopulation:361-369 + Const.MSG_COMBO）
 - ❌ 菜单流：splash→title→menu（GameState.as:53-257 状态机）、Instructions 三页、About、
   High Scores、Reset 确认弹窗——依赖城市模式，保持在清单末位
-- ❌ 菜单流：splash→title→menu（Build City/Quick Game/Instructions/High Scores/About），
-  GameState.as:53-257 全状态机；H5 直接进游戏无任何菜单
-- ❌ Instructions 三页（TIP_INSTR_QUICK/BUILD/INTRO 文案齐全）、About（版本版权）
-- ❌ High Scores（HighScore.as + Local/NetworkProxy；H5 可本地 top10）
-- ❌ Reset 确认弹窗（STT_RESET_MAP_*）
+- ✅ 菜单流：title→menu（原版 title_spr/menu_spr 位图 + makeMenuSprites:341-355 按钮坐标）
+  Build City→城市 / Quick Game→无尽 / Reset Map→确认弹窗（STT_RESET_MAP_YES/NO）/
+  Instructions（Quick Game/Build City/About 三页, TIP_INSTR*/TIP_ABOUT 全文）/
+  High Scores（本地 top10, HighScoreLocalProxy 语义）；无 URL 参数时从 title 进入
+- ⬜ Get More Games/Mobile League/Tell a Friend 外链按钮（平台依赖, 有意不复刻）
+- ⬜ splash 素材（828_splash_spr 已导出未接, portal logo 层）
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 

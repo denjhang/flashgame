@@ -56,6 +56,8 @@ const hud = {
   cityMenu: document.getElementById('cityMenu'), cityLevel: document.getElementById('cityLevel'),
   cityPop: document.getElementById('cityPop'), cityProgressFill: document.getElementById('cityProgressFill'),
   cityStatus: document.getElementById('cityStatus'), cityHint: document.getElementById('cityHint'),
+  titleScr: document.getElementById('titleScr'), menuScr: document.getElementById('menuScr'),
+  menuSub: document.getElementById('menuSub'),
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -74,6 +76,86 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.9));
 const sun = new THREE.DirectionalLight(0xffffff, 1.2);
 sun.position.set(0.4, 1, 1.5);
 scene.add(sun);
+
+
+// ---- 菜单流 (GameState.as:53-257 状态机; GameSprites.makeMenuSprites:341-355 按钮坐标) ----
+const TIP_TEXTS = { // Const.TIP_INSTR_QUICK/BUILD/INTRO/ABOUT (Const.as:74-82)
+  quick: "In the Quick Game mode your goal is to build as high and as stable a building as possible. At the bottom of the screen you'll see the current height of the building, how many tries you have left, and the current population of the building. The higher your building the more people you'll get for each placed block. The amount of people also depends on how well the block is placed. Centering a block perfectly on top of another will fill the combo meter. Placing more blocks before the meter empties will add to the combo, and perfect drops will refill the meter. Every block that's placed while a combo is active will increase the combo score. The combo score is added to the population score after the combo ends.",
+  build: "In Build City mode your goal is to create a thriving Megalopolis! Build towers and place them wisely in the city grid to reach the goal. Increasing your city's population and level will unlock new building types. In tower building mode you are aiming to reach a target height. The better you place the roof the more bonus you'll get. You have three chances to finish the tower, if you fail, the building can still be placed in the city without a roof.",
+  intro: "Left click anywhere on the screen with your mouse or press the spacebar or down arrow on your keyboard to drop the apartment blocks. You're allowed 3 misses before the construction is halted. The better you build the more people will move in. Good luck!",
+  about: "Tower Bloxx(TM) v.1.0. Copyright 2005-2007 Digital Chocolate, Inc. All Rights Reserved. www.DigitalChocolate.com. Flash version developed by Zero G Games (www.zeroggames.com)"
+};
+function showTitle() { // STT_TITLE
+  craneGroup.visible = false;
+  hud.titleScr.style.display = 'block';
+  playSong('sng_title');
+  hud.titleScr.onclick = () => { hud.titleScr.onclick = null; showMenu(); };
+}
+function showMenu() { // STT_MENU (makeMenuSprites:341-355)
+  hud.titleScr.style.display = 'none';
+  hud.menuSub.style.display = 'none';
+  stopGameVisual();
+  hud.menuScr.style.display = 'block';
+  playSong('sng_title');
+}
+function enterQuick() { // STT_QUICK (GameState.as:93-100): totalBlocks=999, currColor=3
+  G.cityMode = false; G.totalBlocks = 999; G.currColor = 3; G.pendingCell = null;
+  hud.menuScr.style.display = 'none';
+  craneGroup.visible = true;
+  startGame();
+}
+function enterCity() { // STT_CITY (GameState.as:86-92)
+  G.cityMode = true;
+  hud.menuScr.style.display = 'none';
+  showCity();
+  playSong('sng_city');
+}
+function showSub(html) { // 子页容器 (Instructions/About/HighScores)
+  hud.menuSub.innerHTML = '<span class="close">✕ close</span>' + html;
+  hud.menuSub.style.display = 'block';
+  hud.menuSub.querySelector('.close').onclick = () => { hud.menuSub.style.display = 'none'; };
+}
+function showInstructions(page) { // STT_INSTRUCTIONS + INSTR fork (GameSprites.as:322-330)
+  const fork = '<h3>Instructions</h3>' +
+    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="quick">Quick Game</div>' +
+    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="build">Build City</div>' +
+    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="about">About</div>';
+  if (page) showSub('<h3>Instructions — ' + page + '</h3><p>' + TIP_TEXTS[page].replace(/\r\r|\r/g, '<br><br>') + '</p>');
+  else {
+    showSub(fork);
+    hud.menuSub.querySelectorAll('[data-p]').forEach(el => {
+      el.onclick = () => showInstructions(el.dataset.p);
+    });
+  }
+}
+function showHighScores() { // STT_HIGHSCORES + HighScoreLocalProxy (本地 top10)
+  const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
+  const rows = hs.map((h, i) => '<div>' + (i + 1) + '. Population ' + h.pop + ' — height ' + h.h + ', combo x' + h.combo + '</div>').join('') || '<div>No scores yet.</div>';
+  showSub('<h3>High Scores</h3>' + rows);
+}
+function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET
+  showSub('<h3>Reset city?</h3><p>Reset the progress and population score in your city? (TIP_CONFIRM_RESET)</p>' +
+    '<div class="mbtn" style="position:static;display:inline-block;margin:8px;padding:6px 14px;border:1px solid #456" data-r="1">Yes</div>' +
+    '<div class="mbtn" style="position:static;display:inline-block;margin:8px;padding:6px 14px;border:1px solid #456" data-r="0">No</div>');
+  hud.menuSub.querySelectorAll('[data-r]').forEach(el => {
+    el.onclick = () => { // STT_RESET_MAP_YES/NO (GameState.as:242-248)
+      if (el.dataset.r === '1') {
+        G.save.sm_towerGridData = []; G.save.sm_totalPopulation = 0; saveModel();
+        updateCityLevelAndUnlockedTypes(); renderCity();
+      }
+      hud.menuSub.style.display = 'none';
+    };
+  });
+}
+function bindMenu() {
+  const b = (id, fn) => document.getElementById(id).addEventListener('click', e => { e.stopPropagation(); sndClick(); fn(); });
+  b('mBuild', enterCity);        // BTN_BUILD_CITY → STT_CITY (GameSprites.as:346)
+  b('mQuick', enterQuick);       // BTN_QUICK_GAME → STT_QUICK (:347)
+  b('mReset', showResetConfirm); // BTN_RESET_MAP → STT_RESET_MAP (:348)
+  b('mInstr', () => showInstructions()); // BTN_INSTRUCTIONS (:349)
+  b('mHS', showHighScores);      // BTN_HIGHSCORES (:350)
+}
+bindMenu();
 
 // ---- SoundManager: 音效/歌曲用 FFDec 从原版 SWF 导出的 mp3 (ExportAssets snd_*/sng_* 1:1) ----
 const SND = {};
@@ -171,7 +253,10 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   hookPlane.position.set(0, 0, 5);
   ready = true;
   window.__ready = true;
-  if (CITY_MODE) { stopGameVisual(); showCity(); playSong('sng_city'); } // GameState STT_CITY
+  // GameState 状态机入口: 无 URL 模式 → STT_TITLE (sng_title); 有 → 直接进对应场景
+  if (CITY_MODE) { showCity(); playSong('sng_city'); }
+  else if (TOTAL_BLOCKS !== 999) { /* ?mode=tower 直入 */ }
+  else showTitle();
   window.__tpl = templates.map(t => ({ n: t.name, s: +t.userData.s.toFixed(3), cx: +t.userData.cx.toFixed(1), cy: +t.userData.cy.toFixed(1), kid: t.geometry?.attributes?.position?.count }));
   window.__dbg = { drops: 0, lands: [] };
   startGame();
@@ -430,6 +515,11 @@ function showSummary() {
   G.records.blockRecord = Math.max(G.records.blockRecord, G.stacked);              // setStackedBlocks
   G.records.comboRecord = Math.max(G.records.comboRecord, G.comboMax);             // setComboMult
   localStorage.setItem('twrblx_records', JSON.stringify(G.records));
+  // HighScore 本地榜 (HighScoreLocalProxy): 按人口 top10
+  const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
+  hs.push({ pop: G.population, h: G.stacked, combo: G.comboMax });
+  hs.sort((a, b) => b.pop - a.pop);
+  localStorage.setItem('twrblx_highscores', JSON.stringify(hs.slice(0, 10)));
   G.save.sm_totalPopulation = Math.max(G.save.sm_totalPopulation, G.population); // 城市总人口占位(城市模式接入后为累计值)
   saveModel();
   const line = (label, v, rec) => label + v + (rec ? '  New record!' : '');        // Const.TIP_SUMMARY_REC
@@ -653,7 +743,9 @@ function showMsg(txt, color) {
 
 // ---- 输入 ----
 function drop() {
-  if (!ready || G.over || G.falling || !craneGroup.visible || hud.city.style.display === 'block') return;
+  if (!ready || G.over || G.falling || !craneGroup.visible ||
+      hud.city.style.display === 'block' || hud.menuScr.style.display === 'block' ||
+      hud.titleScr.style.display === 'block') return;
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);

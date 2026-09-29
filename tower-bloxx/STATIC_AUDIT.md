@@ -154,3 +154,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 城市等级/进度条（CITY_LEVEL_LIMITS 20 级, GameModel.as:281-318）; 存档 sm_towerGridData 真实写入
 - 城市视图为 CSS 简排（city_spr 原版美术待导出, 已记 PARITY）
 - smoke_test 16/16
+
+## 第 16 轮（2026-09-29）— PARITY 推进 #8：菜单流
+
+- title(原版 title_spr 位图+MSG_CLICK 闪烁)→menu(menu_spr 位图+makeMenuSprites 按钮坐标热区)
+- Build City / Quick Game 现场切换状态（STT_CITY/STT_QUICK 对号, 不再依赖 URL 参数）
+- Reset Map 确认弹窗（清网格存档）; Instructions 三页（TIP 全文）; High Scores 本地 top10
+  （HighScoreLocalProxy 语义, 结算自动入榜按人口排序）
+- 歌曲随状态切换: title/menu→sng_title, city→sng_city, 游戏→sng_tower
+- smoke_test 16/16
