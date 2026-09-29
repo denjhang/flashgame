@@ -56,3 +56,25 @@
 - [P3] 人口 HUD 增量文本 vs 总量（同上轮）。
 - [P3] MIDI 音乐。
 - [P3] `dropY` 400→340（Crane.as:201）只影响下落动画时长，不影响落点判定；H5 用物理加速近似，暂不动。
+
+## 第 3 轮（2026-09-29）
+
+对号范围：摇晃倾斜对落点测量的影响（Tower.as:118 + Utils.as:12-15）、knock 后计数（Tower.as:176）、
+gameOver 时序（Tower.as:152 + Const.GAME_OVER_DELAY/DUR_PAN_DOWN）、全常量复扫（无新偏差）。
+
+### 已修正
+
+| 级别 | 问题 | 原版证据 | 修正 |
+|---|---|---|---|
+| P1 | 落点测量未计入塔身摇晃的倾斜投影：塔越高歪得越多（20 层 × 1° ≈ 22px，接近 hitLimit 一半） | Tower.as:118 `_loc4_ = block._x - (tower._x + calcX(landingY, _rotation+90))`，Utils.as:14 `calcX = cos(rad(dir))·len` → 投影 = -h·sin(rot) | offset 改为 `blockX - (currCtr - h·sin(θ))` |
+| P2 | 撞塔掉顶块后 `stacked` 未递减（影响计分公式的 层数/10 项与倾斜公式输入） | Tower.as:176 `setStackedBlocks(stackedBlocks - 1)` | knockTopBlock 内 `G.stacked--` |
+| P3 | gameOver 重启延时固定 4000ms | Tower.as:152 `panDown(min(DUR_PAN_DOWN=3000, stacked×250))` + GAME_OVER_DELAY=1000 | 按层数动态延时 |
+
+### 遗留观察
+
+- [P2] roof 人口分支（同前，无尽模式不影响）。
+- [P3] 人口 HUD 增量文本 vs 总量。
+- [P3] MIDI 音乐。
+- [P3] `dropY` 动画时长（同前）。
+
+机制级（P1）差异已全部清零；剩余遗留均为低危/视觉/音频项。后续轮次如无代码变动将只做回归确认。

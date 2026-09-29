@@ -154,7 +154,8 @@ function gameOver(won) {
     }
     G.blocks = [];
   }
-  setTimeout(startGame, 4000);
+  // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
+  setTimeout(startGame, Math.min(3000, G.stacked * 250) + 1000);
 }
 const toppled = [];
 
@@ -234,6 +235,7 @@ function knockTopBlock() { // Tower.knockNextBlock
   top.vy = 0; top.vx = (Math.random() - 0.5) * 0.4; top.vr = 0.03;
   toppled.push(top);
   G.landingY -= BLOCK_H;
+  G.stacked--;                                   // Tower.as:176 setStackedBlocks(stackedBlocks - 1)
   const under = G.blocks[G.blocks.length - 1];
   if (under) G.currCtr = under.mesh.position.x + under.cx; // currCtr = 新顶块中心
   G.population = Math.max(0, G.population - (top.pop || 0));
@@ -331,7 +333,9 @@ function loop(now) {
       if (f.mesh.position.y + f.cy <= topY) {
         scene.remove(f.mesh);
         G.falling = null;
-        const offset = Math.round(f.mesh.position.x + f.cx - G.currCtr); // 块中心 - 塔顶中心
+        // 块中心 - 塔顶中心(含摇晃倾斜投影): Tower.as:118 calcX(landingY, rot+90) = -h*sin(rot)
+        const lean = Math.sin(towerGroup.rotation.z) * G.landingY;
+        const offset = Math.round(f.mesh.position.x + f.cx - (G.currCtr - lean));
         blockLanded(offset, f.bdx);
       }
     }
