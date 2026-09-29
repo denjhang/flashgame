@@ -33,6 +33,11 @@ const accOk = g.accessors.every(a => {
 check(accOk, 'accessor 越界检查');
 // 玩法常量对号 (Const.as)
 const src = fs.readFileSync(path.join(h5, 'game.js'), 'utf8');
+// 加载顺序: restoreModel() 必须在 const G 声明之后 (防 TDZ 崩溃, 第20轮教训)
+{
+  const gi = src.indexOf('const G = {'), ri = src.indexOf('restoreModel();');
+  check(gi >= 0 && ri > gi, 'restoreModel() 调用在 const G 声明之后');
+}
 check(/const CRANE_DUR = 2600/.test(src), '摆钩周期 CRANE_DUR=2600 (Const.as)');
 check(/const BLOCK_H = 64/.test(src), '积木高 BLOCK_H=64 (Const.as)');
 check(/const NUM_TRIES = 3/.test(src), '3 条命 NUM_TRIES=3 (Const.as)');

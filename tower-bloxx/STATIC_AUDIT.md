@@ -187,3 +187,17 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 塔型选择器/dozer 位置对齐原版左侧面板; 顺带发现并修复: 上轮全量导出清理时误删
   bg/dude/star 位图目录, 已按 chid 重导(231/423/426/753/772/783)
 - smoke_test 16/16; PARITY 除 3 项有意不复刻外链外全部 ✅
+
+## 第 20 轮（2026-09-29）— 深度自检：发现并修复加载期 P0 崩溃
+
+用户指出复读机式回归后, 本轮逐行重读 game.js, 发现严重问题:
+
+- [P0] 第12轮存档补丁把 `restoreModel()` 调用放在 `const G` 声明之前 → **TDZ ReferenceError,
+  模块加载即崩溃**。第12~19轮冒烟测试只做静态文件/常量检查, 未执行模块, 因此一直没发现
+  ——此前"可在浏览器游玩"的说法自第12轮起不成立, 特此勘误。
+- [P0] 启动流程: GLB 载入后无条件 `startGame()` → 强制显示吊钩+播放 sng_tower,
+  破坏标题屏/城市模式入口 (showTitle/showCity 之后又被覆盖)。改为 startGame 先行,
+  再按状态机切 showCity/showTitle。
+- [P2] startGame 未清理上一局残留精灵 (people/sparks/fallingPeople/toppled) → 已清。
+- smoke_test 新增断言: `restoreModel()` 调用必须在 `const G` 声明之后 (17 项 PASS)。
+- 教训: 纯静态冒烟测不出加载期崩溃; 后续重大补丁后应尽量做模块级执行验证。

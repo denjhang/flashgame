@@ -33,17 +33,6 @@ const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
 const DROP_G = 0.0045;          // 落块加速度 (px/ms^2, 调校值, 对应原版 ~0.55s 落程)
 const CRANE_FPS = 30;           // Flash 帧率: blockDx 以 px/帧 计 (Crane.animate dx=endx-lastX)
 
-restoreModel();
-// sm_unlockedTowerType 由城市人口推导 (Const.TOWER_UNLOCK_LIMITS; GameModel.updateCityLevelAndUnlockedTypes)
-{
-  let pop = G.save.sm_totalPopulation || 0;
-  let lv = 0;
-  for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (pop >= CITY_LEVEL_LIMITS[i]) lv = i; // :286-293
-  G.sm_cityLevel = lv;
-  G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
-  G.sm_totalPopulation = pop;
-}
-
 const stage = document.getElementById('stage');
 const hud = {
   pop: document.getElementById('pop'), lives: document.getElementById('lives'),
@@ -262,12 +251,12 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   ready = true;
   window.__ready = true;
   // GameState 状态机入口: 无 URL 模式 → STT_TITLE (sng_title); 有 → 直接进对应场景
-  if (CITY_MODE) { showCity(); playSong('sng_city'); }
+  startGame(); // 先完成状态/HUD 初始化
+  if (CITY_MODE) { stopGameVisual(); showCity(); playSong('sng_city'); }        // STT_CITY
   else if (TOTAL_BLOCKS !== 999) { /* ?mode=tower 直入 */ }
-  else showTitle();
+  else { stopGameVisual(); showTitle(); playSong('sng_title'); }                // STT_TITLE
   window.__tpl = templates.map(t => ({ n: t.name, s: +t.userData.s.toFixed(3), cx: +t.userData.cx.toFixed(1), cy: +t.userData.cy.toFixed(1), kid: t.geometry?.attributes?.position?.count }));
   window.__dbg = { drops: 0, lands: [] };
-  startGame();
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
 
 // ---- Build City: CityMap/GameModel 对号 ----
@@ -487,7 +476,19 @@ const G = {
   comboMax: 0,                                    // GameModel.setComboMax
   records: Object.assign({ populationRecord: 0, blockRecord: 0, comboRecord: 0 },
     JSON.parse(localStorage.getItem('twrblx_records') || '{}')), // 原版纪录仅会话内(GameModel.as:11-13), H5 持久化
+  save: null,
 };
+
+restoreModel();
+// sm_unlockedTowerType 由城市人口推导 (Const.TOWER_UNLOCK_LIMITS; GameModel.updateCityLevelAndUnlockedTypes)
+{
+  const pop = G.save.sm_totalPopulation || 0;
+  let lv = 0;
+  for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (pop >= CITY_LEVEL_LIMITS[i]) lv = i; // :286-293
+  G.sm_cityLevel = lv;
+  G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
+  G.sm_totalPopulation = pop;
+}
 
 const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr._rotation)
 scene.add(towerGroup);
@@ -517,6 +518,11 @@ function addHud() {
 
 function startGame() {
   for (const b of G.blocks) towerGroup.remove(b.mesh);
+  for (const q of G.people) towerGroup.remove(q.sp);          // 上一局残留清理
+  for (const q of G.sparks) scene.remove(q.sp);
+  for (const q of G.fallingPeople) scene.remove(q.sp);
+  for (const b of toppled) { towerGroup.remove(b.mesh); scene.remove(b.mesh); }
+  G.people = []; G.sparks = []; G.fallingPeople = []; toppled.length = 0;
   G.blocks = []; G.landingY = 0; G.currCtr = 0; G.towerBdx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
@@ -546,7 +552,6 @@ function gameOver(won) {
     }
     G.blocks = [];
   }
-  // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
   // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
   if (!won) {
     if (G.cityMode && G.pendingCell) { // 0 命未达目标: 楼仍无屋顶入城 (TIP_OUT_OF_TRIES)
