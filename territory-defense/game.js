@@ -1956,9 +1956,21 @@ function dlgShowLine() {
   const box = document.getElementById('dlgBox');
   if (!box || !dlg) return;
   const line = STORY[dlg.m][dlg.i];
-  document.getElementById('dlgWho').textContent = dlgSpeaker(line[0]);
+  const code = line[0];
+  document.getElementById('dlgWho').textContent = dlgSpeaker(code);
   document.getElementById('dlgTxt').textContent = line[1];
   document.getElementById('dlgNext').textContent = (dlg.i + 1 < STORY[dlg.m].length) ? '▼ 点击继续' : '▼ 进入任务';
+  // 原版演出: imgScenario.fond.gotoAndStop(首字母) + personnage.gotoAndStop(去前缀)
+  const fond = document.getElementById('dlgFond'), actor = document.getElementById('dlgActor');
+  if (fond) fond.src = 'assets/story/fond/' + code.charAt(0) + '.png';
+  if (actor) {
+    const label = code.slice(1);           // 'MickNeutre1' / 'v'(旁白空帧)
+    actor.style.display = (label === 'v') ? 'none' : 'block';
+    actor.src = 'assets/story/perso/' + label + '.png';
+    // D/R = 右侧站位, G/S = 左侧 (原版 inverse 镜像简化为左右位)
+    const right = (code.charAt(0) === 'D' || code.charAt(0) === 'R');
+    actor.className = right ? 'right' : 'left';
+  }
   box.style.display = 'block';
 }
 function dlgOpen(m) {

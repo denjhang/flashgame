@@ -1,5 +1,37 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+80 轮成果（2026-09-29, H5 领土防御·主攻方向二 #4：对白演出素材上图 —— 870 房间布景 + 948 人物立绘）
+
+**（权威 = swf_dump DefineSprite_870/948 帧标签逐 tag 解码 + 980_242 pcode
+fond.gotoAndStop(charAt(0)) / personnage.gotoAndStop(substring(1))）**
+
+### 1. 【解码】
+
+- **imgScenario(951) 内部结构**：fond = **870**（对话框房间布景，1333x327×16 帧，
+  帧标签 = 说话人码**首字母** G/D/S/R/P/Q/T/M/H/L/A/E/C/B/X/Y）；
+  personnage = **948**（人物立绘 800x438×41 帧，帧标签 = **去前缀的"人物+情绪"**
+  ElisaNeutre…ZhuRapport + 'v' 空帧给旁白）；perso=948/persoMouvant=950 为动版
+- 机制：nextDialogue 按说话人码首字母切房间布景、去前缀切立绘 —— 与 H5 说话人码
+  数据结构完全同构，无需改 STORY
+
+### 2. 【H5 实现】
+
+- 素材归位：assets/story/fond/{16 字母}.png（内容裁剪）+
+  assets/story/perso/{39 标签}.png（内容裁剪，v = 空帧）
+- #dlgBox 升级为原版演出布局：房间布景通栏 + 立绘按站位（D/R 右、G/S 左，
+  旁白隐藏）+ 底部半透明文本条（说话人名/文本/▼ 提示保持）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 布景 16 框 + 立绘抽样在位；首字母选框 + 去前缀立绘接线断言=true
+- 146 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 949 inverse 镜像态未复刻（H5 以左右站位简化）；950 persoMouvant 入/出场动画未接
+- 1040/1046/1053 归档未接线；1151 音量条拖动 / selectionUnite 点击音（P2）；
+  原版金钱显示 TextField 归属未定位
+
 ## 第 N+79 轮成果（2026-09-29, H5 领土防御·主攻方向二 #3：endPass/perdu 胜负演出流解码 + 终局动画上图）
 
 **（权威 = 6_329/327 pcode_as 伪码 activePerdu/activePerduViaInterval/startInstructions +

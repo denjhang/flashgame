@@ -1303,6 +1303,20 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
+// ---- 主攻方向二 #4: 对白演出素材 (870 布景 16 框 / 948 立绘 39 帧, N+80) ----
+console.log("--- 对白演出素材 ---");
+{
+  const fsx = require('fs');
+  const FL = ['G','D','S','R','P','Q','T','M','H','L','A','E','C','B','X','Y'];
+  let fOK = FL.every(x => fsx.existsSync('assets/story/fond/' + x + '.png'));
+  const PL = ['ElisaNeutre','MickFace','AlexSecret','SarahNeutre','AndrewFace','ShenNeutre','ZhuRapport','v'];
+  let pOK = PL.every(x => fsx.existsSync('assets/story/perso/' + x + '.png'));
+  console.log("870 布景 16 框=" + fOK + "  948 立绘抽样=" + pOK);
+  const hj = fsx.readFileSync('index.html', 'utf8'), gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("演出接线 (dlgFond/dlgActor 首字母选框+去前缀立绘)=" +
+    (hj.includes('id="dlgFond"') && gj.includes("assets/story/fond/' + code.charAt(0)") &&
+     gj.includes("assets/story/perso/' + label")));
+}
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
 {
