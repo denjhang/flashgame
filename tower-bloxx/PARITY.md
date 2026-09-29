@@ -92,11 +92,15 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 音乐/音效开关生效（STT_MUSIC_TOGGLE/STT_SOUND_TOGGLE, GameState.as:249-255）
 - 备注：J2ME 9 首 MIDI 为手机版曲目，与 Flash 版曲库不同源；Flash 版即权威，MIDI 不再转码
 
-## 7. 存档/记录——❌ 缺失 [P1]
+## 7. 存档/记录——✅ 闭环（2026-09-29）
 
-- GameModel SharedObject：sm_totalPopulation/cityLevel/unlockedTowerType/trophyTowerType/
-  towerGridData/populationRecord/comboRecord…（GameModel.as:28-44,74-86）→ H5 用 localStorage
-- 结算记录 populationRecord/comboMax/comboRecord + "New record!"（setComboMult:190-193）
+- ✅ 存档键与字段 1:1：`localStorage["twrblx_cookie"]` = { sm_towerGridData, sm_totalPopulation,
+  tipFlags }（GameModel.restoreModel/saveModel:82-108，SharedObject 名原样）；sm_towerGridData
+  结构已就位，城市模式接入后即写入
+- ✅ 结算纪录 populationRecord/blockRecord/comboRecord 持久化（localStorage["twrblx_records"]；
+  原版纪录仅会话内 GameModel.as:11-13，H5 按用户预期跨会话并保留字段名）
+- ✅ 音乐/音效偏好持久化（twrblx_music/sound）
+- 结算面板 "New record!"（setComboMult:190-193）前轮已实现
 
 ## 8. 输入——🟨
 

@@ -25,6 +25,8 @@ const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
 const DROP_G = 0.0045;          // 落块加速度 (px/ms^2, 调校值, 对应原版 ~0.55s 落程)
 const CRANE_FPS = 30;           // Flash 帧率: blockDx 以 px/帧 计 (Crane.animate dx=endx-lastX)
 
+restoreModel();
+
 const stage = document.getElementById('stage');
 const hud = {
   pop: document.getElementById('pop'), lives: document.getElementById('lives'),
@@ -70,6 +72,22 @@ function playSong(name) { // GameState.playSong:300
   SONGS[name].play().catch(() => {});
 }
 function stopSong() { for (const k in SONGS) SONGS[k].pause(); } // GameState.stopSong:312
+
+// ---- 存档: GameModel.restoreModel/saveModel:79-108, SharedObject "twrblx_cookie" 同名同字段 → localStorage ----
+const SAVE_KEY = 'twrblx_cookie';
+function restoreModel() { // GameModel.restoreModel:82-99
+  try {
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+    G.save = {
+      sm_towerGridData: d.sm_towerGridData || [],
+      sm_totalPopulation: d.sm_totalPopulation == null ? 0 : d.sm_totalPopulation,
+      tipFlags: d.tipFlags || [],
+    };
+  } catch (e) { G.save = { sm_towerGridData: [], sm_totalPopulation: 0, tipFlags: [] }; }
+}
+function saveModel() { // GameModel.saveModel:101-108
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.save)); } catch (e) {}
+}
 
 // ---- 资产载入 ----
 const templates = [];   // 各楼块 mesh 模板 (从 GLB 取)
@@ -170,7 +188,8 @@ const G = {
   totalBlocks: TOTAL_BLOCKS, currColor: CURR_COLOR,
   cleanTower: false, trophyRoof: false,          // GameModel.updateCleanTower / Crane.setTarget
   comboMax: 0,                                    // GameModel.setComboMax
-  records: { populationRecord: 0, blockRecord: 0, comboRecord: 0 }, // GameModel.as:11-13
+  records: Object.assign({ populationRecord: 0, blockRecord: 0, comboRecord: 0 },
+    JSON.parse(localStorage.getItem('twrblx_records') || '{}')), // 原版纪录仅会话内(GameModel.as:11-13), H5 持久化
 };
 
 const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr._rotation)
@@ -241,6 +260,9 @@ function showSummary() {
   G.records.populationRecord = Math.max(G.records.populationRecord, G.population); // GameModel.setPopulation
   G.records.blockRecord = Math.max(G.records.blockRecord, G.stacked);              // setStackedBlocks
   G.records.comboRecord = Math.max(G.records.comboRecord, G.comboMax);             // setComboMult
+  localStorage.setItem('twrblx_records', JSON.stringify(G.records));
+  G.save.sm_totalPopulation = Math.max(G.save.sm_totalPopulation, G.population); // 城市总人口占位(城市模式接入后为累计值)
+  saveModel();
   const line = (label, v, rec) => label + v + (rec ? '  New record!' : '');        // Const.TIP_SUMMARY_REC
   hud.summary.innerHTML =
     '<div class="t">' + hud.msg.textContent + '</div>' +
@@ -477,11 +499,16 @@ function drop() {
 addEventListener('pointerdown', drop);
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
 // 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好
-G.musicOn = true; G.soundOn = true;
+G.musicOn = localStorage.getItem('twrblx_music') !== '0';
+G.soundOn = localStorage.getItem('twrblx_sound') !== '0';
+if (!G.musicOn) hud.btnMusic.style.opacity = 0.4;
+if (!G.soundOn) hud.btnSound.style.opacity = 0.4;
 function sndClick() { if (G.soundOn && SND.snd_click) { SND.snd_click.currentTime = 0; SND.snd_click.play().catch(() => {}); } }
-hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4; sndClick();
+hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4;
+  localStorage.setItem('twrblx_music', G.musicOn ? '1' : '0'); sndClick();
   if (!G.musicOn) stopSong(); else playSong('sng_tower'); };  // STT_MUSIC_TOGGLE toggleSongs
-hud.btnSound.onclick = e => { e.stopPropagation(); G.soundOn = !G.soundOn; hud.btnSound.style.opacity = G.soundOn ? 1 : 0.4; sndClick(); }; // STT_SOUND_TOGGLE
+hud.btnSound.onclick = e => { e.stopPropagation(); G.soundOn = !G.soundOn; hud.btnSound.style.opacity = G.soundOn ? 1 : 0.4;
+  localStorage.setItem('twrblx_sound', G.soundOn ? '1' : '0'); sndClick(); }; // STT_SOUND_TOGGLE
 hud.btnExit.onclick = e => { // BTN_EXIT_QUICK (GameState STT_EXIT_PLAY → 菜单; 菜单未实现, 先回模式入口)
   e.stopPropagation();
   location.href = location.pathname + (G.totalBlocks !== 999 ? '' : '?mode=tower');

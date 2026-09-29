@@ -137,3 +137,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 音乐/音效按钮开关真实生效（toggleSongs/toggleSounds 对号）
 - J2ME MIDI 评估：与 Flash 曲库不同源，Flash 版即权威，不转码
 - smoke_test 16/16
+
+## 第 14 轮（2026-09-29）— PARITY 推进 #6：存档闭环
+
+- localStorage["twrblx_cookie"] 与原版 SharedObject 同名同字段（sm_towerGridData/sm_totalPopulation/
+  tipFlags, GameModel.restoreModel/saveModel:82-108）
+- 纪录三项持久化（twrblx_records; 原版仅会话内, H5 跨会话）+ 音乐/音效偏好持久化
+- smoke_test 16/16
