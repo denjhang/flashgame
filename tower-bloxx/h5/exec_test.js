@@ -10,16 +10,27 @@ let fail = 0;
 const check = (cond, msg) => { console.log((cond ? 'PASS' : 'FAIL') + ' ' + msg); if (!cond) fail++; };
 
 // ---- DOM stubs ----
-const el = () => {
+const elCache = new Map();
+const fire = (id, type) => {
+  const e = elCache.get('el:' + id);
+  if (!e || !e._l || !e._l[type]) return false;
+  e._l[type].forEach(f => f({ stopPropagation() {}, preventDefault() {} }));
+  return true;
+};
+const el = (id) => {
+  if (id !== undefined && elCache.has('el:' + id)) return elCache.get('el:' + id);
   const e = {
     style: {}, textContent: '', innerHTML: '', dataset: {}, children: [],
     appendChild(c) { this.children.push(c); }, remove() {},
-    addEventListener() {}, removeEventListener() {},
+    _l: {},
+    addEventListener(t, f) { (this._l[t] ||= []).push(f); },
+    removeEventListener() {},
     querySelector: () => el(), querySelectorAll: () => [],
     classList: { add() {}, remove() {}, toggle() {} },
     set onclick(f) { this._onclick = f; }, get onclick() { return this._onclick; },
     prepend() {},
   };
+  if (id !== undefined) elCache.set('el:' + id, e);
   e.getContext = () => new Proxy({}, { get: (t, k) => {
     if (k === 'canvas') return e;
     return () => undefined;      // 吸收全部 GL 调用
@@ -28,7 +39,7 @@ const el = () => {
 };
 const listeners = {};
 globalThis.document = {
-  getElementById: () => el(),
+  getElementById: (id) => el('id:' + id),
   createElement: () => el(),
   createElementNS: (ns, tag) => {
     if (tag === 'img') return { // ImageLoader 用: src 一设即触发 onload, 尺寸假 64x64
@@ -111,6 +122,22 @@ try {
 
 const dbg = globalThis.__dbg || {};
 check((dbg.lands || []).length >= 3, `放块落地次数 = ${(dbg.lands || []).length} (期望 ≥3)`);
+
+// ---- 场景 2: 菜单流 (标题点击 → 菜单 → Quick Game → 无尽模式放块) ----
+// 回 tower 结算后的重启定时器/summary: 直接走菜单入口
+{
+  const title = document.getElementById('titleScr');
+  if (title && title.onclick) title.onclick();          // STT_TITLE → STT_MENU
+  const clicked = fire('id:mQuick', 'click');            // BTN_QUICK_GAME (GameSprites.as:347)
+  check(clicked, '菜单 Quick Game 按钮已绑定');
+  for (let i = 0; i < 400; i++) {
+    t += 16;
+    if (i % 30 === 15) for (const f of listeners.pointerdown || []) f({ stopPropagation() {} });
+    if (i % 30 === 16) for (const f of listeners.keydown || []) f({ code: 'Space', preventDefault() {} });
+    frame(t);
+  }
+  check((globalThis.__dbg.lands || []).length >= 13, `菜单流+无尽模式放块落地 = ${(globalThis.__dbg.lands || []).length} (期望 ≥13)`);
+}
 
 // 快进更多帧验证摇晃/结算路径不炸
 try {

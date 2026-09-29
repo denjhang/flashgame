@@ -210,3 +210,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   浏览器里首次成功落块即 TypeError → 修复为 hudEl(#hud) 容器
 - ?mode=tower 直入跑完整闭环: 10 块落地含屋顶/过关/结算, 无异常
 - smoke_test 17/17; 执行测试纳入验证体系 (node exec_test.js)
+
+## 第 22 轮（2026-09-29）— exec_test 菜单流场景
+
+- exec_test 元素桩加 id 缓存与监听记录, 支持测试内触发按钮点击
+- 场景 2: 标题 onclick → 菜单 → mQuick (BTN_QUICK_GAME) → 无尽模式 400 帧放块,
+  落地 35 次全通过 — 菜单流全链(状态机+按钮绑定+startGame)获得执行级覆盖
+- smoke_test 17/17 保持
