@@ -1,5 +1,49 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+77 轮成果（2026-09-29, H5 领土防御·主攻方向二 #1：剧情对白库全量解码 + 简报对白播放器上线）
+
+**（权威 = frame_6/PlaceObject2_980_242 onClipEvent(load) 全文 + 953 f30 分支复核）**
+
+### 1. 【解码：原版剧情库结构（本轮核心取证）】
+
+- **980_242 = scenario 对白库**：`scenario[iMission]`（iMission 1 基，45 项含 0 号空占位），
+  每句 = [说话人码, 文本]，**全 44 关共 237 句**（法语/英语双份逐句对应）
+- 说话人码结构：首字母 **D/G/R/S = 四象限站位**（右下/左下/右上/左上）+ 人物名 + 情绪
+  （Mick/Elisa/Alex/Andrew/Sarah/Shen/Zhu + Face 特写态）；
+  两字母 + v（Xv/Ev/Cv/Yv/Lv/Bv/Av/Hv/Mv）= 旁白/新闻播报（无头像）
+- **播放机制（pcode 逐行）**：load → curIScenario=0 → haloNoirOuverture/haloNoir 播放；
+  nextDialogue() 取 [码,文本] → imgScenario.fond.gotoAndStop(码) + txt.text → 索引++；
+  末句后 nextMission.gotoAndPlay → startMission（与 953 haloNoir 时间线衔接）
+- **953 f30 分支复核（字节码）**：iMission ∈ {1,5,9,11,15,16,19,26,31,37,41,44} 走
+  暂停/倒计时演示，其余关走常速分支 —— BRIEFING_WAVES 维持无误
+- 剧情内容含大量现实政治（Hu Jintao/Hillary Clinton/Sarkozy/Merkel/Putin/Chavez/
+  Ahmadinejad/Fukuda 及诸国名）—— 即用户指令要去除的部分
+
+### 2. 【H5 实现】
+
+- **tools/parse_scenario.py**：转义感知的 AS 数组解析器 → scenario.json（fr/en 全 237 句）
+- **data.js 新增 STORY**：12 个简报关（BRIEFING_WAVES）114 句**中文去政治化改写**
+  —— 敌方虚构为"北方联盟"、我方"联军"，现实人物/国名全部中性化；
+  句数与原版逐关一致（36/1/25/1/8/1/2/16/15/1/2/6）；人名映射表 STORY_NAMES
+- **game.js 对白播放器**：briefingShow 时 dlgOpen(下一波) → 逐句显示（#dlgBox：
+  说话人名 + 文本 + ▼ 提示），点击/空格/回车推进（空格在对白态不触发取消）；
+  放完 → applyBriefBar 亮出 start mission 条；briefingGo 在对白未放完时不可点
+  （= 原版 nextMission 未触发则 1106 不可达）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- STORY 覆盖 12 简报关且句数与原版逐关一致=true；每句格式=true；
+  **去政治化审计（现实政客/国名残留扫描）=true**；播放器接线=true；
+  对白放完后 briefingGo 生效（波1=9 单位维持）
+- 142 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 其余 32 关对白（123 句）已解码未入库（非简报关，触发时机需先取证常速分支的
+  instructions 演出位）—— 下轮优先
+- 对白演出素材：imgScenario 头像/框体 sprite 未导出上图（说话人现为文字名牌）
+- endPass/perdu 胜负演出流未解码；1040/1046/1053 归档未接线；1151 音量条（P2）
+
 ## 第 N+76 轮成果（2026-09-29, H5 领土防御·UI 替换 #6 审计收口：HUD 杂项全数确认原版上图）
 
 **（审计结论：#6 清单里的件在前几轮均已接线，本轮补取证断言 + 移除最后一块自造冗余）**

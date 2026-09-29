@@ -1940,10 +1940,51 @@ function applyBriefBar() {
                                      : 'assets/briefing/start_in_' + briefState + '.png';
 }
 // 暂停分支: 显示 "start mission" 条 (1106), 波次调度冻结直到点击
-function briefingShow() { G.briefing = true; briefState = 'mission'; applyBriefBar(); }
+// ---------------- 剧情对白播放器 (980_242 nextDialogue, N+77) ----------------
+// 原版: 简报暂停期间逐句显示 scenario[iMission][curIScenario], 点击推进;
+//   放完 → nextMission.play() → startMission。H5: 在 briefingShow 的暂停波里
+//   先播对白 (STORY[wave], 中文去政治化文本), 播完才亮出 start mission 条。
+let dlg = null;   // null | { m: iMission, i: 句索引 }
+function dlgSpeaker(code) {
+  if (/^[A-Z]v$/.test(code)) return '新闻播报';           // Xv/Ev/Cv/... = 旁白/播报
+  for (const [re, name] of STORY_NAMES) if (re.test(code)) return name;
+  return code;
+}
+function dlgShowLine() {
+  const box = document.getElementById('dlgBox');
+  if (!box || !dlg) return;
+  const line = STORY[dlg.m][dlg.i];
+  document.getElementById('dlgWho').textContent = dlgSpeaker(line[0]);
+  document.getElementById('dlgTxt').textContent = line[1];
+  document.getElementById('dlgNext').textContent = (dlg.i + 1 < STORY[dlg.m].length) ? '▼ 点击继续' : '▼ 进入任务';
+  box.style.display = 'block';
+}
+function dlgOpen(m) {
+  if (!STORY[m] || !STORY[m].length) return false;
+  dlg = { m: m, i: 0 };
+  const bar = document.getElementById('briefBar');
+  if (bar) bar.style.display = 'none';   // 对白放完才亮开战条 (原版 nextMission → startMission)
+  dlgShowLine();
+  return true;
+}
+function dlgNext() {
+  if (!dlg) return false;
+  dlg.i++;
+  if (dlg.i < STORY[dlg.m].length) { dlgShowLine(); return true; }
+  dlg = null;
+  const box = document.getElementById('dlgBox');
+  if (box) box.style.display = 'none';
+  applyBriefBar();                        // 亮出 start mission 条
+  return true;
+}
+function briefingShow() {
+  G.briefing = true; briefState = 'mission';
+  // 原版: 有对白的关卡先逐句播对白 (980 nextDialogue), 放完才到 1106 开战条
+  if (!dlgOpen(G.wave + 1)) applyBriefBar();
+}
 // 1106 on(press): 守卫 → 隐藏 + creationUnite 音效 + startMission()
 function briefingGo() {
-  if (!G.briefing) return;
+  if (!G.briefing || dlg) return;   // 对白未放完时开战条不可点 (原版 nextMission 未触发)
   G.briefing = false; briefState = null; applyBriefBar();
   playSfx('creationUnite', 0.45);
   startWave();
@@ -2972,6 +3013,7 @@ window.addEventListener('keydown', (e) => {
   if (k === 'm') G.mouseScroll = !G.mouseScroll;
   if (k === 'c') G.showBuildArea = !G.showBuildArea;
   if (k === 'g') toggleZoom();
+  if (dlg && (e.key === ' ' || e.key === 'Enter')) { dlgNext(); e.preventDefault(); return; }
   if (e.key === ' ') { depressSpace(); e.preventDefault(); buildShop(); }
 });
 
@@ -3041,6 +3083,8 @@ hud();
 {
   const bb = document.getElementById('briefBar');
   if (bb) bb.onclick = briefBarPress;
+  const db = document.getElementById('dlgBox');
+  if (db) db.onclick = () => dlgNext();
   if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
 }
 setInterval(tick, 1000 / 30);

@@ -108,6 +108,15 @@
   #briefBar { position:absolute; left:50%; top:400px; transform:translateX(-50%);
               display:none; z-index:28; cursor:pointer; }
   #briefBar img { display:block; width:125px; height:35px; image-rendering:auto; }
+  /* 剧情对白框 (980): 原版为舞台底部对白区 (txt + 说话人), 点击推进 */
+  #dlgBox { position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
+            width:560px; max-width:92%; display:none; z-index:29; cursor:pointer;
+            background:rgba(8,10,14,.88); border:2px solid #5a6a7a; border-radius:6px;
+            padding:8px 12px 6px; box-shadow:0 4px 18px rgba(0,0,0,.6); }
+  #dlgWho { color:#ffd; font-weight:bold; font-size:12px; margin-bottom:3px; }
+  #dlgTxt { color:#e8e8e8; font-size:12px; line-height:1.55; white-space:pre-wrap;
+            max-height:150px; overflow-y:auto; }
+  #dlgNext { color:#89a; font-size:10px; text-align:right; margin-top:3px; }
   #unlockPanel button:disabled { opacity:.35; cursor:not-allowed; }
   #unlockPanel button.int { background:#3a4a5a; }
   #unlockPanel button.int:hover:not(:disabled) { background:#4a5a6a; }
@@ -165,13 +174,19 @@
     <!-- 原版 953 出兵条: 简报波 = chid1106 "start mission" 按钮 (on press → startMission);
          其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
     <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
+    <!-- 剧情对白 (980_242 nextDialogue): 简报暂停波逐句显示, 点击/空格推进 -->
+    <div id="dlgBox">
+      <div id="dlgWho"></div>
+      <div id="dlgTxt"></div>
+      <div id="dlgNext">▼ 点击继续</div>
+    </div>
   </div>
   <div id="hud">
     金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> (丢塔数) |
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600044"></script>
-<script src="game.js?v=1790600044"></script>
+<script src="data.js?v=1790600045"></script>
+<script src="game.js?v=1790600045"></script>
 </body>
 </html>

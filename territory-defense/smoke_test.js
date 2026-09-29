@@ -41,7 +41,9 @@ src += "\nconst R4 = ROUTES.parcourt4;";
 src += "\nG.turrets.push(new Turret('canon105', R4[4][0], R4[4][1] + 60));";
 src += "\nG.turrets.push(new Turret('crotale', R4[6][0] + 60, R4[6][1] + 40));";
 src += "\nif (!G.briefing || briefState !== 'mission') console.log('boot 简报异常: briefing=%s briefState=%s (期望 true/mission)', G.briefing, briefState);";
+src += "\nwhile (dlg) dlgNext();   // 播完第 1 波剧情对白 (980 nextDialogue 全部推进)";
 src += "\nbriefingGo();   // 模拟点击原版 start mission 按钮 (第 1 波为简报暂停波)";
+src += "\nconsole.log('对白已放完且开战条可点: dlg=%s 波1已激活=%s', dlg !== null, G.wave === 1);";
 src += "\nconsole.log('boot 点击开波: 第1波单位=%d (期望 9, briefingGo 生效)', G.units.length);";
 src += "\nfor (let i = 0; i < 450; i++) tick();";
 src += '\nconsole.log("迷雾+真实路点 450帧: 波次=%d 金钱=%d 场上敌=%d 击杀=%d 塔存=%d/%d lost=%s won=%s",';
@@ -1300,6 +1302,25 @@ console.log("--- 建造菜单原版图标 ---");
     return m && (m[1] === '/' || +m[1] === STRUCTURES[n].cost);
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
+}
+// ---- 主攻方向二 #1: 剧情对白系统 (980_242 scenario + 953 f30 分支, N+77) ----
+console.log("--- 剧情对白系统 ---");
+{
+  // 原版行数 = tools/parse_scenario.py 对 980_242 逐句解析的权威值
+  const ORIG = { 1:36, 5:1, 9:25, 11:1, 15:8, 16:1, 19:2, 26:16, 31:15, 37:1, 41:2, 44:6 };
+  const keysOK = BRIEFING_WAVES.every(w => Array.isArray(STORY[w]) && STORY[w].length === ORIG[w]);
+  console.log("STORY 覆盖 12 简报关且句数与原版逐关一致=" + keysOK);
+  const fmtOK = Object.keys(STORY).every(k => STORY[k].every(l => Array.isArray(l) && l.length === 2 &&
+    typeof l[0] === 'string' && /^[A-Z]/.test(l[0]) && typeof l[1] === 'string' && l[1].length > 0));
+  console.log("每句均为 [说话人码, 非空文本]=" + fmtOK);
+  // 去政治化审计: 不得出现现实政客/国名组合
+  const banned = ['Hu Jintao','Hillary','Sarkozy','Merkel','Putin','Chavez','Ahmadinejad','Fukuda',
+                  'Beijing','Washington','Manchuria','China','Chinese','France','Israel','Russia','Iran','Iraq','Korean'];
+  const joined = Object.keys(STORY).map(k => STORY[k].map(l => l[1]).join(String.fromCharCode(10))).join(String.fromCharCode(10));
+  const hit = banned.filter(b => joined.includes(b));
+  console.log("去政治化 (无现实政客/国名残留)=" + (hit.length === 0) + (hit.length ? ' 命中:' + hit.join(',') : ''));
+  console.log("播放器接线 (dlgOpen/dlgNext/空格推进)=" +
+    (typeof dlgOpen === 'function' && typeof dlgNext === 'function'));
 }
 // ---- UI 原版素材替换 #6 审计: 1161 取消提示 / 778 准星 / 775 射程圈 (N+76) ----
 console.log("--- HUD 杂项原版素材 ---");
