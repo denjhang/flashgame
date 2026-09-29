@@ -1960,16 +1960,20 @@ function dlgShowLine() {
   document.getElementById('dlgWho').textContent = dlgSpeaker(code);
   document.getElementById('dlgTxt').textContent = line[1];
   document.getElementById('dlgNext').textContent = (dlg.i + 1 < STORY[dlg.m].length) ? '▼ 点击继续' : '▼ 进入任务';
-  // 原版演出: imgScenario.fond.gotoAndStop(首字母) + personnage.gotoAndStop(去前缀)
+  // 原版演出 (980 nextDialogue pcode): fond.gotoAndStop(首字母);
+  //   前缀 'R' → personnage "inverse"(镜像), 其余 "normal";
+  //   personnage.perso.gotoAndStop(去前缀) = 立绘; 位置固定在场景左侧 (951 矩阵 -406),
+  //   persoMouvant(950) 为入/出场滑动容器 → H5 以换行滑入动画近似
   const fond = document.getElementById('dlgFond'), actor = document.getElementById('dlgActor');
   if (fond) fond.src = 'assets/story/fond/' + code.charAt(0) + '.png';
   if (actor) {
     const label = code.slice(1);           // 'MickNeutre1' / 'v'(旁白空帧)
     actor.style.display = (label === 'v') ? 'none' : 'block';
     actor.src = 'assets/story/perso/' + label + '.png';
-    // D/R = 右侧站位, G/S = 左侧 (原版 inverse 镜像简化为左右位)
-    const right = (code.charAt(0) === 'D' || code.charAt(0) === 'R');
-    actor.className = right ? 'right' : 'left';
+    actor.classList.toggle('mirror', code.charAt(0) === 'R');   // 原版 inverse
+    actor.classList.remove('slide');
+    void actor.offsetWidth;                // 重触发滑入 (persoMouvant 近似)
+    actor.classList.add('slide');
   }
   box.style.display = 'block';
 }

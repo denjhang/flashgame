@@ -115,9 +115,14 @@
             border:2px solid #5a6a7a; border-radius:6px; overflow:hidden;
             background:#111; box-shadow:0 4px 18px rgba(0,0,0,.6); }
   #dlgFond { display:block; width:100%; }
-  #dlgActor { position:absolute; bottom:0; height:78%; max-height:none; }
-  #dlgActor.left { left:4%; }
-  #dlgActor.right { right:4%; }
+  /* 人物固定在场景左侧 (951 矩阵 persoMouvant @-407), 'R' 前缀镜像 = 原版 inverse;
+     换行滑入 = 950 persoMouvant 入场近似 */
+  #dlgActor { position:absolute; left:5%; bottom:96px; height:72%; }
+  #dlgActor.mirror { transform:scaleX(-1); }
+  #dlgActor.slide { animation:dlgSlide .3s ease-out; }
+  @keyframes dlgSlide { from { transform:translateX(-18px); opacity:.4; } to { opacity:1; } }
+  #dlgActor.mirror.slide { animation:dlgSlideM .3s ease-out; }
+  @keyframes dlgSlideM { from { transform:scaleX(-1) translateX(18px); opacity:.4; } to { transform:scaleX(-1); opacity:1; } }
   #dlgPanel { position:relative; background:rgba(8,10,14,.88); padding:6px 12px 5px; }
   #dlgWho { color:#ffd; font-weight:bold; font-size:12px; margin-bottom:3px; }
   #dlgTxt { color:#e8e8e8; font-size:12px; line-height:1.55; white-space:pre-wrap;
@@ -209,7 +214,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600048"></script>
-<script src="game.js?v=1790600048"></script>
+<script src="data.js?v=1790600049"></script>
+<script src="game.js?v=1790600049"></script>
 </body>
 </html>

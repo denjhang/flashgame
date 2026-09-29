@@ -1,5 +1,35 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+81 轮成果（2026-09-29, H5 领土防御·主攻方向二 #5：inverse 镜像 + persoMouvant 入场动画对齐）
+
+**（权威 = 980_242 pcode_as nextDialogue 伪码逐行 + FFDec 951 SVG 摆放矩阵）**
+
+### 1. 【解码（本轮勘误 + 补全）】
+
+- **nextDialogue 精确语义**：仅前缀 **'R'** → `personnage.gotoAndStop("inverse")`（镜像），
+  其余（D/G/S/旁白）→ "normal"；立绘 = `personnage.perso.gotoAndStop(substring(1))`；
+  fond = `gotoAndStop(charAt(0))`
+- 结构链：persoMouvant(950 滑动容器) > personnage(949 normal/inverse 镜像层) > perso(948 立绘)
+- **951 SVG 矩阵**：persoMouvant @(-406.95,-174.2) —— 人物固定在场景**左侧**，
+  上轮的"按前缀分左右站"是误读，本轮勘误为固定左位 + R 镜像
+
+### 2. 【H5 实现】
+
+- actor 固定场景左侧（951 矩阵），前缀 R 时 scaleX(-1) 镜像（= inverse）；
+  每句换行时滑入动画（= 950 persoMouvant 入场近似，CSS keyframes，
+  镜像态用独立 keyframes 保持翻转不变）
+- 排错：冒烟 DOM stub 的 classList 补 remove/add
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 146 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 950 入场动画为 CSS 近似（原版为逐帧 _x 补间）
+- 1040/1046/1053 归档未接线；1151 音量条拖动 / selectionUnite 点击音（P2）；
+  原版金钱显示 TextField 归属未定位
+
 ## 第 N+80 轮成果（2026-09-29, H5 领土防御·主攻方向二 #4：对白演出素材上图 —— 870 房间布景 + 948 人物立绘）
 
 **（权威 = swf_dump DefineSprite_870/948 帧标签逐 tag 解码 + 980_242 pcode
