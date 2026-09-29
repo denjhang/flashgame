@@ -1,5 +1,43 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+67 轮成果（2026-09-29, H5 领土防御·★★ 雷达真用途实锤 + 门控接线 —— N+56"悖论"是我自己的分支极性错误）
+
+**（用户实机证言 + 785_17 activeDisponibilite/chargeBombes + getDistance 重读。此轮纠正
+N+55/56 两轮的错误结论）**
+
+### 1. 【★ 勘误：分支极性读反 —— 门控【仅作用于 MLRS/pluton】】
+
+重读 getDistance 原始字节码：`if (type=='MLRS' || type=='pluton')` 命中时走的是
+**雷达门控分支**（loc01b7），普通武器走"直接返回距离"。即：
+
+- **普通塔（m60/canon 等）：完全不过门控，永远按真实距离索敌** → 29 波无敌方雷达
+  也照常游戏，"悖论"根本不存在，是我把 `Not/If` 链的分支归属读反了
+- **MLRS/pluton（间接射击火箭炮）：候选须处于己方雷达单元的 distanceOfFire 覆盖内**
+  （雷达塔 1200 / 敌方 radarMobile 车 1500），否则距离按 1000000 计 = 不可锁定
+- **用户实机证言**："只有建了雷达之后，MLRS 还有另外一个大火箭炮(pluton)才能用" ——
+  与修正后的解码完全吻合
+- 雷达塔的真实用途 = **为远程间接射击火箭炮提供目标指示**；敌方 radarMobile 车 =
+  敌方 MLRS 的眼（wave 33/34 的 camionBlinde+MLRS 正是配 radarMobile 出场）
+
+### 2. H5 接线
+
+- `radarCovered(cand, shooterSide)`：覆盖者 = 己方 radar 塔(1200) / 敌方
+  weaponId=='radarMobile' 单位(1500)
+- 玩家塔获取循环 + 保持检查：`id==='MLRS'||'pluton'` 时须雷达覆盖，失覆盖即弃
+- 敌方 Unit 索敌：weaponId=='MLRS' 的 camionBlinde 同门控（覆盖者 = 敌 radarMobile 车）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `MLRS 无雷达不可锁定=true → 建雷达(覆盖1200)后锁定=true → 覆盖外目标仍不可锁=true`
+- `m60 无雷达正常锁定 (不受门控)=true`
+- `敌方 MLRS: 无 radarMobile 车不可锁定=true → radarMobile 覆盖后锁定=true`
+- 126 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- getDistance 的 /4 提前量偏置、挂架横向 decalX 散布、chargeBombes 乱码重置（小项）
+- 容器 bbox 炮管外扩 / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+66 轮成果（2026-09-29, H5 领土防御·空格键 depressSpace 对齐 —— 补 Su37 瞄准取消）
 
 **（权威 = 6_1 load pcode loc0207 的 depressSpace 全函数）**

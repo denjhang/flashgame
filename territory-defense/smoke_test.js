@@ -1162,6 +1162,49 @@ console.log("--- 空格取消 ---");
   console.log("空格取消建造模式=%s", G.shopSel === null);
   G.shopSel = sv.sel; G.su37Aiming = sv.aim; G.unlocker.su37 = sv.s37;
 }
+// ---- 雷达门控 (原版 getDistance: 仅 MLRS/pluton 需己方雷达覆盖, N+67 勘误) ----
+console.log("--- 雷达门控 ---");
+{
+  const sv = { units: G.units.length, turrets: G.turrets.length, lost: G.lost, losses: G.losses, euro: G.euros };
+  G.units.length = 0; G.turrets.length = 0; G.lost = false; G.euros = 50000;
+  VIS = [{ x: 0, y: 0, r: 99999 }];
+  const ml = new Turret('MLRS', 0, 0);
+  G.turrets.push(ml);
+  const u = new Unit('camion1', 'null', 'parcourt1'); u.x = 1000; u.y = 0;   // MLRS 射程 1300 内
+  G.units.push(u);
+  ml.retargetT = 0; ml.update();
+  const noRadar = ml.target === null;
+  const rd = new Turret('radar', 900, 0); G.turrets.push(rd);   // 雷达塔 (覆盖 1200; 距 u 100)
+  ml.retargetT = 0; ml.update();
+  const withRadar = ml.target === u;
+  const u2 = new Unit('camion1', 'null', 'parcourt1'); u2.x = -1250; u2.y = 0;  // 距雷达 2150 > 1200, 距 MLRS 1250 ≤ 1300
+  G.units.push(u2);
+  ml.retargetT = 0; ml.update();
+  const outside = ml.target === u;   // 覆盖外的 u2 不可锁, 仍锁覆盖内的 u
+  console.log("MLRS 无雷达不可锁定=%s → 建雷达(覆盖1200)后锁定=%s → 覆盖外目标仍不可锁=%s",
+    noRadar, withRadar, outside);
+  // m60 对照: 普通塔不受门控 (无雷达也可锁定)
+  const mw = new Turret('m60', 0, 400); G.turrets.push(mw);
+  const u3 = new Unit('camion1', 'null', 'parcourt1'); u3.x = 300; u3.y = 400;
+  G.units.push(u3);
+  mw.retargetT = 0; mw.update();
+  console.log("m60 无雷达正常锁定 (不受门控)=%s", mw.target === u3);
+  // 敌方 MLRS 车: 需己方 (敌方) radarMobile 车覆盖
+  const eM = new Unit('camionBlinde', 'MLRS', 'parcourt1');
+  eM.hp = 99999; eM.x = 3000; eM.y = 0;
+  const tw = new Turret('canon105', 2000, 0);
+  G.units.push(eM); G.turrets.push(tw);
+  eM.retargetT = 0; eM.update();
+  const eNo = eM.target === null;
+  const rc = new Unit('camion3', 'radarMobile', 'parcourt1');
+  rc.x = 2600; rc.y = 0; rc.hp = 99999;    // 距 tw 600 ≤ 1500 覆盖
+  G.units.push(rc);
+  eM.retargetT = 0; eM.update();
+  console.log("敌方 MLRS: 无 radarMobile 车不可锁定=%s → radarMobile 覆盖后锁定=%s",
+    eNo, eM.target === tw);
+  G.units.length = 0; G.turrets.length = 0;
+  G.lost = sv.lost; G.losses = sv.losses; G.euros = sv.euro;
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {

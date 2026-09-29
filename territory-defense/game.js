@@ -1037,6 +1037,22 @@ function buildMaskHit(wx, wy) {
 //   → |dx|<58 且 |dy|<58 拒绝。注: Flash 容器 bbox 还随炮管朝向动态外扩 (基座是下限),
 //   H5 取基座 bbox, 如实记录
 const VISEUR_HALF = 20, TOWER_BASE_HALF = 38;
+// 雷达网络门控 (原版 174 getDistance, N+67 勘误: 门控【仅作用于 MLRS/pluton】—
+//   旧读法把分支极性弄反导致"29 波悖论"; 实机佐证: 建雷达后 MLRS/pluton 才能用。
+//   规则: 候选须处于【射击者一方】雷达单元的 distanceOfFire 覆盖内, 否则距离按
+//   1000000 计 = 不可锁定。覆盖者: 己方 radar 塔 (1200) / 敌方 radarMobile 车 (1500);
+//   普通武器完全不过门控。用途 = 为远程间接射击火箭炮提供目标指示)
+function radarCovered(cand, shooterSide) {
+  if (shooterSide === 'ally') {
+    for (const t of G.turrets)
+      if (t.id === 'radar' && t.hp > 0 && Math.hypot(t.x - cand.x, t.y - cand.y) <= RADAR_RANGE) return true;
+    return false;
+  }
+  for (const u of G.units)
+    if (u.weaponId === 'radarMobile' && u.hp > 0 &&
+        Math.hypot(u.x - cand.x, u.y - cand.y) <= WEAPONS.radarMobile[1]) return true;
+  return false;
+}
 // 完整可建判定 (原版 822_226 on(press) 前两层; 钱的检查由调用方在之后做)
 function buildAllowedAt(wx, wy) {
   for (const t of G.turrets)
@@ -1377,6 +1393,10 @@ class Unit {
         if (this.retargetT <= 0) {
           this.retargetT = 500;
           this.target = nearestTurret(this.x, this.y, this.weapon[1]);
+          // 原版 getDistance 门控: 敌方 MLRS 需己方 (敌方) radarMobile 车覆盖我方塔
+          if (this.target && this.weaponId === 'MLRS' && !radarCovered(this.target, 'ennemy')) {
+            this.target = null;
+          }
           this.pollArmed = false;
         }
       }
@@ -1498,7 +1518,9 @@ class Turret {
     // 开火直到下次轮询 (≤500ms) 按 ≤100% 重取/置空 (N+52 复刻 N+51 遗留项)
     if (this.target && (this.target.hp <= 0 || this.target.reached)) this.target = null;
     if (this.target) {
-      if (twD(this.target) > this.w[1] * 0.6) this.pollArmed = true;
+      if ((this.id === 'MLRS' || this.id === 'pluton') && !radarCovered(this.target, 'ally')) {
+        this.target = null;   // 目标离开雷达覆盖 → 门控距离变 1000000 (原版语义)
+      } else if (twD(this.target) > this.w[1] * 0.6) this.pollArmed = true;
     }
     if (!this.target || this.pollArmed) {
       this.retargetT = (this.retargetT === undefined) ? 0 : this.retargetT;
@@ -1506,8 +1528,10 @@ class Turret {
       if (this.retargetT <= 0) {
         this.retargetT = 500;
         let best = null, bd = Infinity;
+        const gated = this.id === 'MLRS' || this.id === 'pluton';   // 原版 getDistance: 仅这两门受雷达门控
         for (const u of G.units) {
           if (u.hp <= 0 || u.x < 0 || u.y > 477 || u.reached) continue;
+          if (gated && !radarCovered(u, 'ally')) continue;   // 需己方雷达覆盖 (无雷达 = 不可锁定)
           if (u.aa && !this.aa) continue;               // 直升机需对空能力
           if (!isVisible(u.x, u.y)) continue;           // 迷雾中的敌人不可锁定
           const d = twD(u);
