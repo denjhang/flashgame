@@ -1346,7 +1346,35 @@ console.log("--- 存档系统 ---");
     (sv.t0 === null || (G.turrets[0].id === sv.t0[0] && Math.round(G.turrets[0].hp) === sv.t0[1] && Math.round(G.turrets[0].x) === sv.t0[2]))));
   console.log("unlocker 随 iMission 重建=" + (G.unlocker.m60 === true));
 }
-// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----
+// ---- 读档后实战稳定性 (N+94): 存档重建塔跑 450 帧全速模拟 ----
+console.log("--- 读档实战模拟 ---");
+{
+  // 构造第 10 关存档态: 波次/钱/解锁/混合塔阵(含雷达/MLRS 验证门控路径)
+  G.wave = 9; G.euros = 3000; G.interest = 12; G.score = 500; G.iUnlock = 2;
+  G.units.length = 0; G.turrets.length = 0; G.lost = false; G.won = false;
+  G.unlocker = { m60:true, gatling:true, canon75:true, canon105:true, canon105D:false,
+                 radar:true, crotale:false, canon125:false, MLRS:true, MTHEL:false, pluton:false, su37:false };
+  for (const [id,x,y,hp,ar] of [['m60',200,-300,80,true],['radar',700,-600,220,false],
+                                ['MLRS',900,-900,320,false],['canon105',400,-500,280,false]]) {
+    const t = new Turret(id, x, y); t.hp = hp; t.autoRepair = !!ar; G.turrets.push(t);
+  }
+  const okSave = saveGame();
+  G.turrets.length = 0; G.euros = 1; G.wave = 0;
+  const okLoad = loadGame();
+  const restored = okSave && okLoad && G.wave === 9 && G.turrets.length === 4 &&
+                   G.turrets.some(t => t.id === 'MLRS' && t.autoRepair === false) &&
+                   G.turrets.some(t => t.id === 'm60' && t.autoRepair === true);
+  console.log("第10关态存/读=" + restored);
+  // 放入敌波跑 450 帧 (波10 unitsMissions): 塔更新/索敌/MLRS 雷达门控全链走通
+  G.waveActive = false; G.briefing = false; briefState = null; dlg = null;
+  G.interWave = 5; G.panelOpen = false;
+  let crashed = false;
+  try { for (let i = 0; i < 450; i++) tick(); } catch (e) { crashed = true; console.log('CRASH', e.message); }
+  console.log("读档后 450 帧 sim 无异常=" + (!crashed) +
+    " 波次=" + G.wave + " 塔存=" + G.turrets.filter(t=>t.hp>0).length + "/" + G.turrets.length +
+    " lost=" + G.lost);
+}
+// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----
 console.log("--- 帮助板双钮 ---");
 {
   const fsx = require('fs');
