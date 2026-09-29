@@ -1301,6 +1301,23 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
+// ---- UI 原版素材替换 #4: 侧栏开关按钮本体 (1058/1063/1068/1073, N+73) ----
+console.log("--- 开关按钮原版素材 ---");
+{
+  const fsx = require('fs');
+  const MAP = { tZoom: 'btn_zoom.png', tHp: 'btn_health.png', tArea: 'btn_area.png', tScroll: 'btn_scroll.png' };
+  const SZ = { 'btn_zoom.png': [247,23], 'btn_health.png': [247,23], 'btn_area.png': [247,23], 'btn_scroll.png': [217,23] };
+  let ok = true, sz = true;
+  for (const k in MAP) {
+    const p = 'assets/ui/' + MAP[k];
+    if (!fsx.existsSync(p)) { ok = false; continue; }
+    const b = fsx.readFileSync(p);
+    if (b.readUInt32BE(16) !== SZ[MAP[k]][0] || b.readUInt32BE(20) !== SZ[MAP[k]][1]) sz = false;
+  }
+  console.log("开关按钮 4 素材存在=" + ok + " 尺寸与 SWF 一致(247x23 x3 + 1073=217x23)=" + sz);
+  const hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("index artBtn 引用 4 图=" + Object.values(MAP).every(f => hj.includes('assets/ui/' + f)));
+}
 // ---- UI 原版素材替换 #3: 侧栏底板 (DefineSprite_1079, N+72) ----
 console.log("--- 侧栏底板原版素材 ---");
 {

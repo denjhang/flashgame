@@ -56,20 +56,30 @@
              background:transparent; color:#ccccdd; font-size:10.5px; line-height:1.35;
              padding:2px 4px; overflow:hidden; box-sizing:border-box; }
   #infoBox b { color:#e8e8ff; }
-  #lossBox { position:absolute; left:1px; top:562px; width:166px; height:38px;
-             background:transparent; padding:1px 5px; font-size:11px; box-sizing:border-box; }
+  #lossBox { position:absolute; left:1px; top:589px; width:166px; height:11px;
+             background:transparent; padding:0 5px; font-size:9px; line-height:11px; box-sizing:border-box; }
   #lossBox .losses { color:#daa; }
-  #lossBox .cash { color:#ee8; display:block; }
-  #lossBox .interest { color:#aa8; font-size:10px; }
+  #lossBox .cash { color:#ee8; }
+  #lossBox .interest { color:#aa8; font-size:9px; }
+  /* 原版开关按钮本体 (#4, N+73): 1058/1063/1068/1073 直出 247x23 → 缩放 166x23,
+     竖排 23px 行距 (= informations 内 menuZoom/menuHealth/menuArea 行距) */
+  .artBtn { position:absolute; left:2px; width:166px; height:23px; border:none; padding:0;
+            background-repeat:no-repeat; background-size:166px 23px; background-color:transparent;
+            cursor:pointer; }
+  .artBtn:hover { filter:brightness(1.35); }
+  .artBtn.on { outline:1px solid #e80; outline-offset:-1px; }
+  #tZoom   { top:496px; background-image:url('assets/ui/btn_zoom.png'); }
+  #tHp     { top:519px; background-image:url('assets/ui/btn_health.png'); }
+  #tArea   { top:542px; background-image:url('assets/ui/btn_area.png'); }
+  #tScroll { top:565px; background-image:url('assets/ui/btn_scroll.png'); }
+  /* 音乐面板开关: 小 ♪ 置于标题条右端 (原版无此钮, 面板由 UI 容器显隐) */
+  #mOpen { position:absolute; left:152px; top:176px; width:16px; height:20px; padding:0;
+           background:transparent; border:none; color:#ddd; font-size:12px; cursor:pointer; }
+  #mOpen:hover { color:#ff8; }
   /* 音乐/开关面板 — 原版 DefineSprite_1151 全景图 (178x203) + 原位热区。
      权威 = FFDec SVG: 1145 歌曲按钮 109.65x21.05 @ (6.85, 7.05/34.65/61.7),
      pauser @ (7.15, 91.5), 关闭钮 686 @ (144.8, 3.05) 26.75x26.75 */
-  #musicBox { position:absolute; left:1px; top:497px; width:166px; background:transparent;
-              padding:0; display:flex; flex-direction:column; gap:2px; }
-  #musicBox .row { display:flex; gap:2px; }
-  #musicBox button { background:rgba(48,48,48,.9); color:#ccc; border:1px solid #555; font-size:10px;
-                     font-family:monospace; padding:1px 2px; cursor:pointer; text-align:left; }
-  #musicBox .row button { flex:1; text-align:center; }
+  #musicBox { position:absolute; left:0; top:0; width:0; height:0; background:transparent; }
   /* 1151 面板为弹出层 (原版盖在地图上): 向左弹出侧栏 */
   #musicPanel { position:absolute; right:172px; top:0; width:178px; height:203px;
                 font-family:monospace; display:none; }
@@ -122,16 +132,14 @@
         <div class="arrow" id="pageR" title="下一页">▶</div>
       </div>
       <div id="infoBox">点选炮塔查看属性</div>
+      <!-- 原版开关按钮本体 (1058 change zoom / 1063 health on/off / 1068 build areas /
+           1073 mouse scroll, 247x23 直出缩放 166x23, 竖排 = informations 行距 23) -->
+      <button class="artBtn" id="tZoom" title="全图 G"></button>
+      <button class="artBtn" id="tHp" title="血条 H"></button>
+      <button class="artBtn" id="tArea" title="建区 C"></button>
+      <button class="artBtn" id="tScroll" title="滚屏 M"></button>
+      <button id="mOpen" title="音乐面板">♪</button>
       <div id="musicBox">
-        <div class="row" id="toggles">
-          <button id="tHp">血条 H</button>
-          <button id="tScroll">滚屏 M</button>
-          <button id="tArea">建区 C</button>
-        </div>
-        <div class="row">
-          <button id="tZoom">全图 G</button>
-          <button id="mOpen" title="音乐面板">♪ 音乐</button>
-        </div>
         <div id="musicPanel">
           <img id="musicPanelImg" src="assets/ui/music_panel.png" width="178" height="203" alt="">
           <div class="mpBtn" id="m0" style="left:7px;top:7px;width:105px;height:21px"></div>
@@ -163,7 +171,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600041"></script>
-<script src="game.js?v=1790600041"></script>
+<script src="data.js?v=1790600042"></script>
+<script src="game.js?v=1790600042"></script>
 </body>
 </html>
