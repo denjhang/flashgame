@@ -76,6 +76,31 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
       templates.push(n);
     }
   });
+  // ---- 原版视差背景 (Tower.move:93-104, BG_RATIOS=[0.05,0.1,0.2,0.3]; FFDec 导出 bg2/3/4_spr) ----
+  const BG_TEX = ['DefineSprite_231_bg2_spr','DefineSprite_423_bg3_spr','DefineSprite_426_bg4_spr']
+    .map(n => { const t = new THREE.TextureLoader().load(`./assets/flash/${n}/1.png`); t.colorSpace = THREE.SRGBColorSpace; return t; });
+  const BG_CONF = [ // [ratio, 高度px, 世界基准y, z]
+    { r: 0.05, h: 2000, y0: 240 - 1000, z: -420 },
+    { r: 0.10, h: 912,  y0: -1760 - 456, z: -400 },
+    { r: 0.20, h: 316,  y0: -2216 - 950, z: -380 }, // 太空层 repeat 纵向平铺
+  ];
+  BG_TEX[2].wrapT = THREE.RepeatWrapping; BG_TEX[2].repeat.set(1, 6);
+  G.bgs = BG_CONF.map((c, i) => {
+    const m = new THREE.Mesh(
+      new THREE.PlaneGeometry(640, c.h * (i === 2 ? 6 : 1)),
+      new THREE.MeshBasicMaterial({ map: BG_TEX[i], transparent: true, depthWrite: false })
+    );
+    m.position.set(0, c.y0 - (i === 2 ? c.h * 2.5 : 0), c.z);
+    m.userData.r = c.r;
+    scene.add(m);
+    return m;
+  });
+  // 小人/火花纹理 (dude_spr 753 / dudette_spr 772 / star_spr 783)
+  G.texPeople = ['DefineSprite_753_dude_spr', 'DefineSprite_772_dudette_spr'].map(n => {
+    const t = new THREE.TextureLoader().load(`./assets/flash/${n}/1.png`); t.colorSpace = THREE.SRGBColorSpace; return t;
+  });
+  G.texStar = new THREE.TextureLoader().load('./assets/flash/DefineSprite_783_star_spr/1.png');
+  G.texStar.colorSpace = THREE.SRGBColorSpace;
   // 吊钩: 用原版 hook 贴图 (image_12) 做公告牌
   const tex = new THREE.TextureLoader().load('./assets/image_12.png');
   tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter;
@@ -118,6 +143,7 @@ const G = {
   falling: null,        // {mesh, vy, cy, bdx, vx}
   hanging: null, hangingFor: -1,
   craneDx: 0, towerBdx: 0,
+  people: [], sparks: [], fallingPeople: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
@@ -272,7 +298,7 @@ function blockLanded(offset, releaseBdx) {
                        : Math.floor(a / (5 - (G.currColor + 1))); // 普通: floor(aoff/(5-(currColor+1)))
     pop = Math.max(0, pop);
   } else pop = perfect ? 4 : abs < TOON_LIMIT_2 ? 3 : abs < TOON_LIMIT_3 ? 2 : 1;
-  if (pop > 0) changePopulation(pop);
+  if (pop > 0) { changePopulation(pop); if (!isRoof) spawnPeople(mesh, pop); }
   updateCleanTower();                            // GameModel.updateCleanTower
   tipperIncSway(offset);
   G.blocks.push({ mesh, cx: tpl.userData.cx, pop });
@@ -286,10 +312,48 @@ function blockLanded(offset, releaseBdx) {
   if (G.totalBlocks !== 999 && G.stacked >= G.totalBlocks) gameOver(true); // CityMap 目标高度
 }
 
+// ---- 小人 (Person.as:24-66): 出生 ±viewWidth/2 / 上方 rand(100,200), 向 (x±12, y-17) 半步逼近,
+// 步长 min(PEOPLE_MAX_MV±10, dist/2), 每 50ms; 到达后 250ms 淡出 ----
+function spawnPeople(blockMesh, amt) {
+  for (let k = 0; k < amt; k++) {
+    const tex = G.texPeople[Math.floor(Math.random() * 2)];
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+    const sp = new THREE.Sprite(mat);
+    sp.scale.set(30, 40, 1);
+    const bx = blockMesh.position.x + (blockMesh.userData.cx || 0);
+    const side = Math.random() < 0.5 ? -1 : 1;
+    sp.position.set(bx + side * (160 + Math.random() * 160), G.landingY + 100 + Math.random() * 100, 2);
+    towerGroup.add(sp);
+    G.people.push({ sp, tx: bx + (12 - Math.floor(Math.random() * 2) * 24), ty: G.landingY - 17,
+      seekMax: 10 + Math.random() * 20, next: 0, fading: 0 });
+  }
+}
+// 完美落地 4 向火花 (Tower.makeSpark:311-317, speed=100, angles 135/45/225/315, Flipbook 150ms)
+function makeSparks(x, y) {
+  for (const a of [135, 45, 225, 315]) {
+    const mat = new THREE.SpriteMaterial({ map: G.texStar, transparent: true });
+    const sp = new THREE.Sprite(mat);
+    sp.scale.set(26, 24, 1);
+    sp.position.set(x, y, 3);
+    scene.add(sp);
+    G.sparks.push({ sp, vx: 100 * Math.cos(a * Math.PI / 180), vy: 100 * Math.sin(a * Math.PI / 180), life: 500 });
+  }
+}
+// miss 坠落小人 (Tower.makeFallingPerson:296-310: 5000ms, 漂移 ±100)
+function spawnFallingPerson(x, y) {
+  const mat = new THREE.SpriteMaterial({ map: G.texPeople[Math.floor(Math.random() * 2)], transparent: true });
+  const sp = new THREE.Sprite(mat);
+  sp.scale.set(30, 40, 1);
+  sp.position.set(x, y, 2);
+  scene.add(sp);
+  G.fallingPeople.push({ sp, vx: (Math.random() - 0.5) * 0.04, life: 5000 });
+}
+
 function knockTopBlock() { // Tower.knockNextBlock
   const top = G.blocks.pop();
   top.vy = 0; top.vx = (Math.random() - 0.5) * 0.4; top.vr = 0.03;
   toppled.push(top);
+  spawnFallingPerson(top.mesh.position.x + (top.cx || 0), top.mesh.position.y + 40); // makeFallingPerson
   G.landingY -= BLOCK_H;
   G.stacked--;                                   // Tower.as:176 setStackedBlocks(stackedBlocks - 1)
   const under = G.blocks[G.blocks.length - 1];
@@ -420,6 +484,40 @@ function loop(now) {
       b.mesh.position.y -= b.vy * dt;
       b.mesh.rotation.z += (b.vr || 0) * dt;
       if (b.mesh.position.y < G.camY - STAGE_H) { towerGroup.remove(b.mesh); scene.remove(b.mesh); toppled.splice(i, 1); }
+    }
+
+    // 视差背景: worldY = camY*(1-r) + y0 (Tower.move: bg._y = towerY + bgStartY - towerY*ratio)
+    for (const b of G.bgs) b.position.y = G.camY * (1 - b.userData.r) + b.userData.y0;
+
+    // 小人寻步 (Person.eachTick: 每 50ms 半步逼近, 上限 seekMax; 到达后 250ms 淡出)
+    for (let i = G.people.length - 1; i >= 0; i--) {
+      const q = G.people[i];
+      if (!q.fading) {
+        if (now >= q.next) {
+          q.next = now + 50;
+          const dx = Math.max(-q.seekMax, Math.min(q.seekMax, (q.sp.position.x + (0 - q.tx)) / -2));
+          const dy = Math.max(-q.seekMax, Math.min(q.seekMax, (q.sp.position.y + (0 - q.ty)) / -2));
+          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) q.fading = now + 250;
+          else q.sp.position.x += dx, q.sp.position.y += dy;
+        }
+      } else if (now >= q.fading) {
+        q.sp.material.opacity -= dt / 250;
+        if (q.sp.material.opacity <= 0) { towerGroup.remove(q.sp); G.people.splice(i, 1); }
+      }
+    }
+    // 火花
+    for (let i = G.sparks.length - 1; i >= 0; i--) {
+      const q = G.sparks[i];
+      q.sp.position.x += q.vx * dt / 1000; q.sp.position.y += q.vy * dt / 1000;
+      q.life -= dt; q.sp.material.opacity = Math.max(0, q.life / 500);
+      if (q.life <= 0) { scene.remove(q.sp); G.sparks.splice(i, 1); }
+    }
+    // 坠落小人
+    for (let i = G.fallingPeople.length - 1; i >= 0; i--) {
+      const q = G.fallingPeople[i];
+      q.sp.position.x += q.vx * dt; q.sp.position.y -= 0.15 * dt;
+      q.life -= dt;
+      if (q.life <= 0 || q.sp.position.y < G.camY - STAGE_H) { scene.remove(q.sp); G.fallingPeople.splice(i, 1); }
     }
 
     // 相机跟随 (pan up)

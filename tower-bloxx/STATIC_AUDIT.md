@@ -111,3 +111,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 连击 UI 改原版格式 "min(5,secs) x mult"（ComboTimer.setSecs:50-56），mult≥1 即显示
 - 音乐/音效/退出按钮（594,20/50/80）：开关存偏好（音频落地生效），退出暂回模式入口（菜单未实现）
 - smoke_test 16/16；PARITY.md 第 4 节 HUD 本体 ✅，菜单流保持 ❌（依赖城市模式）
+
+## 第 11 轮（2026-09-29）— PARITY 推进 #3：视差背景+小人+火花
+
+- 视差背景 3 层：FFDec 按 ExportAssets chid(231/423/426) 导出 bg2/3/4_spr 原版位图，
+  worldY=camY×(1-ratio)（Tower.move:93-104, BG_RATIOS 0.05/0.1/0.2），bg4 平铺覆盖太空段
+- 小人：Person.as:24-66 全参数（出生点/半步逼近/步长上限/50ms 节拍/淡出），
+  dude/dudette 原版位图（chid 753/772），随 towerGroup 倾斜
+- miss 坠落小人（makeFallingPerson:296-310）；完美落地四角星形火花（makeSpark:311-317, chid 783）
+- smoke_test 16/16；遗留：28 种环境特效（ambient_spr 逐帧导出，下轮）

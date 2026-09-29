@@ -65,15 +65,17 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 
-- ❌ 4 层视差背景 bg2-5（Tower.move:93-104，BG_RATIOS=[0.05,0.1,0.2,0.3]，BG_PANEL_H=1000，
-  随高度换景 BG_IDS 2/3/4/5：城市→高空→太空）
-- ❌ 环境特效系统 28 种（AMBIENT_SPRS + EFFECT_PROBABILITIES*：云/鸟/飞艇/气球/客机/
-  星星/行星/鲸鱼 FX_*，GameSprites.generateEffect:209）
-- ❌ 小人系统：落块后居民入住动画（Person.as 走到楼内）、miss 时小人坠落
-  （Tower.makeFallingPerson:296-310）、完美落地火花 makeSpark（4 向星形）
+- ✅ 视差背景 3 层 bg2/3/4（FFDec 导出原版位图 640×2000/912/316，Tower.move:93-104
+  `worldY = camY×(1-ratio)`，BG_RATIOS 0.05/0.1/0.2；bg4 纵向平铺 6 次覆盖太空段；
+  原版无 bg5_spr，NUM_BGS 循环 2..4）
+- ⬜ 环境特效系统 28 种（AMBIENT_SPRS + EFFECT_PROBABILITIES*，GameSprites.generateEffect:209）
+  —— ambient_spr 为多帧 Flipbook 剪辑，需逐帧导出，下轮处理
+- ✅ 小人系统：落块居民走半步逼近入住（Person.as:24-66，出生 ±viewWidth/2、上方 rand(100,200)、
+  步长 min(PEOPLE_MAX_MV±10, dist/2)、每 50ms、到达 250ms 淡出）、miss 小人坠落
+  （makeFallingPerson:296-310 漂移±100/5s）、完美落地四角星形火花（makeSpark:311-317, speed=100）
 - ❌ 落块 bounceOffTower 旋转弹飞轨迹（BPath 抛物线，Tower.as:344-356）
-- 🟨 楼块外观：现用 4 款网格轮换；原版 currColor 驱动 block00-03 同款不同色 +
-  城市模式逐级换色（GameModel.currColor，CityMap.towerSpr gotoAndStop(currColor*4+…)）
+- ✅ 楼块外观按 currColor 选款（CityMap.as:160 currColor×4 语义；quick=3→第 4 款，tower=0→第 1 款）
+- ✅ 屋顶人口/特效触发（snd_stacked 音效待音频轮）
 - ❌ 音效触发视觉（snd_destroy 等与动画同步）
 
 ## 6. 音频——❌ 整体缺失 [P1]
