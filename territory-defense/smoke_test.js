@@ -1148,6 +1148,20 @@ console.log("--- 商店槽位进入条件 ---");
   G.shopSel = sv.sel; G.euros = sv.euros; G.su37Aiming = sv.aim;
   G.unlocker.canon75 = sv.lock; G.unlocker.su37 = sv.s37;
 }
+// ---- 空格取消 (原版 depressSpace: 建造/Su37瞄准/选中全取消, N+66) ----
+console.log("--- 空格取消 ---");
+{
+  const sv = { sel: G.shopSel, aim: G.su37Aiming, s37: G.unlocker.su37 };
+  G.unlocker.su37 = true; G.euros = 5000; G.shopSel = null; G.su37Aiming = false;
+  su37Start();
+  depressSpace();
+  console.log("空格取消 Su37 瞄准+pending=%s (aiming=%s pending=%s)",
+    G.su37Aiming === false && SU37.pending === null, G.su37Aiming, SU37.pending === null);
+  G.shopSel = 'm60'; G.selected = null;
+  depressSpace();
+  console.log("空格取消建造模式=%s", G.shopSel === null);
+  G.shopSel = sv.sel; G.su37Aiming = sv.aim; G.unlocker.su37 = sv.s37;
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {

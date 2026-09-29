@@ -1,5 +1,30 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+66 轮成果（2026-09-29, H5 领土防御·空格键 depressSpace 对齐 —— 补 Su37 瞄准取消）
+
+**（权威 = 6_1 load pcode loc0207 的 depressSpace 全函数）**
+
+### 1. 【原版空格取消范围解码】
+
+`depressSpace()`：①建造模式关（viseurConstruction=false + 光标 _x=-500）；
+②**Su37 瞄准关**（zoneBombardement=false + zone 光标藏）；③选中单位取消
+（unshowInfoOnUnit + 射程指示器 _x=-2000/_width=0）；④helpBoard/jukeboxPanel 面板滑走。
+
+### 2. H5 修正
+
+- 空格处理器提取为同名 `depressSpace()`（keydown 调用）：补上**缺失的 Su37 瞄准取消**
+  （`G.su37Aiming=false + SU37.pending=null`）；建造/选中取消原有 ✓
+- ④的面板滑走不建模（原版 800x600 舞台布局，H5 侧栏常驻），如实记录
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `空格取消 Su37 瞄准+pending=true`、`空格取消建造模式=true`
+- 123 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- 雷达门控 / chargeBombes 乱码重置 / 容器 bbox / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+65 轮成果（2026-09-29, H5 领土防御·商店槽位进入条件对齐 —— 锁定/钱不够点即 cannot）
 
 **（权威 = 1027/1026_* on(press) 逐行：unlocker && euros ≥ cost 才进建造模式，否则

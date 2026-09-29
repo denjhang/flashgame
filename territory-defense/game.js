@@ -2912,8 +2912,18 @@ window.addEventListener('keydown', (e) => {
   if (k === 'm') G.mouseScroll = !G.mouseScroll;
   if (k === 'c') G.showBuildArea = !G.showBuildArea;
   if (k === 'g') toggleZoom();
-  if (e.key === ' ') { G.shopSel = null; G.selected = null; e.preventDefault(); buildShop(); }
+  if (e.key === ' ') { depressSpace(); e.preventDefault(); buildShop(); }
 });
+
+// 原版 depressSpace (6_1 load pcode loc0207): 取消建造模式/Su37 瞄准/选中单位;
+//   jukeboxPanel/helpBoard 面板滑走为原版 800x600 舞台布局, H5 侧栏常驻不隐藏
+function depressSpace() {
+  G.shopSel = null;
+  G.selected = null;
+  G.su37Aiming = false;
+  SU37.pending = null;
+  buildShop();
+}
 
 // ---------------- 现代窗口适配 (宽屏不留黑边) ----------------
 // 原版是固定 800x600 的 Flash 舞台 (地图 635 + 侧栏 165)。
