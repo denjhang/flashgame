@@ -1301,6 +1301,21 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
+// ---- UI 原版素材替换 #3: 侧栏底板 (DefineSprite_1079, N+72) ----
+console.log("--- 侧栏底板原版素材 ---");
+{
+  const fsx = require('fs');
+  const p = 'assets/ui/sidebar.png';
+  const ok = fsx.existsSync(p);
+  let wh = null;
+  if (ok) {
+    const b = fsx.readFileSync(p);
+    wh = [b.readUInt32BE(16), b.readUInt32BE(20)];
+  }
+  console.log("侧栏 1079 底板存在=" + ok + " 尺寸=" + (wh ? wh.join('x') : 'N/A') + " (期望 170x602)");
+  const gj = fsx.readFileSync('game.js', 'utf8'), hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("SIDE_W=170 且 index 引用底板=" + (gj.includes('SIDE_W = 170') && hj.includes("assets/ui/sidebar.png")));
+}
 // ---- UI 原版素材替换 #1: 音乐面板 (DefineSprite_1151, N+70) ----
 console.log("--- 音乐面板原版素材 ---");
 {

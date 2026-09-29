@@ -2979,21 +2979,21 @@ function depressSpace() {
 }
 
 // ---------------- 现代窗口适配 (宽屏不留黑边) ----------------
-// 原版是固定 800x600 的 Flash 舞台 (地图 635 + 侧栏 165)。
-// H5 目标: 地图区横向铺满窗口剩余宽度 (不留左右黑边), 侧栏保持 165 逻辑宽,
+// 原版是固定 800x600 的 Flash 舞台 (地图 630 + 侧栏 170)。
+// H5 目标: 地图区横向铺满窗口剩余宽度 (不留左右黑边), 侧栏保持 170 逻辑宽 (原版 1079 底板),
 //   整体只做【等比缩放】(scale 取两轴较小的那个), 于是竖直方向若有余量会有少量
 //   上下留白 —— 这是等比缩放不可避免的; 为了把它降到最小, 地图区宽度按窗口比例放大。
 // 做法:
 //   1) 按窗口宽高比算出地图区应有的逻辑宽度 mapW, 写入 canvas.width (重设尺寸会清空画布,
 //      故紧接着重建依赖 W/H 的离屏 fog/heavy 画布)
-//   2) 侧栏宽度固定 165 逻辑像素; 总逻辑尺寸 (mapW+165) x 600 记为 #fit
+//   2) 侧栏宽度固定 165 逻辑像素; 总逻辑尺寸 (mapW+170) x 600 记为 #fit
 //   3) #fit 用 CSS transform 等比缩放到刚好填满窗口 (取 min), 居中
 function fitStage() {
   const fit = document.getElementById('fit');
   const stage = document.getElementById('stage');
   const side = document.getElementById('side');
   if (!fit || !stage || !side) return;
-  const SIDE_W = 165, H = 600;
+  const SIDE_W = 170, H = 600;   // 原版 1079 侧栏底板 170x602 (N+72)
 
   // 目标: 让 (mapW + SIDE_W) / H 尽量贴近窗口的宽高比 → 等比缩放后黑边最小
   const winW = window.innerWidth, winH = window.innerHeight;

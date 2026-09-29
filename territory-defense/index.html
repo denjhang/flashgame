@@ -16,19 +16,21 @@
   /* 底色 = 原版 SWF 舞台背景色 #441100 (canvas 未覆盖处与原版一致) */
   #stage { position:relative; background:#441100; overflow:hidden; }
   #cv { position:absolute; left:0; top:0; cursor:crosshair; }
-  /* 原版右侧栏 (frames/6.png) —— 高度锁 600px, 否则会把 INFO 挤出舞台 (N+25 修过) */
-  #side { position:absolute; right:0; top:0; width:165px; height:600px;
-          background:#4a4a4a; display:flex; flex-direction:column; overflow:hidden; }
-  #minimapBox { height:152px; border-bottom:2px solid #222; background:#000; flex:none; }
-  #minimap { display:block; cursor:pointer; width:165px; height:150px; }
-  .panelTitle { background:#333; color:#ddd; text-align:center; font-weight:bold;
-                font-size:11px; padding:3px 0; letter-spacing:1px; border-top:1px solid #666;
-                border-bottom:1px solid #111; }
-  /* 建造菜单: 原版 constructionCont(chid 1027) 3 页 x 4 格 (2x2)。
-     图标 = 1025 帧库 (75x62, FFDec 字节级导出);
-     1026 按钮态 = cxform 变体: lock 乘 0x68(≈0.41 变暗) / over 提亮 */
-  #shop { display:grid; grid-template-columns:1fr 1fr; gap:1px; padding:1px;
-          background:#0a0a0a; flex:none; width:154px; margin:0 auto; }
+  /* 原版右侧栏 = DefineSprite_1079 底板直出 (170x602, FFDec 字节级)。
+     子区坐标 = 1079 PNG 像素测量 (x-85 归零): 小地图 (2,11)163x150,
+     标题条 y175(h23, 已烤入), 槽位 2x2 @ (9,201)(86,201)(9,265)(86,265) 75x62,
+     INFO 条 y332 (INFO 标签/◀▶ 已烤入), 信息框 (1,360)166x136, 底栏 y543..601。
+     动态控件绝对定位覆盖其上; 1026 按钮态 = cxform 变体: lock 乘 0x68(≈0.41) */
+  #side { position:absolute; right:0; top:0; width:170px; height:600px;
+          background:url('assets/ui/sidebar.png') no-repeat; display:block; overflow:visible; }
+  #minimapBox { position:absolute; left:2px; top:11px; width:163px; height:150px; }
+  #minimap { display:block; cursor:pointer; width:163px; height:150px; }
+  /* 标题条/INFO 标签已烤入底图 → 文本透明, 元素仅占位/供 JS 写页码 */
+  .panelTitle { background:transparent; color:transparent; text-align:center; font-weight:bold;
+                font-size:11px; padding:3px 0; letter-spacing:1px; }
+  #shopTitle { position:absolute; left:0; top:175px; width:170px; height:23px; line-height:23px; padding:0; }
+  #shop { position:absolute; left:9px; top:201px; width:152px; display:grid;
+          grid-template-columns:75px 75px; gap:2px; padding:0; background:transparent; }
   .sel { cursor:pointer; position:relative; width:75px; height:62px; background:#000; }
   .sel img { width:75px; height:62px; display:block; }
   .sel:hover { filter:brightness(1.25) saturate(1.15); }
@@ -37,34 +39,40 @@
   .sel.lock:hover { filter:brightness(0.41); cursor:not-allowed; }
   .sel .price { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center;
              justify-content:center; background:rgba(0,0,0,.55); color:#fc6; font-size:10px; }
-  .panelHead { display:flex; flex:none; }
-  .panelHead .panelTitle { flex:1; border-top:none; }
-  /* 翻页箭头 (原版 arrowL/arrowR chid 1078 -> turnConstruction("left"/"right")) */
-  .panelHead .arrow { background:#555; color:#ddd; width:24px; text-align:center; font-size:11px;
-                      padding:3px 0; cursor:pointer; border-bottom:1px solid #111; user-select:none; }
-  .panelHead .arrow:hover { background:#6a6a4a; color:#ff8; }
-  .panelHead .arrow:active { background:#7a7a3a; }
-  /* 页码点 (3 页) */
-  #pageDots { display:flex; gap:3px; justify-content:center; padding:2px 0; background:#333;
-              border-bottom:1px solid #111; flex:none; }
-  #pageDots i { width:6px; height:6px; border-radius:50%; background:#666; display:block; }
+  /* INFO 条 y332 h27: 标签已烤入; ◀▶ 原版 1078 位置 = 底图 (65,335)(116,335) 45x23 */
+  .panelHead { position:absolute; left:0; top:332px; width:166px; height:27px; }
+  .panelHead .panelTitle { position:absolute; left:4px; top:3px; width:58px; height:23px; padding:0; line-height:20px; }
+  .panelHead .arrow { position:absolute; top:3px; background:transparent; color:transparent; width:45px;
+                      height:23px; cursor:pointer; padding:0; border:none; user-select:none; }
+  .panelHead .arrow:active { background:rgba(255,255,255,.15); }
+  #pageL { left:65px; }
+  #pageR { left:116px; }
+  /* 页码点 (3 页, H5 附加; 原版无, 置于 INFO 条下方不遮挡) */
+  #pageDots { position:absolute; left:0; top:359px; width:166px; display:flex; gap:3px;
+              justify-content:center; padding:0; background:transparent; }
+  #pageDots i { width:5px; height:4px; border-radius:0; background:#666; display:block; }
   #pageDots i.on { background:#e80; }
-  #infoBox { background:#101010; color:#9f9; font-size:10.5px; line-height:1.35;
-             padding:4px; flex:1 1 auto; min-height:0; overflow:hidden; }
-  #infoBox b { color:#cf9; }
-  #lossBox { background:#0a0a0a; padding:3px 5px; font-size:11px; flex:none; }
+  #infoBox { position:absolute; left:1px; top:363px; width:166px; height:132px;
+             background:transparent; color:#ccccdd; font-size:10.5px; line-height:1.35;
+             padding:2px 4px; overflow:hidden; box-sizing:border-box; }
+  #infoBox b { color:#e8e8ff; }
+  #lossBox { position:absolute; left:1px; top:562px; width:166px; height:38px;
+             background:transparent; padding:1px 5px; font-size:11px; box-sizing:border-box; }
   #lossBox .losses { color:#daa; }
   #lossBox .cash { color:#ee8; display:block; }
   #lossBox .interest { color:#aa8; font-size:10px; }
   /* 音乐/开关面板 — 原版 DefineSprite_1151 全景图 (178x203) + 原位热区。
      权威 = FFDec SVG: 1145 歌曲按钮 109.65x21.05 @ (6.85, 7.05/34.65/61.7),
      pauser @ (7.15, 91.5), 关闭钮 686 @ (144.8, 3.05) 26.75x26.75 */
-  #musicBox { background:#2a2a2a; padding:3px; display:flex; flex-direction:column; gap:2px; flex:none; }
+  #musicBox { position:absolute; left:1px; top:497px; width:166px; background:transparent;
+              padding:0; display:flex; flex-direction:column; gap:2px; }
   #musicBox .row { display:flex; gap:2px; }
-  #musicBox button { background:#444; color:#ccc; border:1px solid #666; font-size:10px;
+  #musicBox button { background:rgba(48,48,48,.9); color:#ccc; border:1px solid #555; font-size:10px;
                      font-family:monospace; padding:1px 2px; cursor:pointer; text-align:left; }
   #musicBox .row button { flex:1; text-align:center; }
-  #musicPanel { position:relative; width:178px; height:203px; font-family:monospace; display:none; flex:none; }
+  /* 1151 面板为弹出层 (原版盖在地图上): 向左弹出侧栏 */
+  #musicPanel { position:absolute; right:172px; top:0; width:178px; height:203px;
+                font-family:monospace; display:none; }
   #musicPanel.show { display:block; }
   #musicPanelImg { position:absolute; left:0; top:0; }
   .mpBtn { position:absolute; cursor:pointer; font-size:11px; line-height:21px; padding-left:5px;
@@ -155,7 +163,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600040"></script>
-<script src="game.js?v=1790600040"></script>
+<script src="data.js?v=1790600041"></script>
+<script src="game.js?v=1790600041"></script>
 </body>
 </html>
