@@ -1301,6 +1301,21 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
+// ---- UI 原版素材替换 #6 审计: 1161 取消提示 / 778 准星 / 775 射程圈 (N+76) ----
+console.log("--- HUD 杂项原版素材 ---");
+{
+  const fsx = require('fs');
+  const chk = (p, w0, h0) => {
+    if (!fsx.existsSync(p)) return 'MISSING';
+    const b = fsx.readFileSync(p);
+    return (b.readUInt32BE(16) === w0 && b.readUInt32BE(20) === h0) ? 'ok' : b.readUInt32BE(16) + 'x' + b.readUInt32BE(20);
+  };
+  console.log("1161 提示条(634x15)=" + chk('assets/build_ui/DefineSprite_1161/1.png', 634, 15) +
+    "  775 射程圈(100x100)=" + chk('assets/selection/DefineSprite_775/1.png', 100, 100) +
+    "  778 准星(60x60)=" + chk('assets/selection/DefineSprite_778/1.png', 60, 60));
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("自造'可建/不可建'角标已移除(原版仅帧色)=" + !gj.includes("可建 '"));
+}
 // ---- UI 原版素材替换 #5: 修理条 (814 base / 818 autor, N+75 烤入文本清洗) ----
 console.log("--- 修理条原版素材 ---");
 {

@@ -2571,9 +2571,7 @@ function draw() {
     if (hi.complete && hi.naturalWidth) {
       ctx.drawImage(hi, (W - hi.naturalWidth) / 2, H - 26);
     }
-    ctx.fillStyle = ok ? '#cfc' : '#f88';
-    ctx.font = '11px monospace';
-    ctx.fillText((ok ? '可建 ' : '不可建 ') + G.shopSel, 8, H - 8);
+    // 原版无左下角文字: 可建性完全由 viseurConstruction 帧色表达 (帧1浅绿/帧3深红)
   }
 
   // ---- 战争迷雾 (N+69 用户指令: 暂时取消 — 原版主地图敌人无条件绘制, 无迷雾层) ----
