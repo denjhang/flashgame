@@ -224,3 +224,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   选 Residential → 点格建造 → 10 层(含屋顶)落地 → 结算 OK → finishCityTower 放置 →
   存档断言 (sm_towerGridData 人口/塔色/屋顶帧 1:1)
 - 城市模式 click 链(最后的执行盲区)补齐; smoke 17/17 保持
+
+## 第 22+ 轮 — exec_test 稳定性修正
+
+- GLB 载入轮询窗口 2s→5s: 一次回归轮出现偶发 "PASS=2"（高负载下 GLB 未及载入, 后续断言跳过）,
+  三连跑验证 7 PASS 稳定; 属测试自身不稳定, 非游戏代码回归

@@ -108,7 +108,7 @@ try {
 }
 
 // 等 GLB 异步加载 + 纹理 onload 定时器
-for (let i = 0; i < 40; i++) { await new Promise(r => setTimeout(r, 50)); frame(500 + i * 16); if (globalThis.__ready) break; }
+for (let i = 0; i < 100; i++) { await new Promise(r => setTimeout(r, 50)); frame(500 + i * 16); if (globalThis.__ready) break; } // 5s 轮询, 防高负载偶发
 console.log('[dbg] errs=' + JSON.stringify(globalThis.__errs) + ' ready=' + globalThis.__ready);
 check(globalThis.__ready === true, 'GLB 载入完成 (window.__ready)' + (globalThis.__errs && globalThis.__errs.length ? ' errs=' + JSON.stringify(globalThis.__errs) : ''));
 
