@@ -933,13 +933,33 @@ const BGM_FILES = ['actofinstinct.mp3', 'hellmarch.mp3', 'justdoitup.mp3'];
 //   PlaceObject2_1145_11 → "Just do it up"   (changeMusic 2)
 // 与 6_430 的 musics[0..2].attachSound("actOfInstinct"/"hellMarch"/"justDoItUp") 索引一致
 const BGM_NAMES = ['Act of instinct', 'Hell march', 'Just do it up'];
+// 原版 changeLevels (1151 音量条 rollOver): 两路各 5 段 levels 15/35/50/80/100,
+//   载入默认点亮至 50 (1150_19..27 load 状态)。H5 以全局增益复刻。
+let SFX_GAIN = 0.5, MUS_GAIN = 0.5;
+function changeLevels(group, level) {
+  const v = level / 100;
+  if (group === 'sounds') {
+    SFX_GAIN = v;
+  } else {
+    MUS_GAIN = v;
+    if (bgmAudio) bgmAudio.volume = 0.5 * v;
+    if (segmentAudio) segmentAudio.volume = 0.5 * v;
+  }
+}
+function updateVolBars(group, level) {   // ≤level 点亮(seg1), >level 熄灭(seg2)
+  const p = group === 's' ? 'v' + 's' : 'vm';
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(p + i);
+    if (el) el.src = 'assets/ui/slider/seg' + (i * 10 <= level ? 1 : 2) + '.png';   // l∈{15..100}, i*10 近似判定
+  }
+}
 let bgmAudio = null, imusic = 0, positionmusic = 0, isPause = true, bgmMuted = false;
 function playMusic() {                    // 原版 playMusic: 从 positionmusic 恢复
   try {
     if (!bgmAudio) bgmAudio = new Audio();
     if (!bgmAudio.src.endsWith(BGM_FILES[imusic])) bgmAudio.src = 'assets/music/' + BGM_FILES[imusic];
     bgmAudio.currentTime = positionmusic;
-    bgmAudio.volume = 0.5;
+    bgmAudio.volume = 0.5 * MUS_GAIN;
     bgmAudio.onended = () => {            // 原版 onSoundComplete=nextMusic
       imusic = imusic === 2 ? 0 : imusic + 1;
       positionmusic = 0;
@@ -987,7 +1007,7 @@ function playSegment(name, loop = true) {  // 段落播放 (原版 bgscenario/ed
     segmentAudio.pause();
     segmentAudio.src = 'assets/music/' + SEGMENT_FILES[name];
     segmentAudio.loop = loop;
-    segmentAudio.volume = 0.5;
+    segmentAudio.volume = 0.5 * MUS_GAIN;
     segmentAudio.play().catch(() => {});
     segmentName = name;
   } catch (e) {}
@@ -1013,6 +1033,15 @@ function wireMusicPanel() {               // 原版 1151 面板按钮
     const panel = document.getElementById('musicPanel');
     if (panel) panel.classList.remove('show');
   };
+  // 原版音量条: 1150_* on(rollOver) → changeLevels(group, level) + selectionUnite
+  document.querySelectorAll('.vseg').forEach(el => {
+    el.onmouseenter = () => {
+      changeLevels(el.dataset.g === 's' ? 'sounds' : 'music', +el.dataset.l);
+      updateVolBars(el.dataset.g, +el.dataset.l);
+      playSfx('selectionUnite', 0.3);
+    };
+  });
+  updateVolBars('s', 50); updateVolBars('m', 50);   // 载入默认 (点亮至 50)
   const mo = document.getElementById('mOpen');
   if (mo) mo.onclick = () => {            // H5 侧栏重开面板 (原版面板由 UI 容器显隐)
     const panel = document.getElementById('musicPanel');
@@ -1198,6 +1227,7 @@ function playSfx(name, vol = 0.4) {
     const pool = SFX_POOL[name];
     pool._i = (pool._i + 1) % pool.length;
     const a = pool[pool._i];
+    a.volume = vol * SFX_GAIN;          // 原版 changeLevels("sounds",level) 全局增益
     a.currentTime = 0;
     a.volume = vol;
     a.play().catch(() => {});

@@ -1,5 +1,34 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+83 轮成果（2026-09-29, H5 领土防御·P2 组 #2：1151 音量条全量接线 —— changeLevels 两路增益）
+
+**（权威 = 1151/frame_1 的 1150_19..37 全部 CLIPACTION 脚本 + 1151 SVG s1..m5 矩阵）**
+
+### 1. 【解码】
+
+- 音量条 = **1150** 段图（6x22 两态：1=亮 2=灭）× 每组 5 段（s1..s5 "sounds" /
+  m1..m5 "music"），电平 **15/35/50/80/100**，条高随电平递增（22×0.4168→1.3571）
+- 交互 = **on(rollOver)**（非按压）：≤当前段点亮、>当前段熄灭 +
+  `master_sounds.changeLevels("sounds"/"music", level)` + selectionUnite 音
+- **载入默认点亮至 50**（19..23 load stop(1)，25/27 stop(2)）—— 即默认两路 50%
+
+### 2. 【H5 实现】
+
+- 10 个段图热点按 SVG 矩阵绝对定位在 1151 面板上（mouseenter = 原版 rollOver）；
+  updateVolBars 复刻亮/灭两态（seg1/seg2 直出图）
+- changeLevels 落地：SFX_GAIN（playSfx 播放时实时乘）+ MUS_GAIN（BGM/段落
+  volume 实时乘），默认两路 0.5；设级即生效并伴随 selectionUnite
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 两态段图在位；10 段热点；changeLevels/增益/默认 50 接线断言=true
+- 151 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 1040 quality（Flash 声音质量，H5 无对应）与 1053 story 模式切换未接
+- 原版金钱显示 TextField 归属未定位（H5 唯一残留自造 UI 文字）
+
 ## 第 N+82 轮成果（2026-09-29, H5 领土防御·P2 组 #1：helpB 帮助板接线 + 三钮行为全量取证）
 
 **（权威 = 1074/frame_1 各按钮 on(press) 脚本逐个核对）**

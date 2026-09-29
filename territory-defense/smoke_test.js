@@ -1303,7 +1303,21 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- 帮助板 (helpB 1046 → helpBoard 1103, N+82) ----
+// ---- 音量条 (1151 内 1150 x10, changeLevels, N+83) ----
+console.log("--- 音量条 ---");
+{
+  const fsx = require('fs');
+  const ok1 = fsx.existsSync('assets/ui/slider/seg1.png'), ok2 = fsx.existsSync('assets/ui/slider/seg2.png');
+  console.log("1150 两态段图=" + (ok1 && ok2));
+  const hj = fsx.readFileSync('index.html', 'utf8');
+  const n = (hj.match(/class="vseg"/g) || []).length;
+  console.log("10 段热点=" + (n === 10));
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("changeLevels 接线 (SFX_GAIN/MUS_GAIN/默认50)=" +
+    (gj.includes('function changeLevels') && gj.includes('SFX_GAIN') && gj.includes('MUS_GAIN') &&
+     gj.includes("updateVolBars('s', 50)")));
+}
+// ---- 帮助板 (helpB 1046 → helpBoard 1103, N+82) ----// ---- 帮助板 (helpB 1046 → helpBoard 1103, N+82) ----
 console.log("--- 帮助板 ---");
 {
   const fsx = require('fs');
