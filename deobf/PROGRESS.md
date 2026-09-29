@@ -1,5 +1,49 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+71 轮成果（2026-09-29, H5 领土防御·UI 原版素材替换 #2：建造菜单 1025 帧库图标字节级上图 + 原版 info 悬停）
+
+**（权威 = swf_dump 逐 tag 解码 DefineSprite_1025/1026/1027 + 1027 各 1026_* CLIPACTION 脚本）**
+
+### 1. 【原版建造菜单结构解码（本轮取证，纠正旧注）】
+
+- **1025 = 图标帧库**（12 帧，帧标签逐字 = 武器名）：m60→子图 1002, gatling→1004,
+  canon75→1006, canon105→1008, canon105D→1010, radar→1012, crotale→1014,
+  canon125→1016, MLRS→1018, pluton→1020, MTHEL→1022, su37→1024；
+  槽位 load 脚本 `item.gotoAndStop(name)` 换图
+- **1026 = 槽位按钮**（7 帧，帧标签 normal/over/lock/press）——所谓"态"只是
+  **同一图标的 cxform 变体**（lock 乘 0x68≈0.41 变暗；press 是颜色动画），无独立美术
+- **1027 = 3 页容器**：三帧都是同 4 个 1026 实例换名字重指（f1 m60…, f2 canon105D…,
+  f3 MLRS…），槽位矩阵 (±76, -63.05/1.4)，格 75x62
+- FFDec sprite:png 导出 1027 三帧 md5 相同（导出器塌缩，读 item 默认帧 m60）→
+  改从 1025 直出 12 帧图标
+- 每格 rollOver 的 **info 文本逐字提取**（含 price/power/impact/range/rate/life），
+  造价与 STRUCTURES 表逐项交叉一致（120/200/300/420/540/250/1000/1400/2200/1200/5000）
+  —— 再次实证经济表 cost 列正确
+
+### 2. 【H5 换装】
+
+- `assets/menu/*.png` 12 张全部替换为 1025 直出的**字节级导出**（75x62；旧图为
+  二次加工品 76x63）
+- buildShop：删除自造武器名/价格角标；槽 = 原版图标 + CSS 复刻 1026 三态
+  （hover 提亮 = over、brightness(.41) = lock、橙色描边 = 选中）；造价/属性改为
+  **原版 rollOver 行为**——悬停把逐字 info 文本写进侧栏 INFO 面板（原版
+  showInfoOfItem），移开恢复。su37 compteur（ready/.. wait）保留
+- 布局 2x2 网格 1px 缝、格 75x62，与 1027 槽位矩阵一致
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `1025 图标 12/12 存在=true 尺寸全 75x62=true`（PNG IHDR 断言）
+- `SHOP_INFO 12 条且造价与结构表交叉一致=true`
+- 132 项 `=true`；450 帧 sim 正常；node --check 通过
+- 排错记录：断言块在模板字符串内 `\t\d` 被模板转义吃掉 → 双反斜杠修正
+
+### 4. 本轮仍未做（如实记录）
+
+- 音量条 s1/s2 拖动调音 / selectionUnite 点击音（1151 面板遗留，P2）
+- UI 替换 #3 起：1079/1074 侧栏容器 / 1078/653/979 按钮 / 819 修理条 / HUD 杂项
+- 剧情系统按原关卡安排复刻（解码 329/980_242/instructions 演出流）未动工
+
+
 ## 第 N+70 轮成果（2026-09-29, H5 领土防御·UI 原版素材替换 #1：音乐面板 1151 整面板上图）
 
 **（权威 = FFDec 导出 DefineSprite_1151 PNG(178x203)/SVG + frame_1 全部 CLIPACTION 脚本）**

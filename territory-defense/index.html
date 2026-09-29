@@ -24,18 +24,18 @@
   .panelTitle { background:#333; color:#ddd; text-align:center; font-weight:bold;
                 font-size:11px; padding:3px 0; letter-spacing:1px; border-top:1px solid #666;
                 border-bottom:1px solid #111; }
-  /* 建造菜单: 原版 constructionCont(chid 1027) 是 3 页 x 4 格 (2x2), 不是单页长列表 */
-  #shop { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px;
-          background:#c8c8c8; flex:none; }
-  .sel { border:2px solid #999; background:#d8d8d8; cursor:pointer; position:relative; height:62px; }
-  .sel img { width:100%; height:48px; object-fit:cover; display:block; }
-  .sel.on { border-color:#e80; }
-  .sel.lock { opacity:.30; cursor:not-allowed; }
-  .sel .nm { position:absolute; left:1px; top:0; font-size:9px; font-weight:bold; color:#111;
-             background:rgba(255,255,255,.65); padding:0 2px; }
-  .sel .price { position:absolute; right:1px; bottom:0; font-size:10px; font-weight:bold; color:#040;
-                background:rgba(255,255,255,.75); padding:0 2px; }
-  .sel .cd { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center;
+  /* 建造菜单: 原版 constructionCont(chid 1027) 3 页 x 4 格 (2x2)。
+     图标 = 1025 帧库 (75x62, FFDec 字节级导出);
+     1026 按钮态 = cxform 变体: lock 乘 0x68(≈0.41 变暗) / over 提亮 */
+  #shop { display:grid; grid-template-columns:1fr 1fr; gap:1px; padding:1px;
+          background:#0a0a0a; flex:none; width:154px; margin:0 auto; }
+  .sel { cursor:pointer; position:relative; width:75px; height:62px; background:#000; }
+  .sel img { width:75px; height:62px; display:block; }
+  .sel:hover { filter:brightness(1.25) saturate(1.15); }
+  .sel.on { outline:2px solid #e80; outline-offset:-2px; }
+  .sel.lock { filter:brightness(0.41); }
+  .sel.lock:hover { filter:brightness(0.41); cursor:not-allowed; }
+  .sel .price { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center;
              justify-content:center; background:rgba(0,0,0,.55); color:#fc6; font-size:10px; }
   .panelHead { display:flex; flex:none; }
   .panelHead .panelTitle { flex:1; border-top:none; }
@@ -155,7 +155,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600039"></script>
-<script src="game.js?v=1790600039"></script>
+<script src="data.js?v=1790600040"></script>
+<script src="game.js?v=1790600040"></script>
 </body>
 </html>

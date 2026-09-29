@@ -1281,6 +1281,26 @@ console.log("--- 开火序列无空帧 ---");
     " crotale(122)=" + burstCount[122] + " MLRS(128)=" + burstCount[128] +
     " (期望 4/6/2/6)");
 }
+// ---- UI 原版素材替换 #2: 建造菜单图标 (DefineSprite_1025 帧库, N+71) ----
+console.log("--- 建造菜单原版图标 ---");
+{
+  const fsx = require('fs');
+  const NAMES = ['m60','gatling','canon75','canon105','canon105D','radar','crotale','canon125','MLRS','pluton','MTHEL','su37'];
+  let missing = [], badsz = [];
+  for (const n of NAMES) {
+    const p = 'assets/menu/' + n + '.png';
+    if (!fsx.existsSync(p)) { missing.push(n); continue; }
+    const b = fsx.readFileSync(p);
+    if (b.readUInt32BE(16) !== 75 || b.readUInt32BE(20) !== 62) badsz.push(n + ':' + b.readUInt32BE(16) + 'x' + b.readUInt32BE(20));
+  }
+  console.log("1025 图标 12/12 存在=" + (missing.length === 0) + " 尺寸全 75x62=" + (badsz.length === 0));
+  // 原版 info 文本造价 与 STRUCTURES 造价表交叉验证 (1027 rollOver vs data 表)
+  const infoOK = NAMES.every(n => {
+    const m = (SHOP_INFO[n] || '').match(/price\\t([\\d/]+)/);
+    return m && (m[1] === '/' || +m[1] === STRUCTURES[n].cost);
+  }) && NAMES.length === Object.keys(SHOP_INFO).length;
+  console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
+}
 // ---- UI 原版素材替换 #1: 音乐面板 (DefineSprite_1151, N+70) ----
 console.log("--- 音乐面板原版素材 ---");
 {

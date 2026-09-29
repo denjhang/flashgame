@@ -101,6 +101,22 @@ function turnConstruction(dir) {
   buildShop();
   return true;
 }
+// 原版每格 rollOver 的 info 文本 (DefineSprite_1027 各 1026_*/on(rollOver), 逐字提取):
+// 悬停时 informations.showInfoOfItem(info) → 侧栏 INFO 面板; rollOut → unshowInfoOfItem
+const SHOP_INFO = {
+  m60: 'm60 (7.62mm NATO)\n\nprice\t120\npower\t3 * 4\nimpact\t3\nrange\t350\nrate\t1.6 sec\nlife\t80\n',
+  gatling: 'gatling "vulcain" (7.62mm NATO)\n\nprice\t200\npower\t3 * 6\nimpact\t3\nrange\t380\nrate\t1.6 sec\nlife\t120\n',
+  canon75: '75mm canon\n\nprice\t300\npower\t12\nimpact\t16\nrange\t480\nrate\t1.6 sec\nlife\t220\n',
+  canon105: '105mm canon\n\nprice\t420\npower\t20\nimpact\t30\nrange\t620\nrate\t2.7 sec\nlife\t280\n',
+  canon105D: '105mm canon "twin"\n\nprice\t540\npower\t15\nimpact\t30\nrange\t620\nrate\t1.3 sec\nlife\t300\n',
+  radar: 'radar station\n\nprice\t250\npower\t/\nimpact\t/\nrange\t1200\nrate\t/\nlife\t220\n',
+  crotale: 'crotale missiles launcher\n\nprice\t1000\npower\t40 * 2\nimpact\t80\nrange\t800\nrate\t7.5 sec\nlife\t220\n',
+  canon125: '125mm canon "howitzer"\n\nprice\t1400\npower\t60\nimpact\t80\nrange\t1200\nrate\t6.2 sec\nlife\t240\n',
+  MLRS: 'MLRS (Multiple Launch Rocket System) \n\nprice\t2200\npower\t70 * 6\nimpact\t120\nrange\t1300\nrate\t20 sec\nlife\t320\n',
+  MTHEL: 'MTHEL (Mobile Tactical High Energy Laser) \n\nprice\t1200\npower\t120\nimpact\t2\nrange\t800\nrate\t6.2 sec\nlife\t300\n',
+  pluton: 'Pluton ballistic missile\n\nprice\t5000\npower\t2500\nimpact\t300\nrange\t10000\nrate\t30 sec\nlife\t600\n',
+  su37: 'Su-37 (Capt. Elena Angel Pokrovskaya)\n\nprice\t/\npower\t500 * 4\nimpact\t260\nrange\t/\nrate\t60 sec\nlife\t/\n',
+};
 // 原版解锁时间线 (DefineSprite_834/frame_1/PlaceObject2_773_189 newEvents, 关卡号=波号):
 //   m7 → canon75 / m11 → canon105 / m16 → canon105D  (自动解锁)
 //   m27 → radar / m31 → su37                          (自动解锁 + 开二选一面板)
@@ -2713,6 +2729,8 @@ function preloadTurretArt() {
 function buildShop() {
   const el = document.getElementById('shop');
   el.innerHTML = '';
+  const infoBox = document.getElementById('infoBox');
+  const infoDefault = '点选炮塔查看属性';
   const page = SHOP_PAGES[SHOP_PANEL - 1] || SHOP_PAGES[0];
   for (const id of page) {
     const isSu37 = id === 'su37';
@@ -2720,14 +2738,11 @@ function buildShop() {
     const locked = isSu37 ? !G.unlocker.su37 : !G.unlocker[id];
     const sp = document.createElement('span');
     sp.className = 'sel' + (locked ? ' lock' : '') + (G.shopSel === id ? ' on' : '');
-    // 原版建造菜单武器照片 (1025 帧库)
+    // 原版 1025 帧库图标 (FFDec 字节级导出, 75x62; 1026 态 normal/over/lock 由 CSS 滤镜)
     const im = document.createElement('img');
     im.src = 'assets/menu/' + id + '.png';
+    im.width = 75; im.height = 62;
     sp.appendChild(im);
-    const nm = document.createElement('div');
-    nm.className = 'nm';
-    nm.textContent = id;
-    sp.appendChild(nm);
     if (isSu37) {
       // Su37 无"造价"概念 (是空袭技能), 显示冷却状态 (原版 compteur EditText: "ready" / ".. wait")
       const cd = document.createElement('div');
@@ -2739,12 +2754,11 @@ function buildShop() {
         sp.onclick = () => { su37Start(); buildShop(); };
       }
     } else {
-      const pr = document.createElement('div');
-      pr.className = 'price';
-      pr.textContent = '$' + STRUCTURES[id].cost;
-      sp.appendChild(pr);
       sp.onclick = () => shopSlotPick(id);
     }
+    // 原版 rollOver/rollOut: info 文本进侧栏 INFO 面板 (不做槽上角标)
+    sp.onmouseenter = () => { if (infoBox) infoBox.textContent = SHOP_INFO[id]; };
+    sp.onmouseleave = () => { if (infoBox) infoBox.textContent = infoDefault; };
     el.appendChild(sp);
   }
   // 高亮当前页码点 (3 页)
