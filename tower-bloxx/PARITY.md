@@ -46,14 +46,17 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ❌ 网格存档 SharedObject（GameModel.sm_towerGridData 等 → H5 应 localStorage）
 - ❌ 城市背景（city_spr 网格视图）与城市 BGM `sng_city`
 
-## 4. HUD 与界面——🟨 极简代替 [P1]
+## 4. HUD 与界面——✅ HUD 本体闭环（2026-09-29）/ 菜单流 ❌ [P1]
 
-- ❌ 高度进度条 progress_spr（LWR_LFT，setStackedBlocks 驱动，GameModel.as:208-227）
-- ❌ 命数 HUD tries_spr（帧 `3+currColor*6+(3-v)*2`，GameModel.as:143）
-- 🟨 人口显示：原版 5 位数字滚动（setDigits）+ 增量弹出文本（showPopChange/showBonusPopulation），
-  H5 为静态文本
-- 🟨 连击 UI：原版 combo_spr 计量表（ComboTimer.setSecs `min(5,secs)+" x"+mult`），H5 为文本
-- ❌ 音乐/音效/退出按钮（GameSprites.buildGameSprites:99-101，594,20/50/80）
+- ✅ 高度进度条（tower 模式 fill=stacked/total + 顶部旗标 hudTop；GameModel.as:208-227；quick 隐藏）
+- ✅ 命数 HUD tries（LWR_LFT 51,-55，♥ 计数替代原版帧动画，GameModel.as:139-148）
+- ✅ 人口 5 位数字（GameSprites.setDigits:124-136，padStart(5)）+ 连击计量 "min(5,secs) x mult"
+  （ComboTimer.setSecs:50-56）
+- ✅ 音乐/音效/退出按钮（GameSprites.buildGameSprites:99-101 坐标 594,20/50/80；开关先存偏好，
+  音频落地后生效；退出暂回模式入口）
+- ⬜ 人口增量弹出文本（showPopChange/showBonusPopulation）→ 归入视觉层轮次
+- ❌ 菜单流：splash→title→menu（GameState.as:53-257 状态机）、Instructions 三页、About、
+  High Scores、Reset 确认弹窗——依赖城市模式，保持在清单末位
 - ❌ 菜单流：splash→title→menu（Build City/Quick Game/Instructions/High Scores/About），
   GameState.as:53-257 全状态机；H5 直接进游戏无任何菜单
 - ❌ Instructions 三页（TIP_INSTR_QUICK/BUILD/INTRO 文案齐全）、About（版本版权）

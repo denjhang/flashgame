@@ -103,3 +103,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 结算面板：getSummary 三行 + New record! + MSG_RESTART 点击重开（GameSprites.showSummary）
 - comboMax/records 记录（GameModel.as:11-13,192）
 - smoke_test 16/16；PARITY.md 第 2 节标记闭环
+
+## 第 10 轮（2026-09-29）— PARITY 推进 #2：HUD 完整化
+
+- 进度条：tower 模式显示 fill=stacked/totalBlocks + 顶部旗标（GameModel.as:208-227）；quick 隐藏
+- 命数 tries 移至原版坐标 LWR_LFT(51,-55)；人口 5 位数字右上(-52,-40)（setDigits padStart(5)）
+- 连击 UI 改原版格式 "min(5,secs) x mult"（ComboTimer.setSecs:50-56），mult≥1 即显示
+- 音乐/音效/退出按钮（594,20/50/80）：开关存偏好（音频落地生效），退出暂回模式入口（菜单未实现）
+- smoke_test 16/16；PARITY.md 第 4 节 HUD 本体 ✅，菜单流保持 ❌（依赖城市模式）

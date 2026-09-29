@@ -8,9 +8,14 @@
   #stage{position:relative;width:640px;height:480px;box-shadow:0 0 40px #000;}
   canvas{display:block;}
   #hud{position:absolute;inset:0;pointer-events:none;color:#fff;text-shadow:1px 1px 2px #000;}
-  #pop{position:absolute;top:8px;left:12px;font-size:20px;}
-  #lives{position:absolute;top:8px;right:12px;font-size:20px;}
-  #combo{position:absolute;top:36px;left:50%;transform:translateX(-50%);font-size:22px;color:#ffd700;display:none;}
+  #pop{position:absolute;top:40px;right:52px;font-size:22px;letter-spacing:2px;}
+  #tries{position:absolute;bottom:55px;left:51px;font-size:18px;}
+  .bar{position:absolute;bottom:31px;left:22px;width:12px;height:150px;background:#00000044;border:1px solid #234;}
+  .bar .fill{position:absolute;bottom:0;left:0;right:0;background:#e34545;}
+  .bar .top{position:absolute;top:-10px;left:-4px;right:-4px;height:6px;background:#ffd700;display:none;}
+  #combo{position:absolute;top:50px;left:50%;transform:translateX(-50%);font-size:20px;color:#ffd700;display:none;}
+  #btns{position:absolute;top:14px;right:14px;pointer-events:auto;}
+  #btns span{display:block;margin:6px 0;padding:2px 6px;background:#00000066;border-radius:4px;cursor:pointer;font-size:15px;}
   #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;}
   #hint{position:absolute;bottom:8px;width:100%;text-align:center;font-size:13px;opacity:.7;}
 </style>
@@ -25,9 +30,11 @@
 <body>
 <div id="stage">
   <div id="hud">
-    <div id="pop">👥 0</div>
-    <div id="lives">❤❤❤</div>
-    <div id="combo">COMBO ×2</div>
+    <div class="bar" id="progress"><div class="fill"></div><div class="top"></div></div>
+    <div id="tries">♥♥♥</div>
+    <div id="pop">00000</div>
+    <div id="combo">5 x1</div>
+    <div id="btns"><span id="btnMusic">♪</span><span id="btnSound">🔊</span><span id="btnExit">✕</span></div>
     <div id="msg"></div>
     <div id="hint">点击 / 空格 放下积木 · 还原自原版 Tower Bloxx（J2ME 3D 资产）</div>
   </div>

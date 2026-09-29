@@ -30,6 +30,9 @@ const hud = {
   pop: document.getElementById('pop'), lives: document.getElementById('lives'),
   combo: document.getElementById('combo'), msg: document.getElementById('msg'),
   summary: document.getElementById('summary'),
+  progress: document.getElementById('progress'), tries: document.getElementById('tries'),
+  btnMusic: document.getElementById('btnMusic'), btnSound: document.getElementById('btnSound'),
+  btnExit: document.getElementById('btnExit'),
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -136,10 +139,19 @@ const cable = new THREE.Line(
 craneGroup.add(cable);
 
 function addHud() {
-  hud.pop.textContent = '👥 ' + G.population;
-  hud.lives.textContent = '❤'.repeat(Math.max(0, G.lives)) || '—';
-  hud.combo.style.display = G.comboMult > 1 ? 'block' : 'none';
-  if (G.comboMult > 1) hud.combo.textContent = 'COMBO ×' + G.comboMult;
+  // 人口: 5 位数字 (GameSprites.setDigits:124-136, populationSpr numDigs=5)
+  hud.pop.textContent = String(Math.floor(G.population)).padStart(5, '0');
+  // 命数 (tries_spr LWR_LFT 51,-55; GameModel.setTries:139)
+  hud.tries.textContent = '♥'.repeat(Math.max(0, G.lives)) || '—';
+  // 高度进度条: tower 模式 blackBar=(total-stacked)*total*5/total (GameModel.as:213-227); quick 只显示层数
+  if (G.totalBlocks !== 999) {
+    hud.progress.querySelector('.fill').style.height = (100 * G.stacked / G.totalBlocks) + '%';
+    hud.progress.querySelector('.top').style.display = G.stacked >= G.totalBlocks - 1 ? 'block' : 'none'; // hudTop:217
+  } else hud.progress.style.display = 'none';
+  // 连击: "min(5,secs) x mult" (ComboTimer.setSecs:50-56)
+  const secs = Math.max(0, Math.ceil(G.comboT / 1000));
+  hud.combo.style.display = G.comboMult > 0 && G.comboT > 0 ? 'block' : 'none';
+  if (G.comboMult > 0 && G.comboT > 0) hud.combo.textContent = Math.min(5, secs) + ' x' + G.comboMult;
 }
 
 function startGame() {
@@ -359,6 +371,14 @@ function drop() {
 }
 addEventListener('pointerdown', drop);
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
+// 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好
+G.musicOn = true; G.soundOn = true;
+hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4; };
+hud.btnSound.onclick = e => { e.stopPropagation(); G.soundOn = !G.soundOn; hud.btnSound.style.opacity = G.soundOn ? 1 : 0.4; };
+hud.btnExit.onclick = e => { // BTN_EXIT_QUICK (GameState STT_EXIT_PLAY → 菜单; 菜单未实现, 先回模式入口)
+  e.stopPropagation();
+  location.href = location.pathname + (G.totalBlocks !== 999 ? '' : '?mode=tower');
+};
 
 // ---- 主循环 ----
 let last = performance.now();
@@ -424,6 +444,7 @@ function loop(now) {
 
     // combo 计时
     if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) finishCombo(); addHud(); }
+    else if (hud.combo.style.display !== 'none') addHud();
   }
   renderer.render(scene, camera);
 }
