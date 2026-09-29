@@ -1327,7 +1327,9 @@ console.log("--- 画质/云层 ---");
 console.log("--- 利息浮字 ---");
 {
   const fsx = require('fs');
+  const hj_read = () => fsx.readFileSync('index.html', 'utf8');
   const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("浮字三段颜色相位 (1141 同位三变体)=" + (hj_read().includes('hintColor')));
   console.log("moreeuros 差值记录 + 1.3s 浮字接线=" +
     (gj.includes('G.moreeuros = G.euros - before') && gj.includes("floatHint") &&
      gj.includes("'+' + G.moreeuros")));

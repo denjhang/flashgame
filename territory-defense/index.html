@@ -66,7 +66,10 @@
   #lossBox .cash { position:absolute; left:8px; top:22px; color:#fff; font-weight:bold; font-size:14px; }
   #lossBox .interest { position:absolute; right:6px; top:42px; color:#8a8f8a; font-size:10px; }
   /* intresthint (1141): "+N" 上浮 ~31帧@24fps ≈ 1.3s 后回落为 interest 文本 */
-  #lossBox .floatHint { color:#ff8; animation:hintFloat 1.3s ease-out; }
+  #lossBox .floatHint { animation:hintFloat 1.3s ease-out; }
+  /* 原版 1141 三段变体 (1138/1139/1140) 同位不同色 → 颜色三相位 */
+  @keyframes hintColor { 0% { color:#ffd; } 40% { color:#fff; } 80% { color:#fc6; } 100% { color:#fc6; } }
+  #lossBox .floatHint { animation:hintFloat 1.3s ease-out, hintColor 1.3s linear; }
   @keyframes hintFloat { from { transform:translateY(10px); opacity:.2; } 30% { opacity:1; } to { transform:translateY(-8px); opacity:0; } }
   /* 原版开关按钮本体 (#4, N+73): 1058/1063/1068/1073 直出 247x23 → 缩放 166x23,
      竖排 23px 行距 (= informations 内 menuZoom/menuHealth/menuArea 行距) */
@@ -261,7 +264,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600056"></script>
-<script src="game.js?v=1790600056"></script>
+<script src="data.js?v=1790600057"></script>
+<script src="game.js?v=1790600057"></script>
 </body>
 </html>
