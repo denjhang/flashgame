@@ -241,6 +241,14 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   });
   G.texStar = new THREE.TextureLoader().load('./assets/flash/DefineSprite_783_star_spr/1.png');
   G.texStar.colorSpace = THREE.SRGBColorSpace;
+  // 环境特效 28 帧 (ambient_spr chid734 帧→子剪辑 670..733, FFDec 逐帧导出)
+  G.txFX = [];
+  for (let i = 1; i <= 28; i++) {
+    const t = new THREE.TextureLoader().load(`./assets/flash/fx/fx${String(i).padStart(2, '0')}.png`);
+    t.colorSpace = THREE.SRGBColorSpace;
+    G.txFX.push(t);
+  }
+  initAmbientFX();
   // 吊钩: 用原版 hook 贴图 (image_12) 做公告牌
   const tex = new THREE.TextureLoader().load('./assets/image_12.png');
   tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter;
@@ -658,6 +666,61 @@ function blockLanded(offset, releaseBdx) {
   if (G.totalBlocks !== 999 && G.stacked >= G.totalBlocks) gameOver(true); // CityMap 目标高度
 }
 
+// ---- 环境特效 (Const.as:176-181 三表 + GameSprites.updateEffects/generateEffect) ----
+const FX_START=[0,0,0,2,3,2,3,3,4,5,6,6,6,7,8,8,9,9,10,10,11,12,12,13,14,15,17,18,21];
+const FX_END  =[1,1,1,3,4,4,4,5,5,6,7,7,7,999,9,10,999,999,11,999,12,13,14,999,15,16,18,19,999];
+const FX_PROB =[0,30,30,20,20,40,60,60,30,30,50,50,10,50,100,20,40,50,100,30,100,100,30,10,100,100,100,100,100];
+const FX_SPD  =[60,2,1,3,2,2,-2,3,-4,5,2,2,6,0,0,-2,0,0,0,0,0,0,3,-3,0,0,0,0,-3];
+const FX_OCC0 =[8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1]; // GameSprites.as:26
+const FX_MAX = 9;                 // Const.MAX_NUMBER_OF_EFFECTS
+const FX_SIZES = {};              // 载入后按纹理自然尺寸填
+function initAmbientFX() {
+  G.fxSlots = [];
+  for (let i = 0; i < FX_MAX; i++)
+    G.fxSlots.push({ type: 0, x: 0, sy: 0, next: performance.now() + Math.random() * 2000, sp: null });
+  G.fxOcc = FX_OCC0.slice();
+}
+function generateEffect(slot) { // GameSprites.generateEffect:209-263
+  const tier = G.stacked / 10;
+  let pick = 0;
+  for (let i = 1; i <= 28; i++) {
+    if (tier >= FX_START[i] && tier < FX_END[i] && (G.fxOcc[i] > 0 || G.fxOcc[i] === -1) &&
+        Math.random() * 100 < FX_PROB[i]) { pick = i; break; }
+  }
+  if (pick === 0) { slot.next = performance.now() + 1000 + Math.random() * 2500; return; }
+  G.fxOcc[pick]--; // :243
+  const spd = FX_SPD[pick];
+  if (spd === 0 || Math.floor(Math.random() * 2) === 0)
+    slot.x = -320 + Math.random() * 640;
+  else if (spd > 0) slot.x = -320 - 100;
+  else slot.x = 320 + 100;
+  slot.sy = -BLOCK_H / 2 - Math.random() * BLOCK_H * 1.5; // 2500-camy-rand(BLOCK_H/2..*2) 的屏幕等价
+  slot.type = pick;
+  const tex = G.txFX[pick];
+  if (!FX_SIZES[pick]) FX_SIZES[pick] = { w: tex.image.width, h: tex.image.height };
+  const { w, h } = FX_SIZES[pick];
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(w, h, 1);
+  scene.add(sp);
+  slot.sp = sp;
+}
+function updateEffects(dt, now) { // GameSprites.updateEffects:154-208
+  if (!G.fxSlots) return;
+  for (const slot of G.fxSlots) {
+    if (slot.type !== 0) {
+      slot.x += FX_SPD[slot.type] * dt / 330; // :167 SPD/10 per frame@30fps
+      if (slot.sp) slot.sp.position.set(slot.x, G.camY + slot.sy, -350);
+      const syWorld = slot.sp ? slot.sp.position.y - G.camY : 0;
+      if (slot.x > 320 + 200 || slot.x < -320 - 200 || syWorld > STAGE_H + 100) { // :174-176
+        if (G.fxOcc[slot.type] >= 0) G.fxOcc[slot.type]++; // :189-191
+        if (slot.sp) { scene.remove(slot.sp); slot.sp = null; }
+        slot.type = 0;
+        slot.next = now + Math.random() * 2000;
+      }
+    } else if (now >= slot.next) generateEffect(slot);
+  }
+}
+
 // ---- 小人 (Person.as:24-66): 出生 ±viewWidth/2 / 上方 rand(100,200), 向 (x±12, y-17) 半步逼近,
 // 步长 min(PEOPLE_MAX_MV±10, dist/2), 每 50ms; 到达后 250ms 淡出 ----
 function spawnPeople(blockMesh, amt) {
@@ -859,6 +922,7 @@ function loop(now) {
       if (b.mesh.position.y < G.camY - STAGE_H) { towerGroup.remove(b.mesh); scene.remove(b.mesh); toppled.splice(i, 1); }
     }
 
+    updateEffects(dt, now);
     // 视差背景: worldY = camY*(1-r) + y0 (Tower.move: bg._y = towerY + bgStartY - towerY*ratio)
     for (const b of G.bgs) b.position.y = G.camY * (1 - b.userData.r) + b.userData.y0;
 

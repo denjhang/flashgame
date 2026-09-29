@@ -171,3 +171,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 替换对比（点已占格显示 Old 人口, TIP_CITY_COMPARE）
 - 输入补齐: 下方向键/PgDn 放块（TIP_INTRO, Key.isDown(34)）
 - smoke_test 16/16
+
+## 第 18 轮（2026-09-29）— PARITY 推进 #10：环境特效 28 种闭环
+
+- 反汇编 ambient_spr(chid734) 时间轴: 27 帧, 每帧 PlaceObject2 一个子剪辑 (670..733)
+- FFDec 导出 26 张原版特效位图 → h5/assets/flash/fx/fx01..28.png
+- 三表状态机全对号: tier=stacked/10 分档 + PROB 掷骰 + OCC 次数(-1 无限, 出界+1 回收) +
+  SPD 速度/进场侧 + 9 槽位 2s 随机冷却 (updateEffects/generateEffect 逐行对号)
+- smoke_test 16/16

@@ -84,10 +84,10 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 视差背景 3 层 bg2/3/4（FFDec 导出原版位图 640×2000/912/316，Tower.move:93-104
   `worldY = camY×(1-ratio)`，BG_RATIOS 0.05/0.1/0.2；bg4 纵向平铺 6 次覆盖太空段；
   原版无 bg5_spr，NUM_BGS 循环 2..4）
-- ❌ [P2 遗留] 环境特效系统 28 种（AMBIENT_SPRS + EFFECT_PROBABILITIES*，GameSprites.generateEffect:209,
-  次数表 GameSprites.as:26）。取证：ExportAssets ambient_spr=chid734 仅 5 帧且为整幅遮罩，
-  28 种特效图形嵌在更深层子剪辑，逐帧还原需逐 clip 反汇编，成本/收益不匹配——暂缓，
-  状态机参数已记录在案（发生次数表 [8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1]）
+- ✅ 环境特效系统 28 种：ambient_spr(chid734) 帧结构反汇编成功（27 帧每帧 PlaceObject 一个子剪辑
+  670..733），FFDec 逐子剪辑导出 26 张原版位图（鸟群/飞艇/气球/云/客机/星星/行星/鲸鱼…）；
+  三表状态机全对号（EFFECT_PROBABILITIES_START/END/PROB/SPD + 次数表 GameSprites.as:26，
+  槽位 9、出生点/速度/出界回收 GameSprites.updateEffects:154-208 + generateEffect:209-263）
 - ✅ 小人系统：落块居民走半步逼近入住（Person.as:24-66，出生 ±viewWidth/2、上方 rand(100,200)、
   步长 min(PEOPLE_MAX_MV±10, dist/2)、每 50ms、到达 250ms 淡出）、miss 小人坠落
   （makeFallingPerson:296-310 漂移±100/5s）、完美落地四角星形火花（makeSpark:311-317, speed=100）
