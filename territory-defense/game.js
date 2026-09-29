@@ -1961,6 +1961,8 @@ function startWave() {
     G.units.push(nu);
   });
   G.waveActive = true;
+  const fc = document.getElementById('fadeCurtain');
+  if (fc) fc.classList.remove('on');    // 开波: 黑幕 1.5s 淡出
   briefState = null; applyBriefBar();   // 开波即收条 (对应原版 f183 gotoAndStop(10) 空帧)
   const dirNames = { parcourt1: '南方公路', parcourt2: '西侧小路', parcourt3: '北面空降', parcourt4: '海上航线' };
   showBanner('第 ' + G.wave + ' / 44 波来袭 — ' + dirNames[routeName]);
@@ -2086,6 +2088,12 @@ function loadGame() {                       // 原版 loadGame 分支 (6_333/834
 }
 function briefingShow() {
   G.briefing = true; briefState = 'mission';
+  // 原版 victims(762): iMission<=3 时黑幕在屏 (frame_4: >3 永久移出), 开波淡出
+  const fc = document.getElementById('fadeCurtain');
+  if (fc) {
+    if (G.wave + 1 <= 3) fc.classList.add('on');
+    else fc.classList.remove('on');
+  }
   // 原版: 有对白的关卡先逐句播对白 (980 nextDialogue), 放完才到 1106 开战条
   if (!dlgOpen(G.wave + 1)) applyBriefBar();
 }

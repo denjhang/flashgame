@@ -141,6 +141,11 @@
              z-index:29; background:rgba(20,20,20,.95); color:#ffd; border:2px solid #e80;
              font-family:monospace; font-size:13px; padding:8px 16px; cursor:pointer; }
   #loadBtn:hover { background:#3a2a10; }
+  /* victims 黑幕 (762): dpt113 位于地图之上/菜单之下, 开波时 35帧@24fps ≈1.5s 淡出 */
+  #fadeCurtain { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
+                 background:#000; z-index:20; pointer-events:none; opacity:0; }
+  #fadeCurtain.on { display:block; animation:curtainOut 1.5s ease-out forwards; }
+  @keyframes curtainOut { from { opacity:1; } to { opacity:0; } }
   /* 剧情对白 (980): 原版演出 = 870 房间布景(首字母选框, 794x314 内容) + 948 立绘 +
      底部文本; 870/948 为 FFDec 字节级导出 */
   #dlgBox { position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
@@ -243,6 +248,8 @@
          其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
     <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
     <button id="saveBtn" title="保存进度">SAVE GAME</button>
+    <!-- 原版 victims 黑幕 (chid762, 35帧淡出): 仅前 3 关简报显示 (frame_4: iMission>3 移出屏) -->
+    <div id="fadeCurtain"></div>
     <button id="loadBtn" title="读取存档继续">▶ CONTINUE</button>
     <!-- 原版 helpBoard (DefineSprite_1103, 463x283): helpB(1046) on(press) 置 (400,300) -->
     <div id="helpBoard">
@@ -276,7 +283,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600058"></script>
-<script src="game.js?v=1790600058"></script>
+<script src="data.js?v=1790600059"></script>
+<script src="game.js?v=1790600059"></script>
 </body>
 </html>

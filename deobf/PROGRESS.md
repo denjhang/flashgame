@@ -1,5 +1,35 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+91 轮成果（2026-09-29, H5 领土防御·可选增强 #2：victims 黑幕（前 3 关简报帘）复刻）
+
+**（权威 = frame_4 DoAction（loadGame/langue/gc 默认 + iMission>3 → victims._x=-5000）
++ PlaceObject victims(chid 762, 800x600, 35 帧) + 773_189 canon75AutoFire=0 根旗标）**
+
+### 1. 【解码】
+
+- **victims = DefineSprite_762**：800x600 纯黑幕布，35 帧淡出动画，深度 113（地图上/菜单下）
+- **frame_4 规则**：有存档且 iMission>3 → victims 永久移出屏 —— 即黑幕只服务
+  **前 3 关（教学关）的简报阶段**，开波后淡出
+- 同批取证：root 默认 loadGame=false / langue=english / gc=1；
+  canon75AutoFire 根旗标 = 0（834/773_189 设置，无游戏内读取点 → 无行为可接，如实挂账）
+- m60AutoFire/scoreBonus/interestSup 仅出现在 ConstantPool 与 cookie 初始化，
+  无游戏内读取点（应为外链 Mo-chibot 统计/废弃字段）—— 不接线，如实记录
+
+### 2. 【H5 实现】
+
+- #fadeCurtain 全屏黑幕：briefingShow 时若下一关 ≤3 挂幕，startWave 开波 1.5s
+  淡出（= 原版 35帧@24fps）；第 4 关起永久不显示
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 前 3 关黑幕规则接线断言=true；163 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- canon75AutoFire / m60AutoFire / scoreBonus / interestSup：反编译全库无游戏内
+  读取点（cookie 初始化 + ConstantPool 残留），判定为废弃/外链字段，不接线
+- 至此可选项内再无可考未落地机制
+
 ## 第 N+90 轮成果（2026-09-29, H5 领土防御·可选增强 #1：存档/读档系统复刻 —— saveData/loadGame 全字段对齐）
 
 **（权威 = frame_4 pcode_as function saveData + 976 on(press) "GAME SAVED" +

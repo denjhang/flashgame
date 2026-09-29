@@ -1304,7 +1304,15 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
+// ---- victims 黑幕 (762, 前3关简报, N+91) ----
+console.log("--- victims 黑幕 ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8'), hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("前3关黑幕规则 (briefingShow 挂 / startWave 淡出)=" +
+    (gj.includes("G.wave + 1 <= 3") && gj.includes("fadeCurtain") && hj.includes('id="fadeCurtain"')));
+}
+// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
 console.log("--- 存档系统 ---");
 {
   const sv = { wave: G.wave, euros: G.euros, score: G.score, interest: G.interest,
