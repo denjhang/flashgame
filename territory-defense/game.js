@@ -2171,7 +2171,11 @@ function endWave() {
   // 计息之前, 因此这笔奖金也吃当波利息
   if (nextWave === 25) G.euros += 2400;
   // 利息 (giveIntrest, 953/frame_30): euros = floor(euros × (1 + interest/100)); 第 1 波后不给
-  if (G.wave > 1) G.euros = Math.floor(G.euros * (1 + G.interest / 100));
+  if (G.wave > 1) {
+    const before = G.euros;
+    G.euros = Math.floor(G.euros * (1 + G.interest / 100));
+    G.moreeuros = G.euros - before;   // 原版 giveIntrest: moreeuros = 差值 (1141 浮字文本)
+  }
   G.waveActive = false;
   // 原版两波之间的剧情段调用 _root.events() (953/frame_2), 此时 mR = 即将开始的波号
   autoUnlockForWave(nextWave);
@@ -2188,6 +2192,14 @@ function endWave() {
   if (G.wave < WAVES.length) {
     if (nextWave === 26) playSegment('edith');
     else if (!(nextWave >= 27 && nextWave <= 30)) playSegment('bgscenario');
+  }
+  if (G.moreeuros > 0) {              // 原版 giveIntrest 末尾: infoMoneyAndScore.intresthint.play()
+    const el = document.getElementById('hInt2');
+    if (el) {
+      el.textContent = '+' + G.moreeuros;
+      el.classList.remove('floatHint'); void el.offsetWidth; el.classList.add('floatHint');
+      setTimeout(() => { if (el) el.textContent = 'interest ' + G.interest + '%'; }, 1300);
+    }
   }
   if (G.wave >= WAVES.length && G.units.every(u => u.dead)) {
     G.won = true;

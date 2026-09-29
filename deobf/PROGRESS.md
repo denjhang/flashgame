@@ -1,5 +1,33 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+85 轮成果（2026-09-29, H5 领土防御·P2 组 #4：intresthint "+N" 利息浮字对齐 1141）
+
+**（权威 = DefineSprite_1141 时间线（3 段 1138/1139/1140 moreeuros 文本，~31帧@24fps
+≈1.3s）+ frame_2/26 DoAction `moreeuros.text = "+" + master_menuItems.moreeuros`）**
+
+### 1. 【解码】
+
+- giveIntrest 末尾 `infoMoneyAndScore.intresthint.play()` → 1141 从 stop 帧 1 播放：
+  三个变体文本帧段（帧 5/20/37 放置 1138/1139/1140），文本 = **"+" + moreeuros**
+  （moreeuros = 本次利息差值，giveIntrest 内先记 before 再取差）
+- 全程 ≈1.3s 上浮消隐，播完停回帧 1
+
+### 2. 【H5 实现】
+
+- giveIntrest 补记 `G.moreeuros` 差值；endWave 触发浮字：interest 位置显示
+  "+"+moreeuros（金色），CSS 1.3s 上浮消隐（≈原版 31 帧）后回落为 interest 文本
+- hud() 写值逻辑零改动
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- moreeuros 差值 + 浮字接线断言=true；m25 奖金/利息数值测试维持全绿
+- 154 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 1040 quality（Flash 声音质量，H5 无对应）与 1053 story 模式切换未接（依附帮助板）
+- 浮字为单条 CSS 近似（原版 3 段变体文本帧）
+
 ## 第 N+84 轮成果（2026-09-29, H5 领土防御·P2 组 #3：原版金钱面板定位并上图 —— 最后一块自造 UI 文字收编）
 
 **（权威 = frame_6 PlaceObject nm:infoMoneyAndScore → chid 1142 + 主时间线 frame_6 SVG

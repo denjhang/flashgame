@@ -1303,7 +1303,16 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- 金钱面板 (infoMoneyAndScore 1142 直出 + EditText 清洗, N+84) ----
+// ---- intresthint "+N" 浮字 (1141 时间线 ~31帧@24fps, N+85) ----
+console.log("--- 利息浮字 ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("moreeuros 差值记录 + 1.3s 浮字接线=" +
+    (gj.includes('G.moreeuros = G.euros - before') && gj.includes("floatHint") &&
+     gj.includes("'+' + G.moreeuros")));
+}
+// ---- 金钱面板 (infoMoneyAndScore 1142 直出 + EditText 清洗, N+84) ----// ---- 金钱面板 (infoMoneyAndScore 1142 直出 + EditText 清洗, N+84) ----
 console.log("--- 金钱面板 ---");
 {
   const fsx = require('fs');
