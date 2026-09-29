@@ -36,15 +36,16 @@ function fireCooldownMs(t2) {
   return Math.floor(t2 / FPSC) * OCEEF_INTERVAL_MS;
 }
 
-// ---------------- 战争迷雾 ----------------
-// 改设定: 全图默认迷雾; 视野源 = 各塔(射程+60)/雷达站(1200)/基地(150)。
-// 建造不受视野限制(区别于红警)。雷达站由原版鸡肋变为驱雾核心。
+// ---------------- 战争迷雾 (N+69 用户指令: 暂时取消 —— 原版主地图敌人无条件绘制,
+//   迷雾/探索记忆为 H5 自造层。FOG_ENABLED=false 时全图恒可见, 代码保留可随时恢复) ----------------
+const FOG_ENABLED = false;
 const fogCv = document.createElement('canvas');
 fogCv.width = W; fogCv.height = H;
 const fogCtx = fogCv.getContext('2d');
 let VIS = [];                   // 每帧重算的视野源
 
 function computeVisibility() {
+  if (!FOG_ENABLED) { VIS = []; return; }
   // 基地视野: 基地在 r10 (93, -1563) 北端
   VIS = [{ x: 480, y: WORLD.y0 + 80, r: BASE_VIS * 1.6 }];
   for (const t of G.turrets) {
@@ -54,11 +55,13 @@ function computeVisibility() {
   }
 }
 function isVisible(x, y) {
+  if (!FOG_ENABLED) return true;   // 迷雾停用: 全图恒可见 (原版行为)
   for (const s of VIS)
     if (Math.hypot(s.x - x, s.y - y) <= s.r) return true;
   return false;
 }
 function revealExplored() {   // 视野经过的区域永久标记为已探索
+  if (!FOG_ENABLED) return;
   exploredCtx.fillStyle = '#fff';
   for (const s of VIS) {
     const ex = (s.x - (WORLD.x0 - 40)) * EXPLORED_SCALE;
@@ -904,7 +907,10 @@ function su37Draw() {
 }
 
 // ---------------- 音乐 (原版 1151 面板机制: 手动选曲 changeMusic + playMusic/pauseMusic) ----------------
-const BGM_FILES = ['bgm_main.mp3', 'bgm2.mp3', 'bgm3.mp3'];
+// 原版播放列表 musics[0..2].attachSound("actOfInstinct"/"hellMarch"/"justDoItUp")
+//   (6_430 load 逐行) — 三首 = DefineSound 1107/1124/1157 (N+69 提取, 导出名在 SWF 中
+//   已被裁, 按 chid 序对应)
+const BGM_FILES = ['actofinstinct.mp3', 'hellmarch.mp3', 'justdoitup.mp3'];
 // 曲名 = 原版 1151 音乐面板按钮显示文本 (反编译权威):
 //   PlaceObject2_1145_5 → "Act of instinct" (changeMusic 0)
 //   PlaceObject2_1145_8 → "Hell march"       (changeMusic 1)
@@ -2538,9 +2544,8 @@ function draw() {
     ctx.fillText((ok ? '可建 ' : '不可建 ') + G.shopSel, 8, H - 8);
   }
 
-  // ---- 战争迷雾 (最后绘制, 视野源换算到屏幕坐标) ----
-  // 三态迷雾: 淡雾基底 → 挖当前视野 → 叠未探索浓雾(探索记忆挖除)
-  // 第一层: 已探索淡雾基底
+  // ---- 战争迷雾 (N+69 用户指令: 暂时取消 — 原版主地图敌人无条件绘制, 无迷雾层) ----
+  if (FOG_ENABLED) {
   fogCtx.globalCompositeOperation = 'source-over';
   fogCtx.clearRect(0, 0, W, H);
   fogCtx.fillStyle = 'rgba(5,9,5,0.25)';
@@ -2567,8 +2572,8 @@ function draw() {
     fogCtx.fill();
   }
   fogCtx.globalCompositeOperation = 'source-over';
-  // 雷达站扫描圈提示 (可见的驱雾范围)
   ctx.drawImage(fogCv, 0, 0);
+  }   // end FOG_ENABLED
 
   // ---- 小地图 + INFO 面板 (迷雾之上, 原版右上角 minimap 152px) ----
   drawMinimap();

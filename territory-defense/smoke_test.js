@@ -49,7 +49,7 @@ src += '  G.wave, G.euros, G.units.filter(u=>u.hp>0).length,';
 src += '  14 - G.turrets.length + G.turrets.filter(t=>t.hp>0).length, G.turrets.filter(t=>t.hp>0).length, G.turrets.length, G.lost, G.won);';
 src += '\nconst aaT = G.turrets.find(t => !t.aa);';
 src += '\nif (aaT) { G.euros += 5000; const c0 = aaT.aaUpgradeCost(); const ok = aaT.upgradeAA(); console.log("对空升级: 花费=%d 成功=%s 可对空=%s", c0, ok, aaT.aa); }';
-src += '\nconsole.log("迷雾验证: 视野源数=", VIS.length, " 敌人在迷雾外不可见=", !isVisible(100000, 100000));';
+src += '\nconsole.log("迷雾已停用(FOG_ENABLED=false, 原版无迷雾): 全图恒可见=", isVisible(100000, 100000), " VIS源数=", VIS.length);';
 // ---- 敌方武器塔独立索敌转向 (原版 174 OCEEF: tourelle._rotation 朝目标逼近, 3° 死区) ----
 src += `
 {
