@@ -15,7 +15,9 @@ const TOON_LIMIT_1 = 4, TOON_LIMIT_2 = 6, TOON_LIMIT_3 = 9; // Const.TOON_LIMIT_
 const MAX_LANDING_AMT = 30;     // Const.MAX_LANDING_AMT
 const COMBO_SECS = 5, COMBO_ADJ = 0.1; // Const.COMBO_SECS/COMBO_ADJ_FACTOR
 const NUM_TRIES = 3;            // Const.NUM_TRIES
-const TOTAL_BLOCKS = 30;        // quick game 目标层数
+const TOTAL_BLOCKS = 999;       // quick game: GameState.as:97 totalBlocks=999 (无尽模式)
+const SWAY_MAX_ANGLE = 1;       // Const.SWAY_MAX_ANGLE (度, GameModel:239 上限)
+const TIMER_MAX = 5;            // Const.TIMER_MAX (ComboTimer 计时上限 TIMER_MAX+1 秒)
 const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
 const DROP_G = 0.0045;          // 落块加速度 (px/ms^2, 调校值, 对应原版 ~0.55s 落程)
 
@@ -49,7 +51,6 @@ let ready = false;
 
 new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   const root = gltf.scene;
-  const tex4 = new THREE.TextureLoader().load('./assets/image_4.png'); // 备用
   // GLB 里的节点名 n<gid>; 251..268 是楼块, 269 是吊车
   root.updateMatrixWorld(true);
   root.traverse(n => {
@@ -80,7 +81,6 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   ready = true;
   window.__ready = true;
   window.__tpl = templates.map(t => ({ n: t.name, s: +t.userData.s.toFixed(3), cx: +t.userData.cx.toFixed(1), cy: +t.userData.cy.toFixed(1), kid: t.geometry?.attributes?.position?.count }));
-  const _bl = blockLanded;
   window.__dbg = { drops: 0, lands: [] };
   startGame();
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
@@ -102,9 +102,8 @@ const G = {
   population: 0,
   stacked: 0,
   falling: null,        // {mesh, vy, x, y}
-  swinging: true,
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
-  comboMult: 0, comboT: 0,
+  comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
   over: false,
 };
@@ -131,7 +130,7 @@ function startGame() {
   G.blocks = []; G.landingY = 0; G.currCtr = 0; G.blockDx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
-  G.comboMult = 0; G.comboT = 0; G.camY = 0; G.over = false;
+  G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
   addHud();
@@ -157,18 +156,26 @@ const toppled = [];
 
 // ---- Crane: 摆钩 ----
 let t0 = performance.now();
+// Crane.resetGameVars: setRadx(30+totalBlocks); CPath.setRadx: min(70,v) → 快速游戏恒 70
+// CPath.init: radx=r*2, rady=r=25 → 椭圆摆 (CPath.as:33, updateLoc: x+=radx*cosθ, y+=rady*sinθ)
+const CRANE_RADX = Math.min(70, 30 + TOTAL_BLOCKS);
+const CRANE_RADY = 25;
 function hookX(now) {
-  const radx = 90 + Math.min(40, G.stacked * 2); // Crane.resetGameVars setRadx(30+totalBlocks) 的等比放大
-  return TOWER_START_X - STAGE_W/2 + (radx - 45) * Math.sin((2 * Math.PI * (now - t0)) / CRANE_DUR);
+  const th = (2 * Math.PI * (now - t0)) / CRANE_DUR;
+  return TOWER_START_X - STAGE_W/2 + CRANE_RADX * Math.cos(th);
+}
+function hookY(now) {
+  const th = (2 * Math.PI * (now - t0)) / CRANE_DUR;
+  return CRANE_HOOK_Y + CRANE_RADY * Math.sin(th);
 }
 
-// ---- Tower.blockLanded 对号 ----
+// ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
 function blockLanded(offset) {
   window.__dbg && (window.__dbg.lands.push(offset), window.__dbg.drops++);
-  finishCombo();
   const abs = Math.abs(offset);
   if (abs >= HIT_LIMIT && abs <= BLOCK_H) {
-    // 撞塔: 弹飞 + 晃动加剧 + 顶部一块被撞掉
+    // 撞塔: 弹飞 + 晃动加剧 + 顶部一块被撞掉 (Tower.as:150-167 finishCombo→bounceOffTower→knockNextBlock→decTries)
+    finishCombo();
     tipperIncSway(offset);
     G.lives--; showMsg('-1', '#ff6b6b');
     if (G.blocks.length > 1) knockTopBlock();
@@ -176,34 +183,40 @@ function blockLanded(offset) {
     if (G.lives <= 0) gameOver(false);
     return;
   }
-  if (abs > BLOCK_H) { G.lives--; showMsg('MISS', '#ff6b6b'); addHud(); if (G.lives <= 0) gameOver(false); return; }
+  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145)
+    finishCombo();
+    G.lives--; showMsg('MISS', '#ff6b6b'); addHud();
+    if (G.lives <= 0) gameOver(false);
+    return;
+  }
 
-  // landOnTower
-  let x = offset, perfect = abs < TOON_LIMIT_1;
-  if (perfect) { x = 0; }                    // TOON_LIMIT_1 内吸附归正
+  // landOnTower (Tower.as:169-261)
+  const onGround = G.landingY === 0;               // onGround: 地基块, 不结算人口
+  let x = offset;
+  const perfect = !onGround && abs < TOON_LIMIT_1; // _loc5_(frame<3) && |offset|<TOON_LIMIT_1
+  if (Math.abs(offset) < TOON_LIMIT_1) x = 0;      // TOON_LIMIT_1 内吸附归正 (landOnTower:172-176)
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);
-  mesh.rotation.z = perfect ? 0 : offset / 2; // Rotater offset/2 度
-  mesh.userData.rx = mesh.rotation.x; // keep
-  G.pendingPlace = { mesh, x: G.currCtr + x, y: G.landingY + BLOCK_H/2, tpl };
+  mesh.rotation.z = perfect ? 0 : offset / 2;      // Rotater offset/2 度 (Tower.as:211)
+  const cx = G.currCtr + x;
   towerGroup.add(mesh);
-  placeBlock(mesh, G.pendingPlace);
-  G.blocks.push({ mesh, pop: perfect ? 4 : abs < TOON_LIMIT_2 ? 3 : abs < TOON_LIMIT_3 ? 2 : 1 });
-  // 人口 (Tower.makePeople)
-  G.population += G.blocks[G.blocks.length-1].pop;
-  G.stacked++;
-  if (perfect && G.landingY !== 0) startCombo(); else if (G.comboMult) G.comboT -= COMBO_ADJ * 1000;
+  mesh.position.set(cx - tpl.userData.cx, G.landingY - tpl.userData.cy, 0);
+  // 连击: 落地时 comboMult!=0 → +1 (Tower.as:233); 完美落地重置计时 (perfectLanding→ComboTimer.setTimer)
+  if (G.comboMult !== 0) G.comboMult++;
+  if (perfect) comboSetTimer();
+  else if (G.comboMult !== 0) comboAddTimer(-COMBO_ADJ); // Tower.as:222-224 addToTimer(-COMBO_ADJ_FACTOR)
+  // 人口: makePeople 4/3/2/1 按 |offset| 分级 (Tower.as:252-261); 地基块不结算
+  const pop = onGround ? 0 : perfect ? 4 : abs < TOON_LIMIT_2 ? 3 : abs < TOON_LIMIT_3 ? 2 : 1;
+  if (pop > 0) changePopulation(pop);
   tipperIncSway(offset);
+  G.blocks.push({ mesh, cx: tpl.userData.cx, pop });
   G.landingY += BLOCK_H;
   G.currCtr += x;
+  G.stacked++;
   panUp();
   addHud();
   if (G.stacked >= TOTAL_BLOCKS) gameOver(true);
-}
-
-function placeBlock(mesh, p) { // 按模板 bbox 归一化摆放: 底边贴 landingY, 水平居中于 x
-  mesh.position.set(p.x - p.tpl.userData.cx, p.y - p.tpl.userData.cy - BLOCK_H/2, 0);
 }
 
 function knockTopBlock() { // Tower.knockNextBlock
@@ -212,7 +225,7 @@ function knockTopBlock() { // Tower.knockNextBlock
   toppled.push(top);
   G.landingY -= BLOCK_H;
   const under = G.blocks[G.blocks.length - 1];
-  if (under) G.currCtr = under.mesh.position.x;
+  if (under) G.currCtr = under.mesh.position.x + under.cx; // currCtr = 新顶块中心
   G.population = Math.max(0, G.population - (top.pop || 0));
 }
 
@@ -221,24 +234,43 @@ function tipperIncSway(amt) {
   const s = G.sway;
   s.recent[s.idx] = Math.min(MAX_LANDING_AMT, Math.abs(amt));
   s.idx = (s.idx + 1) % 3;
-  s.adj = 0.5 + (s.recent[0] + s.recent[1] + s.recent[2]) / 3 / 20;
+  s.adj = 0.5 + (s.recent[0] + s.recent[1] + s.recent[2]) / 3 / 20; // Tipper.incSway
+}
+function maxTowerAngle() { // GameModel.as:236-239
+  const c = Math.abs(G.currCtr);
+  const a = G.stacked / 2 + c / 20;
+  const b = G.stacked * a / 6;
+  return Math.min(SWAY_MAX_ANGLE, Math.min(a, b) / 18);
 }
 function swayAngle(dt) {
   const s = G.sway;
-  s.timer += dt / 20;                       // updateTower: /swayVolume(20)/30
-  return 1.2 * s.adj * Math.cos(s.timer);   // m_maxTowerAngle≈1.2°
+  s.timer += dt / 20 / 30;                            // Tipper.updateTower: delta/=swayVolume(20); timer+=delta/30
+  return maxTowerAngle() * s.adj * Math.cos(s.timer); // Tipper.as:80-81
 }
 
-// ---- combo (perfectLanding) ----
-function startCombo() {
-  G.comboMult = Math.max(1, G.comboMult) + 1;
-  G.comboT = Math.max(COMBO_ADJ, COMBO_SECS - G.comboMult * COMBO_ADJ) * 1000;
+// ---- 计分: GameModel.changePopulation (GameModel.as:159-176) ----
+// 落块人口 = floor(stackedBlocks/10 + inc); 连击期间银行 m_comboPopulation += floor(mult*(2+stacked/10*2))
+function changePopulation(inc) {
+  if (G.comboMult > 0) G.comboBank += Math.floor(G.comboMult * (2 + G.stacked / 10 * 2));
+  G.population += Math.floor(G.stacked / 10 + inc);
 }
-function finishCombo() { G.comboMult = 0; G.comboT = 0; }
+// ---- combo: ComboTimer.as:28-46 (setTimer/addToTimer, 上限 TIMER_MAX+1 秒) + perfectLanding 公式 (Tower.as:330-334) ----
+function comboSetTimer() {
+  if (G.comboMult === 0) G.comboMult = 1;       // ComboTimer.setTimer
+  const secs = Math.max(COMBO_ADJ, COMBO_SECS - G.comboMult * COMBO_ADJ); // perfectLanding
+  G.comboT = Math.min((TIMER_MAX + 1) * 1000 - 1, secs * 1000);
+}
+function comboAddTimer(amt) {
+  if (G.comboMult === 0) G.comboMult = 1;       // ComboTimer.addToTimer
+  G.comboT = Math.min((TIMER_MAX + 1) * 1000 - 1, Math.max(G.comboT, 0) + amt * 1000);
+}
+function finishCombo() { // GameModel.finishCombo: 支付连击银行人口
+  if (G.comboBank > 0) { G.population += G.comboBank; showMsg('+' + G.comboBank, '#ffd700'); G.comboBank = 0; }
+  G.comboMult = 0; G.comboT = 0;
+}
 
 function panUp() { // Path DELAY_PAN_UP
-  const target = G.landingY - STAGE_H/2 + 3 * BLOCK_H;
-  G.camTarget = Math.max(0, target);
+  G.camTarget = Math.max(0, G.landingY - STAGE_H/2 + 3 * BLOCK_H);
 }
 function showMsg(txt, color) {
   const m = document.createElement('div');
@@ -254,7 +286,7 @@ function drop() {
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);
-  const x = craneGroup.position.x - tpl.userData.cx, y = craneGroup.position.y - 60 - tpl.userData.cy - BLOCK_H/2;
+  const x = craneGroup.position.x - tpl.userData.cx, y = craneGroup.position.y - 60 - tpl.userData.cy;
   mesh.position.set(x, y, 0);
   scene.add(mesh);
   G.falling = { mesh, vy: 0, cy: tpl.userData.cy };
@@ -270,7 +302,7 @@ function loop(now) {
   if (ready) {
     // 摆钩
     if (!G.falling && !G.over) craneGroup.position.x = hookX(now);
-    craneGroup.position.y = G.camY + CRANE_HOOK_Y;
+    craneGroup.position.y = G.camY + hookY(now);
     cable.geometry.setFromPoints([new THREE.Vector3(0, STAGE_H/2 - CRANE_HOOK_Y + 10, 0), new THREE.Vector3(0, 0, 0)]);
 
     // 下落块
@@ -278,12 +310,11 @@ function loop(now) {
       const f = G.falling;
       f.vy += DROP_G * dt;
       f.mesh.position.y -= f.vy * dt;
-      const targetY = G.landingY + (G.currCtr === 0 && G.blocks.length === 0 ? 0 : 0);
       const topY = G.landingY + BLOCK_H / 2;
       if (f.mesh.position.y + f.cy <= topY) {
         scene.remove(f.mesh);
         G.falling = null;
-        const offset = Math.round(f.mesh.position.x - G.currCtr);
+        const offset = Math.round(f.mesh.position.x + f.cx - G.currCtr); // 块中心 - 塔顶中心
         blockLanded(offset);
       }
     }

@@ -1,0 +1,36 @@
+# Tower Bloxx H5 静态对标审计
+
+权威源：`scripts/scripts/__Packages/bz/esg/game/*.as`（Flash 版，符号未混淆）、
+`j2me/src/City_Bloxx_2008Nokiav1.0.12/*.java`（J2ME 版，交叉验证用）。
+每 10 分钟一轮自动化检查（automation-0847c93e），小差异当场修，大差异记 herein。
+
+## 第 1 轮（2026-09-29）
+
+对号范围：Const.as / Tower.as / Crane.as / Tipper.as / GameModel.as / ComboTimer.as / CPath.as / GameState.as。
+
+### 已修正（本次提交）
+
+| 级别 | 问题 | 原版证据 | 修正 |
+|---|---|---|---|
+| P1 | 快速游戏目标层数写成 30，到 30 层误判过关 | GameState.as:97 `totalBlocks=999`（无尽模式），CityMap.as:508 才是 (type+1)*10 | `TOTAL_BLOCKS=999`，无尽 |
+| P1 | `blockLanded` 开头无条件 `finishCombo()`，连击永远无法维持 | Tower.as:150/139 只在撞塔/坠落分支 finishCombo；成功落块时 comboMult+1（Tower.as:233） | finishCombo 移到 miss/knock 分支 |
+| P1 | 计分写成直接 `population += inc` | GameModel.as:159-176 `changePopulation`: 实得 = floor(stacked/10 + inc)，连击期间另入银行 `m_comboPopulation += floor(mult*(2+stacked/10*2))`，finishCombo 时支付 | 按公式重写 + comboBank |
+| P1 | 连击计时模型错误（自创 startCombo） | ComboTimer.as:28-46 setTimer/addToTimer（mult==0 时置 1，上限 TIMER_MAX+1=6s）；perfectLanding 公式 Tower.as:330-334 `max(ADJ, SECS-mult*ADJ)` | comboSetTimer/comboAddTimer 对号 |
+| P1 | 摇晃速度 30 倍过快、幅度公式缺失 | Tipper.as:77-81 `timer += delta/20/30`；GameModel.as:236-239 `maxTowerAngle = min(SWAY_MAX_ANGLE, min(stacked/2+|currCtr|/20, stacked×(...)/6)/18)`，SWAY_MAX_ANGLE=1 | timer+=dt/600 + 公式对号 |
+| P1 | 落点 offset 用网格原点而非块中心 | GameModel.as:235 |currCtr| 取块中心 | offset/currCtr 均改用 position.x+cx |
+| P2 | 地基块（第一块）结算了人口 | Tower.as:182-190 onGround 分支无 makePeople | onGround 不结算 |
+| P2 | 摆钩为固定高度正弦，幅度自创 45~85 | CPath.as:33 `radx=r*2, rady=r`（椭圆摆），setRadx:41-46 `min(70, 30+totalBlocks)`→恒 70，rady=25 | 椭圆摆 radx=70/rady=25 对号 |
+| P3 | 死代码清理（swinging/camTarget/_bl/tex4/targetY） | — | 删除 |
+
+### 连击完整链路（本轮取证，此前理解不全）
+
+完美落地 → `perfectLanding()` 首次走 showTip（GameState.as:115 STT_START_COMBO → `addToTimer(COMBO_SECS)`），
+后续走 Tower.as:330-334 计时公式；连击存续期每次成功落块 `comboMult+1`（Tower.as:233）；
+非完美落地 `addToTimer(-0.1)`（Tower.as:222-224）；miss/knock → `finishCombo()` 清零并支付银行人口。
+
+### 遗留观察（待后续轮次）
+
+- [P2] 原版 `makePeople` 有 roof 分支（塔顶层人口按 `aoff*128/BLOCK_H` 换算），H5 未区分屋顶块（quick game 屋顶块逻辑 `needRoof` 在 stacked==totalBlocks-1 时成立，999 层实际上取不到）——对无尽模式无影响，城市模式再补。
+- [P3] 原版人口 HUD 显示的是 `showPopChange` 增量文本，H5 直接显示总量，视觉差异非机制差异。
+- [P3] `blockDx`（Tower.as:24 塔身倾斜累计偏移）H5 声明未用；原版在 knockNextBlock 后续块对齐中生效，待第 2 轮评估是否补。
+- [P3] MIDI 音乐未实现（需软音源，与本审计无关，记录在案）。
