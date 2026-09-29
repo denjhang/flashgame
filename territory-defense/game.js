@@ -794,6 +794,7 @@ const SU37 = {
   IMPACT: 260,      // 原版 impact (溅射范围)
   SCALE: 0.4946,    // 原版 PlaceObject2 矩阵 scaleX/Y (SWF 二进制权威解码)
   DROPS: 16,        // 原版 4 挂架 × nMissile=4 (786_1/11/21/31 load)
+  DECALS: [20, -10, -20, 10],  // 挂架横向错位 decalX (missile1/2/3/4, 链式顺序)
   SPACING: 40,      // 毯式落点间距 (沿航向)
   DROP_START: 340,  // 进入投弹窗口的距离 (16 弹 × 40px 的一半略余)
 };
@@ -859,9 +860,11 @@ function su37Update() {
   }
   if (p.dropped && p.dropN < SU37.DROPS) {
     p.dropN++;
-    const off = (p.dropN - 8.5) * SU37.SPACING;
-    const bx = p.tx + Math.cos(p.dropRot) * off;
-    const by = p.ty + Math.sin(p.dropRot) * off;
+    const along = (p.dropN - 8.5) * SU37.SPACING;
+    const decal = SU37.DECALS[(p.dropN - 1) % 4];   // 挂架链式横向错位 (missile1→4)
+    const px = -Math.sin(p.dropRot), py = Math.cos(p.dropRot);
+    const bx = p.tx + Math.cos(p.dropRot) * along + px * decal;
+    const by = p.ty + Math.sin(p.dropRot) * along + py * decal;
     boomTyped(bx, by, 40, 'large');
     for (const [rr, pm] of SPLIT) {
       for (const u of G.units) {

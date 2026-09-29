@@ -113,6 +113,8 @@ console.log("Su37: start=%s aiming=%s 边=%s 起飞=%s 起飞后available=%s",
   okStart, aiming, p0 && p0.side, planeAfter, availAfterLaunch);
 console.log("Su37 毯式投弹: %d 枚 (期望 16)=%s, 4 单位全灭=%s, 总损失=%d (死亡后 HP 为负故超过 3520)",
   booms, booms === 16, dead === 4, totalLoss);
+  console.log("挂架横向 decalX [20,-10,-20,10] (786_1/2/3/4 链式) 一致=%s",
+    JSON.stringify(SU37.DECALS) === JSON.stringify([20, -10, -20, 10]));
 // 瞄准区标记 (原版 zoneBombardement chid 785, 替代 CSS 近似)
 console.log("瞄准区: img=%s origin=(%s,%s) 154.3px (原版 785, FFDec 导出)",
   ZONE_IMG && ZONE_IMG.src, ZONE_ORIGIN.x, ZONE_ORIGIN.y);
