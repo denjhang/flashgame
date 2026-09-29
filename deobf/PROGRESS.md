@@ -1,5 +1,35 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+84 轮成果（2026-09-29, H5 领土防御·P2 组 #3：原版金钱面板定位并上图 —— 最后一块自造 UI 文字收编）
+
+**（权威 = frame_6 PlaceObject nm:infoMoneyAndScore → chid 1142 + 主时间线 frame_6 SVG
+matrix(1,0,0,1, 639.35, 542.15) + DefineEditText 1134/1135/1136 + DefineShape 1133/1137）**
+
+### 1. 【解码】
+
+- **infoMoneyAndScore = DefineSprite_1142**（158x55），舞台**右下角** (639,542)——
+  即 H5 侧栏底栏 lossBox 的原版对应物，"金钱显示归属"悬案结案
+- 内部：底板 shape 1133（#151515 圆角双层）+ **LOSSES 矢量字 1137** + 三个
+  DefineEditText：euros(1134 "10000000 $" 白粗大字) / score(1136 "10000" #ccccdd
+  右上) / interest(1135 "interest 12%" 右下) + 浮动 "+N" 提示 intresthint(1141, 已有)
+- FFDec 直出后按底色清洗三处 EditText 烤入值，保留 LOSSES 矢量字与双层底板
+
+### 2. 【H5 实现】
+
+- lossBox 换为 1142 清洗版直出图（158x55 @侧栏 (6,544)，对齐原版右下角位）；
+  三个动态 span 按原位绝对定位：分数右上 #ccccdd、金额左中大字白、
+  interest 右下灰 —— hud() 写值逻辑零改动
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 1142 底板 158x55 在位；lossBox 引用断言=true
+- 153 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 1040 quality（Flash 声音质量，H5 无对应）与 1053 story 模式切换未接（依附帮助板）
+- intresthint "+N" 浮字动画未对齐原版 1141 时间线（H5 现为静态 interest 文本）
+
 ## 第 N+83 轮成果（2026-09-29, H5 领土防御·P2 组 #2：1151 音量条全量接线 —— changeLevels 两路增益）
 
 **（权威 = 1151/frame_1 的 1150_19..37 全部 CLIPACTION 脚本 + 1151 SVG s1..m5 矩阵）**

@@ -56,11 +56,15 @@
              background:transparent; color:#ccccdd; font-size:10.5px; line-height:1.35;
              padding:2px 4px; overflow:hidden; box-sizing:border-box; }
   #infoBox b { color:#e8e8ff; }
-  #lossBox { position:absolute; left:1px; top:589px; width:166px; height:11px;
-             background:transparent; padding:0 5px; font-size:9px; line-height:11px; box-sizing:border-box; }
-  #lossBox .losses { color:#daa; }
-  #lossBox .cash { color:#ee8; }
-  #lossBox .interest { color:#aa8; font-size:9px; }
+  /* 金钱面板 = DefineSprite_1142 直出 (158x55, 原版舞台右下 (639,542));
+     EditText 烤入值已按底色清洗, 保留 LOSSES 矢量字; 三个动态文本按原位排布 */
+  #lossBox { position:absolute; left:6px; top:544px; width:158px; height:55px;
+             background:url('assets/ui/money_panel.png') no-repeat;
+             padding:0; font-size:10px; box-sizing:border-box; }
+  #lossBox .losses { position:absolute; left:56px; top:3px; right:4px; text-align:right;
+                     color:#ccccdd; font-size:10px; }
+  #lossBox .cash { position:absolute; left:8px; top:22px; color:#fff; font-weight:bold; font-size:14px; }
+  #lossBox .interest { position:absolute; right:6px; top:42px; color:#8a8f8a; font-size:10px; }
   /* 原版开关按钮本体 (#4, N+73): 1058/1063/1068/1073 直出 247x23 → 缩放 166x23,
      竖排 23px 行距 (= informations 内 menuZoom/menuHealth/menuArea 行距) */
   .artBtn { position:absolute; left:2px; width:166px; height:23px; border:none; padding:0;
@@ -240,7 +244,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600051"></script>
-<script src="game.js?v=1790600051"></script>
+<script src="data.js?v=1790600052"></script>
+<script src="game.js?v=1790600052"></script>
 </body>
 </html>

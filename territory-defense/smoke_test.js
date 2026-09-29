@@ -1303,7 +1303,18 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- 音量条 (1151 内 1150 x10, changeLevels, N+83) ----
+// ---- 金钱面板 (infoMoneyAndScore 1142 直出 + EditText 清洗, N+84) ----
+console.log("--- 金钱面板 ---");
+{
+  const fsx = require('fs');
+  const ok = fsx.existsSync('assets/ui/money_panel.png');
+  let wh = null;
+  if (ok) { const b = fsx.readFileSync('assets/ui/money_panel.png'); wh = [b.readUInt32BE(16), b.readUInt32BE(20)]; }
+  console.log("1142 底板=" + ok + " 尺寸=" + (wh ? wh.join('x') : 'N/A') + " (期望 158x55)");
+  const hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("lossBox 引用原版面板图=" + hj.includes("background:url('assets/ui/money_panel.png')"));
+}
+// ---- 音量条 (1151 内 1150 x10, changeLevels, N+83) ----// ---- 音量条 (1151 内 1150 x10, changeLevels, N+83) ----
 console.log("--- 音量条 ---");
 {
   const fsx = require('fs');
