@@ -1,5 +1,34 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+86 轮成果（2026-09-29, H5 领土防御·P2 组 #5：changeQuality 画质循环 + nuageux 云层上图，Q 键恢复原版语义）
+
+**（权威 = 6_1 pcode_as function changeQuality + PlaceObject nuageux(chid 833,
+矩阵 (-1,0,0,1, 2030.45,-1471.45)) + keyDown 138 行 Q 绑定）**
+
+### 1. 【解码】
+
+- **changeQuality = 渲染质量三循环 good→medium→low**（`_quality` + 按钮文本
+  qual "good/medium/low"），**nuageux(833) 云层仅 HIGH(good) 显示**，
+  MEDIUM/LOW 移出屏 (_x=-5000)；触发 = keyDown **Q** 与 qualityB(1040) 按钮
+- 833 = 2134x1956 全图云层纹理，横向镜像铺满地图
+
+### 2. 【H5 实现】
+
+- Q 键**恢复原版语义** = changeQuality（页左翻保留 [ 键，E/]] 翻右不变——H5
+  曾把 Q 误借给翻页，本轮归位）
+- 素材：assets/ui/nuageux.png（2134x1956 量化 64 色，150KB，含 alpha 云层）
+- draw：quality=good 时按原矩阵镜像铺云层（translate(2030.45,-1471.45) scale(-zoom)）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 833 素材在位；Q 键 + 云层接线断言=true
+- 156 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 1040 qualityB 按钮图仍未上图（侧栏无空位，Q 键已等效原版交互）；
+  1053 story 模式切换（依附帮助板文字模式）未接
+
 ## 第 N+85 轮成果（2026-09-29, H5 领土防御·P2 组 #4：intresthint "+N" 利息浮字对齐 1141）
 
 **（权威 = DefineSprite_1141 时间线（3 段 1138/1139/1140 moreeuros 文本，~31帧@24fps

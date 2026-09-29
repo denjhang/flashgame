@@ -1303,7 +1303,17 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- intresthint "+N" 浮字 (1141 时间线 ~31帧@24fps, N+85) ----
+// ---- 画质循环 + 云层 (changeQuality Q / nuageux 833, N+86) ----
+console.log("--- 画质/云层 ---");
+{
+  const fsx = require('fs');
+  console.log("nuageux 833 素材=" + fsx.existsSync('assets/ui/nuageux.png'));
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("changeQuality 接线 (Q 键恢复原版语义 + good 时铺云层)=" +
+    (gj.includes("function changeQuality") && gj.includes("k === 'q'") && gj.includes('nuageuxImg') &&
+     gj.includes("QUALITY === 'good'")));
+}
+// ---- intresthint "+N" 浮字 (1141 时间线 ~31帧@24fps, N+85) ----// ---- intresthint "+N" 浮字 (1141 时间线 ~31帧@24fps, N+85) ----
 console.log("--- 利息浮字 ---");
 {
   const fsx = require('fs');

@@ -935,6 +935,14 @@ const BGM_FILES = ['actofinstinct.mp3', 'hellmarch.mp3', 'justdoitup.mp3'];
 const BGM_NAMES = ['Act of instinct', 'Hell march', 'Just do it up'];
 // 原版 changeLevels (1151 音量条 rollOver): 两路各 5 段 levels 15/35/50/80/100,
 //   载入默认点亮至 50 (1150_19..27 load 状态)。H5 以全局增益复刻。
+// 原版渲染质量循环 (changeQuality, 6_1 keyDown Q): HIGH(=good) 才显示 nuageux(833) 云层,
+//   MEDIUM/LOW 将其移出屏; H5 以云层图开关复刻
+let QUALITY = 'good';
+const nuageuxImg = new Image();
+nuageuxImg.src = 'assets/ui/nuageux.png';
+function changeQuality() {
+  QUALITY = QUALITY === 'good' ? 'medium' : (QUALITY === 'medium' ? 'low' : 'good');
+}
 let SFX_GAIN = 0.5, MUS_GAIN = 0.5;
 function changeLevels(group, level) {
   const v = level / 100;
@@ -2324,6 +2332,16 @@ function draw() {
   // 地图背景: 位图左上角放在世界 (MAP_ORIGIN.x, MAP_ORIGIN.y=-1440=北缘), Flash 屏幕系直接铺
   ctx.drawImage(mapImg, w2sX(MAP_ORIGIN.x), w2sY(MAP_ORIGIN.y), MAP_W * zoom, MAP_H * zoom);
 
+  // 云层 (原版 nuageux chid833: 矩阵 (-1,0,0,1, 2030.45,-1471.45) 横向镜像铺满地图,
+  //   仅 quality=HIGH(good) 显示, changeQuality 在 MEDIUM/LOW 移出屏)
+  if (QUALITY === 'good' && nuageuxImg.complete && nuageuxImg.naturalWidth) {
+    ctx.save();
+    ctx.translate(w2sX(2030.45), w2sY(-1471.45));
+    ctx.scale(-zoom, zoom);       // 横向镜像 + 世界比例
+    ctx.drawImage(nuageuxImg, 0, 0, 2134.5, 1956.1);
+    ctx.restore();
+  }
+
   // 建造区显示 (原版 C 键: carte.surfaceForBuild._alpha 0↔35, keyDown 142-149 权威):
   // 直接铺 768 手描地块掩码 (白色填充, 35% 透明度), 不再是道路描线近似
   if (G.showBuildArea && BUILD_MASK_IMG.complete && BUILD_MASK_IMG.naturalWidth) {
@@ -2941,7 +2959,8 @@ function buildShop() {
 // 键盘翻页 (原版 turnConstruction 只由箭头触发; H5 额外给 [,] / Q,E 方便操作, 如实记录)
 window.addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
-  if (k === 'q' || k === '[') { turnConstruction('left'); e.preventDefault(); }
+  if (k === 'q') { changeQuality(); e.preventDefault(); }   // 原版 keyDown: Q → changeQuality
+  if (k === '[') { turnConstruction('left'); e.preventDefault(); }
   if (k === 'e' || k === ']') { turnConstruction('right'); e.preventDefault(); }
 });
 
