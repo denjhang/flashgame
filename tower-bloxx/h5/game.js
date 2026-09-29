@@ -305,12 +305,30 @@ function isValid(col, row, color) { // CityMap.as:561-567
   if (col < 0 || col >= 5 || row < 0 || row >= 5) return false;
   return G.sm_towerGridTypesAllowed[row * TOWER_GRID_TOWERS + col] >= color;
 }
-function updateCityLevelAndUnlockedTypes() { // GameModel.as:281-293 + TOWER_UNLOCK_LIMITS
+const CITY_PROMOTION_LEVELS = [0,1,4,7,9,11,13,15,18,20]; // Const (称号档)
+function updateCityLevelAndUnlockedTypes() { // GameModel.as:281-293 + TOWER_UNLOCK_LIMITS + 提示队列
   G.sm_totalPopulation = calcCityPop();
+  const prev = G.sm_cityLevel;
   let lv = 0;
   for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (G.sm_totalPopulation >= CITY_LEVEL_LIMITS[i]) lv = i;
   G.sm_cityLevel = lv;
   G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
+  if (lv !== prev) { // GameModel.as:315-323: 里程碑提示 (TIP_MSa + 阈值)
+    queueCityTip('More than ' + CITY_LEVEL_LIMITS[lv] + ' citizens have moved in!  (Lv.' + lv + ')');
+    // 升格称号 (CITY_PROMOTION_LEVELS → CITY_TYPES)
+    for (let k = 0; k < CITY_PROMOTION_LEVELS.length; k++) {
+      if (CITY_PROMOTION_LEVELS[k] === lv && k > 0) queueCityTip('Your city is now a ' + CITY_TYPES[Math.min(8, k - 1)] + '!');
+    }
+  }
+}
+// 提示队列 (GameModel.addTipToQueue:243-250)
+const cityTipQueue = [];
+function queueCityTip(txt) { cityTipQueue.push(txt); }
+function pumpCityTips() {
+  if (cityTipQueue.length === 0) return;
+  const txt = cityTipQueue.shift();
+  showCityStatus(txt);
+  setTimeout(pumpCityTips, 2600);
 }
 // 进入城市视图 / 渲染
 function showCity() {
@@ -319,6 +337,7 @@ function showCity() {
   updateCityLevelAndUnlockedTypes();
   renderCity();
   hud.city.style.display = 'block';
+  pumpCityTips();
 }
 function renderCity() {
   hud.cityLevel.textContent = 'Lv.' + G.sm_cityLevel + '/20 ' + (CITY_TYPES[Math.min(8, Math.floor(G.sm_cityLevel / 2.5))] || '');
@@ -362,11 +381,30 @@ function renderCity() {
     };
     hud.cityMenu.appendChild(sel);
   }
-  hud.cityHint.textContent = '选塔型 → 点网格建造（目标 ' + '高度 ' + '10 层/塔）。邻接规则：红需蓝邻，绿需蓝+红，黄需蓝+红+绿（Const.STATUS_CITY_RULES）';
+  const dz = document.createElement('div');
+  dz.className = 'sel' + (G.dozerMode ? ' active' : '');
+  dz.innerHTML = '<div class="sw">🚜</div>Dozer';
+  dz.onclick = () => { sndClick(); G.dozerMode = !G.dozerMode; renderCity(); }; // placeInDozer/STATUS_DOZER
+  hud.cityMenu.appendChild(dz);
+  hud.cityHint.textContent = '选塔型 → 点网格建造（目标高度 10 层/塔）。邻接规则：红需蓝邻，绿需蓝+红，黄需蓝+红+绿（Const.STATUS_CITY_RULES）';
 }
 function cityCellClick(col, row) {
+  // dozer 模式: 点已有塔拆除 (placeInDozer:398-410, snd_destroy)
+  if (G.dozerMode) {
+    if (getTowerColor(col, row) > 0) {
+      playSound('snd_destroy');
+      setTowerInfo(col, row, 0, 0, 0);
+      updateCityLevelAndUnlockedTypes();
+      saveModel();
+      renderCity();
+      showCityStatus('Tower demolished. (STATUS_DOZER)');
+    }
+    return;
+  }
   if (G.selectedType < 0) return;
   if (!isValid(col, row, G.selectedType)) { showCityStatus("You can't place the tower here."); return; } // STATUS_PLACE_TOWER3
+  const oldPop = getTowerPop(col, row);
+  if (oldPop > 0) showCityStatus('New: ? / Old: ' + oldPop + '  (TIP_CITY_COMPARE)'); // 替换对比
   G.pendingCell = { col, row };
   // buildTower (CityMap.as:505-513): totalBlocks=(type+1)*10, currColor=type
   G.totalBlocks = (G.selectedType + 1) * 10;
@@ -434,7 +472,7 @@ const G = {
   over: false,
   totalBlocks: TOTAL_BLOCKS, currColor: CURR_COLOR,
   cityMode: CITY_MODE,
-  pendingCell: null, selectedType: -1,
+  pendingCell: null, selectedType: -1, dozerMode: false,
   sm_towerGridTypesAllowed: new Array(25).fill(0),
   sm_cityLevel: 0, sm_unlockedTowerType: 0, sm_totalPopulation: 0,
   cleanTower: false, trophyRoof: false,          // GameModel.updateCleanTower / Crane.setTarget
@@ -475,7 +513,7 @@ function startGame() {
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
-  G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false;
+  G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false; G.dozerMode = false;
   hud.summary.style.display = 'none';
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
@@ -760,7 +798,9 @@ function drop() {
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
 addEventListener('pointerdown', drop);
-addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
+addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'PageDown') { e.preventDefault(); drop(); } // TIP_INTRO
+});
 // 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好
 G.musicOn = localStorage.getItem('twrblx_music') !== '0';
 G.soundOn = localStorage.getItem('twrblx_sound') !== '0';

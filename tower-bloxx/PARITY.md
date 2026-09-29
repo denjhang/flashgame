@@ -41,10 +41,10 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   增减人口状态文本(STATUS_POP_INC*)→updateCityLevelAndUnlockedTypes→saveModel→空地foundation/重建destroy音）
 - ✅ 城市等级/进度条（GameModel.as:281-318, CITY_LEVEL_LIMITS 20 级, 338px 条）
 - ✅ 0 命未达标 → 无屋顶入城（TIP_OUT_OF_TRIES）
-- ⬜ 升格称号提示（CITY_TYPES 9 级 + CITY_PROMOTION_LEVELS 提示队列）
-- ⬜ 20 里程碑提示（TIP_MS1a/MSa）
-- ⬜ 替换对比人口 UI（TIP_CITY_COMPARE）
-- ⬜ dozer 拆除位（placeInDozer:398）
+- ✅ 升格称号提示（CITY_PROMOTION_LEVELS→CITY_TYPES 队列, GameModel.as:315-323）
+- ✅ 里程碑提示（TIP_MSa + CITY_LEVEL_LIMITS 阈值, addTipToQueue:243-250 队列语义）
+- ✅ 替换对比人口（TIP_CITY_COMPARE: 点已占格显示 Old 人口）
+- ✅ dozer 拆除（placeInDozer:398-410 语义: dozer 按钮+点塔拆除, snd_destroy）
 - ⬜ city_spr 原版美术（现为 CSS 简排）
 
 证据：CityMap.as 全文 + Const.as:67-71/103/117-119/216-220。
@@ -119,7 +119,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 
 ## 8. 输入——🟨
 
-- ✅ 点击/空格放块
+- ✅ 点击/空格/下方向键/PgDn 放块（TIP_INTRO; Tipper.as:62 Key.isDown(34)）
 - ❌ 下方向键（TIP_INTRO: "spacebar or down arrow"，Key.isDown 34）
 - ❌ 菜单鼠标导航、城市模式拖放定位、暂停按钮（fla 有 bt_pause/bt_restart/bt_speed? 仅快速游戏音速）
 

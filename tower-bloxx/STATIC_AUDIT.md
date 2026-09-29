@@ -163,3 +163,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   （HighScoreLocalProxy 语义, 结算自动入榜按人口排序）
 - 歌曲随状态切换: title/menu→sng_title, city→sng_city, 游戏→sng_tower
 - smoke_test 16/16
+
+## 第 17 轮（2026-09-29）— PARITY 推进 #9：城市模式尾部+输入
+
+- 升格称号/里程碑提示队列（CITY_PROMOTION_LEVELS+CITY_TYPES, addTipToQueue 语义, 2.6s 逐条）
+- dozer 拆除位（按钮+点塔拆除, placeInDozer:398-410 语义）
+- 替换对比（点已占格显示 Old 人口, TIP_CITY_COMPARE）
+- 输入补齐: 下方向键/PgDn 放块（TIP_INTRO, Key.isDown(34)）
+- smoke_test 16/16
