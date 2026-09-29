@@ -217,3 +217,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 场景 2: 标题 onclick → 菜单 → mQuick (BTN_QUICK_GAME) → 无尽模式 400 帧放块,
   落地 35 次全通过 — 菜单流全链(状态机+按钮绑定+startGame)获得执行级覆盖
 - smoke_test 17/17 保持
+
+## 第 23 轮（2026-09-29）— exec_test 城市场景
+
+- exec_test 参数化 (node exec_test.js [tower|city]); city 场景: 网格 25 格渲染 →
+  选 Residential → 点格建造 → 10 层(含屋顶)落地 → 结算 OK → finishCityTower 放置 →
+  存档断言 (sm_towerGridData 人口/塔色/屋顶帧 1:1)
+- 城市模式 click 链(最后的执行盲区)补齐; smoke 17/17 保持

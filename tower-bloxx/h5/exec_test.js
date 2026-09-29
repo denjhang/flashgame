@@ -25,12 +25,13 @@ const el = (id) => {
     _l: {},
     addEventListener(t, f) { (this._l[t] ||= []).push(f); },
     removeEventListener() {},
-    querySelector: () => el(), querySelectorAll: () => [],
+    querySelector(s2) { this._q = this._q || {}; if (!this._q[s2]) this._q[s2] = el('q:' + (this._qid || '') + s2); return this._q[s2]; },
+    querySelectorAll: () => [],
     classList: { add() {}, remove() {}, toggle() {} },
     set onclick(f) { this._onclick = f; }, get onclick() { return this._onclick; },
     prepend() {},
   };
-  if (id !== undefined) elCache.set('el:' + id, e);
+  if (id !== undefined) { elCache.set('el:' + id, e); e._qid = id; }
   e.getContext = () => new Proxy({}, { get: (t, k) => {
     if (k === 'canvas') return e;
     return () => undefined;      // 吸收全部 GL 调用
@@ -60,7 +61,8 @@ globalThis.window = globalThis;
 globalThis.self = globalThis;
 globalThis.addEventListener = (t, f) => { (listeners[t] ||= []).push(f); };
 globalThis.localStorage = { _m: new Map(), getItem(k) { return this._m.has(k) ? this._m.get(k) : null; }, setItem(k, v) { this._m.set(k, v); } };
-globalThis.location = { search: '?mode=tower', pathname: '/index.html', href: 'http://x/index.html?mode=tower' };
+const SCENARIO = process.argv[2] === 'city' ? 'city' : 'tower';
+globalThis.location = { search: SCENARIO === 'city' ? '?mode=city' : '?mode=tower', pathname: '/index.html', href: 'http://x/index.html' };
 globalThis.devicePixelRatio = 1;
 globalThis.Audio = class { constructor() {} set loop(v) {} set src(v) {} play() { return Promise.resolve(); } pause() {} set currentTime(v) {} get currentTime() { return 0; } };
 globalThis.Image = class { constructor() { this.width = 64; this.height = 64; } set src(v) { setTimeout(() => this.onload && this.onload(), 0); } addEventListener() {} };
@@ -89,6 +91,11 @@ globalThis.fetch = (url, opt) => {
     }
   }
   return realFetch(u, opt);
+};
+
+const hudCityGridChildren = () => {
+  const g = document.getElementById('cityGrid');
+  return g ? g.children.length : 0;
 };
 
 // ---- 运行 ----
@@ -121,11 +128,11 @@ try {
 }
 
 const dbg = globalThis.__dbg || {};
-check((dbg.lands || []).length >= 3, `放块落地次数 = ${(dbg.lands || []).length} (期望 ≥3)`);
+if (SCENARIO === 'tower') check((dbg.lands || []).length >= 3, `放块落地次数 = ${(dbg.lands || []).length} (期望 ≥3)`);
 
 // ---- 场景 2: 菜单流 (标题点击 → 菜单 → Quick Game → 无尽模式放块) ----
 // 回 tower 结算后的重启定时器/summary: 直接走菜单入口
-{
+if (SCENARIO === 'tower') {
   const title = document.getElementById('titleScr');
   if (title && title.onclick) title.onclick();          // STT_TITLE → STT_MENU
   const clicked = fire('id:mQuick', 'click');            // BTN_QUICK_GAME (GameSprites.as:347)
@@ -137,6 +144,33 @@ check((dbg.lands || []).length >= 3, `放块落地次数 = ${(dbg.lands || []).l
     frame(t);
   }
   check((globalThis.__dbg.lands || []).length >= 13, `菜单流+无尽模式放块落地 = ${(globalThis.__dbg.lands || []).length} (期望 ≥13)`);
+}
+
+// ---- 场景 city: 网格点击 → 建造 10 层 → 回城放置 → 存档 ----
+if (SCENARIO === 'city') {
+  check(hudCityGridChildren() === 25, '城市网格渲染 25 格 (实际 ' + hudCityGridChildren() + ')');
+  // 选 Residential (cityMenu.children[0].onclick)
+  const sel = document.getElementById('cityMenu').children[0];
+  sel.onclick();
+  // 点第 0 格 → 进入建造 (cityCellClick: isValid(0,0,0) 恒真)
+  const cell0 = document.getElementById('cityGrid').children[0];
+  cell0.onclick();
+  // 放块至 10 层 (含屋顶)
+  for (let i = 0; i < 900 && (globalThis.__dbg.lands || []).length < 10; i++) {
+    t += 16;
+    if (i % 30 === 15) for (const f of listeners.pointerdown || []) f({ stopPropagation() {} });
+    frame(t);
+  }
+  check((globalThis.__dbg.lands || []).length >= 10, `城市塔建造落地 = ${(globalThis.__dbg.lands || []).length} (期望 ≥10)`);
+  // 过关 → 结算面板 OK → finishCityTower(true) → 放置+存档
+  const sm = document.getElementById('summary');
+  const okBtn = sm.querySelector('.ok');
+  check(!!okBtn && !!okBtn.onclick, '结算面板 OK 按钮就绪');
+  okBtn.onclick();
+  const save = JSON.parse(localStorage.getItem('twrblx_cookie') || '{}');
+  check((save.sm_towerGridData || [])[1] > 0, `sm_towerGridData[1] 人口已写入 (${(save.sm_towerGridData || [])[1]})`);
+  check((save.sm_towerGridData || [])[0] === 1, `塔色 type+1=1 已写入 (${(save.sm_towerGridData || [])[0]})`);
+  check((save.sm_towerGridData || [])[2] === 1, '屋顶帧=1 已写入');
 }
 
 // 快进更多帧验证摇晃/结算路径不炸
