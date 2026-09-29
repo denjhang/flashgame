@@ -1973,6 +1973,8 @@ function startWave() {
 function applyBriefBar() {
   const bar = document.getElementById('briefBar'), img = document.getElementById('briefImg');
   if (!bar || !img) return;
+  const sv = document.getElementById('saveBtn');   // SAVE 仅在开战等待期可见 (原版 instructions 屏)
+  if (sv) sv.style.display = (briefState === null) ? 'none' : 'block';
   if (briefState === null) { bar.style.display = 'none'; bar.className = ''; return; }
   bar.style.display = 'block';
   bar.className = briefState === 'mission' ? 'clickable' : '';
@@ -2033,6 +2035,54 @@ function dlgNext() {
   if (wasBriefing) applyBriefBar();       // 亮出 start mission 条
   else G.interWave = INTERWAVE_TICKS;     // 原版 nextMission → haloNoir 窗口重新计时
   return true;
+}
+// ---------------- 存档 (原版 frame_4 saveData → SharedObject "cookie";
+//   H5 等价 = localStorage "tcs_cookie"; 字段逐一同名: units[type,etat,x,y,autoRepair]
+//   + iMission/score/euros/interest/iUnlock) ----------------
+function hasSave() {
+  try { return typeof localStorage !== 'undefined' && !!localStorage.getItem('tcs_cookie'); }
+  catch (e) { return false; }
+}
+function saveGame() {                       // 原版 saveData (976 on press → "GAME SAVED")
+  try {
+    if (typeof localStorage === 'undefined') return false;
+    const units = [];
+    for (const t of G.turrets) {
+      if (t.hp <= 0) continue;
+      units.push([t.id, Math.round(t.hp), Math.round(t.x), Math.round(t.y), !!t.autoRepair]);
+    }
+    localStorage.setItem('tcs_cookie', JSON.stringify({
+      units: units,
+      iMission: G.wave + 1,                 // 原版 iMission = 下一关号
+      score: G.score, euros: G.euros, interest: G.interest, iUnlock: G.iUnlock,
+    }));
+    return true;
+  } catch (e) { return false; }
+}
+function loadGame() {                       // 原版 loadGame 分支 (6_333/834 newEvents)
+  try {
+    if (!hasSave()) return false;
+    const d = JSON.parse(localStorage.getItem('tcs_cookie'));
+    G.wave = Math.max(0, (d.iMission || 1) - 1);
+    G.score = d.score || 0; G.euros = (d.euros === undefined) ? 850 : d.euros;
+    G.interest = (d.interest === undefined) ? 6 : d.interest;
+    G.iUnlock = d.iUnlock || 0;
+    // 原版 unlocker: 基础两枪 + 按 iUnlock 循环 unlockNextWeapon (6_333)
+    G.unlocker = { m60: true, gatling: true, canon75: false, canon105: false, canon105D: false,
+                   radar: false, crotale: false, canon125: false, MLRS: false, MTHEL: false,
+                   pluton: false, su37: false };
+    for (let i = 0; i < G.iUnlock && i < WEAPONS_TO_UNLOCK.length; i++) G.unlocker[WEAPONS_TO_UNLOCK[i]] = true;
+    for (const k in AUTO_UNLOCK) if (+k < (d.iMission || 1)) G.unlocker[AUTO_UNLOCK[k]] = true;
+    // 塔重建 [type, hp, x, y, autoRepair]
+    G.turrets.length = 0;
+    for (const u of (d.units || [])) {
+      const t = new Turret(u[0], u[2], u[3]);
+      t.hp = Math.min(u[1] || t.maxHp, t.maxHp);
+      t.autoRepair = !!u[4];
+      G.turrets.push(t);
+    }
+    return true;
+  } catch (e) { return false; }
 }
 function briefingShow() {
   G.briefing = true; briefState = 'mission';
@@ -3212,12 +3262,33 @@ fitStage();           // 先适配窗口 (避免首帧错位)
 preloadTurretArt();   // 预载炮塔素材, 避免首座塔在 PNG 到位前渲染成兜底色块
 refreshToggleBtns();
 buildShop();
+// 原版 preloader loadGame: 有 cookie 存档时提供继续
+if (hasSave() && typeof document !== 'undefined') {
+  const lb = document.getElementById('loadBtn');
+  if (lb) {
+    lb.style.display = 'block';
+    lb.onclick = () => {
+      if (!loadGame()) return;
+      lb.style.display = 'none';
+      hud(); buildShop(); preloadTurretArt();
+      briefingShow();               // 进入存档关的简报 (对白/开战条)
+    };
+  }
+}
 hud();
 // 原版第 1 波即简报暂停波 (953 frame_30: 波 1 在 startMissionPause 列表) — 开局显示
 // "start mission" 条等点击, 不自动倒计时; 条点击 = 1106/1176 两套 on(press) 的统一入口
 {
   const bb = document.getElementById('briefBar');
   if (bb) bb.onclick = briefBarPress;
+  // 原版 instructions 屏 save 按钮 (976 on press → saveData + "GAME SAVED")
+  const sv = document.getElementById('saveBtn');
+  if (sv) sv.onclick = () => {
+    if (saveGame()) {
+      sv.textContent = 'GAME SAVED';
+      setTimeout(() => { sv.textContent = 'SAVE GAME'; }, 1500);
+    }
+  };
   const db = document.getElementById('dlgBox');
   if (db) db.onclick = () => dlgNext();
   // 原版 helpB (1074/frame_1 PlaceObject2_1046_11 on press): helpBoard 置 (400,300) 居中

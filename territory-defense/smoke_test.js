@@ -11,6 +11,7 @@ const ctxStub = new Proxy(function () {}, {
   set() { return true; },
 });
 global.__ctxStub = ctxStub;
+global.localStorage = { _d: {}, getItem(k){ return this._d[k] ?? null; }, setItem(k,v){ this._d[k]=String(v); }, removeItem(k){ delete this._d[k]; } };
 global.document = {
   getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {}, remove() {}, add() {} }, dataset: {}, addEventListener() {}, children: [], querySelector: () => null, querySelectorAll: () => [] }),
   createElement: () => ({ onclick: null, classList: { toggle() {}, remove() {}, add() {} }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {}, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] }),
@@ -1303,7 +1304,21 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----
+// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
+console.log("--- 存档系统 ---");
+{
+  const sv = { wave: G.wave, euros: G.euros, score: G.score, interest: G.interest,
+               iUnlock: G.iUnlock, nT: G.turrets.length,
+               t0: G.turrets.length ? [G.turrets[0].id, Math.round(G.turrets[0].hp), Math.round(G.turrets[0].x)] : null };
+  const ok = saveGame();
+  G.turrets.length = 0; G.euros = 1; G.wave = 0;
+  const loaded = loadGame();
+  console.log("saveGame→loadGame 往返=" + (ok && loaded &&
+    G.wave === sv.wave && G.euros === sv.euros && G.turrets.length === sv.nT &&
+    (sv.t0 === null || (G.turrets[0].id === sv.t0[0] && Math.round(G.turrets[0].hp) === sv.t0[1] && Math.round(G.turrets[0].x) === sv.t0[2]))));
+  console.log("unlocker 随 iMission 重建=" + (G.unlocker.m60 === true));
+}
+// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----
 console.log("--- 帮助板双钮 ---");
 {
   const fsx = require('fs');

@@ -1,5 +1,37 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+90 轮成果（2026-09-29, H5 领土防御·可选增强 #1：存档/读档系统复刻 —— saveData/loadGame 全字段对齐）
+
+**（权威 = frame_4 pcode_as function saveData + 976 on(press) "GAME SAVED" +
+6_333 loadGame 分支（euros/interest/score/iMission/_root 载入 + unlockNextWeapon 循环））**
+
+### 1. 【解码】
+
+- **saveData**：cookie.data = units[]（每塔 [type, etat, _x, _y, autoRepair]，跳过 null）
+  + iMission / score / euros / interest / iUnlock / lg / gc
+- **976 SAVE 按钮**（instructions 屏）→ saveData() + 文本 "GAME SAVED"
+- **loadGame**（preloader 选择）：6_333 从 _root 恢复 euros/interest/score/iMission；
+  unlocker 重置为基础两枪 + 按 iUnlock 循环解锁 + 834 newEvents 按关卡自动解锁
+
+### 2. 【H5 实现】
+
+- 等价存储 = **localStorage "tcs_cookie"**（SharedObject 对应物），字段逐一同名
+- SAVE GAME 按钮：开战等待期显示于 start mission 条左侧（= 原版 instructions 屏
+  save 钮位），保存后 1.5s 显示 "GAME SAVED"
+- CONTINUE 按钮：boot 时检测存档则显示 → loadGame() 恢复波次/金钱/利率/分数/
+  解锁树/全部炮塔（含 hp 与 autoRepair）→ 直接进入存档关简报（对白→开战条）
+- Q 键等已接线项不受影响；node 环境无 localStorage 时静默降级
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- saveGame→loadGame 往返（波次/金钱/塔数/塔位/塔血逐项）=true；unlocker 重建=true
+- 162 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 原版 gc / lg 字段（防作弊码/语言）H5 无对应，未存
+- 载入后不复原建造区覆盖状态（原版同样不含）
+
 ## 第 N+89 轮成果（2026-09-29, H5 领土防御·收官：浮字三段变体取证对齐 —— 全工程已知微差清零）
 
 **（权威 = DefineSprite_1141 内 1138/1139/1140 三个 PlaceObject MATRIX 位级解码）**
