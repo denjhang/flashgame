@@ -1304,7 +1304,27 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- victims 黑幕 (762, 前3关简报, N+91) ----
+// ---- 全资产引用审计 (N+92) ----
+console.log("--- 资产引用审计 ---");
+{
+  const fsx = require('fs'), path = require('path');
+  const refs = new Set();
+  for (const f of ['game.js', 'index.html', 'data.js']) {
+    const src = fsx.readFileSync(f, 'utf8');
+    for (const m of src.matchAll(new RegExp('assets' + String.fromCharCode(92) + '/[A-Za-z0-9_./-]+?' + String.fromCharCode(92) + '' + String.fromCharCode(46) + '(?:png|jpg|mp3)', 'g'))) {
+      const r = m[0];
+      if (!r.includes('..')) refs.add(r);   // 跳过注释中的范围写法 (1..4)
+    }
+  }
+  const missing = [...refs].filter(r => !fsx.existsSync(r));
+  const dirs = ['assets/menu','assets/briefing','assets/story/fond','assets/story/perso',
+                'assets/endgame/perdu','assets/endgame/end','assets/ui/slider','assets/sounds',
+                'assets/music','assets/selection','assets/explosion','assets/flame'];
+  const dirOK = dirs.every(d => fsx.existsSync(d));
+  console.log("静态引用 " + refs.size + " 条全在=" + (missing.length === 0) +
+    (missing.length ? ' 缺:' + missing.join(',') : '') + "  动态目录 12/12 在=" + dirOK);
+}
+// ---- victims 黑幕 (762, 前3关简报, N+91) ----// ---- victims 黑幕 (762, 前3关简报, N+91) ----
 console.log("--- victims 黑幕 ---");
 {
   const fsx = require('fs');

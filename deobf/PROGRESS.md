@@ -1,5 +1,26 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+92 轮成果（2026-09-29, H5 领土防御·完整性审计：全资产引用扫描入冒烟 —— 永久防回归）
+
+**（审计对象 = game.js / index.html / data.js 全部 assets/*.png|jpg|mp3 字面引用）**
+
+### 1. 【审计结果】
+
+- 静态引用 **28 条全部在位**；12 个动态素材目录（menu/briefing/story/endgame/slider/
+  sounds/music/selection/explosion/flame…）全在
+- 误报甄别：注释中的范围写法 "1..4.png" 被排除（实际 assets/explosion/1.png..4.png 在位）
+- 审计块入 smoke_test.js 永久断言 —— 今后任何引用悬空/素材遗失即冒烟红
+
+### 2. 验证
+
+- `静态引用 28 条全在=true  动态目录 12/12 在=true`
+- 164 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 3. 本轮仍未做（如实记录）
+
+- 无（工程可考项已全部收口；本轮为完整性加固）
+- 永久挂账：真机听感（纪律禁止浏览器）
+
 ## 第 N+91 轮成果（2026-09-29, H5 领土防御·可选增强 #2：victims 黑幕（前 3 关简报帘）复刻）
 
 **（权威 = frame_4 DoAction（loadGame/langue/gc 默认 + iMission>3 → victims._x=-5000）
