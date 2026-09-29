@@ -1,5 +1,45 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+79 轮成果（2026-09-29, H5 领土防御·主攻方向二 #3：endPass/perdu 胜负演出流解码 + 终局动画上图）
+
+**（权威 = 6_329/327 pcode_as 伪码 activePerdu/activePerduViaInterval/startInstructions +
+PlaceObject 章节表 1125/1132/1158 + DefineSprite_1158 frame_80 textesTempo）**
+
+### 1. 【解码：胜负演出全流程】
+
+- **startInstructions（6_329）**：44 关全部走 instructions 中央界面 (400,300) —
+  "SAVE GAME" + "start mission N" + 对白；iMission==45（终波清场后）→ 停火分支：
+  fireOnEnnemi("ennemy",1e6,...) + endPass.gotoAndPlay(2) + pauseMusic
+- **activePerdu（败局）**：activePerduViaInterval = **setInterval(4000ms, activePerdu)**
+  —— 单位抵达后战局继续演 4 秒，然后 perdu 画面 (400,300) + pauseMusic +
+  bgSound edithStop/ventStop + 鸟声停 + **gameOverStart**（段落已接线）+ aPerdu 防重入
+- **角色 ID 表**：endPass = **1158**（6 句敌台对白 + textesTempo
+  [13300,13300,5600,4200,6200,2800] 自动推进，总 ~45.4s）→ end = **1125**（胜局动画
+  800x600 × 336 帧 @24fps）→ perdu = **1132**（败局动画 1064x837 × 30 帧）
+- 6_339: 深度表 endPass=100001 / end=100002 / perdu=100003（叠加顺序）
+
+### 2. 【H5 实现】
+
+- 败局：单位抵达 → gameOverStart（原有时序）+ **G.defeatT=120 tick 延迟**
+  （战局继续演 4s）→ G.lost + #cineBox 全屏播 1132 的 30 帧原版动画（24fps）→
+  停末帧 + 点击重开
+- 胜局：终波清场 → pauseMusic+stopSegment（停火分支）→ END_DLG 6 句按 END_TEMPO
+  自动推进（中文去政治化）→ 播 1125 的 336 帧原版动画（JPEG q72 收缩至 5.9MB）→
+  停末帧"任务完成"
+- 素材：assets/endgame/perdu/1..30.png（字节级）+ end/1..336.jpg（334+2 帧导出）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 败局 30 帧 + 胜局 336 帧齐全；END_TEMPO 与原版 textesTempo 逐项一致；
+  END_DLG 6 句合规；败局 4s 延迟 + aPerdu 接线
+- 144 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- imgScenario 头像/框体 sprite 未导出上图（对白/终局说话人仍为文字名牌）
+- 1040/1046/1053 归档未接线；1151 音量条拖动 / selectionUnite 点击音（P2）
+- 原版金钱显示 TextField 归属未定位（H5 为自绘文字）
+
 ## 第 N+78 轮成果（2026-09-29, H5 领土防御·主攻方向二 #2：全 44 关对白入库（237 句）+ 非简报波对白门控接线）
 
 **（权威 = 980_242 scenario 全量解析 + DefineButton2_979 on(press) + 1158 终局取样）**

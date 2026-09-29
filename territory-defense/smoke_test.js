@@ -1303,6 +1303,23 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
+// ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
+console.log("--- 终局演出 ---");
+{
+  const fsx = require('fs');
+  let pOK = true;
+  for (let i = 1; i <= 30; i++) if (!fsx.existsSync('assets/endgame/perdu/' + i + '.png')) { pOK = false; break; }
+  let eOK = true;
+  for (let i = 1; i <= 336; i++) if (!fsx.existsSync('assets/endgame/end/' + i + '.jpg')) { eOK = false; break; }
+  console.log("1132 败局 30 帧=" + pOK + "  1125 胜局 336 帧=" + eOK);
+  console.log("END_TEMPO 与原版 textesTempo 一致=" +
+    (END_TEMPO.length === 6 && END_TEMPO.join() === '13300,13300,5600,4200,6200,2800'));
+  console.log("END_DLG 6 句且格式合规=" +
+    (END_DLG.length === 6 && END_DLG.every(l => Array.isArray(l) && l.length === 2 && l[1].length > 0)));
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("败局 4s 延迟(120 tick)+aPerdu 防重入接线=" +
+    (G.defeatT === 0 && G.aPerdu === false && gj.includes('G.defeatT = 120')));
+}
 // ---- 主攻方向二 #1: 剧情对白系统 (980_242 scenario + 953 f30 分支, N+77) ----
 console.log("--- 剧情对白系统 ---");
 {

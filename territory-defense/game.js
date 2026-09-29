@@ -1284,6 +1284,8 @@ const G = {
   beams: [],                 // MTHEL 激光束 (原版 obus frame13 chid399: _height=目标距离)
   waveActive: false, interWave: 120, briefing: false,
   lost: false, won: false, losses: 0,
+  defeatT: 0,               // 败局延迟 (原版 activePerduViaInterval: setInterval(4000ms, activePerdu))
+  aPerdu: false,            // 败局防重入 (原版同名标志)
   // 建造模式: 原版 carte.viseurConstruction 初值为 false
   //   (DefineSprite_834/frame_1/PlaceObject2_6_321 onClipEvent(load): set("viseurConstruction",false))
   //   → 开局不在建造模式, 必须点菜单项才进入。旧代码默认 'm60' 会导致一进游戏就跟随建造光标。
@@ -1984,6 +1986,45 @@ function briefingShow() {
   // 原版: 有对白的关卡先逐句播对白 (980 nextDialogue), 放完才到 1106 开战条
   if (!dlgOpen(G.wave + 1)) applyBriefBar();
 }
+
+// ---------------- 终局演出播放器 (1132 perdu 30帧 / 1158 对白时间轴 / 1125 end 336帧) ----------------
+const CINE_FPS = 24;                      // 原版 Flash 24fps
+let cineTimer = null;
+function playFrames(img, prefix, ext, count, done) {
+  let f = 1;
+  clearInterval(cineTimer);
+  cineTimer = setInterval(() => {
+    if (f > count) { clearInterval(cineTimer); if (done) done(); return; }
+    img.src = prefix + f + ext;
+    f++;
+  }, 1000 / CINE_FPS);
+}
+function showCine(kind) {                 // 'perdu' = 败局; 'end' = 胜局 (对白 → 动画)
+  const box = document.getElementById('cineBox'), img = document.getElementById('cineImg'),
+        txt = document.getElementById('cineTxt');
+  if (!box || !img || !txt) return;
+  box.style.display = 'flex';
+  if (kind === 'perdu') {
+    playFrames(img, 'assets/endgame/perdu/', '.png', 30, () => {
+      txt.textContent = '营地失守 —— 点击重新开始';
+      box.onclick = () => location.reload();
+    });
+  } else {
+    // 原版顺序: endPass(1158) 6 句按 textesTempo 自动推进 → end(1125) 动画
+    const st = { i: 0 };
+    const step = () => {
+      if (st.i >= END_DLG.length) {
+        txt.textContent = '';
+        playFrames(img, 'assets/endgame/end/', '.jpg', 336, () => { txt.textContent = '任务完成'; });
+        return;
+      }
+      txt.textContent = END_DLG[st.i][0] + '：' + END_DLG[st.i][1];
+      setTimeout(step, END_TEMPO[st.i]);
+      st.i++;
+    };
+    step();
+  }
+}
 // 1106 on(press): 守卫 → 隐藏 + creationUnite 音效 + startMission()
 function briefingGo() {
   if (!G.briefing || dlg) return;   // 对白未放完时开战条不可点 (原版 nextMission 未触发)
@@ -2104,6 +2145,9 @@ function endWave() {
   }
   if (G.wave >= WAVES.length && G.units.every(u => u.dead)) {
     G.won = true;
+    // 原版 startInstructions iMission==45 分支: 停火 + pauseMusic + endPass.gotoAndPlay(2)
+    pauseMusic(); stopSegment();
+    showCine('end');
   }
   hud();
 }
@@ -2111,6 +2155,11 @@ function endWave() {
 // ---------------- 主循环 ----------------
 function tick() {
   if (G.lost || G.won) return;
+  if (G.defeatT > 0 && --G.defeatT === 0) {   // 原版 4s 内战局继续演, 到点 activePerdu
+    G.lost = true;
+    showCine('perdu');
+    return;
+  }
   G.frame++;
   scrollCamera();
   updateDeathShake();   // 阵亡镜头抖动 (原版 destruction 段改 _root.carte._x/_y; 差值之和为 0)
@@ -2145,7 +2194,9 @@ function tick() {
 
   for (const u of G.units) {
     u.update();
-    if (u.reached && !u.dead) { u.dead = true; G.losses++; G.lost = true; playSegment('gameover', false); }  // 抵达基地 = 失败 (原版 activePerdu → gameOverStart, 单次)
+    if (u.reached && !u.dead) { u.dead = true; G.losses++;
+      if (!G.aPerdu) { G.aPerdu = true; G.defeatT = 120; playSegment('gameover', false); }  // 抵达基地 → 4s 后败局画面 (原版 4000ms 延迟 + gameOverStart)
+    }
   }
   G.units = G.units.filter(u => !u.dead);
   for (const t of G.turrets) t.update();

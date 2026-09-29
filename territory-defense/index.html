@@ -117,6 +117,13 @@
   #dlgTxt { color:#e8e8e8; font-size:12px; line-height:1.55; white-space:pre-wrap;
             max-height:150px; overflow-y:auto; }
   #dlgNext { color:#89a; font-size:10px; text-align:right; margin-top:3px; }
+  /* 终局演出: 全屏遮罩, 800x600 原版帧图居中 */
+  #cineBox { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
+             z-index:60; flex-direction:column; align-items:center; justify-content:center;
+             background:#000; cursor:default; }
+  #cineImg { max-width:100%; max-height:570px; }
+  #cineTxt { color:#ffd; font-size:13px; margin-top:6px; min-height:16px; text-align:center;
+             padding:0 10px; }
   #unlockPanel button:disabled { opacity:.35; cursor:not-allowed; }
   #unlockPanel button.int { background:#3a4a5a; }
   #unlockPanel button.int:hover:not(:disabled) { background:#4a5a6a; }
@@ -180,13 +187,18 @@
       <div id="dlgTxt"></div>
       <div id="dlgNext">▼ 点击继续</div>
     </div>
+    <!-- 终局演出 (1132 perdu 败局动画 / 1158 对白 + 1125 end 胜局动画) -->
+    <div id="cineBox">
+      <img id="cineImg" alt="" width="800" height="600">
+      <div id="cineTxt"></div>
+    </div>
   </div>
   <div id="hud">
     金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> (丢塔数) |
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600046"></script>
-<script src="game.js?v=1790600046"></script>
+<script src="data.js?v=1790600047"></script>
+<script src="game.js?v=1790600047"></script>
 </body>
 </html>
