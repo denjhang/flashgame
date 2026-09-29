@@ -1332,7 +1332,20 @@ console.log("--- victims 黑幕 ---");
   console.log("前3关黑幕规则 (briefingShow 挂 / startWave 淡出)=" +
     (gj.includes("G.wave + 1 <= 3") && gj.includes("fadeCurtain") && hj.includes('id="fadeCurtain"')));
 }
-// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
+// ---- STORY 说话人码逐句比对 (N+95): data.js vs deobf/data/scenario_parsed.json ----
+console.log("--- 剧情码序列比对 ---");
+{
+  const fsx2 = require('fs');
+  const orig = JSON.parse(fsx2.readFileSync('../deobf/data/scenario_parsed.json', 'utf8')).en;
+  let bad = 0;
+  for (let m = 1; m <= 44; m++) {
+    const oc = (orig[m] || []).map(x => x[0]);
+    const mc = (STORY[m] || []).map(x => x[0]);
+    if (JSON.stringify(oc) !== JSON.stringify(mc)) bad++;
+  }
+  console.log("44 关说话人码序列与原版逐句一致=" + (bad === 0) + (bad ? ' 不一致 ' + bad + ' 关' : ''));
+}
+// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
 console.log("--- 存档系统 ---");
 {
   const sv = { wave: G.wave, euros: G.euros, score: G.score, interest: G.interest,
