@@ -1,5 +1,29 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+87 轮成果（2026-09-29, H5 领土防御·P2 组 #6：qualityB/storyB 上图接线（帮助板内）—— 看板清零）
+
+**（权威 = 1074/frame_1 on(press)：1040 → changeQuality()；1053 → 布尔翻转 +
+文本 "action"/"story"）**
+
+### 1. 【实现】
+
+- 两钮清洗版素材（值区文本按底色抹除，保留 "quality"/"story" 前缀标签）上图到
+  helpBoard 底部按钮排（其功能归属地）
+- hQual → changeQuality() + 值文本实时显示 good/medium/low；hStory → 标签翻转
+  story↔action（原版布尔切换）；均不冒泡关闭帮助板
+- 至此 **PROGRESS 看板全部已知未对齐项清零**
+
+### 2. 验证（node 冒烟，无浏览器）
+
+- 两钮素材 + 接线断言=true；156→158 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 3. 本轮仍未做（如实记录）
+
+- 950 persoMouvant 入场为 CSS 近似（原版逐帧补间）；浮字为单条 CSS 近似
+  （原版 3 段变体）—— 视觉级微差，已如实挂账
+- 全部可考机制/素材均已落地：对白库→演出→胜负终局、UI 六面板、经济/武器/单位
+  三表、音视频（三首原曲+四段落+点击音）、云层/画质、金钱面板、帮助板、音量条
+
 ## 第 N+86 轮成果（2026-09-29, H5 领土防御·P2 组 #5：changeQuality 画质循环 + nuageux 云层上图，Q 键恢复原版语义）
 
 **（权威 = 6_1 pcode_as function changeQuality + PlaceObject nuageux(chid 833,

@@ -3230,6 +3230,11 @@ hud();
       playSfx('selectionUnite', 0.35);
     };
     if (board) board.onclick = () => board.classList.remove('show');
+    // 原版 qualityB(1040 → changeQuality) / storyB(1053 模式标签翻转)
+    const qb = document.getElementById('hQual'), qt = document.getElementById('hQualTxt');
+    if (qb && qt) qb.onclick = (e) => { e.stopPropagation(); changeQuality(); qt.textContent = QUALITY; };
+    const sb = document.getElementById('hStory'), stt = document.getElementById('hStoryTxt');
+    if (sb && stt) sb.onclick = (e) => { e.stopPropagation(); stt.textContent = stt.textContent === 'story' ? 'action' : 'story'; };
   }
   if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
 }

@@ -92,6 +92,10 @@
   #helpBoard.show { display:block; }
   #helpImg { display:block; }
   #helpClose { color:#89a; font-size:10px; text-align:center; padding:2px 0; background:rgba(8,10,14,.8); }
+  #hbBtns { display:flex; gap:6px; padding:3px 6px; background:#151515; }
+  #hbBtns button { position:relative; background:transparent; border:none; padding:2px 3px; cursor:pointer; }
+  #hbBtns button:hover { filter:brightness(1.4); }
+  #hQualTxt, #hStoryTxt { position:absolute; left:56px; top:5px; color:#ccc; font-size:9px; font-family:monospace; }
   /* 音乐/开关面板 — 原版 DefineSprite_1151 全景图 (178x203) + 原位热区。
      权威 = FFDec SVG: 1145 歌曲按钮 109.65x21.05 @ (6.85, 7.05/34.65/61.7),
      pauser @ (7.15, 91.5), 关闭钮 686 @ (144.8, 3.05) 26.75x26.75 */
@@ -223,6 +227,11 @@
     <!-- 原版 helpBoard (DefineSprite_1103, 463x283): helpB(1046) on(press) 置 (400,300) -->
     <div id="helpBoard">
       <img id="helpImg" src="assets/ui/help_board.png" width="463" height="283" alt="">
+      <!-- 原版 qualityB(1040 changeQuality) / storyB(1053 模式切换), 值文本动态 -->
+      <div id="hbBtns">
+        <button id="hQual"><img src="assets/ui/btn_quality.png" width="107" height="12" alt=""><span id="hQualTxt">good</span></button>
+        <button id="hStory"><img src="assets/ui/btn_story.png" width="92" height="12" alt=""><span id="hStoryTxt">story</span></button>
+      </div>
       <div id="helpClose">× 点击关闭</div>
     </div>
     <!-- 剧情对白 (980_242 nextDialogue): 原版演出 = imgScenario.fond(870 房间布景,
@@ -247,7 +256,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600054"></script>
-<script src="game.js?v=1790600054"></script>
+<script src="data.js?v=1790600055"></script>
+<script src="game.js?v=1790600055"></script>
 </body>
 </html>

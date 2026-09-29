@@ -1303,7 +1303,17 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- 画质循环 + 云层 (changeQuality Q / nuageux 833, N+86) ----
+// ---- helpBoard 内 qualityB/storyB (1040/1053, N+87) ----
+console.log("--- 帮助板双钮 ---");
+{
+  const fsx = require('fs');
+  console.log("两钮清洗版素材=" +
+    (fsx.existsSync('assets/ui/btn_quality.png') && fsx.existsSync('assets/ui/btn_story.png')));
+  const gj = fsx.readFileSync('game.js', 'utf8'), hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("接线 (hQual→changeQuality / hStory 翻转)=" +
+    (gj.includes('hQual') && gj.includes('hStoryTxt') && hj.includes('id="hQualTxt"')));
+}
+// ---- 画质循环 + 云层 (changeQuality Q / nuageux 833, N+86) ----// ---- 画质循环 + 云层 (changeQuality Q / nuageux 833, N+86) ----
 console.log("--- 画质/云层 ---");
 {
   const fsx = require('fs');
