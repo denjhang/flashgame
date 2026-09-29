@@ -1301,6 +1301,21 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
+// ---- UI 原版素材替换 #5: 修理条 (814 base / 818 autor, N+75 烤入文本清洗) ----
+console.log("--- 修理条原版素材 ---");
+{
+  const fsx = require('fs');
+  const chk = (p, w0, h0) => {
+    if (!fsx.existsSync(p)) return 'MISSING';
+    const b = fsx.readFileSync(p);
+    const w = b.readUInt32BE(16), h = b.readUInt32BE(20);
+    return (w === w0 && h === h0) ? 'ok' : w + 'x' + h;
+  };
+  console.log("814 底板(236x21, 清洗后)=" + chk('assets/ui/repair_base.png', 236, 21) +
+    "  818 autor(236x23)=" + chk('assets/ui/repair_autor.png', 236, 23));
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("drawInfoPanel 接线直出图=" + (gj.includes('REPAIR_ART') && gj.includes('drawImgOr')));
+}
 // ---- UI 原版素材替换 #4: 侧栏开关按钮本体 (1058/1063/1068/1073, N+73) ----
 console.log("--- 开关按钮原版素材 ---");
 {

@@ -1117,6 +1117,15 @@ const CANCEL_HINT = [1, 2].map(i => {
 // 注意: FFDec 把 814/818 里 EditText 的示例文字("repair for 1000000$")烧进了导出位图, 不可直接用;
 // 已从 814 采样权威配色: 边框纯黑 + 填充 RGB(0,102,152); 818 autor 为黑底。H5 按此配色 + 原版布局自绘
 const BAR_FILL = '#006698', BAR_BORDER = '#000';
+// 原版修理条直出图 (814/818, N+75 清洗烤入文本后归档); drawImgOr = 图未就绪时回退自绘
+const REPAIR_ART = {
+  base: Object.assign(new Image(), { src: 'assets/ui/repair_base.png' }),
+  autor: Object.assign(new Image(), { src: 'assets/ui/repair_autor.png' }),
+};
+function drawImgOr(im, x, y, fallback) {
+  if (im && im.complete && im.naturalWidth) ctx.drawImage(im, x, y);
+  else fallback();
+}
 // 修理费公式 (原版 819 refresh() 权威): round(2 * (etatMax - etat)) = 2 $/HP
 //   注: pcode 里 r3=(r3/2); r3=(r3/r5); 是混淆死代码, 随后 `r3 = 2` 直接覆盖
 function repairPrice(t) {
@@ -2679,29 +2688,29 @@ function drawInfoPanel() {
   ctx.fillStyle = '#8f8'; ctx.font = '11px monospace';
   ctx.fillText('HP ' + t.hp + '/' + t.maxHp, px + 8, py + 32);
   if (t.w) ctx.fillText('伤害 ' + t.w[4] + '  射程 ' + t.w[1] + '  冷却 ' + t.w[2], px + 8, py + 46);
-  // 修理条 (原版 814 base 尺寸 236x21, 权威配色: 纯黑边框 + RGB(0,102,152) 填充)
+  // 修理条 (原版 814 base 236x21 直出图; FFDec 烤入的示例文本"repair for 1000000$"
+  //   已按中段填充色 RGB(0,102,152) 清洗, 两端黑帽保留; 813 文本动态重画, 原版字色 (182,212,226))
   {
-    const barX = px + 4, barY = py + 56, barW = 236, barH = 21;
-    ctx.fillStyle = BAR_BORDER; ctx.fillRect(barX, barY, barW, barH);
-    ctx.fillStyle = BAR_FILL;  ctx.fillRect(barX + 1, barY + 1, barW - 2, barH - 2);
-    // HP 进度 (亮起部分)
-    const ratio = t.maxHp > 0 ? Math.max(0, t.hp) / t.maxHp : 0;
-    ctx.fillStyle = 'rgba(120,230,160,.45)';
-    ctx.fillRect(barX + 1, barY + 1, (barW - 2) * ratio, barH - 2);
-    // 修理费文字 (原版 813 repairPrice EditText 的内容, 中英双写保留原版英文)
-    ctx.fillStyle = price > 0 ? '#fff' : '#bfe';
-    ctx.font = '12px monospace';
-    ctx.fillText(price > 0 ? 'repair for ' + price + ' $' : 'no reparations needed', barX + 8, barY + 15);
+    const barX = px + 4, barY = py + 56;
+    drawImgOr(REPAIR_ART.base, barX, barY, () => {
+      ctx.fillStyle = BAR_BORDER; ctx.fillRect(barX, barY, 236, 21);
+      ctx.fillStyle = BAR_FILL;  ctx.fillRect(barX + 1, barY + 1, 234, 19);
+    });
+    // 修理费文字 (原版 813 repairPrice EditText 的内容)
+    ctx.fillStyle = price > 0 ? '#b6d4e2' : 'rgba(182,212,226,.45)';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(price > 0 ? 'repair for ' + price + ' $' : 'no reparations needed', barX + 42, barY + 15);
   }
-  // autoRepair 开关 (原版 818 autor 文字层: 黑底 + "auto repair ON/OFF")
+  // autoRepair 开关 (原版 818 autor 236x23 直出图, 填充 RGB(102,0,152), 字色 (194,152,213))
   {
-    const aX = px + 4, aY = py + 82, aW = 236, aH = 19;
-    ctx.fillStyle = BAR_BORDER; ctx.fillRect(aX, aY, aW, aH);
-    ctx.fillStyle = t.autoRepair ? '#1a3a1a' : '#2a1010';
-    ctx.fillRect(aX + 1, aY + 1, aW - 2, aH - 2);
-    ctx.fillStyle = t.autoRepair ? '#8f8' : '#a88';
-    ctx.font = '12px monospace';
-    ctx.fillText(t.autoRepair ? 'auto repair ON' : 'auto repair OFF', aX + 8, aY + 14);
+    const aX = px + 4, aY = py + 82;
+    drawImgOr(REPAIR_ART.autor, aX, aY, () => {
+      ctx.fillStyle = BAR_BORDER; ctx.fillRect(aX, aY, 236, 23);
+      ctx.fillStyle = '#660098'; ctx.fillRect(aX + 1, aY + 1, 234, 21);
+    });
+    ctx.fillStyle = t.autoRepair ? '#c2a0d5' : 'rgba(194,152,213,.45)';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(t.autoRepair ? 'auto repair ON' : 'auto repair OFF', aX + 42, aY + 15);
   }
 }
 
