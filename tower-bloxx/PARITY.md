@@ -45,7 +45,10 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 里程碑提示（TIP_MSa + CITY_LEVEL_LIMITS 阈值, addTipToQueue:243-250 队列语义）
 - ✅ 替换对比人口（TIP_CITY_COMPARE: 点已占格显示 Old 人口）
 - ✅ dozer 拆除（placeInDozer:398-410 语义: dozer 按钮+点塔拆除, snd_destroy）
-- ⬜ city_spr 原版美术（现为 CSS 简排）
+- ✅ city_spr 原版美术（FFDec 导出 chid668, 640×509→裁 480; 网格原点对号
+  (320+CITY_MAP_X, 240+CITY_MAP_Y)=(224,107), 格 52px; 塔型选择器/dozer 对齐原版面板位置）
+
+**第 3 节全部 ✅（城市模式闭环）**
 
 证据：CityMap.as 全文 + Const.as:67-71/103/117-119/216-220。
 

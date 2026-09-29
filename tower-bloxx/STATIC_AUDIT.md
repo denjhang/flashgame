@@ -179,3 +179,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 三表状态机全对号: tier=stacked/10 分档 + PROB 掷骰 + OCC 次数(-1 无限, 出界+1 回收) +
   SPD 速度/进场侧 + 9 槽位 2s 随机冷却 (updateEffects/generateEffect 逐行对号)
 - smoke_test 16/16
+
+## 第 19 轮（2026-09-29）— PARITY 推进 #11：city_spr 原版美术
+
+- FFDec 导出 city_spr(chid668, 640×509) → city_spr_640.png 作为城市视图底图
+- 网格原点按 Const.CITY_MAP_X/Y(-96,-133)+中心(320,240) 对齐到 (224,107), 52px 格
+- 塔型选择器/dozer 位置对齐原版左侧面板; 顺带发现并修复: 上轮全量导出清理时误删
+  bg/dude/star 位图目录, 已按 chid 重导(231/423/426/753/772/783)
+- smoke_test 16/16; PARITY 除 3 项有意不复刻外链外全部 ✅
