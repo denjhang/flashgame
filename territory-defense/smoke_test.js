@@ -1281,6 +1281,24 @@ console.log("--- 开火序列无空帧 ---");
     " crotale(122)=" + burstCount[122] + " MLRS(128)=" + burstCount[128] +
     " (期望 4/6/2/6)");
 }
+// ---- UI 原版素材替换 #1: 音乐面板 (DefineSprite_1151, N+70) ----
+console.log("--- 音乐面板原版素材 ---");
+{
+  const fsx = require('fs');
+  const p = 'assets/ui/music_panel.png';
+  const ok = fsx.existsSync(p);
+  let wh = null;
+  if (ok) {
+    const b = fsx.readFileSync(p);
+    wh = [b.readUInt32BE(16), b.readUInt32BE(20)];   // PNG IHDR
+  }
+  console.log("音乐面板 1151 素材存在=" + ok + " 尺寸=" + (wh ? wh.join('x') : 'N/A') + " (期望 178x203)");
+  const gj = fsx.readFileSync('game.js', 'utf8'), hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("pauser 'music on/off' 原版语义已接线=" + (gj.includes("'music on'") && gj.includes("'music off'")));
+  console.log("index.html 引用原版面板图+四热区+关闭钮=" +
+    (hj.includes('assets/ui/music_panel.png') &&
+     ['m0','m1','m2','mPlay','mMute','mOpen'].every(id => hj.includes('id="' + id + '"'))));
+}
 `;
 eval(src);
 console.log("[done]");

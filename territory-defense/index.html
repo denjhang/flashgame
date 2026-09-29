@@ -56,16 +56,22 @@
   #lossBox .losses { color:#daa; }
   #lossBox .cash { color:#ee8; display:block; }
   #lossBox .interest { color:#aa8; font-size:10px; }
-  /* 音乐/开关面板 (原版 1151 三曲选择) */
+  /* 音乐/开关面板 — 原版 DefineSprite_1151 全景图 (178x203) + 原位热区。
+     权威 = FFDec SVG: 1145 歌曲按钮 109.65x21.05 @ (6.85, 7.05/34.65/61.7),
+     pauser @ (7.15, 91.5), 关闭钮 686 @ (144.8, 3.05) 26.75x26.75 */
   #musicBox { background:#2a2a2a; padding:3px; display:flex; flex-direction:column; gap:2px; flex:none; }
+  #musicBox .row { display:flex; gap:2px; }
   #musicBox button { background:#444; color:#ccc; border:1px solid #666; font-size:10px;
                      font-family:monospace; padding:1px 2px; cursor:pointer; text-align:left; }
-  #musicBox button.on { background:#6a6a3a; color:#ff8; }
-  #musicBox button:disabled { opacity:.4; cursor:not-allowed; }
-  #musicBox .row { display:flex; gap:2px; }
   #musicBox .row button { flex:1; text-align:center; }
-  /* 三个曲名按钮: 原版曲名较长 ("Act of instinct" 等), 小字 + 允许折行, 避免撑高面板 */
-  #musicBox .row button.song { font-size:9px; line-height:1.15; padding:2px 1px; word-break:break-word; }
+  #musicPanel { position:relative; width:178px; height:203px; font-family:monospace; display:none; flex:none; }
+  #musicPanel.show { display:block; }
+  #musicPanelImg { position:absolute; left:0; top:0; }
+  .mpBtn { position:absolute; cursor:pointer; font-size:11px; line-height:21px; padding-left:5px;
+           white-space:nowrap; overflow:hidden; background:#030303; color:#8a8a8a; }
+  .mpBtn:hover { color:#fff; }
+  .mpBtn.pauser { background:#616161; color:#ddd; }
+  .mpBtn.close { background:transparent; }
   /* 波间二选一面板 (原版 sprite 989 debloquerArme, 舞台居中 _x=400 _y=300) */
   #unlockPanel { position:absolute; left:400px; top:300px; transform:translate(-50%,-50%);
                  width:300px; background:#3a3a3a; border:3px solid #888;
@@ -116,13 +122,15 @@
         </div>
         <div class="row">
           <button id="tZoom">全图 G</button>
-          <button id="mPlay" title="播放/暂停">▶</button>
-          <button id="mMute" title="静音">🔇</button>
+          <button id="mOpen" title="音乐面板">♪ 音乐</button>
         </div>
-        <div class="row">
-          <button id="m0" class="song">♪1</button>
-          <button id="m1" class="song">♪2</button>
-          <button id="m2" class="song">♪3</button>
+        <div id="musicPanel">
+          <img id="musicPanelImg" src="assets/ui/music_panel.png" width="178" height="203" alt="">
+          <div class="mpBtn" id="m0" style="left:7px;top:7px;width:105px;height:21px"></div>
+          <div class="mpBtn" id="m1" style="left:7px;top:35px;width:105px;height:21px"></div>
+          <div class="mpBtn" id="m2" style="left:7px;top:62px;width:105px;height:21px"></div>
+          <div class="mpBtn pauser" id="mPlay" style="left:7px;top:92px;width:105px;height:21px"></div>
+          <div class="mpBtn close" id="mMute" style="left:145px;top:3px;width:27px;height:27px" title="关闭"></div>
         </div>
       </div>
       <div id="lossBox">
@@ -147,7 +155,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600038"></script>
-<script src="game.js?v=1790600038"></script>
+<script src="data.js?v=1790600039"></script>
+<script src="game.js?v=1790600039"></script>
 </body>
 </html>

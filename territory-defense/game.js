@@ -949,16 +949,13 @@ function changeMusic(im) {                // 原版 changeMusic: 换曲并立即
   playMusic();
   refreshMusicPanel();
 }
-function refreshMusicPanel() {            // 音乐面板按钮状态
+function refreshMusicPanel() {            // 音乐面板按钮状态 (原版 1151 动态文本)
   for (let i = 0; i < 3; i++) {
     const b = document.getElementById('m' + i);
-    if (b) {
-      b.classList.toggle('on', i === imusic && !isPause);
-      b.textContent = BGM_NAMES[i];   // 原版 1151 按钮显示曲名 (class="song" 在 HTML 里给, 小字不撑高面板)
-    }
+    if (b) b.textContent = BGM_NAMES[i];  // 1145_5/8/11 onClipEvent(load) txt.text
   }
   const pp = document.getElementById('mPlay');
-  if (pp) pp.textContent = isPause ? '▶ 播放' : '⏸ 播放中';
+  if (pp) pp.textContent = isPause ? 'music on' : 'music off';  // 原版 pauser (1145_14)
 }
 // ---------------- bgSound 段落音乐 (原版 1085 时间线, N+62) ----------------
 //   原版四段 = DefineSound 1081(vent)/1082(edith)/1083(gameover)/1084(bgscenario),
@@ -991,10 +988,20 @@ function wireMusicPanel() {               // 原版 1151 面板按钮
     if (b) b.onclick = () => changeMusic(i);
   }
   const pp = document.getElementById('mPlay');
-  if (pp) pp.onclick = () => { if (isPause) playMusic(); else pauseMusic(); refreshMusicPanel(); };
+  if (pp) pp.onclick = () => {            // 原版 pauser (1145_14): isOff 翻转
+    if (isPause) playMusic(); else pauseMusic();
+    refreshMusicPanel();
+  };
   const mu = document.getElementById('mMute');
-  if (mu) mu.onclick = () => { bgmMuted = !bgmMuted; if (bgmAudio) bgmAudio.muted = bgmMuted;
-                               mu.textContent = bgmMuted ? '🔇 已静音' : '🔇'; };
+  if (mu) mu.onclick = () => {            // 原版 686 关闭钮: 收起面板
+    const panel = document.getElementById('musicPanel');
+    if (panel) panel.classList.remove('show');
+  };
+  const mo = document.getElementById('mOpen');
+  if (mo) mo.onclick = () => {            // H5 侧栏重开面板 (原版面板由 UI 容器显隐)
+    const panel = document.getElementById('musicPanel');
+    if (panel) panel.classList.toggle('show');
+  };
   refreshMusicPanel();
 }
 wireMusicPanel();
