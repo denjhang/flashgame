@@ -20,6 +20,7 @@ const SWAY_MAX_ANGLE = 1;       // Const.SWAY_MAX_ANGLE (度, GameModel:239 上�
 const TIMER_MAX = 5;            // Const.TIMER_MAX (ComboTimer 计时上限 TIMER_MAX+1 秒)
 const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
 const DROP_G = 0.0045;          // 落块加速度 (px/ms^2, 调校值, 对应原版 ~0.55s 落程)
+const CRANE_FPS = 30;           // Flash 帧率: blockDx 以 px/帧 计 (Crane.animate dx=endx-lastX)
 
 const stage = document.getElementById('stage');
 const hud = {
@@ -101,7 +102,9 @@ const G = {
   lives: NUM_TRIES,
   population: 0,
   stacked: 0,
-  falling: null,        // {mesh, vy, x, y}
+  falling: null,        // {mesh, vy, cy, bdx, vx}
+  hanging: null, hangingFor: -1,
+  craneDx: 0, towerBdx: 0,
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
@@ -127,12 +130,13 @@ function addHud() {
 
 function startGame() {
   for (const b of G.blocks) towerGroup.remove(b.mesh);
-  G.blocks = []; G.landingY = 0; G.currCtr = 0; G.blockDx = 0;
+  G.blocks = []; G.landingY = 0; G.currCtr = 0; G.towerBdx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
+  if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
   addHud();
 }
 
@@ -170,8 +174,11 @@ function hookY(now) {
 }
 
 // ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
-function blockLanded(offset) {
+function blockLanded(offset, releaseBdx) {
   window.__dbg && (window.__dbg.lands.push(offset), window.__dbg.drops++);
+  // Tower.blockLanded: blockDx = floor(nextBlock.blockDx/2); 有效偏移 _loc3_ = 视觉偏移 + blockDx (Tower.as:117-121)
+  const bd = Math.floor((releaseBdx || 0) / 2);
+  if (G.landingY !== 0) offset = Math.round(offset + bd); // 地基块不走 _loc3_ 惯性偏移 (Tower.as:182 onGround 传 offset=0)
   const abs = Math.abs(offset);
   if (abs >= HIT_LIMIT && abs <= BLOCK_H) {
     // 撞塔: 弹飞 + 晃动加剧 + 顶部一块被撞掉 (Tower.as:150-167 finishCombo→bounceOffTower→knockNextBlock→decTries)
@@ -194,7 +201,8 @@ function blockLanded(offset) {
   const onGround = G.landingY === 0;               // onGround: 地基块, 不结算人口
   let x = offset;
   const perfect = !onGround && abs < TOON_LIMIT_1; // _loc5_(frame<3) && |offset|<TOON_LIMIT_1
-  if (Math.abs(offset) < TOON_LIMIT_1) x = 0;      // TOON_LIMIT_1 内吸附归正 (landOnTower:172-176)
+  if (Math.abs(offset) < TOON_LIMIT_1) { x = 0; G.towerBdx = 0; } // 完美吸附: blockx=currCtr, 塔身倾斜清零 (Tower.as:208-210)
+  else x = offset;
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);
@@ -212,7 +220,9 @@ function blockLanded(offset) {
   tipperIncSway(offset);
   G.blocks.push({ mesh, cx: tpl.userData.cx, pop });
   G.landingY += BLOCK_H;
-  G.currCtr += x;
+  // currCtr = blockx + blockDx (Tower.as:282): 塔顶中心带保留倾斜
+  G.towerBdx = (Math.abs(offset) < TOON_LIMIT_1) ? 0 : bd;
+  G.currCtr += x + G.towerBdx;
   G.stacked++;
   panUp();
   addHud();
@@ -289,7 +299,12 @@ function drop() {
   const x = craneGroup.position.x - tpl.userData.cx, y = craneGroup.position.y - 60 - tpl.userData.cy;
   mesh.position.set(x, y, 0);
   scene.add(mesh);
-  G.falling = { mesh, vy: 0, cy: tpl.userData.cy };
+  // Crane.dropTarget: blockDx = dx (释放帧钩速 px/帧); 落块带惯性漂移 x + blockDx*3 (Crane.as:198-199)
+  const bdx = G.craneDx || 0;
+  const topY = G.landingY + BLOCK_H / 2;
+  const fallMs = Math.sqrt(2 * Math.max(1, topY - y) / DROP_G);
+  G.falling = { mesh, vy: 0, cy: tpl.userData.cy, bdx, vx: bdx * 3 / fallMs };
+  if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
 addEventListener('pointerdown', drop);
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); drop(); } });
@@ -301,6 +316,7 @@ function loop(now) {
   const dt = Math.min(50, now - last); last = now;
   if (ready) {
     // 摆钩
+    G.craneDx = (hookX(now) - craneGroup.position.x) / (dt / (1000 / CRANE_FPS)); // 折算 px/帧 (Crane.animate dx)
     if (!G.falling && !G.over) craneGroup.position.x = hookX(now);
     craneGroup.position.y = G.camY + hookY(now);
     cable.geometry.setFromPoints([new THREE.Vector3(0, STAGE_H/2 - CRANE_HOOK_Y + 10, 0), new THREE.Vector3(0, 0, 0)]);
@@ -310,12 +326,13 @@ function loop(now) {
       const f = G.falling;
       f.vy += DROP_G * dt;
       f.mesh.position.y -= f.vy * dt;
+      f.mesh.position.x += f.vx * dt; // 惯性漂移 (Crane.as:199 path x+blockDx*3)
       const topY = G.landingY + BLOCK_H / 2;
       if (f.mesh.position.y + f.cy <= topY) {
         scene.remove(f.mesh);
         G.falling = null;
         const offset = Math.round(f.mesh.position.x + f.cx - G.currCtr); // 块中心 - 塔顶中心
-        blockLanded(offset);
+        blockLanded(offset, f.bdx);
       }
     }
 
@@ -336,6 +353,20 @@ function loop(now) {
     const camTargetY = Math.max(0, G.landingY - STAGE_H / 2 + 3 * BLOCK_H);
     G.camY += (camTargetY - G.camY) * Math.min(1, dt / DELAY_PAN_UP);
     camera.position.y = G.camY;
+
+    // 挂钩待放积木 (Crane.updateBlock: targetSpr 随钩, _rotation = -(endx-320)/5 度, 挂点 hook.y+100)
+    if (ready && !G.falling && !G.over && G.hangingFor !== G.stacked) {
+      if (G.hanging) craneGroup.remove(G.hanging);
+      const tpl = blockTemplate(G.stacked);
+      G.hanging = tpl.clone();
+      G.hanging.scale.setScalar(tpl.userData.s);
+      G.hangingFor = G.stacked;
+      craneGroup.add(G.hanging);
+    }
+    if (G.hanging) {
+      G.hanging.position.set(-G.hanging.userData.cx ?? 0, -60 - (G.hanging.userData.cy || 0), 0);
+      G.hanging.rotation.z = THREE.MathUtils.degToRad(-((craneGroup.position.x + STAGE_W/2) - TOWER_START_X) / 5);
+    }
 
     // combo 计时
     if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) finishCombo(); addHud(); }

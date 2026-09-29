@@ -34,3 +34,25 @@
 - [P3] 原版人口 HUD 显示的是 `showPopChange` 增量文本，H5 直接显示总量，视觉差异非机制差异。
 - [P3] `blockDx`（Tower.as:24 塔身倾斜累计偏移）H5 声明未用；原版在 knockNextBlock 后续块对齐中生效，待第 2 轮评估是否补。
 - [P3] MIDI 音乐未实现（需软音源，与本审计无关，记录在案）。
+
+## 第 2 轮（2026-09-29）
+
+对号范围：上轮遗留 `blockDx` 全链路取证（Crane.as:160-210、Tower.as:107-282）+ 挂钩视觉。
+
+### 已修正
+
+| 级别 | 问题 | 原版证据 | 修正 |
+|---|---|---|---|
+| P1 | 落块无惯性：原版落块带释放帧钩速漂移 | Crane.as:198-199 `blockDx = dx`，落块路径 `x + blockDx*3` | drop() 记录 `G.craneDx`（折算 px/帧），下落期线性漂移 bdx*3 |
+| P1 | 塔身倾斜保留机制缺失 | Tower.as:117 `blockDx=floor(dx/2)`；Tower.as:121 有效偏移 `_loc3_ = 视觉偏移+blockDx`；Tower.as:208-210 完美吸附清零；Tower.as:282 `currCtr = blockx + blockDx` | 全链路对号：有效偏移含 bd，完美落地 placedX=currCtr 且 towerBdx=0，非完美 currCtr 含保留倾斜 |
+| P2 | 地基块误用惯性偏移 | Tower.as:182 onGround 分支 `landOnTower(_loc4_, 0, true)`，offset 恒 0 | onGround 不加 bd |
+| P2 | 挂钩上无待放积木（视觉+机制） | Crane.updateBlock:199-205 随钩移动、`_rotation = -(endx-320)/5` 度 | 补挂块 mesh，随钩旋转，落块时移除 |
+
+判定阈值核对：hitLimit/miss 分界用有效偏移 `_loc3_`（含 bd），H5 已一致。
+
+### 遗留观察
+
+- [P2] roof 人口分支（同上轮，无尽模式不影响）。
+- [P3] 人口 HUD 增量文本 vs 总量（同上轮）。
+- [P3] MIDI 音乐。
+- [P3] `dropY` 400→340（Crane.as:201）只影响下落动画时长，不影响落点判定；H5 用物理加速近似，暂不动。
