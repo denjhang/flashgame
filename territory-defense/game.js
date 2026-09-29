@@ -1971,10 +1971,12 @@ function dlgNext() {
   if (!dlg) return false;
   dlg.i++;
   if (dlg.i < STORY[dlg.m].length) { dlgShowLine(); return true; }
+  const wasBriefing = G.briefing;
   dlg = null;
   const box = document.getElementById('dlgBox');
   if (box) box.style.display = 'none';
-  applyBriefBar();                        // 亮出 start mission 条
+  if (wasBriefing) applyBriefBar();       // 亮出 start mission 条
+  else G.interWave = INTERWAVE_TICKS;     // 原版 nextMission → haloNoir 窗口重新计时
   return true;
 }
 function briefingShow() {
@@ -2087,9 +2089,13 @@ function endWave() {
   // 原版两波之间的剧情段调用 _root.events() (953/frame_2), 此时 mR = 即将开始的波号
   autoUnlockForWave(nextWave);
   if (shouldShowUnlockPanel(nextWave)) { showPanelForUnlock(); return; }   // 面板期间不推进 interWave
-  // 953 frame_30: 简报波显示 "start mission" 等点击, 其余进 "start in N" 倒计时
+  // 953 frame_30: 简报波显示 "start mission" 等点击, 其余进 "start in N" 倒计时;
+  //   有对白的关先播对白 (980 scenario → 979 按钮 nextDialogue), 放完才进倒计时窗口
   if (G.wave < WAVES.length && BRIEFING_WAVES.includes(nextWave)) briefingShow();
-  else G.interWave = INTERWAVE_TICKS;
+  else {
+    G.interWave = INTERWAVE_TICKS;
+    if (G.wave < WAVES.length && dlgOpen(nextWave)) G.interWave = INTERWAVE_TICKS + 1;  // 对白冻结标记 (>窗口, tick 不推进)
+  }
   // 段落音乐 (startInstructions: 任务 ∉[26,30] → bgScenarioStart; m26 事件 → edithStart;
   //   27-30 简报静默 = edith 延续)
   if (G.wave < WAVES.length) {
@@ -2124,6 +2130,8 @@ function tick() {
     if (!G.panelOpen) {
       if (G.briefing) {
         // 简报波: 等 "start mission" 点击 (briefingGo), 不推进倒计时
+      } else if (dlg) {
+        // 非简报波对白播放中 (原版 979 按钮 nextDialogue, 放完才 nextMission)
       } else if (--G.interWave <= 0) {
         startWave();
       } else {

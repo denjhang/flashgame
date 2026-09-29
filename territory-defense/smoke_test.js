@@ -1307,9 +1307,13 @@ console.log("--- 建造菜单原版图标 ---");
 console.log("--- 剧情对白系统 ---");
 {
   // 原版行数 = tools/parse_scenario.py 对 980_242 逐句解析的权威值
-  const ORIG = { 1:36, 5:1, 9:25, 11:1, 15:8, 16:1, 19:2, 26:16, 31:15, 37:1, 41:2, 44:6 };
-  const keysOK = BRIEFING_WAVES.every(w => Array.isArray(STORY[w]) && STORY[w].length === ORIG[w]);
-  console.log("STORY 覆盖 12 简报关且句数与原版逐关一致=" + keysOK);
+  const ORIG = { 1:36,2:1,3:1,4:26,5:1,6:1,7:1,8:1,9:25,10:4,11:1,12:1,13:1,14:3,15:8,16:1,
+                 17:15,18:2,19:2,20:1,21:2,22:3,23:5,24:1,25:1,26:16,27:2,28:4,29:1,30:3,
+                 31:15,32:6,33:8,34:1,35:3,36:2,37:1,38:8,39:1,40:3,41:2,42:2,43:9,44:6 };
+  const keysOK = Object.keys(ORIG).every(w => Array.isArray(STORY[w]) && STORY[w].length === ORIG[w])
+    && Object.keys(STORY).length === 44
+    && Object.keys(STORY).reduce((a,k) => a + STORY[k].length, 0) === 237;
+  console.log("STORY 全 44 关句数与原版逐关一致 (237 句)=" + keysOK);
   const fmtOK = Object.keys(STORY).every(k => STORY[k].every(l => Array.isArray(l) && l.length === 2 &&
     typeof l[0] === 'string' && /^[A-Z]/.test(l[0]) && typeof l[1] === 'string' && l[1].length > 0));
   console.log("每句均为 [说话人码, 非空文本]=" + fmtOK);

@@ -1,5 +1,38 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+78 轮成果（2026-09-29, H5 领土防御·主攻方向二 #2：全 44 关对白入库（237 句）+ 非简报波对白门控接线）
+
+**（权威 = 980_242 scenario 全量解析 + DefineButton2_979 on(press) + 1158 终局取样）**
+
+### 1. 【取证】
+
+- **对白推进钮 = DefineButton2_979**：on(press) → `_root.instructions.nextDialogue()`
+  —— 对白由 979 按钮逐句推进，确认"对白门控每一关开局"的机制
+- **DefineSprite_1158 = 终局演出片段**（敌台对白 Zhu Fu Lin/Shen Ming + 毫秒级
+  textesTempo 时间轴）—— 归 endPass/perdu 胜负演出流（下轮解码）
+- 其余 32 关 123 句英文原文全部导出（tools/dump_story.py）
+
+### 2. 【H5 实现】
+
+- **STORY 补全至全 44 关 237 句**（tools/emit_story.py 生成，json.dumps 转义），
+  句数与原版逐关一致；去政治化审计扩到全量
+- **非简报波对白门控**：endWave 常速分支 dlgOpen(下一波)，对白播放期间 tick 冻结
+  倒计时（= 原版 979 未点完则 nextMission 不触发）；放完重启 INTERWAVE_TICKS 窗口
+  （= nextMission → haloNoir 7.58s → startMission）
+- 插入排错记录： STORY 对象一度被误删，自 git HEAD 提取 12 关版 +
+  tools/rebuild_story.py 重建为全 44 关（句数断言兜底）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `STORY 全 44 关句数与原版逐关一致 (237 句)=true`；每句格式 / 去政治化 / 接线=true
+- 140 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 1158 终局演出（textesTempo 毫秒时间轴）+ endPass/perdu 胜负流解码 —— 下轮
+- imgScenario 头像/框体 sprite 未导出上图（说话人现为文字名牌）
+- 1040/1046/1053 归档未接线；1151 音量条拖动 / selectionUnite 点击音（P2）
+
 ## 第 N+77 轮成果（2026-09-29, H5 领土防御·主攻方向二 #1：剧情对白库全量解码 + 简报对白播放器上线）
 
 **（权威 = frame_6/PlaceObject2_980_242 onClipEvent(load) 全文 + 953 f30 分支复核）**
