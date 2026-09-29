@@ -1,5 +1,34 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+82 轮成果（2026-09-29, H5 领土防御·P2 组 #1：helpB 帮助板接线 + 三钮行为全量取证）
+
+**（权威 = 1074/frame_1 各按钮 on(press) 脚本逐个核对）**
+
+### 1. 【取证：informations 全部按钮行为定案】
+
+- **1040 qualityB** → `master_clavier.changeQuality()`（Flash 声音质量切换，H5 无对应，维持不接线）
+- **1046 helpB** → helpBoard 置 (400,300) 居中 + selectionUnite 音 —— 本轮接线
+- **1053 story** → 布尔翻转 + 文本 "action"/"story"（帮助板内的文字模式切换，依附 helpBoard，暂不单接）
+- **1058 zoom** → 全图缩放 _xscale=39 —— 与 H5 G 键 39% 一致（已接线，佐证）
+- 1063 health / 1068 build areas(surfaceForBuild alpha 35) / 1073 mouse scroll —— 均已接线 ✓
+
+### 2. 【H5 实现】
+
+- 标题条新增原版 1046 "?" 按钮（btn_help.png 直出图）→ 弹出 **helpBoard =
+  DefineSprite_1103 直出图**（463x283，按键说明面板，舞台中央 = 原版 (400,300)），
+  点击 selectionUnite 音（与原版一致），点板关闭
+- ♪ 音乐钮左移让位
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- 1103 素材尺寸 463x283；helpB 接线断言=true
+- 148 项 `=true`；450 帧 sim 正常；node --check 通过
+
+### 4. 本轮仍未做（如实记录）
+
+- 1040 quality（Flash 声音质量，H5 无对应）与 1053 story 模式切换未接（依附帮助板）
+- 1151 音量条拖动（P2）；原版金钱显示 TextField 归属未定位
+
 ## 第 N+81 轮成果（2026-09-29, H5 领土防御·主攻方向二 #5：inverse 镜像 + persoMouvant 入场动画对齐）
 
 **（权威 = 980_242 pcode_as nextDialogue 伪码逐行 + FFDec 951 SVG 摆放矩阵）**

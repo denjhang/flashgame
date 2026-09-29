@@ -3160,6 +3160,16 @@ hud();
   if (bb) bb.onclick = briefBarPress;
   const db = document.getElementById('dlgBox');
   if (db) db.onclick = () => dlgNext();
+  // 原版 helpB (1074/frame_1 PlaceObject2_1046_11 on press): helpBoard 置 (400,300) 居中
+  //   + selectionUnite 音; H5 以 1103 直出图弹出层复刻
+  {
+    const hb = document.getElementById('hOpen'), board = document.getElementById('helpBoard');
+    if (hb && board) hb.onclick = () => {
+      board.classList.toggle('show');
+      playSfx('selectionUnite', 0.35);
+    };
+    if (board) board.onclick = () => board.classList.remove('show');
+  }
   if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
 }
 setInterval(tick, 1000 / 30);

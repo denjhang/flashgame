@@ -1303,7 +1303,20 @@ console.log("--- 建造菜单原版图标 ---");
   }) && NAMES.length === Object.keys(SHOP_INFO).length;
   console.log("SHOP_INFO 12 条且造价与结构表交叉一致=" + infoOK);
 }
-// ---- 主攻方向二 #4: 对白演出素材 (870 布景 16 框 / 948 立绘 39 帧, N+80) ----
+// ---- 帮助板 (helpB 1046 → helpBoard 1103, N+82) ----
+console.log("--- 帮助板 ---");
+{
+  const fsx = require('fs');
+  const ok = fsx.existsSync('assets/ui/help_board.png');
+  let wh = null;
+  if (ok) { const b = fsx.readFileSync('assets/ui/help_board.png'); wh = [b.readUInt32BE(16), b.readUInt32BE(20)]; }
+  console.log("1103 helpBoard 素材=" + ok + " 尺寸=" + (wh ? wh.join('x') : 'N/A') + " (期望 463x283)");
+  const hj = fsx.readFileSync('index.html', 'utf8'), gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("helpB 接线 (hOpen 钮 + 中央弹出 + selectionUnite)=" +
+    (hj.includes('id="hOpen"') && hj.includes('assets/ui/help_board.png') &&
+     gj.includes("playSfx('selectionUnite', 0.35)") && hj.includes('id="helpBoard"')));
+}
+// ---- 主攻方向二 #4: 对白演出素材// ---- 主攻方向二 #4: 对白演出素材 (870 布景 16 框 / 948 立绘 39 帧, N+80) ----
 console.log("--- 对白演出素材 ---");
 {
   const fsx = require('fs');

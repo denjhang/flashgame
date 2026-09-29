@@ -73,9 +73,18 @@
   #tArea   { top:542px; background-image:url('assets/ui/btn_area.png'); }
   #tScroll { top:565px; background-image:url('assets/ui/btn_scroll.png'); }
   /* 音乐面板开关: 小 ♪ 置于标题条右端 (原版无此钮, 面板由 UI 容器显隐) */
-  #mOpen { position:absolute; left:152px; top:176px; width:16px; height:20px; padding:0;
+  #mOpen { position:absolute; left:140px; top:176px; width:16px; height:20px; padding:0;
            background:transparent; border:none; color:#ddd; font-size:12px; cursor:pointer; }
   #mOpen:hover { color:#ff8; }
+  /* 帮助钮 (原版 helpB 1046 "?" 按钮图) + helpBoard 1103 弹出板 (463x283, 舞台中央) */
+  #hOpen { position:absolute; left:152px; top:176px; width:16px; height:20px; padding:0;
+           border:none; background:transparent; cursor:pointer; }
+  #hOpen img { width:16px; height:17px; display:block; }
+  #helpBoard { position:absolute; left:50%; top:300px; transform:translate(-50%,-50%);
+               display:none; z-index:55; cursor:pointer; }
+  #helpBoard.show { display:block; }
+  #helpImg { display:block; }
+  #helpClose { color:#89a; font-size:10px; text-align:center; padding:2px 0; background:rgba(8,10,14,.8); }
   /* 音乐/开关面板 — 原版 DefineSprite_1151 全景图 (178x203) + 原位热区。
      权威 = FFDec SVG: 1145 歌曲按钮 109.65x21.05 @ (6.85, 7.05/34.65/61.7),
      pauser @ (7.15, 91.5), 关闭钮 686 @ (144.8, 3.05) 26.75x26.75 */
@@ -166,6 +175,7 @@
       <button class="artBtn" id="tArea" title="建区 C"></button>
       <button class="artBtn" id="tScroll" title="滚屏 M"></button>
       <button id="mOpen" title="音乐面板">♪</button>
+      <button id="hOpen" title="帮助 (按键说明)"><img src="assets/ui/btn_help.png" alt="?"></button>
       <div id="musicBox">
         <div id="musicPanel">
           <img id="musicPanelImg" src="assets/ui/music_panel.png" width="178" height="203" alt="">
@@ -192,6 +202,11 @@
     <!-- 原版 953 出兵条: 简报波 = chid1106 "start mission" 按钮 (on press → startMission);
          其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
     <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
+    <!-- 原版 helpBoard (DefineSprite_1103, 463x283): helpB(1046) on(press) 置 (400,300) -->
+    <div id="helpBoard">
+      <img id="helpImg" src="assets/ui/help_board.png" width="463" height="283" alt="">
+      <div id="helpClose">× 点击关闭</div>
+    </div>
     <!-- 剧情对白 (980_242 nextDialogue): 原版演出 = imgScenario.fond(870 房间布景,
          首字母选框) + personnage(948 立绘, 去前缀标签) + 文本; 点击/空格推进 -->
     <div id="dlgBox">
@@ -214,7 +229,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600049"></script>
-<script src="game.js?v=1790600049"></script>
+<script src="data.js?v=1790600050"></script>
+<script src="game.js?v=1790600050"></script>
 </body>
 </html>
