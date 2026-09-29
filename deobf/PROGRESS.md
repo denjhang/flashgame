@@ -1,5 +1,34 @@
 # TCS 反混淆与资源还原进度
 
+## 第 N+65 轮成果（2026-09-29, H5 领土防御·商店槽位进入条件对齐 —— 锁定/钱不够点即 cannot）
+
+**（权威 = 1027/1026_* on(press) 逐行：unlocker && euros ≥ cost 才进建造模式，否则
+cannot；Su37 槽位 press 取消建造模式）**
+
+### 1. 【偏差：H5 在地图点击才查钱，原版在槽位点击就查】
+
+原版槽位 press：`if (unlocker[name] && euros >= cost) { 进入建造模式 } else { cannot.start() }`
+—— 锁定塔点击 = cannot；钱不够点击 = cannot 且**不进入建造模式**。进入建造时同时
+`zoneBombardement = false`（取消 Su37 瞄准）；反之 Su37 槽位 press 会取消建造模式
+（两光标互斥）。H5 旧版：解锁即可进建造（钱不够到地图点击才报 cannot），且两光标可
+同时待命。
+
+### 2. H5 修正
+
+- 新增 `shopSlotPick(id)`：门控（unlocker + 钱）→ 取消 Su37 瞄准 → 进建造；
+  锁定槽/钱不够 → cannot。槽位 onclick 统一走它（锁定槽从"不可点"改为 cannot 反馈）
+- `su37Start` 取消建造模式（G.shopSel=null，对应原版互斥）
+
+### 3. 验证（node 冒烟，无浏览器）
+
+- `锁定cannot/钱不够cannot/够钱进建造/Su37取消建造 全链=true`（含 m60 建造价 120 的
+  100 元不可造用例）
+- 121 项 `=true`；450 帧 sim 正常
+
+### 4. 本轮仍未做（如实记录）
+
+- 雷达门控 / chargeBombes 乱码重置 / 容器 bbox / 画质档 / 多 chid 合成器 / 真机听感（搁置）
+
 ## 第 N+64 轮成果（2026-09-29, H5 领土防御·★ Su37 投弹重写：单点爆炸 → 16 枚毯式连投）
 
 **（权威 = 793/frame_1 的 4 个挂架剪辑（786_1/11/21/31 load: ordre=missile1..4,

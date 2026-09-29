@@ -1126,6 +1126,28 @@ console.log("--- 段落音乐 ---");
   G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.lost = sv.lost;
   G.losses = sv.losses; G.briefing = sv.br;
 }
+// ---- 商店槽位进入条件 (原版 1027/1026_* on(press): unlocker && euros ≥ cost, N+65) ----
+console.log("--- 商店槽位进入条件 ---");
+{
+  const sv = { sel: G.shopSel, euros: G.euros, aim: G.su37Aiming, lock: G.unlocker.canon75, s37: G.unlocker.su37 };
+  G.unlocker.canon75 = false; G.unlocker.su37 = true; G.su37Aiming = false;
+  // 锁定塔 → cannot, 不进建造
+  G.shopSel = null; G.euros = 5000;
+  let ok = shopSlotPick('canon75') === false && G.shopSel === null;
+  // 钱不够 → cannot, 不进建造 (m60 默认解锁, 建造价 120)
+  G.euros = 100;
+  ok = ok && shopSlotPick('m60') === false && G.shopSel === null;
+  // 够钱 → 进入建造
+  G.euros = 5000;
+  ok = ok && shopSlotPick('m60') === true && G.shopSel === 'm60';
+  // 选 Su37 → 取消建造模式 (原版 Su37 槽位 press: viseurConstruction=false)
+  G.shopSel = 'm60';
+  su37Start();
+  ok = ok && G.shopSel === null && G.su37Aiming === true;
+  console.log("锁定cannot/钱不够cannot/够钱进建造/Su37取消建造 全链=%s", ok);
+  G.shopSel = sv.sel; G.euros = sv.euros; G.su37Aiming = sv.aim;
+  G.unlocker.canon75 = sv.lock; G.unlocker.su37 = sv.s37;
+}
 // ---- 舞台底色 (原版 SWF SetBackgroundColor) ----
 console.log("--- 舞台底色 ---");
 {

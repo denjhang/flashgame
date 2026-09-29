@@ -827,6 +827,7 @@ function su37Start() {   // 侧栏按钮: 选进入边, 等待玩家点击地图
   }
   SU37.pending = { side, x, y };
   G.su37Aiming = true;
+  G.shopSel = null;   // 原版 Su37 槽位 press: viseurConstruction=false (取消建造模式)
   playSfx('selectionUnite', 0.35);
   return true;
 }
@@ -1898,6 +1899,16 @@ function briefBarPress() {
 // 伪代码出处 deobf/pcode_as/frame_6__PlaceObject2_6_333 onClipEvent(load):
 //   unlockNextWeapon: iUnlock==unlockerLength → return false; 否则 weaponsToUnlock[iUnlock]=true, iUnlock++
 //   showPanelForUnlock: 弹出面板, lockItem=false, 显示下一件武器名 + (interest+3)%
+// 原版 1027/1026_* on(press): unlocker && euros >= cost 才进入建造模式, 否则 cannot;
+//   进入建造时取消 Su37 瞄准 (zoneBombardement=false); 锁定槽点击同样 cannot
+function shopSlotPick(id) {
+  if (!G.unlocker[id] || G.euros < STRUCTURES[id].cost) { playSfx('cannot', 0.4); return false; }
+  G.su37Aiming = false; SU37.pending = null;
+  G.shopSel = id;
+  playSfx('boutonScroll', 0.35);
+  buildShop();
+  return true;
+}
 function unlockNextWeapon() {
   if (G.iUnlock >= WEAPONS_TO_UNLOCK.length) return false;
   G.unlocker[WEAPONS_TO_UNLOCK[G.iUnlock]] = true;
@@ -2693,7 +2704,7 @@ function buildShop() {
       pr.className = 'price';
       pr.textContent = '$' + STRUCTURES[id].cost;
       sp.appendChild(pr);
-      if (!locked) sp.onclick = () => { G.shopSel = id; playSfx('boutonScroll', 0.35); buildShop(); };
+      sp.onclick = () => shopSlotPick(id);
     }
     el.appendChild(sp);
   }
