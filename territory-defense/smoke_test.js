@@ -1380,6 +1380,8 @@ console.log("--- 对白演出素材 ---");
   let pOK = PL.every(x => fsx.existsSync('assets/story/perso/' + x + '.png'));
   console.log("870 布景 16 框=" + fOK + "  948 立绘抽样=" + pOK);
   const hj = fsx.readFileSync('index.html', 'utf8'), gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("950 待机摆动 (dlgSway 3.4s 循环) 接线=" +
+    (hj.includes('dlgSway 3.4s') && gj.includes("actor.style.animation = 'none'")));
   console.log("演出接线 (dlgFond/dlgActor 首字母选框+去前缀立绘)=" +
     (hj.includes('id="dlgFond"') && gj.includes("assets/story/fond/' + code.charAt(0)") &&
      gj.includes("assets/story/perso/' + label")));

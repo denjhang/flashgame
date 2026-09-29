@@ -135,14 +135,19 @@
             border:2px solid #5a6a7a; border-radius:6px; overflow:hidden;
             background:#111; box-shadow:0 4px 18px rgba(0,0,0,.6); }
   #dlgFond { display:block; width:100%; }
-  /* 人物固定在场景左侧 (951 矩阵 persoMouvant @-407), 'R' 前缀镜像 = 原版 inverse;
-     换行滑入 = 950 persoMouvant 入场近似 */
-  #dlgActor { position:absolute; left:5%; bottom:96px; height:72%; }
-  #dlgActor.mirror { transform:scaleX(-1); }
-  #dlgActor.slide { animation:dlgSlide .3s ease-out; }
-  @keyframes dlgSlide { from { transform:translateX(-18px); opacity:.4; } to { opacity:1; } }
-  #dlgActor.mirror.slide { animation:dlgSlideM .3s ease-out; }
-  @keyframes dlgSlideM { from { transform:scaleX(-1) translateX(18px); opacity:.4; } to { transform:scaleX(-1); opacity:1; } }
+  /* 人物固定在场景左侧 (951 矩阵 persoMouvant @-407), 'R' 前缀镜像 = 原版 inverse。
+     950 persoMouvant 时间线逐帧解码: X ±5px / Y ±13px 微漂移, 82帧@24fps=3.4s 循环
+     (呼吸式待机摆动, 非滑入) → H5 以无限 sway 动画复刻 */
+  #dlgActor { position:absolute; left:5%; bottom:96px; height:72%; animation:dlgSway 3.4s ease-in-out infinite; }
+  @keyframes dlgSway {
+    0% { transform:translate(0,0); } 25% { transform:translate(-2px,4px); }
+    50% { transform:translate(-5px,8px); } 75% { transform:translate(-2px,2px); }
+    100% { transform:translate(0,0); } }
+  #dlgActor.mirror { animation-name:dlgSwayM; }
+  @keyframes dlgSwayM {
+    0% { transform:scaleX(-1) translate(0,0); } 25% { transform:scaleX(-1) translate(-2px,4px); }
+    50% { transform:scaleX(-1) translate(-5px,8px); } 75% { transform:scaleX(-1) translate(-2px,2px); }
+    100% { transform:scaleX(-1) translate(0,0); } }
   #dlgPanel { position:relative; background:rgba(8,10,14,.88); padding:6px 12px 5px; }
   #dlgWho { color:#ffd; font-weight:bold; font-size:12px; margin-bottom:3px; }
   #dlgTxt { color:#e8e8e8; font-size:12px; line-height:1.55; white-space:pre-wrap;
@@ -256,7 +261,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600055"></script>
-<script src="game.js?v=1790600055"></script>
+<script src="data.js?v=1790600056"></script>
+<script src="game.js?v=1790600056"></script>
 </body>
 </html>

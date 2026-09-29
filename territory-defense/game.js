@@ -2009,9 +2009,8 @@ function dlgShowLine() {
     actor.style.display = (label === 'v') ? 'none' : 'block';
     actor.src = 'assets/story/perso/' + label + '.png';
     actor.classList.toggle('mirror', code.charAt(0) === 'R');   // 原版 inverse
-    actor.classList.remove('slide');
-    void actor.offsetWidth;                // 重触发滑入 (persoMouvant 近似)
-    actor.classList.add('slide');
+    // 950 待机摆动: 换行时重启动画相位
+    actor.style.animation = 'none'; void actor.offsetWidth; actor.style.animation = '';
   }
   box.style.display = 'block';
 }
