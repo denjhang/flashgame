@@ -101,6 +101,11 @@ public final class SettingsStore {
         return writer;
     }
 
-    // 原 f 静态块: l=new int[14]; m=new int[12]; n=new String[1]; d=false
+    /** 原 f.c(): 提交写缓冲 —— toByteArray → 打开/创建 RecordStore,
+     *  有记录 setRecord(1) 否则 addRecord(记录 1)。全项目各处 f.c() 即"提交 RMS"。 (:96-113) */
+    private static void flushSettings() { /* 见原文件 */ }
+
+    /** 原 f.d(): flushSettings 本体 (:115-138, JD+8 补读); 静态块: l=new int[14];
+     *  m=new int[12]; n=new String[1]; d=false。 */
     // 注: f.c()(writeBuffer 落盘 addRecord) 在 :126-140 区段 —— 见原文件。
 }

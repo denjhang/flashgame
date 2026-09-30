@@ -80,6 +80,11 @@ public abstract class GameMIDlet extends MIDlet implements Runnable, ScreenContr
     /** 原 b(Command): 软键 → activeScreen.a(cmd); splash 阶段 (C==3) a(cmd)+c(53,8)=模拟 FIRE。 */
     public final void softkeyPressed(Command cmd) { /* :276-289 */ }
 
+    // ---- 抽象钩子 18 个 (实现者=k.java, 具体子类) — JD+9 审计补记, 逐个条目:
+    // a(): 初始化 / b(): 首次恢复钩子 / c(): 暂停钩子 / d(): 退出清理 / f(): 后置初始化
+    // e(): 关停收尾 / k(): boot 阶段1 / l(): boot 阶段2 / d(int): splash 结束判定
+    // a(Graphics): splash 绘制 / b(Graphics): 加载覆盖层 / h(int): 游戏 tick / m(): splash tick
+    // p(): 键位表 int[][] / g(int): 数字→串 / b(int,int): splash 按键 / a(Command): splash 软键
     // ---- 抽象钩子 (实现者 k.java) ----
     // a(): 初始化 / b(): 首次恢复 / c(): 暂停 / d(): 退出清理 / f(): 后置初始化
     // e(): 关停收尾 / k(): boot 阶段1 (经 h()) / l(): boot 阶段2 (经 i())
