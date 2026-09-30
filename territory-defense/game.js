@@ -1410,20 +1410,20 @@ class Unit {
     //   当前速度以 freinVirage 为步长渐变 (原版 vitesse ±= freinVirage 的加减速模型)
     const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
     this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
-    // 原版车队链表制动 (roule pcode 常数池解码后的权威公式):
-    //   if (dist < unitDevant._height) { 每帧减速 1/14×CONST_ELOIGNEMENT; 低于阈值硬停 }
-    //   即比较长度 = 【前车精灵的渲染高度】(camion1≈42px, 舰≈150px), 非固定常数。
+    // 原版车队链表制动 (roule pcode 权威): if (dist < unitDevant._height × CONST_ELOIGNEMENT)
+    //   { 每帧减速 1/14×1.8; 低速硬停 }。CONST_ELOIGNEMENT: 普通车 1.8, 舰(navire/Yamato) 4
+    //   (426_1 load: 两混淆底盘名 set 4, jeep 显式 1.8, 其余默认 1.8)。
     //   步长换算: 1/14×1.8 = 0.1286 px/帧@24 → ×0.8 = 0.1029 px/tick@30。
-    //   自洽性: 从巡航 2.89 px/tick 刹停滑行 v²/2a ≈ 40.7px < 间距 42.2px —— 原版常数精确自洽。
     //   前车已亡/到达则拆链 (等价原版 frame_39 的双向 unlink)。
     if (this.devant) {
       if (this.devant.dead || this.devant.reached || this.devant.hp <= 0 || this.devant.dying > 0) {
         this.devant = null;
       } else {
         const dc = CHASSIS_ART[this.devant.type];
-        const gap = dc ? Math.abs(dc.m[3]) * dc.nat[1] : 18;   // 前车渲染高度 (pattern d×nat)
+        const hgt = dc ? Math.abs(dc.m[3]) * dc.nat[1] : 18;   // 前车渲染高度 (pattern d×nat)
+        const elo = (this.devant.type === 'navire' || this.devant.type === 'Yamato') ? 4 : 1.8;
         const dd = Math.hypot(this.devant.x - this.x, this.devant.y - this.y);
-        if (dd < gap) {
+        if (dd < hgt * elo) {
           this.v = Math.max(0, this.v - (1 / 14) * 1.8 * (24 / 30));
           if (this.v < 0.1) this.v = 0;   // 原版 near-stop 硬停
         }
@@ -1937,7 +1937,8 @@ function startWave() {
   //   无逐个延迟; 出生点 = 路线首点 + ypos += j×60 (register5×60×register6;
   //   x 偏移项 register7 仅在 route.length==13 且 iUnitsE==0 时为 1, 实战恒 0)。
   //   parcourt1 向北行进 (+y 为队尾方向) → 领头车在 route[0], 后车 60px 纵向堆叠,
-  //   由车队制动 (unitDevant) 维持车距; 60px > camion1 车高 42.2px, 初始不触发制动
+  //   由车队制动 (unitDevant, 阈值 前车高×1.8≈76px) 维持车距: 60px < 76 → 初始
+  //   即微制动, 前车拉开后加速追赶 —— 原版橡皮筋车队行为, 与原版公式一致
   wave.forEach((u, j) => {
     const nu = new Unit(u.type, u.weapon, routeName);
     nu.y = nu.route[0][1] + 60 * j;

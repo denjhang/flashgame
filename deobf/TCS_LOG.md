@@ -168,3 +168,16 @@
   Yamato/camionBlinde/tigre 巡航 + camion1 转向），本方向已被覆盖——本轮
   重复确认，无码改。三件套通过，冒烟 200 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+43（2026-09-26）车队制动阈值勘误（方向2，行为修正）
+
+- 取证：428_unit/frame_1/PlaceObject2_426_1 load——`CONST_ELOIGNEMENT` 默认 1.8,
+  两个混淆名底盘 set 4（GAME_LOGIC 注"舰 4"）, jeep 显式 1.8; roule pcode:
+  `if (dist < unitDevant._height × CONST_ELOIGNEMENT) → vitesseToDo=0 + 每帧减速`。
+- **缺陷**：H5 阈值只用了前车渲染高度裸值（camion1 42.2px），漏乘 1.8/4 ——
+  刹车距离短 44%，舰船间距 150px vs 原版 601px。
+- 修正：`hgt × elo`（elo = 舰 4 / 其余 1.8）；减速步长 (1/14)×1.8×0.8 不变；
+  波次生成注释同步（60px 初始间距 < 76px 阈值 → 初始微制动、前车拉开后追赶
+  = 原版橡皮筋车队行为）。冒烟车队断言更新（75.9px/601.4px）+ 接线断言 +1
+  → 201 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

@@ -895,9 +895,10 @@ console.log("--- 车队链表 ---");
   c.devant = null;
   G.units.push(a, b, c);
   console.log("建链: 同路线后车.devant=前车=" + (b.devant === a) + ", 异路线=null=" + (c.devant === null));
-  // 制动: 前车停在正前方 (间距=前车渲染高度, 原版 roule: dist < unitDevant._height)
+  // 制动: 前车停在正前方 (间距=前车渲染高度×CONST_ELOIGNEMENT, 原版 roule:
+  //   dist < unitDevant._height × 1.8, 舰 ×4 — TCS+43 勘误: 旧版漏乘系数)
   const dcA = CHASSIS_ART['camion1'];
-  const gapA = Math.abs(dcA.m[3]) * dcA.nat[1];
+  const gapA = Math.abs(dcA.m[3]) * dcA.nat[1] * 1.8;
   a.x = b.x + gapA * 0.5 * Math.cos(b.rot); a.y = b.y + gapA * 0.5 * Math.sin(b.rot);
   a.v = 0; a.rot = b.rot;
   b.v = 2.8928;                       // camion1 巡航
@@ -910,9 +911,9 @@ console.log("--- 车队链表 ---");
   console.log("前车制动: 间距=前车渲染高度 camion1=" + gapA.toFixed(1) + "px," +
     " 减速步长=" + DECEL.toFixed(4) + " px/tick, 刹停滑行=" + stopDist.toFixed(1) +
     "px (" + (stopDist < gapA ? "< 间距 原版常数自洽" : ">=间距!") + "), 硬停用 " + ticks + " tick");
-  // 舰的间距 = 舰渲染高度
+  // 舰的间距 = 舰渲染高度 × 4 (原版两舰底盘 CONST_ELOIGNEMENT=4)
   const dcN = CHASSIS_ART['navire'];
-  console.log("舰间距=渲染高度 navire=" + (Math.abs(dcN.m[3]) * dcN.nat[1]).toFixed(1) + "px");
+  console.log("舰间距=渲染高度×4 navire=" + (Math.abs(dcN.m[3]) * dcN.nat[1] * 4).toFixed(1) + "px");
   // 拆链: 前车死亡 → 后车脱离
   a.hp = 0; a.dead = true;
   if (b.devant.dead || b.devant.reached || b.devant.hp <= 0) b.devant = null;
@@ -1804,6 +1805,10 @@ console.log("--- 修理费 (819) ---");
   console.log("射速模型=floor(t2/1.13)*43ms=" +
     (gj.includes('const FPSC = 1.13;') && gj.includes('OCEEF_INTERVAL_MS = 43') &&
      gj.includes('Math.floor(t2 / FPSC) * OCEEF_INTERVAL_MS')));
+  // TCS+43: 车队制动阈值 = 前车高×CONST_ELOIGNEMENT (426_1 load: 默认 1.8,
+  //   两舰底盘 4, jeep 显式 1.8)
+  console.log("车队制动阈值=前车高×1.8(舰×4)=" +
+    (gj.includes("? 4 : 1.8") && gj.includes('if (dd < hgt * elo)')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
