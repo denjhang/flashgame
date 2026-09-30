@@ -2,11 +2,12 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T8.【函数】CityMap.as 逐函数普查**：CityMap 剩余函数（setMode/checkButtons/showTowerSelections
-> /placeInDozer/highlight 链等）逐个列名+行号对照 h5/game.js，缺的补、偏的修。
+> **T9.【资源】city_icon_spr 塔格缩略图原版化**：读 DefineSprite_603_city_icon_spr 帧（语义
+> (color-1)*4+roofType+1, restoreCity:71-73），替换 renderCity 的 CSS 色块缩略图；格内偏移 (10,-13)。
 >
-> **待办池**：城市塔格缩略图原版化 / J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
-> makeFallingPerson 的 swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）未复刻。
+> **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
+> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ city_place_highlight_spr(774) 与
+> city_demol_spr(818) 高亮/拆除原版化。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -73,6 +74,19 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ❌ 拆除位 dozer（placeInDozer:398）
 - ❌ 网格存档 SharedObject（GameModel.sm_towerGridData 等 → H5 应 localStorage）
 - ❌ 城市背景（city_spr 网格视图）与城市 BGM `sng_city`
+
+
+### 3.1 CityMap.as 逐函数普查（第 33 轮, T8 ✅）
+- 已对号: placeInMap/placeInDozer/isValid/updateAllowedTowerTypes/calcCityPop/buildTower/
+  updateCellHighlights（.cell.ok 高亮）
+- HTML/handler 等价: setMode（MODE_* 分散在 cityCellClick/finishCityTower/showCity）、
+  setPlaceOK/setSelectOK、onMouseMove/mouseRoll（悬停高亮; carry 幽灵塔 n/a——H5 建后才放）、
+  showTowerSelections/checkButtons/selectTowerType/selectTower/showMenu（cityMenu HTML）、
+  placeTower（finishCityTower）、restoreCity（renderCity）
+- 第 33 轮补齐: spinReels ✅——placeInMap 后 5 个 city_reel_spr 滚轮翻页（Flipbook 1-3/150ms
+  ×5 遍, 读图 20x34, 原版坐标 65-22i/-180 相对中心 → 屏幕 (385-22i,60), setRepCnt(5) 后移除）
+- 图标帧语义（restoreCity: icon.gotoAndStop((color-1)*4 + roofType+1), 格内偏移 (10,-13)）
+  归"城市塔格缩略图原版化"（待办池, 资产=DefineSprite_603_city_icon_spr 已导出）
 
 ## 4. HUD 与界面——✅ HUD 本体闭环（2026-09-29）/ 菜单流 ❌ [P1]
 

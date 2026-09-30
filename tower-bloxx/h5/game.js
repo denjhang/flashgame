@@ -473,6 +473,7 @@ function finishCityTower(won) {
   showCityStatus(diff > 0 ? 'Population increased by ' + diff + ' citizens!'
     : diff < 0 ? 'Population decreased by ' + diff + ' citizens.'
     : 'The new building had no effect on overall population.');              // STATUS_POP_INC*
+  spinReels();                                                               // :463
   updateCityLevelAndUnlockedTypes();
   G.pendingCell = null; G.selectedType = -1;
   saveModel();
@@ -480,6 +481,25 @@ function finishCityTower(won) {
   showCity();
 }
 // 城市模式下停掉玩法可视化 (原版 MODE_HIDE_CITY)
+// spinReels (CityMap.spinReels:649-664): placeInMap 后 5 个 city_reel_spr 滚轮翻页
+// Flipbook 1-3/150ms ×5 遍; 原版坐标 (65-22i, -180) 相对 citySpr 中心(320,240) → 屏幕 (385-22i, 60)
+function spinReels() {
+  for (let i = 0; i < 5; i++) {
+    const img = document.createElement('img');
+    img.src = './assets/flash/fx/DefineSprite_825_city_reel_spr/1.png';
+    img.style.cssText = `position:absolute;left:${385 - 22 * i - 10}px;top:${60 - 17}px;` +
+      'width:20px;height:34px;z-index:2;pointer-events:none;';
+    hud.city.appendChild(img);
+    let f = 1, rep = 0;
+    const iv = setInterval(() => {
+      if (++f > 3) {
+        f = 1;
+        if (++rep >= 5) { clearInterval(iv); img.remove(); return; }  // setRepCnt(5)+setKillSprite
+      }
+      img.src = `./assets/flash/fx/DefineSprite_825_city_reel_spr/${f}.png`;
+    }, 150);
+  }
+}
 function stopGameVisual() {
   craneGroup.visible = false;
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }

@@ -327,3 +327,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   vy=0.02、vx=±100/5000、sprite 42x56 原尺寸（与 T5 的 toon 帧序列共用）
 - 记录待办: swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）未复刻 → 待办池
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 33 轮（2026-09-30）— T8 CityMap 逐函数普查 + spinReels 补齐
+
+- 普查（22 函数）: 7 个已对号、11 个 HTML/handler 等价、1 个缺失=spinReels（明细 PARITY 3.1）
+- [P2] spinReels 补齐: finishCityTower 挂 placeInMap:463 的调用; 5 个 city_reel_spr
+  （读图 20x34, 3帧）Flipbook 1-3/150ms×5 遍后移除（setRepCnt(5)+setKillSprite 语义）;
+  坐标 (65-22i,-180) 相对 citySpr 中心 → 屏幕 (385-22i, 60), HTML img 翻帧实现
+- restoreCity 的 icon 帧语义取证入档 → 下一任务 T9（缩略图原版化, 资产 603 已导出）
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
