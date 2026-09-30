@@ -648,3 +648,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   城市剪影数据; id87/88 为同族变体表; 解包产物归位 j2me/res/ (修早前相对路径错位)
 - 清单状态: 方法 98/98, 资源 89/89, T46 ✅ → 主线进入 T48 (差异表修 H5)
 - 全量回归: smoke 20 / tower 7 / city 11 PASS
+## 第 89 轮（2026-09-30）— T48-1: J2ME 摆钩运动学落地
+
+- House.p:1790 全公式移植: aK=cQ*sin(200aP/cP%360)>>15, 参数表 aQ/aR/aS(:4346-48) 按塔色+层高
+  插值, cO=-min(128,bs*256/200), aP+=dt*256 定点累子 → H5 j2Hook()/j2SwingParams(), G.j2me=true
+  默认启用(Flash hookX/Y 保留可切)
+- 全量回归: smoke 20 / tower 7 / city 11 PASS
+- T48 差异表剩余: 8槽并发下落/多块连锁/落点预览/程序天空/中断续档/塔摇摆 bw%3600 参数

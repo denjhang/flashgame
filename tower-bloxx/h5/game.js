@@ -608,7 +608,7 @@ const G = {
   stacked: 0,
   falling: null,        // {mesh, vy, cy, bdx, vx}
   hanging: null, hangingFor: -1,
-  craneDx: 0, towerBdx: 0,
+  craneDx: 0, towerBdx: 0, j2me: true,                       // T48: J2ME 运动学开关(默认开)
   dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
   people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [], straighten: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
@@ -799,6 +799,30 @@ function hookX(now) {
 }
 function hookY(now) {
   return CRANE_HOOK_Y + CRANE_RADY + CRANE_RADY * Math.sin(hookTh(now));
+}
+// ---- J2ME 摆钩 (House.p:1790-1812, T48): aK=cQ*sin(200*aP/cP%360)>>15 定点正弦;
+// aQ/aR/aS 表(:4346-48)按塔色 bl 与层高 bs 插值; cO=-min(v0,v1) 垂直偏移; aw[0]==6 下落中渐升 aH ----
+const J2_AQ = [213, 256, 298, 341, 384];     // 振幅 X 定点 (>>15)
+const J2_AR = [85, 106, 128, 149, 170];      // 振幅 Y 定点
+const J2_AS = [1670, 1700, 1650, 1600, 1550, 1500, 1450]; // 周期基准(帧时长定点)
+function j2SwingParams(stacked, color, towerTypeCount) {
+  const bl = Math.min(color, 4);
+  const bg2 = towerTypeCount;
+  const cQ = Math.min(J2_AQ[bl], J2_AQ[1] + stacked * (J2_AQ[bl] - J2_AQ[1]) / Math.max(1, bg2 >> 1));
+  const cR = Math.min(J2_AR[bl], J2_AR[1] + stacked * (J2_AR[bl] - J2_AR[1]) / Math.max(1, bg2 >> 1));
+  const cP = Math.max(J2_AS[bl + 2], J2_AS[0] - stacked * (J2_AS[0] - J2_AS[bl + 2]) / 100);
+  const cO = -Math.min(128, stacked * 256 / 200);
+  return { cQ, cR, cP, cO };                  // 全为定点值(除 cP)
+}
+G.j2AP = 0;                                     // House.aP 相位累子(定点)
+function j2Hook(dt) {                           // 对应 House.p(n2): 每帧推进
+  const { cQ, cR, cP, cO } = j2SwingParams(G.stacked, G.currColor, 6);
+  G.j2AP += dt * 256;                           // o(var0*256): 帧时长定点化
+  const sinT = Math.sin(2 * Math.PI * (200 * G.j2AP / cP % 360) / 360);
+  const cosT = Math.cos(2 * Math.PI * (200 * G.j2AP / cP % 360) / 360);
+  const x = (cQ * sinT) / 32768;                // >>15
+  const yOff = cO + (cR * cosT) / 32768;        // aL=aJ-cO-aH+n3, n3=-(cR*cos)>>15
+  return { x: TOWER_START_X - STAGE_W/2 + x, y: CRANE_HOOK_Y + 20 - yOff };
 }
 
 // ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
@@ -1220,8 +1244,8 @@ function loop(now) {
   if (ready) {
     // 摆钩
     G.craneDx = (hookX(now) - craneGroup.position.x) / (dt / (1000 / CRANE_FPS)); // 折算 px/帧 (Crane.animate dx)
-    if (!G.falling && !G.over) craneGroup.position.x = hookX(now);
-    craneGroup.position.y = G.camY + hookY(now);
+    if (!G.falling && !G.over) craneGroup.position.x = (G.j2me ? j2Hook(dt).x : hookX(now)); // T48: J2ME 定点摆优先
+    craneGroup.position.y = G.camY + (G.j2me ? j2Hook(dt).y : hookY(now));
     // moveTo(320,-100): 缆线起点=固定枢轴 (TOWER_START_X, 顶), 钩偏摆时呈斜线 (Crane.animate:88-92)
     cable.geometry.setFromPoints([
       new THREE.Vector3(TOWER_START_X - STAGE_W/2 - craneGroup.position.x, STAGE_H/2 - CRANE_HOOK_Y + 10, 0),
