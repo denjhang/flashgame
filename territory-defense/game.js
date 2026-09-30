@@ -2171,7 +2171,11 @@ function showCine(kind) {                 // 'perdu' = 败局; 'end' = 胜局 (�
       if (st.i >= END_DLG.length) {
         txt.textContent = '';
         cineAliveFn = alive;
-        playFrames(img, 'assets/endgame/end/', '.jpg', 336, () => { txt.textContent = '任务完成'; });
+        // 原版 end 序列内 1123 score 面板: setScores 每 50ms 刷 score1..5 =
+        //   master_menuItems.score (丢塔数) —— H5 在动画末行显示 (TCS+68)
+        playFrames(img, 'assets/endgame/end/', '.jpg', 336, () => {
+          txt.textContent = '任务完成 ——  SCORE  ' + G.score + '  (丢塔数)';
+        });
         return;
       }
       txt.textContent = END_DLG[st.i][0] + '：' + END_DLG[st.i][1];

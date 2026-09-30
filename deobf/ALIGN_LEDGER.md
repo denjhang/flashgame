@@ -1,6 +1,6 @@
 # TCS 对齐账本（签名卡；配额制，见 TASKS.md「二之一」）
 
-进度行：**A: 4/6 族, B: 6/6 组**（2026-10-01, TCS+67）
+进度行：**A: 6/6 族, B: 6/6 组**（2026-10-01, TCS+68）—— 函数账本全签收
 
 ## A. 函数账本（95 个具名函数 = DefineFunction2×82 + DefineFunction×13）
 
@@ -41,7 +41,23 @@
 | OCEMM (822_226) | 光标 enterFrame: 可建帧色 + 重叠红 + **射程圈随光标 (portee*2)** | buildAllowedAt+CURSOR_FRAMES (**TCS+67 补射程预览圈**) | 对齐 |
 | e1..e14 (1158) | 终局音效编排 | CINE_SFX (TCS+4) | 对齐 |
 
-### A5/A6: 未签（后续轮）
+### A5 UI/存档族 ✅ TCS+68
+| 原版函数 | 语义 | H5 对应点 | 结论 |
+|---|---|---|---|
+| saveData (976) | SharedObject cookie: units塔+iMission/score/euros/interest/iUnlock | saveGame localStorage 同构 (TCS+32/49) | 对齐 |
+| loadData (6_333) | loadGame ? _root 字段 : 默认 850/6/0 | loadGame (2073) | 对齐 |
+| actualiseInfo (1079) | 面板 euros/interest/score 三字段 | hud() (TCS+46 LOSSES 勘误) | 对齐 |
+| showInfoOfItem (1079) | 悬停武器 → infoItems.text | sp.onmouseenter → SHOP_INFO (3062) | 对齐 |
+| setScores (1123) | end 序列 score1..5 = score, 50ms interval | (**TCS+68 补**: 胜局动画末行显示 SCORE=丢塔数) | 对齐 |
+
+### A6 散件定案表 ✅ TCS+68
+- edith/Yamato/playBirds/changeMusic/changeLevels：段落音乐/语音/鸟叫——已接线
+  （SEGMENT_FILES 1081-1084 md5 实证, m26/m44 事件, b01-b17 10s 节流）。
+- getSound/getPwd/getFirstEA/gpfl/getValueOfChar/notSMove/noTarget/moveFlag/
+  decalMap/repositionneMap/turnConstruction/countUnitsEnnemies/continueStory/
+  gotoLoop/getc/out：反编译全库读取点审计（TCS+2/18 各轮）= 混淆辅助/无消费点/
+  废弃外链（mochibot 统计族, 1123 内 __mochibot__ 同族）→ 定案不复刻。
+- 834 activeDisponibilite/activeDeclencheur/depressSpace：A2/调度族已签。
 
 ## B. 资源账本（assets 1948 文件）
 

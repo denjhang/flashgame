@@ -447,3 +447,17 @@
   无增量漂移（此后每轮随配额滚动抽查一小组）。
 - **账本进度：A: 4/6 族, B: 6/6 组**。三件套通过，冒烟 211 项全 `=true`、exit 0。
 - 本轮仍未做：A5 UI/存档族、A6 散件定案表（下轮配额）。
+
+## TCS+68（2026-10-01）配额轮 5: A5+A6 函数账本全签收 + B 滚动抽查
+
+- **A5 ✅**：saveData/loadData/actualiseInfo/showInfoOfItem/setScores 五卡。
+  **补缺**：原版胜局 end 序列内嵌 1123 score 面板（setScores 每 50ms 刷
+  score1..5=丢塔数），H5 胜局画面无计分 → 动画末行补 "SCORE N (丢塔数)"。
+- **A6 ✅**：散件 20+ 函数定案表——edith/Yamato/playBirds 等音效族已接线;
+  getPwd/gpfl/__mochibot__ 统计族与混淆辅助函数全库无游戏内消费点 → 不复刻。
+- **B 滚动抽查 ✅**：explosion typed 5 型帧组/flame/spark/headlight 抽查与
+  H5 引用一致（细节: flame 28000+i 与 explosion 26000+i 同位 ±10 抖动,
+  H5 boomTyped 同构）。
+- **账本进度：A: 6/6 族, B: 6/6 组 —— 函数 95 项全部签收完毕。**
+- 三件套通过，冒烟 211 项全 `=true`、exit 0。
+- 本轮仍未做：push 积压待网络（本轮回吐时重试）。
