@@ -539,3 +539,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - makePerson:320-322: 偏移 ±viewWidth/2 (±320) + 右侧镜像 → H5 原 ±160..320 无镜像, 已修
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 70 轮（2026-09-30）— T35 回归维护 + Tipper 巡检（洁净）
+
+- Tipper.as 全函数并排: incSway/updateTower/resetSway 逐行一致, lyrPeople 同步旋转
+  = H5 人挂 towerGroup 等价 — 无偏差
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
