@@ -563,3 +563,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 巡检: fanfare 文件名 (snd_fanfare_mediocre 导出名与代码一致) / playSound currentTime 复位与
   soundsEnabled 门控 (GameState:293-298) — 均无问题
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 77 轮（2026-09-30）— T40 首轮取证（J2ME 重对齐开工）
+
+- 控制映射/摆动运动学/场景机三大发现 (明细 PARITY 12): J2ME 钩=线性扫摆+可操控,
+  与 Flash 正弦自动摆为根本语义差异 — H5 改造评估留 T40b/T43
+- 全量回归: smoke 20 / tower 7 / city 11 PASS
