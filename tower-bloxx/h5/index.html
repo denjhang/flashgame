@@ -24,7 +24,8 @@
   #barBlack{position:absolute;left:17px;bottom:4px;width:12px;height:0;background:#000;}
   #barTop{position:absolute;left:8px;width:30px;height:14px;font-size:11px;color:#ffd700;display:none;}
   #combo{position:absolute;top:50px;left:50%;transform:translateX(-50%);font-size:20px;color:#ffd700;display:none;}
-  #btns{position:absolute;top:14px;right:14px;pointer-events:auto;}
+  #btns{position:absolute;inset:0;pointer-events:none;font-size:0;}
+  #btns img{position:absolute;pointer-events:auto;cursor:pointer;}
   #btns span{display:block;margin:6px 0;padding:2px 6px;background:#00000066;border-radius:4px;cursor:pointer;font-size:15px;}
   #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;}
   /* 结算/提示弹窗面板 (GameSprites.showSummary/showTip 共用 popupSpr 语义) */
@@ -92,7 +93,12 @@
     <div id="tries"><img id="triesImg"></div>
     <div id="pop"><img src="./assets/flash/fx/DefineSprite_303_population_spr/1.png"><div id="popDigits">00000</div></div>
     <div id="combo"><img src="./assets/flash/fx/DefineSprite_275_combo_spr/1.png"><div id="comboFill"></div><div id="comboText">5 x1</div></div>
-    <div id="btns"><span id="btnMusic">♪</span><span id="btnSound">🔊</span><span id="btnExit">✕</span></div>
+    <!-- menu_btn_spr 帧 12/11/9 裁切 (bbox 实测 71x28/79x26); 坐标=makeGameButton 中心 594,20/50/80 -->
+    <div id="btns">
+      <img id="btnMusic" src="./assets/flash/fx/btn12.png" style="left:558px;top:6px" alt="music">
+      <img id="btnSound" src="./assets/flash/fx/btn11.png" style="left:558px;top:36px" alt="sound">
+      <img id="btnExit" src="./assets/flash/fx/btn9.png" style="left:554px;top:67px" alt="exit">
+    </div>
     <div id="msg"></div>
   <div id="summary"></div>
     <div id="hint">点击 / 空格 放下积木 · 还原自原版 Tower Bloxx（J2ME 3D 资产）</div>

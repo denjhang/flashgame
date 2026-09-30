@@ -1125,7 +1125,8 @@ addEventListener('keydown', e => {
 // 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好
 G.musicOn = localStorage.getItem('twrblx_music') !== '0';
 G.soundOn = localStorage.getItem('twrblx_sound') !== '0';
-if (!G.musicOn) hud.btnMusic.style.opacity = 0.4;
+if (!G.musicOn) hud.btnMusic.style.opacity = 0.4;
+if (!G.midiOn) {} // MIDI 开关在菜单
 if (!G.soundOn) hud.btnSound.style.opacity = 0.4;
 function sndClick() { if (G.soundOn && SND.snd_click) { SND.snd_click.currentTime = 0; SND.snd_click.play().catch(() => {}); } }
 

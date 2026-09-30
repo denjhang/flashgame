@@ -526,3 +526,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - #hint/#cityHint 原版不存在 → 移除 (提示职能已在 tipFlags 弹窗 + 648 状态条队列)
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 66 轮（2026-09-30）— T35 回归维护 + 右上按钮位图化
+
+- ♪/🔊/✕ 文本按钮 → menu_btn_spr 帧 12/11/9 裁切位图 (bbox 实测 71x28/79x26),
+  按 makeGameButton 中心 594,20/50/80 布置
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
