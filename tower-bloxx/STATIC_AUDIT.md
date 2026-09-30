@@ -517,3 +517,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 ## 第 63 轮（2026-09-30）— T35 回归维护 + 钩贴图旋转
 
 - hookPlane 随倾斜旋转 (Crane.as:73), 首块/屋顶归零 (Crane.as:59) — 全量全绿 (19/7/11)
+## 第 64 轮（2026-09-30）— T35 回归维护 + 缆线三态巡检结论
+
+- 巡检 CRANE_EMPTY/HOOK/CABLE 三态 (Crane.as:30/58): hook_spr(419) 导出帧为纯黑占位,
+  cable 子剪辑位图未导出 → 三态视觉无原版素材, image_12 静态钩为最终近似 (永久记档)
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
