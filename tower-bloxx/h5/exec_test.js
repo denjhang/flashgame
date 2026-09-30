@@ -61,6 +61,12 @@ globalThis.window = globalThis;
 globalThis.self = globalThis;
 globalThis.addEventListener = (t, f) => { (listeners[t] ||= []).push(f); };
 globalThis.localStorage = { _m: new Map(), getItem(k) { return this._m.has(k) ? this._m.get(k) : null; }, setItem(k, v) { this._m.set(k, v); } };
+// 存档兼容种子 (SAVE_SEED=1/2/3, T34): 旧版缺字段/数组 tipFlags/现行全量 → restoreModel 须全兼容
+if (process.env.SAVE_SEED === '1') globalThis.localStorage.setItem('twrblx_cookie', '{}');
+if (process.env.SAVE_SEED === '2') globalThis.localStorage.setItem('twrblx_cookie',
+  JSON.stringify({ sm_towerGridData: [], sm_totalPopulation: 5, tipFlags: [] }));
+if (process.env.SAVE_SEED === '3') globalThis.localStorage.setItem('twrblx_cookie',
+  JSON.stringify({ sm_towerGridData: [], sm_totalPopulation: 5, tipFlags: { intro: true }, sm_unlockedTrophyTowerType: 1 }));
 const SCENARIO = process.argv[2] === 'city' ? 'city' : 'tower';
 globalThis.location = { search: SCENARIO === 'city' ? '?mode=city' : '?mode=tower', pathname: '/index.html', href: 'http://x/index.html' };
 globalThis.devicePixelRatio = 1;

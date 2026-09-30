@@ -2,10 +2,10 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T34.【回归】存档兼容自测**：模拟旧版存档（v1 无 tipFlags/trophy 字段、v2 有数组 tipFlags、
-> 现行版）依次注入 localStorage 后跑 exec_test，确认 restoreModel 全兼容不崩；补 smoke 断言。
+> **T35.【回归】维护轮**：三件套守护 + 巡检（无具体任务时跑全量回归并巡检记档项，
+> 发现回归立即修）。
 >
-> **待办池**：（空——进入回归维护期, 每轮三件套守护 + 巡检 STATIC_AUDIT 记档项）
+> **待办池**：（空）
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -347,6 +347,12 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   hsInsert 双榜→三表弹窗; hsEsc 防 name 注入 innerHTML; G.hs session 在 startGame 复位
 - 未复刻(记档): NETWORK 源(原版服务端已死)+CITY 榜写入(原版城市模式 CHECK_HIGHSCORE 直接
   回 STT_CITY 不写榜, 语义一致)
+
+
+### 7.3 存档兼容自测（第 59 轮, T34 ✅）
+- exec_test 加 SAVE_SEED=1/2/3 三代存档种子 (v1 空对象/v2 数组 tipFlags/v3 现行全量),
+  注入后跑 tower+city 双场景: 7+10 PASS 全兼容
+- smoke 第 19 项断言: restoreModel 对 sm_unlockedTrophyTowerType/tipFlags 的兜底代码必须在位
 
 ## 8. 输入——🟨
 

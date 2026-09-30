@@ -496,3 +496,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   塔格缩略图已原版化/弹飞 BPath 已对号/挂块火花已接/城市模式升 ✅
 - 收尾计划落档 (PARITY 实施顺序节): 剩余项全为永久记档性质; 后续转回归维护+实测反馈微修
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 59 轮（2026-09-30）— T34 存档兼容自测
+
+- exec_test SAVE_SEED=1/2/3 三代存档种子 × tower/city 双场景全 PASS; smoke +1 断言(19 项):
+  restoreModel 字段兜底必须在位 (明细 PARITY 7.3)
+- 进入回归维护期

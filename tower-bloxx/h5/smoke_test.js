@@ -41,6 +41,9 @@ const src = fs.readFileSync(path.join(h5, 'game.js'), 'utf8');
 check(/const CRANE_DUR = 2600/.test(src), '摆钩周期 CRANE_DUR=2600 (Const.as)');
 check(/const BLOCK_H = 64/.test(src), '积木高 BLOCK_H=64 (Const.as)');
 check(/const NUM_TRIES = 3/.test(src), '3 条命 NUM_TRIES=3 (Const.as)');
+check(/sm_unlockedTrophyTowerType: d\.sm_unlockedTrophyTowerType == null \? -1/.test(src)
+  && /tipFlags: d\.tipFlags && !Array\.isArray\(d\.tipFlags\)/.test(src),
+  'restoreModel 旧存档字段全兜底 (T34 存档兼容)');
 
 // DOM id 存在性: game.js 引用的 id 必须在 index.html (防 stub 掩盖的 null 崩, 第42轮教训)
 {
