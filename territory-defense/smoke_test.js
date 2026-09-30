@@ -1809,6 +1809,11 @@ console.log("--- 修理费 (819) ---");
   //   两舰底盘 4, jeep 显式 1.8)
   console.log("车队制动阈值=前车高×1.8(舰×4)=" +
     (gj.includes("? 4 : 1.8") && gj.includes('if (dd < hgt * elo)')));
+  // TCS+44: 路点推进 (426_1 changeCheckpoint: |dx|<40且|dy|<40 入弯减速;
+  //   |dx|<4且|dy|<4 推进+恢复巡航; 逐轴判定)
+  console.log("路点推进=原版逐轴 40px减速/4px推进=" +
+    (gj.includes('< 40 && Math.abs(wp[1] - this.y) < 40') &&
+     gj.includes('< 4 && Math.abs(wp[1] - this.y) < 4')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

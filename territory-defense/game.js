@@ -1408,7 +1408,7 @@ class Unit {
     this.rot += Math.sign(da) * turn;
     // 原版 roule(): 转向中 (Δ>3°) 速度目标降为 vitesseFrein(chassis[1]), 直行恢复巡航(chassis[0]);
     //   当前速度以 freinVirage 为步长渐变 (原版 vitesse ±= freinVirage 的加减速模型)
-    const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
+    let targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
     this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
     // 原版车队链表制动 (roule pcode 权威): if (dist < unitDevant._height × CONST_ELOIGNEMENT)
     //   { 每帧减速 1/14×1.8; 低速硬停 }。CONST_ELOIGNEMENT: 普通车 1.8, 舰(navire/Yamato) 4
@@ -1433,7 +1433,15 @@ class Unit {
     this.y += Math.sin(this.rot) * this.v;
     // 行进音 (原版 roule(): 按底盘随机播车体音; 节流到每 12 帧, 且仅在视野内)
     if (G.frame % 12 === 0 && isVisible(this.x, this.y)) rouleSfx(this.type);
-    if (d < Math.max(12, this.v * 5)) {
+    // 原版 changeCheckpoint (426_1 pcode 权威, 逐轴判定):
+    //   |dx|<40 且 |dy|<40 → vitesseToDo=vitesseFrein (入弯减速);
+    //   |dx|<4 且 |dy|<4  → curIPoint++ 并恢复巡航速 (vitesseToDoInitPrime);
+    //   末点再推进 → activePerdu。每 tick 各轴位移 ≤2.9px < 4, 无隧道风险。
+    const wp = this.route[this.pt];
+    if (Math.abs(wp[0] - this.x) < 40 && Math.abs(wp[1] - this.y) < 40) {
+      this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, this.turnSpeed - this.v));
+    }
+    if (Math.abs(wp[0] - this.x) < 4 && Math.abs(wp[1] - this.y) < 4) {
       this.pt++;
       if (this.pt >= this.route.length) this.reached = true;
     }
