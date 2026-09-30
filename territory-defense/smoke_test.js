@@ -1423,7 +1423,21 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- SHOP_INFO 数值列 vs 武器/结构表交叉验证 (TCS+8) ----
+// ---- SHOP_INFO rate 列 = floor(permission帧/24×10)/10 (TCS+14, 原版 24fps 截断) ----
+console.log("--- 商店INFO rate列 ---");
+{
+  const rows = Object.keys(SHOP_INFO).filter(n => WEAPONS[n]);
+  const bad = rows.filter(n => {
+    const m = SHOP_INFO[n].match(new RegExp('rate' + String.fromCharCode(9) + '([0-9.]+)'));
+    if (!m) return false;                                   // radar rate '/'
+    let v = Math.floor(WEAPONS[n][2] / 24 * 10) / 10;
+    v = String(v); if (v.endsWith('.0')) v = v.slice(0, -2);
+    return v !== m[1];
+  });
+  console.log("rate 列=帧/24 截断一致 (" + rows.length + " 武器)=" + (bad.length === 0) +
+    (bad.length ? ' 差:' + bad.join(',') : ''));
+}
+// ---- SHOP_INFO 数值列 vs 武器/结构表交叉验证 (TCS+8) ----// ---- SHOP_INFO 数值列 vs 武器/结构表交叉验证 (TCS+8) ----
 console.log("--- 商店INFO数值列交叉 ---");
 {
   const rows = Object.keys(SHOP_INFO).filter(n => WEAPONS[n] && STRUCTURES[n]);

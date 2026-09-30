@@ -28,6 +28,7 @@
 ## 四、已完成（摘要，详见 deobf/PROGRESS.md N+1..）
 
 - TCS+11: 文档漂移修正(README 断言计数 164→182/补记断言覆盖面)
+- TCS+14: SHOP_INFO rate 列 = permission帧/24 截断 断言(11 武器全吻合)
 - TCS+9: 1103 页签原版语义解码(prices/keys 帧标签+selectionUnite)+H5 补音
 - TCS+13: 6_321/6_335/6_564 翻证(鼠标阈值/读档解锁阈值严格>语义)+断言
 - TCS+8: SHOP_INFO range/impact/life 三列与武器/结构表交叉验证(11 武器)入冒烟
