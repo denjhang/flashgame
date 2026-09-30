@@ -310,3 +310,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   步进 30fps（1000/CRANE_FPS ms/帧, CRANE_FPS=30 即 Flash 帧率证据）; sprite 放大到原尺寸 42x56
 - miss 坠落小人仍静态帧 → 记 T7
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 31 轮（2026-09-30）— T6 flash/ 资源盘点 + ambient 28 帧修复
+
+- 全目录盘点: 已接入 8 类（明细记 PARITY 5.1）; 其余 219 个 fx/DefineSprite 目录为 UI/弹窗整clip
+  导出（HTML 等价实现, 不需要）; image_10..17 待考
+- [P0 接错修复] G.txFX 加载 fx/fx01..28.png 但该路径只有 5 张散装 → 23/28 纹理 404, 环境特效
+  大部分类型空白。真源 = fx/DefineSprite_734_ambient_spr/1..28.png（338x196 全画布, 特效画在
+  舞台原位）。读图比对 fx06 散装 = frame6 鸟群（同素材不同裁剪）→ 用 PIL alpha-bbox 离线把
+  28 帧全画布紧裁生成 fx/fx01..28.png, 代码零改动, generateEffect 的纹理自然尺寸即原版尺寸
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

@@ -2,10 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T6.【资源】flash/ 下未接入切片盘点**：逐张读图（DefineSprite_231/423/426 背景三件、
-> fx/ 下 224 项、image_10..17、783 star），标出已接入/未接入/接错位置，未接入的写接入任务。
 > **T7.【函数】spawnFallingPerson 帧动画补齐**：miss 坠落小人在原版也是 toon 帧动画
-> （Tower.makeFallingPerson:296-310），H5 目前静态第 1 帧；用 T5 已载入的 56 帧序列补齐。
+> （Tower.makeFallingPerson:296-310），H5 目前静态第 1 帧；用已载入的 2×56 帧序列补齐。
 >
 > **待办池**：城市塔格缩略图原版化 / J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
 >
@@ -125,6 +123,16 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 楼块外观按 currColor 选款（CityMap.as:160 currColor×4 语义；quick=3→第 4 款，tower=0→第 1 款）
 - ✅ 屋顶人口/特效触发（snd_stacked 音效待音频轮）
 - ❌ 音效触发视觉（snd_destroy 等与动画同步）
+
+
+### 5.1 flash/ 资源盘点（第 31 轮, T6 ✅）
+- ✅ 已接入: city_spr_640.png(城市底版) / bg2/3/4(视差,231/423/426) / dude+dudette 56帧(753/772) /
+  star 3帧(783,火花用第1帧) / fx 28帧(环境特效) / image_12(吊钩) / scene.glb(3D积木) / audio 12个
+- ✅ 第31轮修复[P0接错]: ambient 28 帧实际在 fx/DefineSprite_734_ambient_spr/(338x196 全画布),
+  代码指的 fx/fxNN.png 只有 5 张存在 → 23 纹理 404 空白。已离线 bbox 裁剪 28 张全画布帧
+  生成 fx/fx01..28.png 紧裁单图（与既有 5 张散装同规格, 读图比对 fx06=frame6 鸟群一致）
+- 未接入（有意/低优先）: fx/ 下其余 219 个 DefineSprite 目录多为 UI 弹窗/按钮/块模板的 FFDec
+  整clip导出（HUD/菜单用 HTML 等价实现）; image_10/11/13..17（J2ME/UI 贴图, 用途待考）
 
 ## 6. 音频——✅ 闭环（2026-09-29）
 
