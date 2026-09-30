@@ -28,6 +28,12 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+56: 槽位点击音效勘误（方向2, **行为修正**）——1026_1 on(press):
+  成功(unlocker && euros>=cost) = 设 viseurConstruction + ancienX=-548 +
+  zoneBombardement 移出屏(取消 Su37 瞄准) + 槽位 gotoAndPlay("press"),
+  【无音效】; 失败 cannot。H5 成功路径多播 boutonScroll → 移除。
+  断言入冒烟（208 项全绿）
+
 - [x] TCS+55: 建造落点音效勘误（方向2, **行为修正**）——822_226 on(press):
   surfaceForBuild hitTest→塔重叠 hitTest→euros<cost 三处失败均为【静默 return】
   (cannot 只在 1026 槽位点击播); 成功: euros-=cost + gotoAndStop("red") +

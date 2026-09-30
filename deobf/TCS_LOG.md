@@ -309,3 +309,14 @@
   扣款/音效/建造顺序本已一致。
 - 断言 +1 → 冒烟 207 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+56（2026-09-26）槽位点击音效勘误（方向2，行为修正）
+
+- 取证：1027/frame_1/1026_1 on(press)——成功（unlocker && euros>=cost）只做
+  viseurConstruction.construction 赋值 + ancienX=-548（光标初始藏）+
+  zoneBombardement._x=-500（取消 Su37 瞄准）+ 槽位 gotoAndPlay("press")，
+  **无音效**；失败（锁定/钱不够）cannot。
+- **修正**：H5 shopSlotPick 成功路径多播 boutonScroll → 移除。至此与 TCS+53/55
+  连成一致口径：原版的 cannot 只在"明确拒绝"时播，成功与静默失败均无声。
+- 断言 +1 → 冒烟 208 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

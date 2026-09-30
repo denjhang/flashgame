@@ -2196,9 +2196,10 @@ function briefBarPress() {
 //   进入建造时取消 Su37 瞄准 (zoneBombardement=false); 锁定槽点击同样 cannot
 function shopSlotPick(id) {
   if (!G.unlocker[id] || G.euros < STRUCTURES[id].cost) { playSfx('cannot', 0.4); return false; }
+  // 原版 1026_1 on(press) 成功路径无音效: 设 viseurConstruction + zoneBombardement
+  //   移出屏(取消 Su37 瞄准) + 槽位 gotoAndPlay("press") (TCS+56)
   G.su37Aiming = false; SU37.pending = null;
   G.shopSel = id;
-  playSfx('boutonScroll', 0.35);
   buildShop();
   return true;
 }

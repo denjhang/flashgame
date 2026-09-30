@@ -1842,6 +1842,13 @@ console.log("--- 修理费 (819) ---");
   console.log("落点失败静默+成功扣款+creationUnite=" +
     (iBC > -1 && gj.includes('G.euros -= s.cost;') &&
      gj.slice(iBC, iBC + 200).includes('creationUnite')));
+  // TCS+56: 槽位成功静默 (1026_1 on(press): 成功=设光标+取消Su37瞄准+槽位帧动画,
+  //   无音效; 失败 cannot)
+  const iSlot = gj.indexOf('function shopSlotPick');
+  const okSlot = gj.indexOf('return true', iSlot);
+  const bodySlot = gj.slice(gj.indexOf('SU37.pending = null', iSlot), okSlot);
+  console.log("槽位成功静默+失败cannot=" +
+    (!bodySlot.includes('playSfx') && gj.slice(iSlot, bodySlot.length && iSlot + 120).includes("cannot")));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
