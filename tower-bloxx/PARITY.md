@@ -2,8 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T31.【自查】结算数字位图核对**：结算面板 Population/Height/Combo 行的数字原版是位图字
-> （drawDataSet→digit 帧），读图后决定 HTML 字体是否够近；顺带评估 city_icon 悬停放大。
+> **T32.【函数】ComboTimer/changePopulation 二遍细读**：同 T22/T23 方法并排复核
+> ComboTimer.as 全函数与 GameModel 计分三函数（changePopulation/setPopulation/setComboMult）。
 >
 > **待办池**：（空）
 >
@@ -257,6 +257,12 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - 828_splash_spr 读图: Digital Chocolate logo 640x480 满屏 → 无 URL 模式启动先显 logo 2s
   再进 title (STT_SPLASH 原版 case 为空, 时序在时间轴); 点击不做跳过 (原版时间轴亦无)
 - 360 msg_spr 无导出帧, 记档
+
+
+### 5.4 结算数字/悬停取证（第 56 轮, T31 ✅）——两项候选均判"非差距"
+- 结算面板: popup displayText=areaField.text 纯文本 (462 帧脚本) → H5 HTML 文本一致,
+  无位图字需求; HUD 数字 setDigits 也是动态文本字段 (digit0..4) → HTML 数字等价
+- city_icon 悬停放大: CityMap 无 rollOver/_xscale, 原版不存在 → 不做
 
 ## 6. 音频——✅ 闭环（2026-09-29）
 

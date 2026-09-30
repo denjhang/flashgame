@@ -481,3 +481,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 828 读图 (Digital Chocolate logo 640x480) → 启动流: logo 2s → title (仅无 URL 模式);
   360 msg_spr 无帧记档
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 56 轮（2026-09-30）— T31 结算数字/悬停取证（双候选判非差距）
+
+- popup displayText=纯文本/新 setDigits=动态文本 → H5 HTML 等价; city_icon 悬停原版不存在
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS（零代码变更取证轮）
