@@ -1380,7 +1380,20 @@ console.log("--- 剧情码序列比对 ---");
   }
   console.log("44 关说话人码序列与原版逐句一致=" + (bad === 0) + (bad ? ' 不一致 ' + bad + ' 关' : ''));
 }
-// ---- 非简报波对白门控 (N+101): endWave→dlg 冻结倒计时→放完重启窗口 ----
+// ---- 翻页循环 + 商店页内容 (N+102): turnConstruction 环绕与页内容映射 ----
+console.log("--- 翻页循环 ---");
+{
+  const sv = SHOP_PANEL;
+  SHOP_PANEL = 1; turnConstruction('left');
+  const wrap = SHOP_PANEL === 3;                      // 1 左翻 → 3 (原版 curPanel>1?--: =3)
+  const p1 = SHOP_PANEL; buildShop();
+  const page3Ids = SHOP_PAGES[2].join(',');
+  SHOP_PANEL = 3; turnConstruction('right');
+  const wrapR = SHOP_PANEL === 1;                     // 3 右翻 → 1
+  console.log("环绕翻页 1←=3 / 3→=1=" + (wrap && wrapR) + " 第3页内容=" + (page3Ids === 'MLRS,MTHEL,pluton,su37'));
+  SHOP_PANEL = sv; buildShop();
+}
+// ---- 非简报波对白门控 (N+101)// ---- 非简报波对白门控 (N+101): endWave→dlg 冻结倒计时→放完重启窗口 ----
 console.log("--- 非简报波对白门控 ---");
 {
   // 进入第 2 波 (非简报波, 有 1 句对白) 的波间: 清场触发 endWave
