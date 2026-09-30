@@ -431,3 +431,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 抽样 House.java 关键段(定点数/摆钩状态机/存档 RMS/MIDI/关卡阈值), 七维差异表落档 PARITY 11;
   全部为"实现载体"级差异, 非玩法冲突 → 巩固"Flash=玩法权威, J2ME=3D 资产来源"判定
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS（零代码变更文档轮）
+## 第 47 轮（2026-09-30）— T22 忠实度抽查回归（dropTarget/blockLanded/checkTipQueue）
+
+- [P1] 挂块倾斜门控缺失: updateBlock 仅 rotateBlock 倾斜+targetDy=65 偏移 → H5 修,
+  drop 生成点用挂块实际位置
+- [P2] showPopChange(-999) → popClear 挂两个 miss 分支
+- [P1] 第41轮补丁幻影叠加致 missFall.push 重复 → 去重 (T16 引入, 测试不敏感未暴露)
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

@@ -772,6 +772,7 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   if (abs >= HIT_LIMIT && abs <= BLOCK_H) {
     // 撞塔: 弹飞 + 晃动加剧 + 顶部一块被撞掉 (Tower.as:150-167 finishCombo→bounceOffTower→knockNextBlock→decTries)
     finishCombo();
+    popClear();                                  // showPopChange(-999) (Tower.as:151)
     tipperIncSway(offset);
     playSound('snd_destroy');                    // Tower.as:162
     G.lives--; showMsg('-1', '#ff6b6b');
@@ -795,7 +796,7 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   }
   if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145): 块坠出屏幕后 Message 定时播 snd_destroy (dur+100ms)
     finishCombo();
-    G.missFall.push({ mesh: lastFallMesh, vy: DROP_SPD });
+    popClear();                                  // showPopChange(-999) (Tower.as:140)
     G.missFall.push({ mesh: lastFallMesh, vy: DROP_SPD });
     G.lives--; showMsg('MISS', '#ff6b6b'); addHud();
     if (G.lives <= 0) gameOver(false);
@@ -1008,15 +1009,18 @@ function finishCombo() { // GameModel.finishCombo: 支付连击银行人口
 function panUp() { // Path DELAY_PAN_UP
   G.camTarget = Math.max(0, G.landingY - STAGE_H/2 + 3 * BLOCK_H);
 }
+let popEl = null;
 function popFloat(txt, life = 1200) { // bonus_spr 在 (321,31) 人口 HUD 中心, 生命 1200/3000ms
   const m = document.createElement('div');
   m.textContent = txt;
   m.style.cssText = `position:absolute;top:64px;right:52px;color:#ffe27a;font-size:16px;font-weight:bold;` +
     `text-shadow:1px 1px 2px #000;transition:opacity ${life}ms;`;
   hud.hudEl.appendChild(m);
+  popEl = m;
   setTimeout(() => { m.style.opacity = '0'; }, life * 0.3);
-  setTimeout(() => m.remove(), life + 50);
+  setTimeout(() => { m.remove(); if (popEl === m) popEl = null; }, life + 50);
 }
+function popClear() { if (popEl) { popEl.remove(); popEl = null; } } // showPopChange(-999) (GameModel.as:147-151)
 
 function showMsg(txt, color) {
   const m = document.createElement('div');
@@ -1036,7 +1040,9 @@ function drop() {
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);
-  const x = craneGroup.position.x - tpl.userData.cx, y = craneGroup.position.y - 60 - tpl.userData.cy;
+  const hx = G.hanging ? G.hanging.position.x : -(tpl.userData.cx || 0);
+  const hy = G.hanging ? G.hanging.position.y : -60 - (tpl.userData.cy || 0);
+  const x = craneGroup.position.x + hx, y = craneGroup.position.y + hy; // 生成于挂块实际位置(含倾斜偏移)
   mesh.position.set(x, y, 0);
   scene.add(mesh);
   // Crane.dropTarget: blockDx = dx (释放帧钩速 px/帧); 落块带惯性漂移 x + blockDx*3 (Crane.as:198-199)
@@ -1280,8 +1286,17 @@ function loop(now) {
       craneGroup.add(G.hanging);
     }
     if (G.hanging) {
-      G.hanging.position.set(-(G.hanging.userData.cx || 0), -60 - (G.hanging.userData.cy || 0), 0);
-      G.hanging.rotation.z = THREE.MathUtils.degToRad(-((craneGroup.position.x + STAGE_W/2) - TOWER_START_X) / 5);
+      // updateBlock (Crane.as:66-79): 仅 rotateBlock(首块/屋顶块除外)倾斜; 块心沿 ang+90 偏移 targetDy=65
+      if (G.stacked > 0 && !needRoof(G.stacked)) {
+        const ang = -((craneGroup.position.x + STAGE_W/2) - TOWER_START_X) / 5;
+        const th = (ang + 90) * Math.PI / 180;
+        G.hanging.rotation.z = THREE.MathUtils.degToRad(ang);
+        G.hanging.position.set(-(G.hanging.userData.cx || 0) + 65 * Math.cos(th),
+          -60 - (G.hanging.userData.cy || 0) - 65 * Math.sin(th), 0);
+      } else {
+        G.hanging.rotation.z = 0;                  // 首块/屋顶块直立 (else 分支 :76-80)
+        G.hanging.position.set(-(G.hanging.userData.cx || 0), -60 - (G.hanging.userData.cy || 0), 0);
+      }
     }
 
     // combo 计时

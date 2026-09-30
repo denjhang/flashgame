@@ -2,8 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T22.【函数】Faithful 度抽查回归**：从已对号的核心函数里抽 3 个（dropTarget/blockLanded/
-> checkTipQueue）做"逐行并排"复核——H5 代码 vs 原版 .as 并排读，找漏行/顺序差，产微修任务。
+> **T23.【函数】blockLanded/landOnTower 并排复核**：继续二遍细读（landOnTower 人口公式/
+> makePeople 数量/roof 分支 aoff 折算 vs Tower.as:204-288），产微修任务。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
 > 挂块 combo 银火花帧。
@@ -30,6 +30,16 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 摇晃近3次均值+maxTowerAngle | ✅ | Tipper.as:49-59,77-81 / GameModel.as:236-239 | |
 | 3 条命/miss/knock 扣命 | ✅ | Tower.as:139-176 / Const.NUM_TRIES | |
 | 无尽模式 totalBlocks=999 | ✅ | GameState.as:97 | |
+
+
+### 1.1 忠实度抽查回归（第 47 轮, T22 ✅）——二遍细读捞真 bug
+- [P1] 挂块倾斜门控 (updateBlock Crane.as:66-79): 原版仅 rotateBlock(首块/屋顶除外)倾斜,
+  块心沿 ang+90 偏移 targetDy=65 → H5 原来无条件倾斜且无偏移, 已修; drop 生成点改用挂块
+  实际位置(倾斜偏移连续, 原来瞬跳回钩心)
+- [P2] showPopChange(-999) 清 "+" 浮字 (GameModel.as:147-151): miss/撞塔分支立即清
+  → H5 popClear() 挂到两个 miss 分支 (原来自然过期 1.2s)
+- [P1] 第41轮 T16 补丁幻影叠加: miss 分支 G.missFall.push 重复两行 (视觉双块, 测试不敏感
+  未暴露) → 去重。二遍细读的直接战果
 
 ## 2. 塔楼目标与屋顶（quick/city 共用）——✅ 机制闭环（2026-09-29）
 
