@@ -397,13 +397,13 @@ function renderCity() {
       cell.className = 'cell';
       const color = getTowerColor(col, row), pop = getTowerPop(col, row);
       if (color > 0) {
-        const tw = document.createElement('div');
+        // 城市图标 (CityMap.restoreCity:66-76): icon.gotoAndStop((color-1)*4 + roofType+1),
+        // 格内偏移 (CITY_MAP_X+col*52+10, 下一行底-13) → cell 内 left:10 bottom:13, 读图 50x50
+        const roof = G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 2] > 0 ? 1 : 0;
+        const tw = document.createElement('img');
         tw.className = 'tower';
-        tw.style.height = Math.min(48, 10 + Math.log2(1 + pop) * 6) + 'px';
-        tw.style.background = TOWER_TYPE_COLORS[color - 1];
-        tw.textContent = pop;
-        if (G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 2] > 0)
-          tw.textContent = '★' + pop; // 屋顶帧
+        tw.src = './assets/flash/fx/DefineSprite_603_city_icon_spr/' + ((color - 1) * 4 + roof + 1) + '.png';
+        tw.title = 'pop ' + pop;
         cell.appendChild(tw);
       } else if (isValid(col, row, G.selectedType) && G.selectedType >= 0) {
         cell.classList.add('ok'); // updateCellHighlights: 可建格高亮

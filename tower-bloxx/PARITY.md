@@ -2,12 +2,12 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T9.【资源】city_icon_spr 塔格缩略图原版化**：读 DefineSprite_603_city_icon_spr 帧（语义
-> (color-1)*4+roofType+1, restoreCity:71-73），替换 renderCity 的 CSS 色块缩略图；格内偏移 (10,-13)。
+> **T10.【资源】city_place_highlight_spr(774) / city_demol_spr(818) 原版化**：读图确认帧，
+> 替换 .cell.ok 金色 outline 高亮与 dozer 选中态（CityMap.updateCellHighlights:514-539 /
+> setSelectOK:198-202 取证）。
 >
 > **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
-> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ city_place_highlight_spr(774) 与
-> city_demol_spr(818) 高亮/拆除原版化。
+> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -85,8 +85,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   placeTower（finishCityTower）、restoreCity（renderCity）
 - 第 33 轮补齐: spinReels ✅——placeInMap 后 5 个 city_reel_spr 滚轮翻页（Flipbook 1-3/150ms
   ×5 遍, 读图 20x34, 原版坐标 65-22i/-180 相对中心 → 屏幕 (385-22i,60), setRepCnt(5) 后移除）
-- 图标帧语义（restoreCity: icon.gotoAndStop((color-1)*4 + roofType+1), 格内偏移 (10,-13)）
-  归"城市塔格缩略图原版化"（待办池, 资产=DefineSprite_603_city_icon_spr 已导出）
+- ✅ 城市塔格缩略图原版化（第34轮, T9）: city_icon_spr 603 共 16 帧 50x50（读图验证 1=蓝无顶/
+  2=蓝有顶/6=红块）, renderCity 用 img 帧号 (color-1)*4+roof+1, 格内 left:10/bottom:13,
+  原 CSS 色块+人口文字移除（原版图标不含数字）
 
 ## 4. HUD 与界面——✅ HUD 本体闭环（2026-09-29）/ 菜单流 ❌ [P1]
 

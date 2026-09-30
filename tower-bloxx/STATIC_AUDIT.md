@@ -335,3 +335,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   坐标 (65-22i,-180) 相对 citySpr 中心 → 屏幕 (385-22i, 60), HTML img 翻帧实现
 - restoreCity 的 icon 帧语义取证入档 → 下一任务 T9（缩略图原版化, 资产 603 已导出）
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 34 轮（2026-09-30）— T9 city_icon_spr 塔格缩略图原版化
+
+- 读图: DefineSprite_603_city_icon_spr 16 帧 50x50 = 4 色 × (无顶/有顶/…), 验证帧 1=蓝无顶、
+  2=蓝有顶（钻石顶）、6=红块 → 帧号=(color-1)*4+roof+1 与 restoreCity:71-73 一致
+- renderCity: CSS 色块 div（高度对数近似+★pop 文字）→ img 原版图标; 格内 left:10/bottom:13
+  （restoreCity:74-75: cellX+10, 下一行底-13）; 人口数字改 title 属性（原版图标不含数字）
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
