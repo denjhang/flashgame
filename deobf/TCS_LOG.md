@@ -410,3 +410,14 @@
 - 断言：下轮补点选音断言（本轮 3 条目已满, 折算注记: selectUnit 卡含码改）。
 - **账本进度：A: 1/6 族, B: 2/4 组**。三件套通过，冒烟 209 全绿 exit 0。
 - 本轮仍未做：A2/A4-A6、B2/B4（下轮配额）。
+
+## TCS+65（2026-10-01）配额轮 2: A2 调度族 + B2 敌塔序列 + B4 抽样（3 条目 + 补断言）
+
+- **A2 ✅**：refreshVectors/startMission/activeDeclencheur/declencheMissionSuivante/
+  newEvents 五函数签名卡（证据 loc 号齐）→ 账本。
+- **B2 ✅**：帧区间权威=gun_fire_frames.json；80(186)=全用；122/161 超区帧
+  md5 抽证为原版时间线尾部（脚本不播段）→ 定案不接入。
+- **B4 ✅**：menu/fond/perso/perdu/end/units 六组计数全符既有断言。
+- 补上轮挂账：点选己方塔 selectionUnite 断言（210 项）。
+- **账本进度：A: 2/6 族, B: 4/4 组**。三件套通过，冒烟 210 全绿 exit 0。
+- 本轮仍未做：A3 武器族、A4-A6（下轮配额）。

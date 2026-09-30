@@ -1,6 +1,6 @@
 # TCS 对齐账本（签名卡；配额制，见 TASKS.md「二之一」）
 
-进度行：**A: 1/6 族, B: 2/4 组**（2026-10-01, TCS+64）
+进度行：**A: 2/6 族, B: 4/4 组**（2026-10-01, TCS+65）
 
 ## A. 函数账本（95 个具名函数 = DefineFunction2×82 + DefineFunction×13）
 
@@ -14,7 +14,16 @@
 | destruction | 阵亡序列 39 帧, 三点爆炸, 车 12px 漂移 | killUnit/killTurret (早期轮) | 对齐 |
 | autoRepair | 受击触发一次全额修复 | shellHit→autoRepairNow (TCS+57) | 对齐 |
 
-### A2-A6: 未签（后续轮）
+### A2 调度族 ✅ TCS+65
+| 原版函数 | 语义 | H5 对应点 | 结论 |
+|---|---|---|---|
+| refreshVectors (6_327) | 压缩 unitsAlliees 去 null | G.units filter !dead (2356) | 对齐 |
+| startMission (6_329) | refreshVectors + unitsMissions[iMission-1] 整波同步生成 | startWave (1937 注) | 对齐 |
+| activeDeclencheur | setInterval(3000, declencheMissionSuivante) 波间触发器 | INTERWAVE_TICKS 窗口 (TCS+47 定案 317+1冻结) | 对齐 |
+| declencheMissionSuivante | clearInterval + !aPerdu → startInstructions | tick 倒计时归零 → 简报/开波 | 对齐 |
+| newEvents (773_189) | 逐关号事件 (解锁/面板/资金/语音) | TCS+53 全分支 | 对齐 |
+
+### A3-A6: 未签（后续轮）
 
 ## B. 资源账本（assets 1948 文件）
 
@@ -26,7 +35,14 @@
 - shells/303,304,391,400_obus 目录导出 = **已用等价物的源导出**（冗余副本, 定案不删不接）
 - 结论：B1 帧集合全部有消费点，无缺失。
 
-### B2 敌塔序列 ❌ 未签（下轮：80/128/122/164/83/161/167 帧区间核对）
+### B2 敌塔序列 ✅ TCS+65
+- 权威帧区间 = deobf/data/gun_fire_frames.json（H5 GUN_FIRE_SEQ 同源）：
+  92→2..16, 98→2..24, 103→2..25, 108→2..25, 122→2..5, 125/167→2..35,
+  153→2..3, 80→2..186（pluton 长后坐, 导出 186 帧=186 全用 ✓）
+- 超出区间帧逐帧 md5 抽证（122: 6..91 中 53 帧同为收尾保持帧 + 少量过渡;
+  161: 2..46 中 26 帧同帧）→ 为**原版时间线尾部**（脚本不播放段）。
+- 结论：H5 只用脚本引用帧区间 = 忠实；尾部帧定案"导出含完整时间线, 不接入"。
+- idle 子件（115/121 frame1）经 IDLE_SPR_IMG 使用 ✓
 
 ### B3 散件判定 ✅ TCS+64
 - turrets/56..88.png（17x81 黑竖条）、eturrets/100..172.png（12x15 小件）
@@ -35,4 +51,6 @@
 - 结论：**导出冗余，定案不接入**（保留存档）。覆盖 turrets 14 张 + eturrets 27 张
   + sprites/DefineSprite_64 等同名小件。
 
-### B4 抽样复核 ❌ 未签（下轮）
+### B4 抽样复核 ✅ TCS+65
+- menu 12 ✓ story/fond 16 ✓ story/perso 39 ✓ endgame/perdu 30 ✓
+  endgame/end 336 ✓ units 12 ✓ explosion/typed ✓ —— 与既有冒烟断言一致, 无漂移

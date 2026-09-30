@@ -1864,6 +1864,9 @@ console.log("--- 修理费 (819) ---");
   console.log("R修理满血=照播selectionUnite(原版怪癖)=" +
     (!gj.includes('if (price <= 0) return;') &&
      !gj.includes('if (sel && sel.hp < sel.maxHp)')));
+  // TCS+64: 点选己方塔播 selectionUnite (原版 426_1 selectUnit loc0b0a)
+  console.log("点选己方塔播selectionUnite=" +
+    gj.includes("if (hit) { G.selected = hit; playSfx('selectionUnite', 0.35); return; }"));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
