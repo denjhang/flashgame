@@ -1368,6 +1368,21 @@ console.log("--- 商店INFO原文比对 ---");
     (bad.length ? ' 差:' + bad.join(',') : ''));
 }
 // ---- 布景覆盖 QA (TCS+24): STORY 说话人码首字母的 fond 文件存在 ----
+// ---- fr 语种码序列比对 (TCS+25): 原版 fr/en 自身同构 + 与 STORY 一致 ----
+console.log("--- fr语种码序列 ---");
+{
+  const fsx = require('fs');
+  const P = JSON.parse(fsx.readFileSync('../deobf/data/scenario_parsed.json', 'utf8'));
+  let same = true, storyOK = true;
+  for (let m = 1; m <= 44; m++) {
+    const fc = (P.fr[m] || []).map(x => x[0]), ec = (P.en[m] || []).map(x => x[0]);
+    if (JSON.stringify(fc) !== JSON.stringify(ec)) same = false;
+    const mc = (STORY[m] || []).map(x => x[0]);
+    if (JSON.stringify(fc) !== JSON.stringify(mc)) storyOK = false;
+  }
+  console.log("原版 fr/en 码序列同构=" + same + "  STORY 与 fr 亦一致=" + storyOK);
+}
+// ---- 布景覆盖 QA (TCS+24): STORY 说话人码首字母的 fond 文件存在 ----// ---- 布景覆盖 QA (TCS+24): STORY 说话人码首字母的 fond 文件存在 ----
 console.log("--- 布景覆盖 ---");
 {
   const fsx = require('fs');

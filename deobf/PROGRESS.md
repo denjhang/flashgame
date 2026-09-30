@@ -1,5 +1,13 @@
 # TCS 反混淆与资源还原进度
 
+## 第 TCS+25 轮记录（2026-09-30, fr 语种码序列比对 —— 校验矩阵补全）
+
+- 原版 fr/en 两语种码序列自身同构=true；STORY 与 fr 亦逐句一致=true
+- 至此码序列三维校验齐备：原版内部一致性 / STORY vs en / STORY vs fr
+- 189 项 `=true`、exit 0；三件套通过（纯 QA 轮）
+
+### 本轮仍未做：无新挂账
+
 ## 第 TCS+24 轮记录（2026-09-30, 布景覆盖 QA —— STORY 首字母 fond 检查入冒烟）
 
 - 扫描 STORY 全部说话人码首字母（15 个）→ `assets/story/fond/{字母}.png` 逐一
