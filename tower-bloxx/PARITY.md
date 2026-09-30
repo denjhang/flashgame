@@ -2,7 +2,7 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 21/98 (清单第14节), 资源 10/89 (13.1)。**
+> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 29/98 (清单第14节), 资源 13/89 (13.1)。**
 >
 > **T45.【资源】r0 素材鉴定与接入**：id00-80 拼图已读（滚轮/块面板/城市图标/软键/数值图标），
 > 对照 House.java 绘制调用（House.b(graphics,id,...)）确定每张的屏幕位置，替换 H5 对应 UI。
@@ -492,6 +492,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | r0id13 | 20x12 数字图标 | House:1401 ab=g.c(13) 条件加载 | 记档同上 |
 | r0id69 | 20x12 图标 | House:1404 ac=g.c(69); :1523 draw(E-80,60) | 记档: 右上角状态 |
 | r0id70 | 20x12 图标 | House:1407 ad=g.c(70); :1520 draw(10,40) | 记档: 左侧状态 |
+| r0id14-20 | 20x12 数字/图标 | House:1292-1297 U/Y/Z/V/X/W = g.c(14..20) | 记档: 条件加载 UI 组, 下轮逐张定位 |
+| r0id33-36 | 城市图标组 | House:1302-1305 ae/af/ag/ah = g.c(33..36) | 记档: 城市视图, T48 |
+| r0id45 | 20x12 图标 | House:1413 ce[3]=g.c(45); :1517 draw(E/2,30) | 记档: 顶部居中状态 |
 
 ## 14. House.java 99 方法清单（T47 逐行填: 语义/差异; 已读标✅）
 
@@ -539,9 +542,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 40 | 2441 | D | () |  |
 | 41 | 2464 | a | (int n2, int n3, int n4, int n5, int n6, int n7, int n8) |  |
 | 42 | 2476 | w | (int n2) |  |
-| 43 | 2541 | b | (Graphics graphics, boolean bl) |  |
-| 44 | 2573 | a | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) |  |
-| 45 | 2597 | a | (Graphics graphics, int n2, int n3, int n4) |  |
+| 43 | 2541 | b | (Graphics graphics, boolean bl) | 粒子渲染分派: dw 1=雨丝线段/2=方块/3=其他, dd[] 按 dc 源分前后景 | H5 无雨天粒子(Flash 28 种特效替代), 待T48评估 |
+| 44 | 2573 | a | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) | 雨丝绘制: 两段 drawLine (AAAACC 变暗 via dg) | 同上 |
+| 45 | 2597 | a | (Graphics graphics, int n2, int n3, int n4) | 方块粒子: >1 白框蓝底, ≤1 蓝点 | 同上 |
 | 46 | 2611 | b | (Graphics graphics, int n2, int n3, int n4) |  |
 | 47 | 2625 | E | () |  |
 | 48 | 2645 | x | (int n2) |  |
@@ -590,8 +593,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 91 | 4160 | a | (String string, Font font, int n2) |  |
 | 92 | 4202 | a | (String string, String[] stringArray, Image image) |  |
 | 93 | 4228 | c | (Graphics graphics) |  |
-| 94 | 4276 | l | (int n2) | 已读 |
-| 95 | 4304 | O | () |  |
-| 96 | 4313 | P | () |  |
-| 97 | 4317 | q | () |  |
-| 98 | 4321 | a | (Graphics graphics, int n2, int n3, int n4, int n5) |  |
+| 94 | 4276 | l | (int n2) | UI 光标导航: 600ms 节流; 子列表 bZ 滑动/顶层 bQ 步进, 到底 P() 触发 O() 确认 | H5 DOM 点击/悬停 等价 |
+| 95 | 4304 | O | () | 光标复位: bP/bQ/bX/bY/ca 全清 | H5 每次打开重置 等价 |
+| 96 | 4313 | P | () | 光标末位判定: bQ==bP-1 | H5 无此状态机, 记档 |
+| 97 | 4317 | q | () | 字体 getter: 返回 o (font.bin 点阵) | H5 用系统字体, 待T48评估 font.bin |
+| 98 | 4321 | a | (Graphics graphics, int n2, int n3, int n4, int n5) | 裁剪区设置 setClip | H5 canvas 裁剪 等价 |
