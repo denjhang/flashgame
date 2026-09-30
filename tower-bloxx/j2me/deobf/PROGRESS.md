@@ -19,13 +19,14 @@
 | g.java | 656 | 9 | ✅ JD+1 | g_clean.java (ResourceStore; 153 项 id 表保留原文) |
 | GameMIDlet.java | 476 | 26 | ✅ JD+2 | GameMIDlet_clean.java |
 | k.java | 1491 | ~60 | ⬜ | |
-| i.java | 867 | ~40 | ⬜ | |
-| j.java | 584 | ~30 | ⬜ | |
-| p.java | 209 | ~15 | ⬜ | |
+| i.java | 867 | ~25 | 🔶 JD+3 (12/25, 绘制内部待 JD+4) | i_clean.java (MessageRenderer) |
+| j.java | 584 | 23 (含 8 桥) | ✅ JD+3 | j_clean.java (MenuScriptInterpreter) |
+| p.java | 209 | 10 | ✅ JD+3 | p_clean.java (PhoneCanvas) |
 | h.java | 603 | 19 | ✅ JD+2 | h_clean.java (HallOfFameScreen) |
 | House.java | 4420 | 98 | ⬜ (字段表起步见 FIELDS.md) | |
+| com/.../a.java | ~120 | 4 | ✅ JD+3 | nokia_lang_clean.java (NokiaLangPack) |
 
-**方法计数: 112 / ~340 (JD+2)。类: 12/17。**
+**方法计数: 149 / ~340 (JD+3)。类: 15/18。**
 
 ## JD+1 (2026-10-01) 小类全量 67 方法
 - a→ScreenCallback: 空标记接口 (extends e)。
@@ -59,3 +60,16 @@
 - 新证实: A 字段 (h) = 高分榜屏而非"键位处理" (JD+1 注释误判, h implements a 且作为 q() case2 屏返回);
   keymaps p() 由本类键位表兼榜数定义; l[13]=游戏达标标记 (h.n())。
 - 下一轮: j.java (584, SplashScreen, 被 GameMIDlet/h 依赖) → p.java → k.java → i.java → House。
+
+## JD+3 (2026-10-01) j + p + i(部分) + nokia lang
+- 【重大勘误】j 不是 SplashScreen — 是 MenuScriptInterpreter: 读 jar 文件 "m" (菜单屏幕描述树:
+  屏型 0 菜单列表/1 图文页/2 全屏消息/3 名字录入/5/6 设置/7 条件跳转), GameMIDlet.z=菜单屏。
+  旧 PARITY/H5 的 "splash" 语义按此更正 (H5 无对应物, 表现层重做时以 "m"+i 渲染器为准)。
+- j→MenuScriptInterpreter: ctor(头解析)/setupSoftkeys(名字 Form)/openScreen/loadScreen/
+  handleActionBits(位标志: 弹栈/退出/设置循环/写设置对)/onShow(音效开关回跳三态)/tick/paint→i/onKey/命令。
+  "m" 布局逆向记于 j_clean 头注。
+- p→PhoneCanvas: Nokia FullCanvas, -6/-7 软键汇聚, 软键条绘制 (黑描边白字/图标, 左 36 右 40)。
+- i→MessageRenderer (12/25): 三模式浮层 (菜单/消息框/文本框) 装载与几何推演; 绘制内部 b/c/d/e 下轮。
+- com/nokia/.../a→NokiaLangPack: nokia 版 lang.* 读取器实锤 (locale 回退 lang.xx)。
+- 新证实: GameMIDlet.q() case0 (f.g==0) 返回 j=菜单屏; "splashMode"(k) 实为菜单模式。
+- 下一轮: i.java 绘制内部 (JD+4) → k.java (1491, 游戏主屏/具体 MIDlet 子类) → House。

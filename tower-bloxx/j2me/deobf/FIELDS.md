@@ -135,3 +135,36 @@
 | C/D | fadeWide/fadeTall (椭圆羽化蒙版) | 构造 c(E,lineH)/c(E,2lineH) |
 | E/F/G/H | viewLandscape/viewPortrait/legendPending/legendDone | 静态块+b(int,int) |
 | id6/7/8 | 榜行图标/人口图标/高度图标 (r0) | 构造 + 绘制 :424-487 |
+
+## j.java → MenuScriptInterpreter (JD+3)
+| b | bootTable int[9] ("m" 头) | ctor; i.a(j.a()) 转交渲染器 |
+| c | itemTable int[项][8] | d() 装载 (型0 菜单项) |
+| d | subItemNames ("名 [子名]") | d():229 |
+| e | settingPairs (f.a 槽,值 对) | c() case5 |
+| f | itemCount (兼临时模式) | d()/a(int,int,Command[]) |
+| g/h | backScreenId/forwardScreenId | b(int) 屏头 |
+| i | screenType (0/1/2/3/5/6/7) | b(int) |
+| j | scriptStream ("m") | ctor/b(int) |
+| k/l/m | loadOnNextTick/showList(FIRE)/goBackRequested(BACK) | a(int,int)/b(int,int)/a(Command) |
+| n/o | scrollDelta/actionDelta | b(int,int) |
+| p/q | canvas/activeSoftkeys | ctor/b(int) |
+| r | rendererNeedsReset | b(int):165 |
+| s | targetScreenMode (按屏型 0..4) | b(int):148-163 |
+| t/u | 【待证】nameBuffer/nameResult | 仅声明/桥访问器 |
+| v/w/x | nameForm/nameField/sharedNameField | a(int,int,Command[]) 录入名 |
+| y/z/A | soundToggleReturn/returnToQuick/returnToCity | a(int):348-360 音效开关回跳 |
+| "m" 文件 | 菜单屏幕描述脚本 (u16 屏数+9×int32 头+每屏树) | ctor/b(int)/d() 逆向 |
+
+## p.java → PhoneCanvas (JD+3)
+| a/b/c | midlet/suppressShowNotify/suppressHideNotify | :35/:121-129/:98 |
+| d/e/f/g | leftSoftkey/rightSoftkey/leftSoftkeyIcon/rightSoftkeyIcon | a(Command,Image) 型 1/4/5/8=左, 2/3/6/7=右 |
+| h | softkeyFont (32,1,8) | :33 |
+| 软键键码 | -6=左 / -7=右 / -11,-12 忽略 | keyPressed :53-63 |
+
+## i.java → MessageRenderer (JD+3, 部分)
+| a | displayMode (0无/1菜单/2消息/3文本) | a(Graphics) 分派 |
+| b | titleIcon | a(Image,String) |
+| d..F | (28 项) wrappedTitle/settingSlots/lineStride/alignMode/multiPage/pageScroll/cornerIcon(id0)/lastPageReached/itemCount/openClock/itemIcons/itemTexts/itemAligns/iconMaxH/iconMaxW/bodyPages/boxX..boxH/titleY/textTopY/alpha/colors/titleFont/bodyFont/itemFont/noContent | 逐字段见 i_clean.java 注释 (行号 :16-46) |
+
+## com/nokia/mid/appl/bloxx/a.java → NokiaLangPack (JD+3)
+| b/c/a | instance/stream/locale | lang.<locale> 回退 lang.xx — nokia 版 lang.* 布局出处实锤 |
