@@ -1056,6 +1056,15 @@ function maxTowerAngle() { // GameModel.as:236-239
 }
 function swayAngle(dt) {
   const s = G.sway;
+  if (G.j2me) {
+    // J2ME 塔摇摆 (House.q:1816-1841, T48-2): bw=(bw+dt)%3600 正弦, cS=k(bw/10) 定点 sin;
+    // 振幅 bv=min(bs/2+|bm|/20, bs*(bs/2+|bm|/20)/6) (N:2966); 摆角 br=-(cS*bv)/10000
+    s.bw = ((s.bw || 0) + dt) % 3600;
+    const cS = Math.sin(2 * Math.PI * (s.bw / 10) / 360);           // k(bw/10) 查表等价
+    const bv = Math.min(G.stacked / 2 + Math.abs(G.currCtr) / 20,
+      G.stacked * (G.stacked / 2 + Math.abs(G.currCtr) / 20) / 6);
+    return -(cS * bv) / 10000 * 57.3;                                 // br(度): H5 旋转 z 用度
+  }
   s.timer += dt / 20 / 30;                            // Tipper.updateTower: delta/=swayVolume(20); timer+=delta/30
   return maxTowerAngle() * s.adj * Math.cos(s.timer); // Tipper.as:80-81
 }

@@ -655,3 +655,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   默认启用(Flash hookX/Y 保留可切)
 - 全量回归: smoke 20 / tower 7 / city 11 PASS
 - T48 差异表剩余: 8槽并发下落/多块连锁/落点预览/程序天空/中断续档/塔摇摆 bw%3600 参数
+## 第 90 轮（2026-09-30）— T48-2: J2ME 塔摇摆落地
+
+- House.q:1816 移植: bw=(bw+dt)%3600, cS=sin(bw/10°), 振幅 bv=min(bs/2+|bm|/20, bs*(...)/6) (:2966),
+  摆角 br=-(cS*bv)/10000 → swayAngle G.j2me 分支; bm=塔累计偏移(N:2859 落块时+)≈H5 currCtr
+- 全量回归: smoke 20 / tower 7 / city 11 PASS
+- T48 进度 2/6: 摆钩✅ 摇摆✅ | 待: 多块连锁/落点预览/程序天空/中断续档/8槽
