@@ -1367,7 +1367,17 @@ console.log("--- 商店INFO原文比对 ---");
   console.log("SHOP_INFO 与原版逐字节一致 (" + checked + " 条)=" + (bad.length === 0) +
     (bad.length ? ' 差:' + bad.join(',') : ''));
 }
-// ---- STORY 说话人码逐句比对 (N+95)// ---- STORY 说话人码逐句比对 (N+95): data.js vs deobf/data/scenario_parsed.json ----
+// ---- STORY 翻译 QA (TCS+22): 中文文本无 >3 字母残留英文片段 ----
+console.log("--- 翻译QA ---");
+{
+  const OK = new Set(['MLRS','MTHEL','Su37']);
+  let n = 0;
+  for (const m of Object.keys(STORY)) for (const [, tx] of STORY[m]) {
+    n += ((tx.match(/[A-Za-z]{4,}/g) || []).filter(f => !OK.has(f))).length;
+  }
+  console.log("全 44 关中文文本无残留英文/法文片段=" + (n === 0) + " (残留 " + n + " 处)");
+}
+// ---- STORY 说话人码逐句比对 (N+95): data.js vs deobf/data/scenario_parsed.json ----
 console.log("--- 剧情码序列比对 ---");
 {
   const fsx2 = require('fs');

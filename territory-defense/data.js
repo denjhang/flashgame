@@ -130,7 +130,7 @@ const STORY = {
 ["SAlexNeutre1","他们也许只是碰巧在合适的时机对上了频率……安德鲁，严肃点，肯定有人告诉了他们。"],
 ["DSarahNeutre","※低声※ 嗯，米夏尔，我得跟你谈谈。"],
 ["GMickNeutre2","没问题莎拉，现在谈也行。"],
-["DSarahSurprise","※ discret ※ 呃，我是说……私下谈……"],
+["DSarahSurprise","※ 低声 ※ 呃，我是说……私下谈……"],
 ["SAlexNeutre2","坏消息。我刚接到线人电话……朱将军和主席的侄子沈明就在营地以南，他们亲自来给部队打气了。"],
 ["RAndrewRaleur","什么？那个疯子亲自来了？"],
 ["DMickNeutre1","你是说，他们就在营地以南几百米？"],
