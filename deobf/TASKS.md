@@ -24,11 +24,14 @@
 
 ## 三、当前任务（自查自纠，持续自更新；做完一项划掉并补新项）
 
-- [ ] 体验打磨（方向4）：对白框 dlgBox 排版与原版 980_242 字段位置核对
-  （dlgWho/dlgTxt 字号、行距、dlgNext 提示位置 vs 原版 textfield 坐标），仅离线可判部分
+- [ ] 文档（方向5）：已定案事实补录「对白字号 14px/leading 2px（EditText 1156）
+  」「dlgNext/dlgWho 说话人名为 H5 附加件（原版 979 仅 nextDialogue，无名字字段）」
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+29: dlgBox 排版对齐原版（方向4）——取证 EditText 1156（实例 dialogue,
+  放置于 980 深度3）: FontHeight=280twips=14px、白色、左对齐、Leading=40twips=2px；
+  H5 dlgTxt 12px/1.55 → 14px/1.3，dlgWho 12→14px，加防回归断言（冒烟 190 项）
 - [x] TCS+28: 文档漂移修正（方向5）——README 冒烟计数 182→189、
   逐轮记录指针 PROGRESS.md→TCS_LOG.md（历史轮保留注记）
 

@@ -28,3 +28,14 @@
   「逐轮记录」指针由共享 PROGRESS.md 改为 TCS 专属 TCS_LOG.md（历史轮注记保留）。
 - 复核：三件套 node --check 通过；冒烟 189 项全 `=true`、exit 0。
 - 本轮仍未做：方向4（dlgBox 排版 vs 原版 textfield 坐标核对）已补入任务书「三」，下轮执行。
+
+## TCS+29（2026-09-26）dlgBox 排版对齐原版（方向4）
+
+- 取证链：PlaceObject2 (chid:1156, dpt:3, nm:dialogue) 放入 980 → EditText 1156
+  解码（swf_dump 003cba02 + 字节级 bit 解码）：FontID 3、FontHeight=280twips=**14px**、
+  颜色 FFFFFF、左对齐、Leading=40twips=2px、自动宽（rect 宽 0，autosize）。
+- H5 修正：#dlgTxt 12px/1.55 → **14px/1.3**（14px 默认单倍 + 2px leading ≈ 1.3）；
+  #dlgWho 12 → 14px（说话人名行为 H5 附加，字号跟随正文）。
+- 防回归：冒烟新增断言（dlgTxt 14px/1.3 + dlgWho 14px）→ 190 项全 `=true`、exit 0；
+  三件套 node --check 通过。
+- 本轮仍未做：方向5（已定案事实补录两条）已入任务书「三」，下轮执行。

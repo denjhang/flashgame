@@ -1741,6 +1741,11 @@ console.log("--- 对白演出素材 ---");
   console.log("演出接线 (dlgFond/dlgActor 首字母选框+去前缀立绘)=" +
     (hj.includes('id="dlgFond"') && gj.includes("assets/story/fond/' + code.charAt(0)") &&
      gj.includes("assets/story/perso/' + label")));
+  // TCS+29: 对白字号对齐原版 EditText 1156 (实例 dialogue): FontHeight=280tw=14px,
+  //   Leading=40tw=2px → font-size:14px + line-height:1.3 (index.html 内联注释同步)
+  console.log("对白字号=原版14px/leading2px (dlgTxt/dlgWho)=" +
+    (/#dlgTxt \{[^}]*font-size:14px; line-height:1\.3/.test(hj) &&
+     /#dlgWho \{[^}]*font-size:14px/.test(hj)));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
