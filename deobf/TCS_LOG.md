@@ -333,3 +333,14 @@
 - 冒烟断言更新（一次全额 100HP/磁场 9 帧/持续受击全额保持+光环重开 7 次）
   → 208 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+58（2026-09-26）R 键满血怪癖对齐（方向2，行为修正）
+
+- 取证：819 repairIfCan pcode——满血时 r3==0 → 文本 "no reparations needed"、
+  priceToPay=0；仍执行 euros<0?否 → 扣 0 + etat=etatMax + selectionUnite.start()
+  （814_1 on(press) 与 6_1 keyDown(82) 都直接调它，无 hp<max 前置守卫）。
+- **修正**：H5 两处提前拦截（R 键 `sel.hp < sel.maxHp`、修理条点击
+  `price<=0 return`）→ 移除，满血按 R/点修理条现在照播 selectionUnite、
+  扣 0 元（原版怪癖同构）。
+- 断言 +1 → 冒烟 209 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

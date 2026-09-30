@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+58: R 键满血怪癖对齐（方向2, **行为修正**）——原版 repairIfCan:
+  满血时 priceToPay=0 → 照样扣款(0)+selectionUnite, 无 cannot ("no reparations
+  needed" 只改条上文本)。H5 两处 (R 键 guard sel.hp<max / 修理条点击
+  price<=0 return) 都提前拦掉 → 移除守卫。断言入冒烟（209 项全绿）
+
 - [x] TCS+57: 自动修理语义对齐（方向2, **行为修正**）——原版 autoRepair()
   (185/86_1, 与修理条同构) = 一次性全额修复 (2×缺口, 够钱才修), 触发点 =
   6_327 伤害分支 (掉血未毁时), 非持续回血。H5 旧实现每 tick 渐回 5HP 且

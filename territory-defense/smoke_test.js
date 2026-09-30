@@ -1859,6 +1859,11 @@ console.log("--- 修理费 (819) ---");
   const bodySlot = gj.slice(gj.indexOf('SU37.pending = null', iSlot), okSlot);
   console.log("槽位成功静默+失败cannot=" +
     (!bodySlot.includes('playSfx') && gj.slice(iSlot, bodySlot.length && iSlot + 120).includes("cannot")));
+  // TCS+58: R 键/修理条 满血怪癖 (repairIfCan priceToPay=0 照播 selectionUnite,
+  //   无 cannot; 814_1 on(press) 与 6_1 keyDown(82) 同源)
+  console.log("R修理满血=照播selectionUnite(原版怪癖)=" +
+    (!gj.includes('if (price <= 0) return;') &&
+     !gj.includes('if (sel && sel.hp < sel.maxHp)')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

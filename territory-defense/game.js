@@ -3196,7 +3196,7 @@ cv.addEventListener('click', (e) => {
       }
       if (cx >= px + 4 && cx <= px + 240 && cy >= py + 56 && cy <= py + 77) {
         const price = repairPrice(sel0);
-        if (price <= 0) return;
+        // 原版 814_1 on(press) → repairIfCan(): 满血 priceToPay=0 照播 selectionUnite
         if (G.euros < price) playSfx('cannot', 0.4);
         else { G.euros -= price; sel0.hp = sel0.maxHp; playSfx('selectionUnite', 0.4); }
         return;
@@ -3237,8 +3237,9 @@ window.addEventListener('keydown', (e) => {
     }
   }
   if (k === 'r') {   // 原版 819 repairIfCan(): 全额修复, 扣 repairPrice
-    if (sel && sel.hp < sel.maxHp) {
+    if (sel) {
       const price = repairPrice(sel);
+      // 原版怪癖: 满血时 priceToPay=0 → 照样走扣款(0)+selectionUnite, 无 cannot
       if (G.euros < price) playSfx('cannot', 0.4);
       else { G.euros -= price; sel.hp = sel.maxHp; playSfx('selectionUnite', 0.4); }
     }
