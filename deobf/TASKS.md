@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+40: Su37 空袭参数复核（方向2）——834/frame_1/PlaceObject2_793_23
+  load 权威: puissance=500, impact=260; H5 POWER/IMPACT 逐值一致, 冷却
+  comptDispo=60×1000ms=60s 亦同。断言入冒烟（199 项全绿）
+
 - [x] TCS+39: MTHEL 激光复核（方向2）——原版 obus frame13 (chid399 load):
   _height=目标距离, 同帧 fireOnEnnemi 结算, 只播光束动画 (GAME_LOGIC 56 行
   "无弹道直接结算"); H5 shellHit 即发即中 + beams 12 帧光束, 语义一致且已有

@@ -140,3 +140,12 @@
   与原版语义一致；冒烟本就有实战断言（当帧掉血 120 = MTHEL 单发威力）。
   本轮补接线断言 +1 → 198 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+40（2026-09-26）Su37 空袭参数复核（方向2）
+
+- 取证：deobf/scripts/DefineSprite_834/frame_1/PlaceObject2_793_23 load——
+  `puissance = 500; impact = 260;`（弹体属性）；冷却 785_17 权威
+  comptDispo=60×chargeBombes 1000ms = 60 秒。
+- 结论：H5 SU37.POWER=500 / IMPACT=260 / COOL_MS=60000 逐值一致，无漂移。
+  断言 +1 → 冒烟 199 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

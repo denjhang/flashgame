@@ -1794,6 +1794,11 @@ console.log("--- 修理费 (819) ---");
   console.log("MTHEL 激光=即发即中+laser 光束=" +
     (gj.includes("MTHEL: 'laser'") && gj.includes("SHELL_KIND[turretId] === 'laser'") &&
      gj.includes('G.beams.push')));
+  // TCS+40: Su37 空袭参数 (834/frame_1/PlaceObject2_793_23 load 权威:
+  //   puissance=500, impact=260; 冷却 comptDispo=60×1000ms=60s)
+  console.log("Su37 参数=原版 500/260/60s=" +
+    (gj.includes('POWER: 500') && gj.includes('IMPACT: 260') &&
+     gj.includes('COOL_MS: 60000')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
