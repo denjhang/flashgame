@@ -1407,6 +1407,7 @@ function loop(now) {
 
     // 挂钩待放积木 (Crane.updateBlock: targetSpr 随钩, _rotation = -(endx-320)/5 度, 挂点 hook.y+100)
     if (ready && !G.falling && !G.over && G.hangingFor !== G.stacked) {
+      G.hangT = performance.now();               // House.ch: 挂起时刻 (h:3392 cg-ch<600 瞄准窗)
       if (needRoof(G.stacked)) G.trophyRoof = G.cleanTower; // Crane.setTarget: trophyRoof = needRoof && cleanTower
       if (G.hanging) craneGroup.remove(G.hanging);
       const tpl = blockTemplate(G.stacked);
@@ -1434,6 +1435,21 @@ function loop(now) {
       } else {
         G.hanging.rotation.z = 0;                  // 首块/屋顶块直立 (else 分支 :76-80)
         hookPlane.rotation.z = 0;                  // setTarget: hookSpr._rotation=0 (Crane.as:59)
+      }
+      // J2ME 瞄准鸟 (House.h:3390-3431, T48-4): 挂起 600ms 内在预测落点画 ai 鸟 3 帧闪烁
+      if (G.j2me && G.hangT && performance.now() - G.hangT < 600) {
+        const px = craneGroup.position.x + 60;      // 简化: 挂钩右侧 (原版 bi[by] 3D 投影点)
+        const py = craneGroup.position.y - 70;
+        const ph = Math.floor((performance.now() - G.hangT) / 50) % 3;  // n6 = n2/50%3
+        if (!G.aimBird) {
+          const bm2 = new THREE.SpriteMaterial({ map: G.txFX[7] || G.texStar, transparent: true });
+          G.aimBird = new THREE.Sprite(bm2);
+          G.aimBird.scale.set(48, 14, 1);
+          scene.add(G.aimBird);
+        }
+        G.aimBird.visible = true;
+        G.aimBird.position.set(px - ph * 13, py, 4);
+      } else if (G.aimBird) G.aimBird.visible = false;
         G.hanging.position.set(-(G.hanging.userData.cx || 0), -60 - (G.hanging.userData.cy || 0), 0);
       }
     }
