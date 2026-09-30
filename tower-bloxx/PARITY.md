@@ -1,5 +1,19 @@
 # Tower Bloxx H5 与原版全面对差清单（PARITY）
 
+> ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
+>
+> **T1. 摆钩初始相位对齐**：CPath.init 的 aOffset=(a+180)%360 且 ccw=!cw（CPath.as:30-31,38-43），
+> 首摆方向/相位与 H5 的 sin/cos 起点不同。取证后改 h5/game.js 的 hookX/hookY 相位。
+> **T2. dropY 语义**：原版首块落程到 dropY=400、之后 340（Crane.as:57,201），影响首块下落时长；
+> H5 目前落点直接是 landingY。评估并对齐。
+> **T3. tipFlags 首次提示队列**：restoreModel 恢复 tipFlags（GameModel.as:86），首次游玩按
+> STT_INSTR1→TIP_INSTR_BUILD 等顺序弹提示（GameState.as:218-231）。H5 无提示系统。
+>
+> **待办池**（T1-T3 做完后按序取）：城市塔原版图形替换 CSS 近似 / menu_spr 按钮热区实测校准 /
+> J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
+>
+> （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
+
 盘点源：`scripts/scripts/__Packages/bz/esg/game/*.as`（Const/GameState/GameModel/GameSprites/
 CityMap/Tower/Crane/Tipper/ComboTimer/Person/HighScore）、时间轴脚本（paperdefense_fla）、
 J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
