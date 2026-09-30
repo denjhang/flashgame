@@ -426,3 +426,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   （明细 PARITY 10）; 唯一差距: FluidLayout noscale+alignC 的舞台居中 → body flex 居中补齐
 - 覆盖链收官: game 六主类 → anim 基类 → 时间轴脚本 → esg 根类, 反编译源四层全普查
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 46 轮（2026-09-30）— T21 J2ME 差异盘点（判定表）
+
+- 抽样 House.java 关键段(定点数/摆钩状态机/存档 RMS/MIDI/关卡阈值), 七维差异表落档 PARITY 11;
+  全部为"实现载体"级差异, 非玩法冲突 → 巩固"Flash=玩法权威, J2ME=3D 资产来源"判定
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS（零代码变更文档轮）

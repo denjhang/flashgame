@@ -2,9 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T21.【深度自查】J2ME 版差异盘点**：House.java 反编译源逐段过一遍（塔建造/城市视图/存档
-> 格式），列出 J2ME 与 Flash 版行为差异表——H5 以 Flash 为玩法权威（用户已定），差异表用于
-> 说明"哪边才是原版"，防审计时误判。
+> **T22.【函数】Faithful 度抽查回归**：从已对号的核心函数里抽 3 个（dropTarget/blockLanded/
+> checkTipQueue）做"逐行并排"复核——H5 代码 vs 原版 .as 并排读，找漏行/顺序差，产微修任务。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
 > 挂块 combo 银火花帧。
@@ -306,6 +305,22 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - StateMach/Animator/Recycler(接口+池): STT 分发在 GameState(T11), 池=GC; Utils(8):
   randRange/calcX/calcY/calcDist 内联等价, isClicked=hitTest → DOM 命中测试等价
 - 至此覆盖链完整: game 六主类+anim 基类+时间轴+esg 根类, 四层全普查
+
+
+### 11. J2ME 版差异盘点（第 46 轮, T21 ✅）——"哪边才是原版"判定表
+> H5 玩法以 Flash 版为权威（用户定调"J2ME 版动了诺基亚 3D 机能"= 3D 资产来源）。抽样
+> House.java(4420 行, 混淆) 关键段:
+| 维度 | J2ME (House.java) | Flash (bz/esg/game) | H5 取舍 |
+|---|---|---|---|
+| 渲染 | DirectGraphics 2D 投影自绘, 32/256 缩放 (:1393-94,2711) | 真 Flash 剪辑舞台 | M3G→GLB 真 3D (用户指定) |
+| 数值 | 定点 256=1.0 (>>8/:1879,1940) | 浮点 | 浮点 (Flash) |
+| 摆钩/判定 | u() 状态机 dv/dr 渐加 (:2258-2271), aW∈[0,3840] fixed | CPath 椭圆+Tipper (已逐行对号) | Flash |
+| 存档 | RMS DataInputStream (cj[] 数组, towermode/quickModeRS :412-623) | SharedObject twrblx_cookie | Flash 字段 |
+| 音频 | MIDI audio/midi Volume40 (o.java, r0 打包负数 id :1602-1605) | mp3 sng_*+9 sfx | Flash mp3 为主, MIDI 可选 BGM (第42轮) |
+| 关卡 | House.e(80)/aW 阈值 10240..12800 分段 | CITY_LEVEL_LIMITS 20 级 | Flash |
+| 高分 | 无网络/RMS | HighScore 三表 (第44轮已对号) | Flash |
+- 结论: 差异均为"实现载体"级, 非玩法规则冲突; 后续审计遇到 J2ME 数值不一致时以本表为准,
+  不再误判
 
 ## 实施顺序建议（P0 → P1）
 
