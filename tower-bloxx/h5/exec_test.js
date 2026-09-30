@@ -173,10 +173,15 @@ if (SCENARIO === 'city') {
   const cell0 = document.getElementById('cityGrid').children[0];
   cell0.onclick();
   // 放块至 10 层 (含屋顶)
-  await runRealtime(25, 30, () => globalThis.__drop && globalThis.__drop());
+  await runRealtime(25, 30, () => {
+    globalThis.__drop && globalThis.__drop();
+    const st = globalThis.__state();
+    if (st.lives < 3 || st.over) console.log('[dbg] lives=' + st.lives + ' stacked=' + st.stacked + ' over=' + st.over);
+  });
   console.log('[dbg] state=' + JSON.stringify(globalThis.__state()));
   check((globalThis.__dbg.lands || []).length >= 10, `城市塔建造落地 = ${(globalThis.__dbg.lands || []).length} (期望 ≥10)`);
-  // 过关 → 结算面板 OK → finishCityTower(true) → 放置+存档
+  // 过关 → 结算面板 OK → finishCityTower(true) 放置+回城+存档 (GameState.as:138-147)
+  await new Promise(r => setTimeout(r, 600));
   const sm = document.getElementById('summary');
   const okBtn = sm.querySelector('.ok');
   check(!!okBtn && !!okBtn.onclick, '结算面板 OK 按钮就绪');

@@ -260,7 +260,8 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   window.__dbg = { drops: 0, lands: [] };
   window.__drop = drop;                    // 执行测试钩子
   window.__state = () => ({ bt: G.blockTime, now: performance.now(), over: G.over,
-    vis: craneGroup.visible, falling: !!G.falling, city: hud.city.style.display });
+    vis: craneGroup.visible, falling: !!G.falling, city: hud.city.style.display,
+    lives: G.lives, stacked: G.stacked, pending: !!G.pendingCell });
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
 
 // ---- Build City: CityMap/GameModel 对号 ----
@@ -548,9 +549,10 @@ function gameOver(won) {
   hud.msg.style.display = 'block';
   // GameState.as:128: 胜利 fanfare 按 trophyRoof 分 med/good; 失败 bad (:122)
   playSound(won ? (G.trophyRoof ? 'snd_fanfare_good' : 'snd_fanfare_mediocre') : 'snd_fanfare_bad');
-  if (won) showSummary();
-  if (!won) {
-    // 塔散架 (Tower.clearBlocks(topple))
+  wonRef.won = won;
+  showSummary(); // GameState.as:138-147: 输赢都走 showSummary; OK 后 afterHighScore = menu/city
+  if (!won && !(G.cityMode && G.pendingCell)) {
+    // 塔散架 (Tower.clearBlocks(topple)); 城市模式失败楼保留待无屋顶放置
     for (let i = G.blocks.length - 1; i >= 0; i--) {
       const b = G.blocks[i];
       b.vy = 0; b.vx = (Math.random() - 0.5) * 0.3; b.vr = (Math.random() - 0.5) * 0.02;
@@ -558,12 +560,7 @@ function gameOver(won) {
     }
     G.blocks = [];
   }
-  // panDown min(DUR_PAN_DOWN=3000, stacked*250) + GAME_OVER_DELAY=1000 (Tower.as:152, Const.as)
-  if (!won) {
-    if (G.cityMode && G.pendingCell) { // 0 命未达目标: 楼仍无屋顶入城 (TIP_OUT_OF_TRIES)
-      setTimeout(() => finishCityTower(false), Math.min(3000, G.stacked * 250) + 1000);
-    } else setTimeout(startGame, Math.min(3000, G.stacked * 250) + 1000);
-  }
+  // panDown 后由结算面板 OK 驱动后续 (放置/回菜单); 无自动重开 (GameState.as:138-147)
 }
 
 // ---- 结算面板 (GameSprites.showSummary:48-59 + GameModel.getSummary:204-207 + Const.TIP_SUMMARY1-3/MSG_RESTART) ----
@@ -588,10 +585,12 @@ function showSummary() {
     '<div class="ok">Click here to play again</div>';                               // Const.MSG_RESTART
   hud.summary.style.display = 'block';
   hud.summary.querySelector('.ok').onclick = () => {
-    if (G.cityMode && G.pendingCell) finishCityTower(true); else startGame();
+    if (G.cityMode && G.pendingCell) finishCityTower(wonRef.won);
+    else showMenu(); // afterHighScore = STT_MENU (GameState.as:145)
   };
 }
 const toppled = [];
+const wonRef = { won: false }; // gameOver(won) → 结算 OK 回调用
 
 // ---- Crane: 摆钩 ----
 let t0 = performance.now();
