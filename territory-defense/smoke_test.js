@@ -1760,6 +1760,9 @@ console.log("--- 初始经济 (6_333) ---");
   const gj = fsx.readFileSync('game.js', 'utf8');
   console.log("新局初始值=原版 850/6/0 (euros/interest/score)=" +
     /euros: 850, interest: 6, score: 0/.test(gj));
+  // TCS+33: 卖出价公式 (6_1 keyDown 83): floor(etatC/etatM * (price*0.75))
+  console.log("卖出价=原版公式 floor(hp/maxHp*(cost*0.75))=" +
+    gj.includes('Math.floor(this.hp / this.maxHp * (this.cost * SELL_RATIO))'));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

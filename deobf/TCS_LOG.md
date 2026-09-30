@@ -69,3 +69,13 @@
   读档路径（_root 同名 → H5 localStorage 字段）此前存档往返断言已覆盖。
 - 防回归断言 +1 → 冒烟 192 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+33（2026-09-26）卖出价公式抽查（方向2）
+
+- 取证：6_1 keyDown(key==83) → `priceOfSell = Math.floor(etatC/etatM * (price*0.75))`
+  （price=structureData[structure][1], etatM=[0], etatC=当前血），euros 累加后
+  unitEtat.destruction()。H5 sellPrice() 语义一致但乘法结合序不同
+  ((hp/maxHp*cost)*0.75)，极端浮点边界 floor 可差 1 → 分组照抄原版。
+- 断言 +1 → 冒烟 193 项全 `=true`、exit 0；三件套通过。
+  （插曲: 断言正则插入 eval 模板串被吃反斜杠 → 改 includes() 写法, 与 N+7x 教训一致）
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

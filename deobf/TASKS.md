@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+33: 卖出价公式抽查（方向2）——原版 6_1 keyDown(83):
+  floor(etatC/etatM × (price×0.75))；H5 分组改为照抄原版（避免浮点结合序差 1），
+  断言入冒烟（193 项全绿）。另: 利息公式(giveIntrest)已对齐(TCS 早期轮)
+
 - [x] TCS+32: 初始经济抽查（方向2）——原版 6_333 load: loadGame ? _root 同名字段
   : 新局 euros=850 / interest=6 / score=0（iUnlock=0 同文件 57 行）；H5 game.js
   初始 G 与 loadGame 路径均一致。断言入冒烟（192 项全绿）

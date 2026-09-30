@@ -1648,7 +1648,8 @@ class Turret {
       }
     }
   }
-  sellPrice() { return Math.floor(this.hp / this.maxHp * this.cost * SELL_RATIO); }
+  // 原版 6_1 keyDown(83): Math.floor(etatC/etatM * (price*0.75)) — 分组照抄避免浮点边界差 1
+  sellPrice() { return Math.floor(this.hp / this.maxHp * (this.cost * SELL_RATIO)); }
 }
 
 // ---------------- 炮弹 (溅射按原版三段公式) ----------------
