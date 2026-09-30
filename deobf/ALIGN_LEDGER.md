@@ -138,3 +138,23 @@
 ### R6 菜单图标 12 张逐张核 ✅ TCS+70
 - 12 文件全部 75x62；抽样读图 pluton.png（导弹发射车照片）/radar.png
   （雷达天线）内容与命名相符；来源 1025 帧库（早期轮）。结论：对齐。
+
+### R7 选中视觉 775/778 ✅ TCS+71
+- 778 viseurUnit 9 帧：帧 1-4 有内容（271B），5-9 空白（93B）= 闪烁周期；
+  H5 SEL_CROSS 用 1..4 轮播（G.frame/6）= 忠实闪烁。775 cerclePortee 单帧
+  100x100，H5 SEL_RANGE 缩放 直径=射程×2 ✓（OCEMM 建造预览也复用, TCS+67）。
+
+### R8 阴影 ombre ✅ TCS+71
+- exports.txt 全系列 _ombre 图；原版 428 enterFrame: rotation=车体向,
+  _x/_y=+4, colorTransform alpha≈0.352 全黑。
+- H5: SHADOW_IMG/SHADOW_RECT 映射 + SHADOW_OFFSET=4 + rotate(u.rot+π/2) +
+  SHADOW_ALPHA，阵亡中不画（=原版 removeMovieClip(ombre)）。对齐。
+
+### R9 story 立绘 39 张 ✅ TCS+71
+- 计数 39 ✓；抽样读图 ShenNeutre（参谋人员照）/ZhuRapport（将领礼服照）
+  与角色设定相符（原版即真人照片抠像风格）。冒烟已有 404 覆盖断言（TCS+23）。
+
+### F1 unshowInfoOnUnit（函数补卡）✅ TCS+71
+- 原版：viseurUnit/cerclePortee _x=-500 移出 + afficheUnit 清空。
+- H5：G.selected=null + 选中视觉只在 t===G.selected 时绘制（等效移出）。
+  空格 depressSpace 亦触发（TCS+60）。对齐。
