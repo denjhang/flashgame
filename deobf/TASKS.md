@@ -22,9 +22,31 @@
    `node --check` 三件套 + 冒烟全绿后才 `git commit + push`（前缀 TCS+N 递增）。
 5. 不碰 territory-defense 之外的任何项目目录；不做破坏性操作。
 
-## 三、当前任务（自查自纠，持续自更新；做完一项划掉并补新项）
+## 二之一、每轮配额（2026-09-26 用户指令，硬性）
 
-- [ ]（空）
+- 定时任务改为每 10 分钟一轮；【每轮至少完成 3 个账本条目】：
+  至少 2 个资源项（B 组）+ 至少 1 个函数项（A 组），或等价工作量
+  （一条复杂项可顶 2 条，须在日志注明折算）。
+- 每个条目的完成标准：取证（原版行号/帧号）→ H5 对照 → 结论（对齐/修正/定案）
+  → 必要时加断言。禁止只跑回归不做事、禁止一轮只做一条就停。
+- 每轮结束更新本清单勾选 + TCS_LOG.md 账本进度行「A: x/6 族, B: x/4 组」。
+
+## 三、当前任务（对齐账本推进；每轮定量，见「二之一」配额）
+
+### A. 函数账本（原版具名函数 95 个 = DefineFunction2×82 + DefineFunction×13）
+普查（TCS+63）：绝大多数已对号或定案废弃；按族补签「H5 对应点+证据行号」签名卡：
+- [ ] A1 单位族: selectUnit/changeCheckpoint/accelere/roule（428）
+- [ ] A2 调度族: startMission/refreshVectors/newEvents/declencheMissionSuivante
+- [ ] A3 武器族: fireOnEnnemi/createObus/createExplosion/createEclat/chargeBombes
+- [ ] A4 索敌族: getTarget/OCEEF/OCEEM/askPermissionOfFire + e1..e14 编排
+- [ ] A5 UI/存档族: saveData/loadData/actualiseInfo/showInfoOfItem/setScores
+- [ ] A6 散件定案表: edith/Yamato/playBirds/getSound/getPwd 等（外链/音效）
+
+### B. 资源账本（assets 共 1948 文件）
+- [ ] B1 枪口/弹体系: shells/303(14帧)/304(29)/391(29)/400_obus(13) 逐帧核对引用集合
+- [ ] B2 敌塔序列: eturrets_spr/80(186帧)/128(157)/122(164)/164/83/161/167 逐帧核对
+- [ ] B3 散件判定: turrets/56..88.png、eturrets/100..172.png 逐一写定案表
+- [ ] B4 抽样复核: menu/turrets/units/ui/explosion 已有断言组抽查 5 组
 
 ## 三之一、已完成于本轮（滚动记录）
 
