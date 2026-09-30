@@ -373,6 +373,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 下方向键/PageDn（Key.isDown 34 → e.code PageDown, 已接）
 - ✅ 菜单鼠标导航（menu 位图五按钮）/城市点击定位（原版亦为点击非拖放）
 - ⬜ 暂停按钮: 原版脚本无 pause 逻辑 (全源码无引用), 记档不复刻
+- ✅ 移除 H5 自创常驻提示条 (第 64 轮): #hint/#cityHint 原版不存在, 提示职能归 tipFlags
+  弹窗 (TIP_INTRO 等) 与城市状态条 (648 队列)
 
 
 ### 8.1 anim 基类层普查（第 38 轮, T13 ✅）

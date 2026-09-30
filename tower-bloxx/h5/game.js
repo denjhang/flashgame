@@ -48,7 +48,7 @@ const hud = {
   city: document.getElementById('city'), cityGrid: document.getElementById('cityGrid'),
   cityMenu: document.getElementById('cityMenu'), cityLevel: document.getElementById('cityLevel'),
   cityPop: document.getElementById('cityPop'), cityProgressFill: document.getElementById('cityProgressFill'),
-  cityStatus: document.getElementById('cityStatus'), cityHint: document.getElementById('cityHint'),
+  cityStatus: document.getElementById('cityStatus'),
   titleScr: document.getElementById('titleScr'), menuScr: document.getElementById('menuScr'),
   splashScr: document.getElementById('splashScr'),
   menuSub: document.getElementById('menuSub'),
@@ -487,7 +487,6 @@ function renderCity() {
   dz.innerHTML = '<div class="sw">🚜</div>Dozer';
   dz.onclick = () => { sndClick(); G.dozerMode = !G.dozerMode; renderCity(); }; // placeInDozer/STATUS_DOZER
   hud.cityMenu.appendChild(dz);
-  hud.cityHint.textContent = '选塔型 → 点网格建造（目标高度 10 层/塔）。邻接规则：红需蓝邻，绿需蓝+红，黄需蓝+红+绿（Const.STATUS_CITY_RULES）';
 }
 function cityCellClick(col, row) {
   // dozer 模式: 点已有塔拆除 (placeInDozer:398-410, snd_destroy)

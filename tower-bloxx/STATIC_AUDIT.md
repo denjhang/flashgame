@@ -522,3 +522,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 巡检 CRANE_EMPTY/HOOK/CABLE 三态 (Crane.as:30/58): hook_spr(419) 导出帧为纯黑占位,
   cable 子剪辑位图未导出 → 三态视觉无原版素材, image_12 静态钩为最终近似 (永久记档)
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 65 轮（2026-09-30）— T35 回归维护 + 移除自创提示条
+
+- #hint/#cityHint 原版不存在 → 移除 (提示职能已在 tipFlags 弹窗 + 648 状态条队列)
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
