@@ -18,15 +18,15 @@
 | f.java | 141 | 11 | ✅ JD+1 | f_clean.java (SettingsStore) |
 | g.java | 656 | 9 | ✅ JD+1 | g_clean.java (ResourceStore; 153 项 id 表保留原文) |
 | GameMIDlet.java | 476 | 26 | ✅ JD+2 | GameMIDlet_clean.java |
-| k.java | 1491 | ~60 | ⬜ | |
-| i.java | 867 | ~25 | 🔶 JD+3 (12/25, 绘制内部待 JD+4) | i_clean.java (MessageRenderer) |
+| k.java | 1491 | 22 | ✅ JD+4 | k_clean.java (CityMapScreen) |
+| i.java | 867 | 21 | ✅ JD+4 (完整) | i_clean.java (MessageRenderer) |
 | j.java | 584 | 23 (含 8 桥) | ✅ JD+3 | j_clean.java (MenuScriptInterpreter) |
 | p.java | 209 | 10 | ✅ JD+3 | p_clean.java (PhoneCanvas) |
 | h.java | 603 | 19 | ✅ JD+2 | h_clean.java (HallOfFameScreen) |
 | House.java | 4420 | 98 | ⬜ (字段表起步见 FIELDS.md) | |
 | com/.../a.java | ~120 | 4 | ✅ JD+3 | nokia_lang_clean.java (NokiaLangPack) |
 
-**方法计数: 149 / ~340 (JD+3)。类: 15/18。**
+**方法计数: 175 / ~340 (JD+4)。类: 16/18。**
 
 ## JD+1 (2026-10-01) 小类全量 67 方法
 - a→ScreenCallback: 空标记接口 (extends e)。
@@ -73,3 +73,14 @@
 - com/nokia/.../a→NokiaLangPack: nokia 版 lang.* 读取器实锤 (locale 回退 lang.xx)。
 - 新证实: GameMIDlet.q() case0 (f.g==0) 返回 j=菜单屏; "splashMode"(k) 实为菜单模式。
 - 下一轮: i.java 绘制内部 (JD+4) → k.java (1491, 游戏主屏/具体 MIDlet 子类) → House。
+
+## JD+4 (2026-10-01) i 收尾 + k 全量
+- i→MessageRenderer 完整 21 方法: b(Graphics) 菜单列表 (光标高亮/禁用色/图标偏移±1/上下箭头),
+  c/d(Graphics) 消息框/文本框 (palette 底色边框), e(Graphics) 标题跑马灯 (1500ms/行+500ms 滚动),
+  a(4) CJK 折行分页 (空格/句号断点, \p 强制分页, 。悬挂补偿), 箭头图集 18x18×3 帧。
+- k→CityMapScreen 完整 22 方法: 城市视图全逻辑体。【关键定性】House.i:828/j:1003 (cityModeRS
+  写/读) 委托 k.n()/k.m() — RMS "citymode" 即 cityModeRS 本体 (House.e/f 城市人口为头两字段)。
+  里程碑提示队列 r[46] 与 zh 语言包逐条对上; V[21] 里程碑/ai/aj/al 解锁称号表/彩蛋 626428826。
+  aA 虚线相位 >>8=÷256 定点证实。
+- H5 表现层重做的权威依据已齐: k.a(Graphics) 即城市屏逐像素版式 (本次浏览器验证暴露的乱象全部可对表修)。
+- 下一轮: House.java (4420 行/98 方法, 分 3-4 轮) — 最后也是最大的类。

@@ -168,3 +168,33 @@
 
 ## com/nokia/mid/appl/bloxx/a.java → NokiaLangPack (JD+3)
 | b/c/a | instance/stream/locale | lang.<locale> 回退 lang.xx — nokia 版 lang.* 布局出处实锤 |
+
+## k.java → CityMapScreen (JD+4)
+| a | cityCells int[75]=25 格×3 (类型/人口/roof) — 城市地图本体 | b(int,int):放置写 / m() 读 |
+| b | buildableLevel int[25] (0-3 可建上限) | h() 邻接色判定 |
+| c | towerIcons Image[9] = r0 id71-79 | c() |
+| d | hudMsgShown | f() |
+| e/f | selTowerType(0-3)/uiMode(0 常,1 盖楼) | b(int,int) |
+| g/h | cityPopulation/cityLevel (V[21] 里程碑刻度) | g() |
+| i/j | selCol/selRow (-1=起重机位) | b(int,int) 光标 |
+| l | placeAnimActive (ab 3000ms) | b(int,int) |
+| n | milestoneLevel (al 称号档) | g() |
+| o/q | firstTipShown/cheatMode(at, 密码 626428826) | a(int,int) |
+| p | replaceLevel (aj 替换档, -1) | g() |
+| r | tipFlags boolean[46] 里程碑提示 | b(int,int) 队列 / n() 存 |
+| s/t | popFlashTimer/popFlashDigits | b(int,int) 人口闪烁 |
+| u/v | cranePopValue/mapFullFlag | b(int,int)/j() |
+| w | towerNames (状态条折行文本, 跑马灯 aD/aE/aC) | b(int,int) 尾段 |
+| L..U | id21 边框柱/id22 箭头滑块/id23 居民条/id24 起重机/id25-29 城市塔×5/id30 放置6帧/id31 摧毁6帧/id15,16,17 状态图标 | c() |
+| V[21] | 里程碑人口表 {0,75,…,19000} | 静态块 |
+| ai/aj/al | {0,3,6,10} 楼型解锁 / {8,12,14,16} 替换解锁 / {0,1,4,7,9,11,13,15,18,20} 称号档 | g() |
+| au | "626428826" 作弊密码 | a(int,int) 逐键比对 |
+| aB[16] | 行/列建筑连续范围 (虚线瓦片高亮边界) | h() |
+| aC/aD/aE | 状态条行数/跑马灯偏移/停留 2000ms | b(int,int) 尾段 |
+| aF/aG | 盖楼飞入 700ms/落定脉冲 2000ms | b(int,int) |
+| aA | 虚线相位 (>>8=÷256 定点!) | :917 |
+| ax | 格色脉冲 800ms | a(Graphics) |
+| aw | 放置前旧人口 (滚动起点) | b(int,int) |
+| W/X/Y | 新楼类型/人口/roof | a(int,int,int) |
+| Z/aa/k | 光标滚动偏移/150ms | b(int,int) |
+| RMS "citymode" | cityModeRS 本体: House.e/f + 34 标量 + aB[16] + b[25] + a[75]×3 + r[46] + z 续读位 | n() 写 / m() 读 — House.i/j 委托 |
