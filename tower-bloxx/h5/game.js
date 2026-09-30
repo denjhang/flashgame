@@ -1022,17 +1022,27 @@ function spawnFallingPerson(x, y) {
   }, 150);
 }
 
-function knockTopBlock() { // Tower.knockNextBlock
-  const top = G.blocks.pop();
-  // knockNextBlock:169-170: offset = 新顶块x − 被弹块x (确定性方向), wait=DELAY_FINAL_TUMBLE=250ms
-  const under0 = G.blocks[G.blocks.length - 1];
-  const kOff = (under0 ? under0.mesh.position.x + (under0.cx || 0) : G.currCtr)
-    - (top.mesh.position.x + (top.cx || 0));
-  pushBounce(top.mesh, kOff, 250);
-  spawnFallingPerson(top.mesh.position.x + (top.cx || 0), top.mesh.position.y + 40); // makeFallingPerson
-  changePopulation(-(top.pop || 0));             // makeFallingPerson:331 changePopulation(-popCount)
-  G.landingY -= BLOCK_H;
-  G.stacked--;                                   // Tower.as:176 setStackedBlocks(stackedBlocks - 1)
+function knockTopBlock(dir = 1) { // J2ME d(n2,n3):3007 — 撞塔按偏移深度连锁弹出 (T48-3)
+  // :2109: 连锁数 n8 = min(4, bs-1) - F() 命中层 + 1 (偏移越大弹得越深); n2 = 方向符号
+  const top = G.blocks[G.blocks.length - 1];
+  const base = G.blocks[G.blocks.length - 2];
+  const n7 = (top && base) ? Math.sign(base.mesh.position.x - top.mesh.position.x) || dir : dir;
+  let n8 = 1;
+  // 简化对齐: H5 无 F() 层命中索引, 用 |offset| 档: >128→2, >200→3, >256→4 (d 参数表 :2098 区域)
+  if (Math.abs(G.currCtr - TOWER_START_X) > 128) n8 = 2;
+  if (Math.abs(G.currCtr - TOWER_START_X) > 200) n8 = 3;
+  if (Math.abs(G.currCtr - TOWER_START_X) > 256) n8 = 4;
+  n8 = Math.min(n8, G.blocks.length - 1, 4);
+  for (let k = 0; k < n8; k++) {
+    const b = G.blocks.pop();
+    if (!b) break;
+    // d:3011-3030: 弹出块 aw=5, ay=-n2*45, aB=n2*400-(4-i)*30, aC=50+(4-i)*30
+    pushBounce(b.mesh, -n7 * 45 * 4, k * 60);
+    spawnFallingPerson(b.mesh.position.x + (b.cx || 0), b.mesh.position.y + 40);
+    changePopulation(-(b.pop || 0));
+    G.landingY -= BLOCK_H;
+    G.stacked--;
+  }
   const under = G.blocks[G.blocks.length - 1];
   if (under) G.currCtr = under.mesh.position.x + under.cx; // currCtr = 新顶块中心
 }

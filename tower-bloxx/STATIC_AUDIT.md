@@ -661,3 +661,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   摆角 br=-(cS*bv)/10000 → swayAngle G.j2me 分支; bm=塔累计偏移(N:2859 落块时+)≈H5 currCtr
 - 全量回归: smoke 20 / tower 7 / city 11 PASS
 - T48 进度 2/6: 摆钩✅ 摇摆✅ | 待: 多块连锁/落点预览/程序天空/中断续档/8槽
+## 第 91 轮（2026-09-30）— T48-3: 撞塔多块连锁落地
+
+- House.d:3007 移植: 连锁数 n8=min(4,bs-1)-命中层+1 (偏移越深弹越多), 方向 n7=下层x−顶层x 符号,
+  逐块 pushBounce(延迟 k*60) + 坠人 + 扣分; H5 用 |currCtr-TOWER_START| 档位近似 F() 层索引(已注明)
+- 全量回归: smoke 20 / tower 7 / city 11 PASS
+- T48 进度 3/6: 摆钩✅ 摇摆✅ 连锁✅ | 待: 落点预览/程序天空/中断续档/8槽
