@@ -1752,6 +1752,15 @@ console.log("--- 对白演出素材 ---");
     (hj.includes('id="openCurtain"') && hj.includes('curtainOpenOut .21s') &&
      gj.includes("openCurtain") && gj.includes('0.21s')));
 }
+// ---- TCS+32: 初始经济抽查 (原版 6_333 load: 新局 euros=850/interest=6/score=0,
+//      iUnlock=0; 读档走 _root 同名字段 → H5 loadGame 路径已有往返断言) ----
+console.log("--- 初始经济 (6_333) ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("新局初始值=原版 850/6/0 (euros/interest/score)=" +
+    /euros: 850, interest: 6, score: 0/.test(gj));
+}
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
 {

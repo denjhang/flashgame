@@ -59,3 +59,13 @@
   0.21s 淡出；958 = 空 EditText 'txt'（全库无代码引用）判调试遗留不复刻，
   956 = 955 用黑矩形。防回归断言 +1 → 冒烟 191 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+32（2026-09-26）初始经济抽查（方向2）
+
+- 取证：6_333 onClipEvent(load) 逐分支解码——`loadGame ? _root.<同名> : 默认`，
+  默认 euros=850 / interest=6 / score=0，iUnlock=0（同文件 57 行）；另有
+  scoreBonus=1 / interestSup=0 cookie 缺省（与已定案"废弃字段"一致）。
+- 结论：H5 game.js `euros: 850, interest: 6, score: 0` 与原版逐值一致；
+  读档路径（_root 同名 → H5 localStorage 字段）此前存档往返断言已覆盖。
+- 防回归断言 +1 → 冒烟 192 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。
