@@ -371,3 +371,12 @@
 - 结论：H5 `k === 'm'` → `G.mouseScroll` 翻转 + 侧栏 `set('tScroll',...)`
   同步，一致。无码改。三件套通过，209 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+62（2026-09-26）H/G 键复核（方向2）
+
+- 取证：6_1 keyDown——72: `afficheEtat` 血条开关 + `menuHealth` 帧同步；
+  71: zoom 全图 39%（realposmap 反算鼠标世界坐标）+ `menuZoom` 帧同步。
+- 结论：H5 `k==='h'`→showHp / `k==='g'`→toggleZoom（2412 起）+ 侧栏
+  tHp/tZoom 按钮同步（3151/3170），一致。无码改。三件套通过，
+  209 项全 `=true`、exit 0。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

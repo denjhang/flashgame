@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+62: H/G 键复核（方向2）——原版 6_1 keyDown(72): afficheEtat 血条
+  开关 + menuHealth 帧同步; keyDown(71): zoom 全图 39% + realposmap 换算 +
+  menuZoom 帧同步。H5 showHp/toggleZoom + tHp/tZoom 按钮同步一致。无码改
+
 - [x] TCS+61: M 键滚轮开关复核（方向2）——原版 6_1 keyDown(77): mouseScroll
   布尔翻转 + menuScroll 按钮帧 on/off 同步; H5 G.mouseScroll 切换 +
   set('tScroll',...) 同步一致。无码改
