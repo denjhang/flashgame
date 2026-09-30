@@ -1509,7 +1509,6 @@ class Turret {
     const s = STRUCTURES[id];
     this.cost = s.cost;
     this.x = x; this.y = y;
-    this.cost = s.cost;
     // 满血 = structureData[0] (原版 185/frame_1/PlaceObject2_86_1 load: _parent.etat =
     //   structureData[structure][0], etatJauge.maxEtat = etat); 建造价 = [1] (N+58 勘误)
     this.hp = this.maxHp = s.maxHp;

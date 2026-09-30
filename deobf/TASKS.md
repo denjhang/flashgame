@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+35: 全库重复定义扫描（TCS+34 教训推广）——顶层 function 零重名；
+  类方法 constructor/update 重名跨类(Unit/Turret)属合法；顺带清理 Turret
+  constructor 里重复的 this.cost 赋值。断言(顶层无重名)入冒烟(195 项全绿)
+
 - [x] TCS+34: 修理费取证 + 重复定义缺陷清除（方向2）——原版 819 refresh:
   priceToPay=round(2×(etatMax−etat))（pcode 前两行 r3/2、r3/r5 为混淆死代码）;
   repairIfCan: euros<priceToPay→cannot 音效, 否则扣款+etat=etatMax+selectionUnite。

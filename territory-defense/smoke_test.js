@@ -1775,6 +1775,13 @@ console.log("--- 修理费 (819) ---");
   console.log("修理费=round(2$/HP) 且无重复定义 (repairPrice/IfCan 各1)=" +
     (gj.includes('return REPAIR_COST * (t.maxHp - t.hp);') &&
      gj.includes('const REPAIR_COST = 2;') && nRep === 2));
+  // TCS+35: 全库重复定义扫描 (TCS+34 教训) — 顶层 function 不得重名
+  const seen = Object.create(null); let dup = 0;
+  for (const match of gj.matchAll(/function\s+([A-Za-z_$][\w$]*)/g)) {
+    if (seen[match[1]]) dup++;
+    seen[match[1]] = 1;
+  }
+  console.log("顶层函数无重名 (TCS+34 缺陷防回归)=" + (dup === 0));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
