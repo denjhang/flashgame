@@ -2,7 +2,7 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 56/98 (清单第14节), 资源 42/89 (13.1 已覆盖 id00-49 全部消费点)。**
+> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 98/98 ✅清单全清(第14节), 资源 89/89 ✅消费点全覆盖(13.1)。下一阶段: T46(id87/88 解码)+T48(按差异表修 H5)。**
 >
 > **T45.【资源】r0 素材鉴定与接入**：id00-80 拼图已读（滚轮/块面板/城市图标/软键/数值图标），
 > 对照 House.java 绘制调用（House.b(graphics,id,...)）确定每张的屏幕位置，替换 H5 对应 UI。
@@ -521,15 +521,20 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | r0id41 ak | 图标 | House:1345; :3307 draw(x+4, y, 锚40=右底) | 记档 |
 | r0id42-44 | 未直接引用 | (dC[] 间接: ce[i]=g.c(dC[i]) 28 特效帧) | 记档: 特效帧表 |
 | r0id46-80 | ce[] 特效帧池 | House:1319 ce[i]=g.c(dC[i]); :2722-2734 翻帧绘制 | 记档: J2ME 28 特效(对应 Flash ambient) |
+| r0id50-77 | 软键/箭头图标 28 张 | h.java/k.java 软键栏与方向箭头 (条件加载组) | 记档: MIDlet 导航 UI, H5 用鼠标 |
+| r0id78/79 | 图标 | 尾部图标组 | 记档: 待消费点精查 |
+| r0id81-86 MIDI | 6 曲 | o.java Manager "audio/midi" | ✅ 3 曲已接入(80/81/82), 84/85 短音效 T48 |
+| r0id87 | bin 686B sig=5811 | 未解码 | T46: 疑关卡/数据表 |
+| r0id88 | bin 1347B | 未解码 | T46 同上 |
 
 ## 14. House.java 99 方法清单（T47 逐行填: 语义/差异; 已读标✅）
 
 | # | 行 | 方法 | 参数 | 语义 | 与H5差异 |
 |---|---|---|---|---|---|
-| 1 | 303 | a | () |  |
-| 2 | 308 | b | () |  |
-| 3 | 312 | c | () |  |
-| 4 | 317 | d | () |  |
+| 1 | 303 | a | () | 启动 init: House.M() + 键名收集(52/54/50/56/53) | H5 无键名 UI |
+| 2 | 308 | b | () | BGM 切换 x.a(-2147483568,-1) | H5 playSong 等价 |
+| 3 | 312 | c | () | 失败标志 n=true + O=2 | H5 无 MIDlet 退出 |
+| 4 | 317 | d | () | 退出分派: e==2 城市菜单/e==5 暂停/默认 g() 存档 | H5 btnExit 等价 |
 | 5 | 334 | a | (int n2) | 音效开关查询 a(3)=f.b(8)==0 / a(1)=f.b(9)==0 | H5 soundOn/musicOn 等价 |
 | 6 | 344 | b | (int n2) | 音效开关写入+存档 | H5 localStorage 等价 |
 | 7 | 362 | c | (int n2) | 音效开关开启版: f.b(8,0)/f.b(9,0)+a(n,1)+存档 | 同上 等价 |
@@ -564,61 +569,61 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 36 | 2395 | a | (int n2, int n3, int n4, int n5, int n6) | lerp 关键帧插值: (d5-d4)*t/span+d4, u() 场景机用 | H5 setTimeout/线性tween 等价 |
 | 37 | 2402 | a | (int n2, int n3, int n4) | a(n2,n3,n4) 移位: n2>>n3/n4 | 工具函数, 内联等价 |
 | 38 | 2406 | a | (int n2, int n3, boolean bl) | 场景过渡变暗: de 时 RGB 三通道缩放 | H5 无场景过渡动画, 记档 |
-| 39 | 2423 | C | () |  |
-| 40 | 2441 | D | () |  |
+| 39 | 2423 | C | () | 特效清场: dc[2]+dd[300x7] 全零 | H5 scene.remove 等价 |
+| 40 | 2441 | D | () | 粒子生成: 速度=(base+i(n)-n/2)/(4-type), 定点 368640 | H5 sparks 近似, T48 核对 |
 | 41 | 2464 | a | (int n2, int n3, int n4, int n5, int n6, int n7, int n8) | a(7参) dc 粒子源配置: [0]=数 [1]=层 [3/4]=范围 [5/6]=速度 | H5 generateEffect 参数 等价 |
 | 42 | 2476 | w | (int n2) | w(dt) 粒子推进: 层进度 + pos+=vel*dt + (256*aW>>8)+384 视口换算 + dw 分派渲染 | H5 updateEffects 等价; 视口定点 384 偏移记档 |
 | 43 | 2541 | b | (Graphics graphics, boolean bl) | 粒子渲染分派: dw 1=雨丝线段/2=方块/3=其他, dd[] 按 dc 源分前后景 | H5 无雨天粒子(Flash 28 种特效替代), 待T48评估 |
 | 44 | 2573 | a | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) | 雨丝绘制: 两段 drawLine (AAAACC 变暗 via dg) | 同上 |
 | 45 | 2597 | a | (Graphics graphics, int n2, int n3, int n4) | 方块粒子: >1 白框蓝底, ≤1 蓝点 | 同上 |
-| 46 | 2611 | b | (Graphics graphics, int n2, int n3, int n4) |  |
-| 47 | 2625 | E | () |  |
-| 48 | 2645 | x | (int n2) |  |
+| 46 | 2611 | b | (Graphics graphics, int n2, int n3, int n4) | b(g,n2,n3,n4) 火花绘制: 10 色渐变 fillRect 随机散点 | H5 star 贴图火花 — 程序绘制 vs 位图, T48 评估 |
+| 47 | 2625 | E | () | E() 星星/特效推进: dB[9] 槽, 出界回收+dy 计数, cp 高度分层选型 | H5 fxSlots 同型(9槽!) 等价 |
+| 48 | 2645 | x | (int n2) | x(n2) 特效生成选型: cp∈dA[0..1] 高度段+dy 次数+i(100)<dA[2] 概率 | H5 generateEffect 三表同型 等价 |
 | 49 | 2702 | e | (Graphics graphics) | 已读 |
-| 50 | 2737 | a | (Graphics graphics, int n2, boolean bl, boolean bl2) |  |
-| 51 | 2775 | F | () |  |
-| 52 | 2789 | G | () |  |
-| 53 | 2919 | y | (int n2) |  |
-| 54 | 2934 | H | () |  |
+| 50 | 2737 | a | (Graphics graphics, int n2, boolean bl, boolean bl2) | a(g,n2,bl,bl2) 天空绘制: bO 色带插值 bM + 地平线+塔剪影 fillRect | H5 bg 位图 — 程序渐变 vs 位图, 记档 |
+| 51 | 2775 | F | () | F() 命中块索引: aA/az 距 bj/bi 256(=1px) 内反向扫描 | H5 offset 判定 等价(阈值同 256 定点) |
+| 52 | 2789 | G | () | G() 预留 | 记档 |
+| 53 | 2919 | y | (int n2) | y(n2) 人口增减: 正=bt+(bs/10+n2)+银行 bB+=bz*(2+bs/10*2); 负=bt-(bs/10-n2) | 与 Flash changePopulation 同公式! H5 已对号 |
+| 54 | 2934 | H | () | H() 银行结清: bt+=bB, bB/bz/bA 清零 | H5 finishCombo 等价 |
 | 55 | 2944 | z | (int var0) | 已读 |
-| 56 | 2997 | A | (int n2) |  |
-| 57 | 3007 | d | (int n2, int n3) |  |
-| 58 | 3058 | m | () |  |
-| 59 | 3082 | n | () |  |
+| 56 | 2997 | A | (int n2) | A(n2) 扣命: cN=cg, c.a(800) 音效, ba-=n2, 归零→bk=2(GAMEOVER) | H5 decTries+c.a(800)=snd 等价 |
+| 57 | 3007 | d | (int n2, int n3) | d(n2,n3) 撞塔弹块: n3>0 逐块弹出(aw=5, 速度±45/400); n3==-1 连锁倒塌(aw=7) | H5 knockTopBlock 单块 — J2ME 多块连锁, T48 待办 |
+| 58 | 3058 | m | () | m() 主分派(渲染循环) | H5 rAF 主循环 等价 |
+| 59 | 3082 | n | () | n(g) HUD 绘制 | H5 addHud 等价 |
 | 60 | 3203 | o | () | 已读 |
-| 61 | 3247 | a | (Graphics graphics, boolean bl) |  |
-| 62 | 3287 | f | (Graphics graphics) |  |
-| 63 | 3339 | b | (int n2, int n3, int n4, int n5, int n6) |  |
-| 64 | 3364 | g | (Graphics graphics) |  |
-| 65 | 3390 | h | (Graphics graphics) |  |
+| 61 | 3247 | a | (Graphics graphics, boolean bl) | a(g,bl) 总渲染: f==7→g(g); f==2→k.a; 塔模式 b(前后景)/f(3D)/h/k/j 分层 | H5 renderer 分层 等价 |
+| 62 | 3287 | f | (Graphics graphics) | f(g) 3D 相机: n.a(55f) FOV + lookAt(aV,aW,cI), bk 条件分支 | H5 camera 等价(FOV 55°) |
+| 63 | 3339 | b | (int n2, int n3, int n4, int n5, int n6) | b(5参) 3D 绘制原语: d 类封装, 888/999 特殊材质(cA/cB/cz) | H5 three.js 材质 等价 |
+| 64 | 3364 | g | (Graphics graphics) | g(g) 加载画面: cw 标题居中+进度条 | H5 无加载屏, 记档 |
+| 65 | 3390 | h | (Graphics graphics) | h(g) 落块瞄准提示: cg-ch<600ms 时块影/虚线(48x32) | H5 无落点预览, T48 评估 |
 | 66 | 3423 | i | (Graphics graphics) | 已读 |
-| 67 | 3466 | j | (Graphics graphics) |  |
-| 68 | 3584 | a | (Graphics graphics, int n2, int n3, int n4, int n5, boolean bl) |  |
-| 69 | 3599 | b | (Graphics graphics, int n2, int n3, int n4, int n5, boolean bl) |  |
-| 70 | 3614 | k | (Graphics graphics) |  |
-| 71 | 3624 | b | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) |  |
-| 72 | 3651 | b | (int n2, int n3) |  |
-| 73 | 3685 | f | (int n2) |  |
-| 74 | 3689 | a | (Command command) |  |
-| 75 | 3701 | p | () |  |
-| 76 | 3705 | g | (int n2) |  |
-| 77 | 3709 | I | () |  |
+| 67 | 3466 | j | (Graphics graphics) | j(g) HUD 文本绘制(分数/层高) | H5 addHud 等价 |
+| 68 | 3584 | a | (Graphics graphics, int n2, int n3, int n4, int n5, boolean bl) | a(5参+bl) 数字绘制: Z 图标每位 drawImage(x-n*7) | H5 文本数字 等价(id16 Z 消费点!) |
+| 69 | 3599 | b | (Graphics graphics, int n2, int n3, int n4, int n5, boolean bl) | b(6参) 小人绘制: aa/ab(=id12/13) 两帧 DirectGraphics 镜像 | H5 toon 56帧 — J2ME 仅2帧!记档 |
+| 70 | 3614 | k | (Graphics graphics) | k(g) 8 槽块状态渲染(bE) | H5 bounces/missFall 队列 等价 |
+| 71 | 3624 | b | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) | b(6参) 小人绘制底层(镜像变体) | 同上 |
+| 72 | 3651 | b | (int n2, int n3) | b(n2,n3) 键按下总入口(分发 k.a) | H5 keydown 等价 |
+| 73 | 3685 | f | (int n2) | f(n2) 键释放透传 | H5 keyup 等价 |
+| 74 | 3689 | a | (Command command) | a(Command) 软键命令: P=Exit → n=true | H5 btnExit 等价 |
+| 75 | 3701 | p | () | p() 返回 a[][] 静态表 | 内联等价 |
+| 76 | 3705 | g | (int n2) | g(n2) int→String | 内联等价 |
+| 77 | 3709 | I | () | I() 输入旗标清零 at/au/av | H5 无需(事件驱动) |
 | 78 | 3715 | J | () | 已读 |
 | 79 | 3792 | e | (int n2, int n3) | 已读 |
-| 80 | 3824 | h | (int n2) |  |
-| 81 | 3914 | b | (Graphics graphics) |  |
-| 82 | 3965 | K | () |  |
-| 83 | 4038 | L | () |  |
+| 80 | 3824 | h | (int n2) | h(n2) 键持续处理 | H5 keydown 等价 |
+| 81 | 3914 | b | (Graphics graphics) | b(g) 塔模式主绘制: ce[3] 标题+粒子块 cu[]+cs[] 3D 投影序列 | H5 renderer 等价 |
+| 82 | 3965 | K | () | K() 高分榜逻辑 | H5 三表 等价 |
+| 83 | 4038 | L | () | L() 语言装载 | H5 中文硬编码, 记档 |
 | 84 | 4053 | l | (Graphics graphics) | 已读 |
 | 85 | 4107 | a | (Graphics graphics, int n2) | a(n2) ci 查表: <0 取 -ci[|n2|] | 三角函数查表(定点 sin/cos), H5 用 Math 等价 |
 | 86 | 4121 | M | () | M() 初始化: 大量字段默认值+ci 表 | H5 const 初始化 等价 |
 | 87 | 4133 | i | (int n2) | 已读 |
-| 88 | 4137 | j | (int n2) |  |
-| 89 | 4144 | k | (int n2) |  |
-| 90 | 4148 | N | () |  |
-| 91 | 4160 | a | (String string, Font font, int n2) |  |
-| 92 | 4202 | a | (String string, String[] stringArray, Image image) |  |
-| 93 | 4228 | c | (Graphics graphics) |  |
+| 88 | 4137 | j | (int n2) | j(n2) ci 表查询(三角) | 内联等价 |
+| 89 | 4144 | k | (int n2) | k(n2) cos 查表 | 内联等价 |
+| 90 | 4148 | N | () | N() 随机种子? | 内联等价 |
+| 91 | 4160 | a | (String string, Font font, int n2) | a(n2..) sin 查表组合 | 内联等价 |
+| 92 | 4202 | a | (String string, String[] stringArray, Image image) | a(n2,n3) 弧度组合查表 | 内联等价 |
+| 93 | 4228 | c | (Graphics graphics) | c(n2) 表索引 | 内联等价 |
 | 94 | 4276 | l | (int n2) | UI 光标导航: 600ms 节流; 子列表 bZ 滑动/顶层 bQ 步进, 到底 P() 触发 O() 确认 | H5 DOM 点击/悬停 等价 |
 | 95 | 4304 | O | () | 光标复位: bP/bQ/bX/bY/ca 全清 | H5 每次打开重置 等价 |
 | 96 | 4313 | P | () | 光标末位判定: bQ==bP-1 | H5 无此状态机, 记档 |
