@@ -1423,7 +1423,19 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- 1103 双页 (TCS+6): 键位页 + 敌方单位价目页 ----
+// ---- 1103 第二页(敌方价目) 与底盘表交叉验证 (TCS+7) ----
+console.log("--- 底盘表交叉验证 ---");
+{
+  const imgPairs = [[160,50],[345,155],[1200,500],[200,50],[440,250],[2800,250],
+                    [200,50],[880,340],[140,60],[400,500],[1800,1000]];
+  const tablePairs = Object.keys(CHASSIS).filter(k => k !== 'Yamato')
+    .map(k => [CHASSIS[k][3], CHASSIS[k][4]]);
+  const key = (p) => p.join('/');
+  const imgSet = imgPairs.map(key).sort().join(','), tabSet = tablePairs.map(key).sort().join(',');
+  console.log("底盘表 hp/bounty 与 1103 第二页图示一致=" + (imgSet === tabSet) +
+    "  (" + tablePairs.length + " 行)");
+}
+// ---- 1103 双页 (TCS+6): 键位页 + 敌方单位价目页 ----// ---- 1103 双页 (TCS+6): 键位页 + 敌方单位价目页 ----
 console.log("--- 帮助板双页 ---");
 {
   const fsx = require('fs');
