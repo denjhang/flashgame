@@ -450,3 +450,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   exec_test 城市等待 600→4200ms 适配
 - knockNextBlock 一致项入档; BPath 弹飞 vs 随机翻倒差异记档
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 50 轮（2026-09-30）— T25 待办池清零（三个小视觉项）
+
+- swoosh 烟雾轨迹 (790 三帧) / 地基塔身抖动 (±5px×6×75ms) / 挂块 combo 银火花 — 全部接线,
+  参数此前已取证 (明细 PARITY 2.2)
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

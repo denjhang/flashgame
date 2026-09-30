@@ -2,10 +2,11 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T25.【自查】待办池清零轮**：swoosh_spr 特效、地基抖动、挂块银火花三个小视觉项一次做完
-> （资产/参数已全部取证），清空待办池后重新自查生成新任务。
+> **T26.【自查】重生成新任务**：池已清零。自由自查方向——HUD 位图化（topbar/combo/tries 数字
+> 用原版切片替换文本）、镜头 panDown 时长精确化（当前 glide≈500ms vs 原版 2.5-3s）、
+> knockTopBlock 弹飞改 BPath。任选其一做成任务。
 >
-> **待办池**：（待 T25 清零后重建）
+> **待办池**：（空）
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -70,6 +71,14 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - knockNextBlock 已核实一致: 弹顶块+dumpPerson/landingY 回退/currCtr=新顶块/stacked-1;
   差异记档: 弹飞用 BPath(确定方向 offset=新顶-被弹) vs H5 随机翻倒物理(视觉近似)
 - checkTipQueue 顺序 T3 轮已核实 (pumpCityTips 2.6s 间隔)
+
+
+### 2.2 待办池清零（第 50 轮, T25 ✅）——三个小视觉项一次做完
+- ✅ swoosh_spr 烟雾轨迹 (790, 读图 46x66×3帧): spawnFallingPerson 处 Flipbook 1→3/150ms
+  自毁 (makeFallingPerson:329-334)
+- ✅ 地基塔身抖动 (landOnTower:217-219): y-5 osc 75ms×6 次=900ms, G.shakeT 施加于塔组
+- ✅ 挂块 combo 银火花 (makeBlock:135-138): comboMult!=0 且 rotateBlock 时挂 star 精灵,
+  随块回收 (clearSparkles 语义)
 
 ## 3. Build City 城市模式——🟨 机制闭环（底图+热区已用原版 city_spr_640.png+实测坐标, 第29轮; 塔格缩略图仍 CSS 近似）[P0]
 

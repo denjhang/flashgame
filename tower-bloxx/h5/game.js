@@ -296,6 +296,11 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   });
   G.texStar = new THREE.TextureLoader().load('./assets/flash/DefineSprite_783_star_spr/1.png');
   G.texStar.colorSpace = THREE.SRGBColorSpace;
+  // swoosh 烟雾轨迹 3 帧 (读图 46x66, makeFallingPerson:329 Flipbook 1→3/150ms)
+  G.texSwoosh = [1, 2, 3].map(i => {
+    const t = new THREE.TextureLoader().load(`./assets/flash/fx/DefineSprite_790_swoosh_spr/${i}.png`);
+    t.colorSpace = THREE.SRGBColorSpace; return t;
+  });
   // 环境特效 28 帧 (ambient_spr chid734 帧→子剪辑 670..733, FFDec 逐帧导出)
   G.txFX = [];
   for (let i = 1; i <= 28; i++) {
@@ -822,7 +827,8 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   const cx = G.currCtr + x;
   towerGroup.add(mesh);
   mesh.position.set(cx - tpl.userData.cx, G.landingY - tpl.userData.cy, 0);
-  if (onGround) playSound('snd_foundation');   // Tower.as:203 地基块
+  if (onGround) { playSound('snd_foundation');  // Tower.as:203 地基块
+    G.shakeT = 0; }                              // 塔身抖动 Path y-5 osc rep6 (landOnTower:217-219)
   // 连击: 落地时 comboMult!=0 → +1 (Tower.as:233); 完美落地重置计时 (perfectLanding→ComboTimer.setTimer)
   if (G.comboMult !== 0) { G.comboMult++; G.comboMax = Math.max(G.comboMax, G.comboMult); } // Tower.as:233 + GameModel.as:192
   if (perfect) { playSound('snd_combo');
@@ -948,6 +954,15 @@ function spawnFallingPerson(x, y) {
   scene.add(sp);
   G.fallingPeople.push({ sp, toon, f: 9, animT: 0,
     vx: (Math.random() - 0.5) * 2 * 100 / 5000, vy: 100 / 5000, life: 5000 });
+  // swoosh_spr 翻页 1→3/150ms setKillSprite (makeFallingPerson:329-334, 读图 46x66)
+  const sw = new THREE.Sprite(new THREE.SpriteMaterial({ map: G.texSwoosh[0], transparent: true }));
+  sw.scale.set(46, 66, 1); sw.position.set(x, y, 1);
+  scene.add(sw);
+  let sf = 1;
+  const siv = setInterval(() => {
+    if (++sf > 3) { clearInterval(siv); scene.remove(sw); return; }
+    sw.material.map = G.texSwoosh[sf - 1];
+  }, 150);
 }
 
 function knockTopBlock() { // Tower.knockNextBlock
@@ -1190,6 +1205,12 @@ function loop(now) {
 
     // 摇晃 (Tipper.updateTower): 塔绕底部枢轴旋转
     if (!G.over) towerGroup.rotation.z = THREE.MathUtils.degToRad(swayAngle(dt));
+    // 地基塔身抖动 (landOnTower:217-219): y-5 osc 75ms×6 次 = 900ms
+    if (G.shakeT != null) {
+      G.shakeT += dt;
+      towerGroup.position.y = G.shakeT < 900 ? -5 * (0.5 + 0.5 * Math.sin(2 * Math.PI * G.shakeT / 150)) : 0;
+      if (G.shakeT >= 900) G.shakeT = null;
+    }
 
     // miss 坠块 (fallPastTower: 坠到 viewHeight+200)
     for (let i = G.missFall.length - 1; i >= 0; i--) {
@@ -1299,6 +1320,13 @@ function loop(now) {
       G.hanging = tpl.clone();
       G.hanging.scale.setScalar(tpl.userData.s);
       G.hangingFor = G.stacked;
+      // makeBlock:135-138: combo 进行中的挂块加银火花 (sparkle gotoAndPlay(2); clearSparkles 随块回收)
+      if (G.comboMult !== 0 && G.stacked > 0 && !needRoof(G.stacked)) {
+        const st = new THREE.Sprite(new THREE.SpriteMaterial({ map: G.texStar, transparent: true }));
+        st.scale.set(24, 22, 1);
+        st.position.set(0, BLOCK_H / 2, 5);
+        G.hanging.add(st);
+      }
       craneGroup.add(G.hanging);
     }
     if (G.hanging) {
