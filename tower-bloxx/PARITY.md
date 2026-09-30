@@ -354,6 +354,11 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   注入后跑 tower+city 双场景: 7+10 PASS 全兼容
 - smoke 第 19 项断言: restoreModel 对 sm_unlockedTrophyTowerType/tipFlags 的兜底代码必须在位
 
+
+### 7.4 高分表播种回写（第 61 轮, T35 ✅）
+- hsLoad 播种预置榜后未落盘 (SharedObject 语义应为读取即写) → 补 setItem 回写;
+  exec_test city +1 断言: 三表 10 行就绪 (city 11 PASS)
+
 ## 8. 输入——🟨
 
 - ✅ 点击/空格/下方向键/PgDn 放块（TIP_INTRO; Tipper.as:62 Key.isDown(34)）

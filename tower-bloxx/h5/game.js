@@ -164,8 +164,10 @@ const HS_PRESETS = {
 };
 function hsLoad() {
   const hs = JSON.parse(localStorage.getItem('twrblx_hs') || 'null') || {};
+  let seeded = false;
   for (const t of ['CITY', 'QUICK', 'QUICK2'])
-    if (!hs[t]) hs[t] = HS_PRESETS[t].map(r => { const [name, v] = r.split(','); return { name, v: Number(v) }; });
+    if (!hs[t]) { hs[t] = HS_PRESETS[t].map(r => { const [name, v] = r.split(','); return { name, v: Number(v) }; }); seeded = true; }
+  if (seeded) localStorage.setItem('twrblx_hs', JSON.stringify(hs)); // SharedObject 读取即落盘预置
   return hs;
 }
 function hsInsert(table, value, name) { // writeData: 插入+按值降序+截 10

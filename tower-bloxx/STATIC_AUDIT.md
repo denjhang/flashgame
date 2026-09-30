@@ -505,3 +505,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - 全量回归: node --check + smoke 19 PASS / tower 7 PASS / city 10 PASS / SAVE_SEED=2 7 PASS
 - 巡检: 无死引用残留、工作区干净、提交范围无跨项目混入
+## 第 61 轮（2026-09-30）— T35 回归维护 + 高分播种回写
+
+- 巡检发现: hsLoad 惰性播种不落盘 → 补回写 (SharedObject 读取即写语义);
+  exec_test city +1 高分三表断言 (11 PASS), 全量 smoke 19 / tower 7

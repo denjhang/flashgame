@@ -200,6 +200,10 @@ if (SCENARIO === 'city') {
   check((save.sm_towerGridData || [])[1] > 0, `sm_towerGridData[1] 人口已写入 (${(save.sm_towerGridData || [])[1]})`);
   check((save.sm_towerGridData || [])[0] === 1, `塔色 type+1=1 已写入 (${(save.sm_towerGridData || [])[0]})`);
   check((save.sm_towerGridData || [])[2] === 1, '屋顶帧=1 已写入');
+  // 高分三表预置 (HighScoreLocalProxy presets): hsLoad 惰性播种
+  const hs = JSON.parse(localStorage.getItem('twrblx_hs') || 'null');
+  check(!!hs && hs.QUICK.length === 10 && hs.CITY.length === 10 && hs.QUICK2.length === 10,
+    `高分三表就绪 (QUICK ${hs && hs.QUICK.length}/CITY ${hs && hs.CITY.length}/QUICK2 ${hs && hs.QUICK2.length})`);
 }
 
 // 快进更多帧验证摇晃/结算路径不炸
