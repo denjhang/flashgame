@@ -28,11 +28,14 @@
   #btns span{display:block;margin:6px 0;padding:2px 6px;background:#00000066;border-radius:4px;cursor:pointer;font-size:15px;}
   #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;}
   /* 结算/提示弹窗面板 (GameSprites.showSummary/showTip 共用 popupSpr 语义) */
-  #summary{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);min-width:320px;max-width:460px;
-    padding:18px 26px;background:#ffffffee;border:3px solid #345;border-radius:10px;color:#123;
-    font-size:15px;line-height:1.5;display:none;text-align:center;z-index:9;}
-  #summary .t{font-size:24px;font-weight:bold;margin-bottom:8px;}
-  #summary .ok{margin-top:12px;padding:8px 18px;background:#2a4;border-radius:6px;color:#fff;cursor:pointer;display:inline-block;}
+  /* popup_spr(462)/confirmation_reset(444) 绿色面板, 原版 popupSpr CTR 0,40 → (320,280) (读图 433x219) */
+  #summary{position:absolute;left:104px;top:170px;width:433px;height:219px;font-size:14px;color:#14501e;
+    display:none;text-align:center;z-index:9;padding:26px 30px;box-sizing:border-box;overflow:auto;line-height:1.45;
+    background:url('./assets/flash/fx/DefineSprite_462_popup_spr/1.png') center/433px 219px no-repeat;}
+  #summary.reset{background-image:url('./assets/flash/fx/DefineSprite_444_confirmation_reset_spr/1.png');}
+  #summary .t{font-size:20px;font-weight:bold;margin-bottom:8px;}
+  #summary .ok{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:4px 16px;
+    background:#2a6b2a;border-radius:6px;color:#fff;cursor:pointer;display:inline-block;}
   #city{position:absolute;inset:0;background:url('./assets/flash/city_spr_640.png') center/cover;display:none;}
   /* 坐标对号: 网格原点 = (320+CITY_MAP_X, 240+CITY_MAP_Y) = (224,107), 格 52px (Const.CITY_MAP_*) */
   #cityHead{position:absolute;top:40px;left:145px;width:335px;height:34px;font-size:14px;color:#234;}

@@ -2,10 +2,10 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T29.【资源】title/menu 与城市消息条位图核对**：462 popup_spr / 360 msg_spr / 444 reset 弹窗
-> 位图化核对（H5 现用 HTML 白面板），逐张读图后决定替换或记档。
+> **T30.【资源】msg_spr/弹窗杂项收尾**：360 msg_spr 目录为空（无导出帧，记档）；下一批候选
+> ——scoreboard/结算数字位图、city_icon 悬停放大、splash 素材评估。自查后立任务。
 >
-> **待办池**：（空，做完再自查）
+> **待办池**：（空）
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -201,6 +201,15 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   progress_spr(251) 47x232 帧=1+total/10 (:216) + blackBar=(total-stacked)*5px 底锚 4px (:226-227)
   + hudTop 旗 (bottom=21+seg)
 - 坐标全部来自 buildGameSprites:91-95 (LWR_LFT/UPR_CTR 锚点)
+
+
+### 4.5 弹窗面板位图化（第 54 轮, T29 ✅）
+- 读图: 462 popup_spr 与 444 confirmation_reset 同为绿色圆角面板 433x219 (462 帧带滚动箭头变体);
+  360 msg_spr 无导出帧 (记档)
+- #summary 白面板 → 462 位图面板 (popupSpr CTR 0,40 → 屏 (320,280) → left104/top170);
+  showResetConfirm 改用 444 面板 + Yes/No (原 menuSub 文本路径停用)
+- 教训: python 补丁切点落在旧函数体中段会留孤儿代码——node --check 必须在补丁后立即跑
+  (本轮 node --check 抓到 Unexpected '}', 已清)
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 

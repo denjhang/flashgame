@@ -470,3 +470,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 四件 HUD 换原版位图: tries 26帧(帧公式:143)/population 底图+圈位数字/combo 底图+fill+文字/
   progress 5帧(帧公式:216)+blackBar+hudTop — 坐标/读图/公式全取证 (明细 PARITY 4.4)
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 54 轮（2026-09-30）— T29 弹窗面板位图化
+
+- 462/444 读图: 同款绿色圆角面板 433x219; #summary 换 462 位图 (屏坐标 (320,280));
+  showResetConfirm 改 444 面板+Yes/No, 原 menuSub 文本路径停用; 360 msg_spr 无帧记档
+- 教训: 补丁切点中段落→孤儿代码, node --check 即时抓到并清理
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

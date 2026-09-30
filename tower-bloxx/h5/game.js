@@ -183,19 +183,23 @@ function showHighScores() { // STT_HIGHSCORES → drawDataSet 三表
     tbl('Quick Game Population', hs.QUICK, 'Pop') +
     tbl('Quick Game Height', hs.QUICK2, 'Blocks'));
 }
-function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET
-  showSub('<h3>Reset city?</h3><p>Reset the progress and population score in your city? (TIP_CONFIRM_RESET)</p>' +
-    '<div class="mbtn" style="position:static;display:inline-block;margin:8px;padding:6px 14px;border:1px solid #456" data-r="1">Yes</div>' +
-    '<div class="mbtn" style="position:static;display:inline-block;margin:8px;padding:6px 14px;border:1px solid #456" data-r="0">No</div>');
-  hud.menuSub.querySelectorAll('[data-r]').forEach(el => {
+function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET; confirmation_reset_spr(444) 面板
+  hud.summary.className = 'reset';
+  hud.summary.innerHTML = '<div class="t">Reset city?</div>' +
+    '<div>Reset the progress and population score in your city?</div>' +
+    '<div style="margin-top:14px"><div class="mbtn" data-r="1" style="display:inline-block;margin:8px;padding:6px 14px;background:#2a6b2a;border-radius:6px;color:#fff;cursor:pointer">Yes</div>' +
+    '<div class="mbtn" data-r="0" style="display:inline-block;margin:8px;padding:6px 14px;background:#888;border-radius:6px;color:#fff;cursor:pointer">No</div></div>';
+  hud.summary.style.display = 'block';
+  hud.summary.querySelectorAll('[data-r]').forEach(el => {
     el.onclick = () => { // STT_RESET_MAP_YES/NO (GameState.as:242-248)
       if (el.dataset.r === '1') {
         G.save.sm_towerGridData = []; G.save.sm_totalPopulation = 0;
-        G.save.tipFlags = {};                    // resetTips (GameModel.as:91-94): 提示重放
+        G.save.tipFlags = {};                    // resetTips (GameModel.as:91-94)
         saveModel();
         updateCityLevelAndUnlockedTypes(); renderCity();
       }
-      hud.menuSub.style.display = 'none';
+      hud.summary.className = '';
+      hud.summary.style.display = 'none';
     };
   });
 }
