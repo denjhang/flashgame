@@ -75,6 +75,8 @@
   ConstantPool 残留），判定废弃/外链字段，不接线。
 - 811_* 剪辑族 = 地图植被(随机摆动) + 外链版本检查加载器（TCS+16 否证"逐关事件"假设，
   防止后续误立项）；版本检查属网络功能，离线 H5 不复刻。
+- "lapin"(chid6, carte dpt220) = 无行为脚本的装饰彩蛋（仅 ConstantPool 名称出现），
+  尺寸微小不复刻。enScenario 门禁 = 作用域冲突死条件（TCS+18），按键实际永远可用。
 - canon75AutoFire = **反作弊哨兵**（newEvents mR==1: 旗标开启 → activePerdu 当关判负；
   TCS+2 取证）。H5 无作弊入口，不接线（行为即"不开挂则不触发"）。
 - 1053 story 按钮 = 自含标签翻转（"action"/"story"，QEX 旗标无其他读取点），
