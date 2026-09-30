@@ -444,3 +444,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   [P2] 落块 500ms 渐正 (G.straighten) — 明细 PARITY 1.2
 - 已核实一致清单入档 (吸附/连击顺序/人口档位/roof 折算/cleanTower 时点)
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 49 轮（2026-09-30）— T24 gameOver/knock 复核
+
+- [P1] gameOver 时序: 1000ms delay + 赢时 panDown 回卷后才弹结算 → setTimeout 实现,
+  exec_test 城市等待 600→4200ms 适配
+- knockNextBlock 一致项入档; BPath 弹飞 vs 随机翻倒差异记档
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

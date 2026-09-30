@@ -676,7 +676,11 @@ function gameOver(won) {
   // GameState.as:128: 胜利 fanfare 按 trophyRoof 分 med/good; 失败 bad (:122)
   playSound(won ? (G.trophyRoof ? 'snd_fanfare_good' : 'snd_fanfare_mediocre') : 'snd_fanfare_bad');
   wonRef.won = won;
-  showSummary(); // GameState.as:138-147: 输赢都走 showSummary; OK 后 afterHighScore = menu/city
+  // Tower.gameOver (:194-203): won → panDown 回卷塔底 (dur=min(DUR_PAN_DOWN=3000, stacked*250)),
+  // Message wait=GAME_OVER_DELAY=1000 → 输 1s / 赢 1s+pan 后才弹结算
+  if (won) G.camTarget = 0;
+  const goDelay = 1000 + (won ? Math.min(3000, G.stacked * 250) : 0);
+  setTimeout(showSummary, goDelay);
   if (!won && !(G.cityMode && G.pendingCell)) {
     // 塔散架 (Tower.clearBlocks(topple)); 城市模式失败楼保留待无屋顶放置
     for (let i = G.blocks.length - 1; i >= 0; i--) {

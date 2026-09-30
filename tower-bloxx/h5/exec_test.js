@@ -185,7 +185,7 @@ if (SCENARIO === 'city') {
   console.log('[dbg] state=' + JSON.stringify(globalThis.__state()));
   check((globalThis.__dbg.lands || []).length >= 10, `城市塔建造落地 = ${(globalThis.__dbg.lands || []).length} (期望 ≥10)`);
   // 过关 → 结算面板 OK → finishCityTower(true) 放置+回城+存档 (GameState.as:138-147)
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 4200)); // gameOver: 1s delay + panDown(min(3000,stacked*250)) 后才弹结算
   const sm = document.getElementById('summary');
   const okBtn = sm.querySelector('.ok');
   check(!!okBtn && !!okBtn.onclick, '结算面板 OK 按钮就绪');

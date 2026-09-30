@@ -2,11 +2,10 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T24.【函数】其余核心并排抽查**：checkTipQueue/pumpCityTips 顺序、gameOver/panDown 流、
-> knockNextBlock 回退逻辑做第二遍细读（同 T22/T23 方法），产微修任务。
+> **T25.【自查】待办池清零轮**：swoosh_spr 特效、地基抖动、挂块银火花三个小视觉项一次做完
+> （资产/参数已全部取证），清空待办池后重新自查生成新任务。
 >
-> **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
-> 地基块塔身抖动 (landOnTower:217-219 osc ±5px×6 次)。
+> **待办池**：（待 T25 清零后重建）
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -62,6 +61,15 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ GAME_WON 结算：showSummary 面板 人口/塔高/最长连击 + New record!（GameSprites.showSummary:48-59,
   GameModel.getSummary:204-207, Const.TIP_SUMMARY_REC/MSG_RESTART），OK 点击重开
 - ⬜ tries 用尽未达标仍可无屋顶入城（TIP_OUT_OF_TRIES）——依赖城市模式，归入第 3 节
+
+
+### 2.1 gameOver/knockNextBlock 并排复核（第 49 轮, T24 ✅）
+- [P1] gameOver 时序: 原版 Message wait=GAME_OVER_DELAY=1000ms, 赢时再 +panDown
+  (dur=min(DUR_PAN_DOWN=3000, stacked*250)) 回卷塔底后才弹结算 → H5 原来立即弹, 已改
+  setTimeout(1000+pan); won 时 camTarget=0 触发回卷 (camera glide≈panDown 视觉)
+- knockNextBlock 已核实一致: 弹顶块+dumpPerson/landingY 回退/currCtr=新顶块/stacked-1;
+  差异记档: 弹飞用 BPath(确定方向 offset=新顶-被弹) vs H5 随机翻倒物理(视觉近似)
+- checkTipQueue 顺序 T3 轮已核实 (pumpCityTips 2.6s 间隔)
 
 ## 3. Build City 城市模式——🟨 机制闭环（底图+热区已用原版 city_spr_640.png+实测坐标, 第29轮; 塔格缩略图仍 CSS 近似）[P0]
 
