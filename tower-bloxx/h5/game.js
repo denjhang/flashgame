@@ -688,6 +688,7 @@ function finishCityTower(won) {
   showCityStatus(diff > 0 ? 'Population increased by ' + diff + ' citizens!'
     : diff < 0 ? 'Population decreased by ' + diff + ' citizens.'
     : 'The new building had no effect on overall population.');              // STATUS_POP_INC*
+  playMidiJingle(83);                                                        // -2147483565 放置 jingle
   spinReels();                                                               // :463
   updateCityLevelAndUnlockedTypes();
   G.pendingCell = null; G.selectedType = -1;
@@ -812,6 +813,7 @@ function gameOver(won) {
   hud.msg.style.display = 'block';
   // GameState.as:128: 胜利 fanfare 按 trophyRoof 分 med/good; 失败 bad (:122)
   playSound(won ? (G.trophyRoof ? 'snd_fanfare_good' : 'snd_fanfare_mediocre') : 'snd_fanfare_bad');
+  playMidiJingle(won ? 85 : 84);               // J2ME 负 id jingle (85 胜 / 84 败)
   wonRef.won = won;
   // Tower.gameOver (:194-203): won → panDown 回卷塔底 (dur=min(DUR_PAN_DOWN=3000, stacked*250)),
   // Message wait=GAME_OVER_DELAY=1000 → 输 1s / 赢 1s+pan 后才弹结算
@@ -1368,6 +1370,33 @@ function playMidiSchedule() {
   }
   midiTimer = setTimeout(playMidiSchedule, midiCtx._total * 1000); // setLoop
 }
+// 胜负/放置 jingle (House.b.a 负 id :1602-1605/:1673/:1681/:1689-1692):
+// -2147483563→r0[85]=胜利 / -2147483564→r0[84]=失败 / -2147483565→r0[83]=城市放置
+// (nokia_v1011 83/84/85.mid; dc_v1507 解包 +1 错位已对齐 88→85 字节一致)
+let jingleCtx = null;
+function playMidiJingle(id) {
+  if (!G.midiOn) return;
+  try {
+    jingleCtx = jingleCtx || new (window.AudioContext || window.webkitAudioContext)();
+    jingleCtx.resume && jingleCtx.resume();
+    fetch('./assets/midi/' + id + '.mid').then(r => r.arrayBuffer()).then(buf => {
+      const parsed = parseMidi(buf);
+      if (!parsed) return;
+      const t0 = jingleCtx.currentTime + 0.05;
+      for (const x of parsed.notes) {
+        const osc = jingleCtx.createOscillator(), g = jingleCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = 440 * Math.pow(2, (x.n - 69) / 12);
+        g.gain.setValueAtTime(0.0001, t0 + x.t);
+        g.gain.linearRampToValueAtTime(0.09, t0 + x.t + 0.02);         // VolumeControl 40
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + x.t + x.d);
+        osc.connect(g).connect(jingleCtx.destination);
+        osc.start(t0 + x.t); osc.stop(t0 + x.t + x.d + 0.05);
+      }
+    });
+  } catch (e) {}
+}
+
 function toggleMidi() {
   G.midiOn = !G.midiOn;
   localStorage.setItem('twrblx_midi', G.midiOn ? '1' : '0');

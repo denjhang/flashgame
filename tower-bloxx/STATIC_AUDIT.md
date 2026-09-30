@@ -698,3 +698,15 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - H5 landFxSpawn(): 落块尾调用, 3 Sprite (r0id37 切三帧, repeat.x=1/3), updateEffects 尾动画; 资产 h5/assets/id37.png
 - 验证: node --check ✅ / smoke 27 PASS (+3 断言) / tower ✅ / city ✅
 - T48 可选项全部关闭 ✅ | 待办池: MIDI 3 短音效/l0-l6 本地化暂缓
+
+## 96 (2026-10-01) N+61: MIDI 短音效接入 + 负 id 曲目解码
+- 解码: g.a(int) 负 id = seg(高16位&0x7FFF..) + index(低15位): -2147483563→r0[85] / -2147483564→r0[84] / -2147483565→r0[83];
+  x 播放器循环 BGM: -2147483568→r0[80] 主 BGM(:310/:1472/:3074), -2147483567→[81](:1597), -2147483566→[82](:1584)
+- 错位勘定: nokia_v1011 80-85.mid ↔ dc_v1507_r0 81-86.mid 六文件逐字节一致 (+1 错位, 旧档"80/81/82"为新编号前移);
+  nokia 86(91B)/87(474B)/88(222B) 三短音 dc 包无对应
+- jingle 语义: :1673/:1681 e==6 快速局 !bf→84 失败 / bf→85 胜利; :1689-1692 e==5 城市局同档; :1602-1605 退出分派同;
+  :1673 bq==0 / :1681 bq==2 城市放置→83 + g.d(56/57) 消息
+- H5: playMidiJingle(id) (WebAudio 一次性调度, 复用 parseMidi/triangle/Volume40 音量), gameOver→85/84, finishCityTower→83;
+  资产 h5/assets/midi/83/84/85.mid (nokia_v1011 原字节)
+- 验证: node --check ✅ / smoke 28 PASS (+1) / tower ✅ / city ✅
+- 待办池: l0-l6 语言包(暂缓) | MIDI 短音效项关闭 ✅

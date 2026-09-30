@@ -11,7 +11,7 @@
 > 已完成 ~10），每方法一行差异记录。
 > **T48.【修】差异表逐项修 H5（J2ME 语义优先）: 摆钩✅/摇摆✅/连锁✅/瞄准鸟✅/天空✅/中断续档✅(N94: g:443/h:618/i:828/j:1003 → twrblx_quickRS/cityRS, btnExit 写档+enterQuick/beginBuild 恢复+gameOver 清档)。惊慌人群✅(N+60: t:2098 panicPeople, bE[8][12] 定性=8槽惊慌人群非下落块)/落地角标✅(N+60: h:3390 landFxSpawn, r0id37 三帧星)。T48 全部关闭 ✅
 >
-> **待办池**：MIDI 6 曲中 3 个短音效接入；l0-l6 语言包（本地化暂缓）。
+> **待办池**：l0-l6 语言包（本地化暂缓）。MIDI 短音效已关 (N+61)。
 
 盘点源：`scripts/scripts/__Packages/bz/esg/game/*.as`（Const/GameState/GameModel/GameSprites/
 CityMap/Tower/Crane/Tipper/ComboTimer/Person/HighScore）、时间轴脚本（paperdefense_fla）、
@@ -530,7 +530,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | r0id46-80 | ce[] 特效帧池 | House:1319 ce[i]=g.c(dC[i]); :2722-2734 翻帧绘制 | 记档: J2ME 28 特效(对应 Flash ambient) |
 | r0id50-77 | 软键/箭头图标 28 张 | h.java/k.java 软键栏与方向箭头 (条件加载组) | 记档: MIDlet 导航 UI, H5 用鼠标 |
 | r0id78/79 | 图标 | 尾部图标组 | 记档: 待消费点精查 |
-| r0id81-86 MIDI | 6 曲 | o.java Manager "audio/midi" | ✅ 3 曲已接入(80/81/82), 84/85 短音效 T48 |
+| r0id81-86 MIDI | 6 曲 | o.java Manager "audio/midi"; 负 id 解码 83/84/85=放置/败/胜 jingle | ✅ N+61 6 曲全接入 (BGM 81 + jingle 83/84/85, +1 错位对齐 nokia_v1011) |
 | r0id87 | bin 686B sig=5811 | 未解码 | T46: 疑关卡/数据表 |
 | r0id88 | bin 1347B | 未解码 | T46 同上 |
 
