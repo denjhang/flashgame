@@ -101,3 +101,23 @@
 ### B4 抽样复核 ✅ TCS+65
 - menu 12 ✓ story/fond 16 ✓ story/perso 39 ✓ endgame/perdu 30 ✓
   endgame/end 336 ✓ units 12 ✓ explosion/typed ✓ —— 与既有冒烟断言一致, 无漂移
+
+## R. 复审轮条目（账本清零后的滚动深查）
+
+### R1 startInstructions/instructions.refresh（6_329）✅ TCS+69
+- 原版：enScenario=true → 停风声/鸟叫 → pauseMusic(非 edith/暂停时) →
+  SAVE/start mission 条文本 → iMission==31 edithOff → iMission>30 起
+  bgScenario 段落乐 → instructions.refresh(iMission)；iMission>=45 走 endPass。
+- H5：briefingShow（openCurtain/对白/开战条）+ playSegment 段落系统
+  （edith m26/m44、bgscenario 27-30 简报不重启）+ 44 波封顶无 45 分支需求。
+- 结论：对齐（enScenario 语义见 TCS+18 定案：作用域冲突死条件）。
+
+### R2 turretlib 173 帧标签全查 ✅ TCS+69
+- 权威 = deobf/data/turret_layout.json「173.labels」25 武器帧（m60=2..Yamato=26）。
+- H5 TURRET_LIB_FRAME 25 项逐一对帧号比对：**0 mismatch, 0 missing**；
+  86 库 labels（1..11）为旧标记层（已定案弃用）。C2 通过。
+
+### R3 音效字节级比对 ✅ TCS+69
+- assets/sounds 53 文件 vs decompiled/sounds：**49 个 md5 完全一致、0 个不同**；
+  4 个 src-only 均为 466(pluton, Nellymoser 挂账) 同族 flv/mp3 变体+H5 已用
+  等价命名。结论：音效资产 100% 原版字节。

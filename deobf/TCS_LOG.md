@@ -461,3 +461,14 @@
 - **账本进度：A: 6/6 族, B: 6/6 组 —— 函数 95 项全部签收完毕。**
 - 三件套通过，冒烟 211 项全 `=true`、exit 0。
 - 本轮仍未做：push 积压待网络（本轮回吐时重试）。
+
+## TCS+69（2026-10-01）复审轮: R1 startInstructions + R2 173 帧标签 + R3 音效字节比对（3 条目）
+
+- **R1 ✅**：startInstructions/refresh 全流程卡（enScenario/鸟叫停/段落乐切换/
+  45 关 endPass 分支）——H5 briefingShow+playSegment 同构。
+- **R2 ✅**：TURRET_LIB_FRAME 25 项 vs turret_layout.json「173.labels」：
+  零错配零缺漏（86 旧表为标记层已弃）。
+- **R3 ✅**：53 个音效 md5 对比 decompiled/sounds：49 一致 0 不同，4 个
+  src-only 均为 466 挂账族。音效资产 100% 原版字节。
+- **账本进度：A: 6/6, B: 6/6, R: 3 项新签**。三件套通过，冒烟 211 全绿 exit 0。
+- 本轮仍未做：无（下轮继续 R 滚动深查，候补: 1141 浮字相位/云层帧/菜单图标逐张读图）。
