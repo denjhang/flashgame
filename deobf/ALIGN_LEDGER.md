@@ -1,6 +1,6 @@
 # TCS 对齐账本（签名卡；配额制，见 TASKS.md「二之一」）
 
-进度行：**A: 2/6 族, B: 4/4 组**（2026-10-01, TCS+65）
+进度行：**A: 3/6 族, B: 5/6 组**（2026-10-01, TCS+66）
 
 ## A. 函数账本（95 个具名函数 = DefineFunction2×82 + DefineFunction×13）
 
@@ -23,7 +23,16 @@
 | declencheMissionSuivante | clearInterval + !aPerdu → startInstructions | tick 倒计时归零 → 简报/开波 | 对齐 |
 | newEvents (773_189) | 逐关号事件 (解锁/面板/资金/语音) | TCS+53 全分支 | 对齐 |
 
-### A3-A6: 未签（后续轮）
+### A3 武器族 ✅ TCS+66
+| 原版函数 | 语义 | H5 对应点 | 结论 |
+|---|---|---|---|
+| fireOnEnnemi (6_327) | 粗筛 |dx|>range*2+h; 精筛 dist>range+_height; tigre ×4 | shellHit 1815/1833 (**TCS+66 补高度项**) | 对齐 |
+| createObus (6_335) | 25000+idx 弹体 + decalX/Y 管偏移 | spawnShell TURRET_GUNS decal | 对齐 |
+| createExplosion | 26000+i + 28000+i flame, ±10px 抖动, 随机 1..3 变体 | boomTyped + jitter 1402/1575 | 对齐 |
+| createEclat | 27000+i 火花 ±8px + 随机旋转 | spawnSpark (1913) | 对齐 |
+| chargeBombes (785_17) | comptDispo 60×1s 冷却 + disponible | SU37.COOL_MS=60000 (TCS+40) | 对齐 |
+
+### A4-A6: 未签（后续轮）
 
 ## B. 资源账本（assets 1948 文件）
 
@@ -50,6 +59,13 @@
   同族；H5 玩家塔用 turretlib/173 整帧（48x143）、敌塔用 eturrets_spr。
 - 结论：**导出冗余，定案不接入**（保留存档）。覆盖 turrets 14 张 + eturrets 27 张
   + sprites/DefineSprite_64 等同名小件。
+
+### B5 音效资产表 ✅ TCS+66
+- SFX_FILES 53 文件 429..482(缺 466) 与 assets/sounds 磁盘逐一相符, 无缺文件。
+- **缺口修正**：导弹发射音 (400_obus frame_12→crotale / frame_9→mlrs) 原版
+  在弹体生成时播放, H5 未接 → spawnShell 补 crotale/mlrs。
+- **新挂账**：466_pluton 源编码 = Nellymoser (DefineSound format 6, FFDec 只能
+  导出 flv) → H5 无法解码, pluton 发射音无声（同 1040 quality 永久挂账族）。
 
 ### B4 抽样复核 ✅ TCS+65
 - menu 12 ✓ story/fond 16 ✓ story/perso 39 ✓ endgame/perdu 30 ✓

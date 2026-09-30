@@ -37,7 +37,7 @@
 普查（TCS+63）：绝大多数已对号或定案废弃；按族补签「H5 对应点+证据行号」签名卡：
 - [x] A1 单位族（TCS+64, 签名卡见 deobf/ALIGN_LEDGER.md; selectUnit 补音）
 - [x] A2 调度族（TCS+65, 账本签名卡）
-- [ ] A3 武器族: fireOnEnnemi/createObus/createExplosion/createEclat/chargeBombes
+- [x] A3 武器族（TCS+66, 含命中半径高度项修正）
 - [ ] A4 索敌族: getTarget/OCEEF/OCEEM/askPermissionOfFire + e1..e14 编排
 - [ ] A5 UI/存档族: saveData/loadData/actualiseInfo/showInfoOfItem/setScores
 - [ ] A6 散件定案表: edith/Yamato/playBirds/getSound/getPwd 等（外链/音效）

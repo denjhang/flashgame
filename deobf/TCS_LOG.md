@@ -421,3 +421,18 @@
 - 补上轮挂账：点选己方塔 selectionUnite 断言（210 项）。
 - **账本进度：A: 2/6 族, B: 4/4 组**。三件套通过，冒烟 210 全绿 exit 0。
 - 本轮仍未做：A3 武器族、A4-A6（下轮配额）。
+
+## TCS+66（2026-10-01）配额轮 3: A3 武器族 + B5 音效表 + 命中半径修正（3 条目）
+
+- **A3 ✅**：fireOnEnnemi/createObus/createExplosion/createEclat/chargeBombes
+  五函数签名卡。**修正**：原版精筛 `dist > range + _height → 跳过`（目标高度
+  计入命中半径），H5 两处（单位溅射/塔受击）均无高度项 → Unit/Turret 增 hgt
+  （渲染身高 / 76），判定改 `range*rr + (u.hgt||0)` 与 `range + (t.hgt||0)`。
+  450 帧 sim 结果不变（击杀 14/塔 15）。
+- **B5 ✅**：53 个 SFX 文件与磁盘逐一相符；**修正**导弹发射音接线
+  （missile/missileUnder→crotale, missile2→mlrs, 原版在弹体生成时播）；
+  **新挂账**：466_pluton 源编码 Nellymoser（DefineSound format 6, 导出仅得
+  flv）→ H5 无法解码，pluton 发射无声，与 1040 同族永久挂账。
+- **账本进度：A: 3/6 族, B: 5/6 组**。三件套通过，冒烟 211 项全 `=true`
+  （连跑两次稳定）exit 0。
+- 本轮仍未做：A4 索敌族、A5/A6（下轮配额）。

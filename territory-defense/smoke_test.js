@@ -872,7 +872,7 @@ console.log("--- 弹速模型 ---");
 console.log("--- MTHEL 激光 ---");
 {
   G.units.length = 0; G.shells = []; G.beams = []; G.muzzle = []; G.casings = [];
-  const tgt = { x: 480 + 300, y: 0, hp: 100, aa: false, maxHp: 100 };
+  const tgt = { x: 480 + 300, y: 0, hp: 100, aa: false, maxHp: 100, hgt: 40 };
   G.units.push(tgt);
   const hp0 = tgt.hp;
   // MTHEL = laser: spawnShell 应即时结算 (无飞行弹) + 产生光束特效
@@ -1867,6 +1867,13 @@ console.log("--- 修理费 (819) ---");
   // TCS+64: 点选己方塔播 selectionUnite (原版 426_1 selectUnit loc0b0a)
   console.log("点选己方塔播selectionUnite=" +
     gj.includes("if (hit) { G.selected = hit; playSfx('selectionUnite', 0.35); return; }"));
+  // TCS+66: 导弹发射音 (400_obus frame_12→crotale / frame_9→mlrs; pluton 466
+  //   Nellymoser 编码挂账无声) + 命中半径 range+目标高
+  console.log("导弹发射音+命中半径含目标高=" +
+    (gj.includes("if (knd === 'missile' || knd === 'missileUnder') playSfx('crotale', 0.4);") &&
+     gj.includes("else if (knd === 'missile2') playSfx('mlrs', 0.4);") &&
+     gj.includes('range * rr + (u.hgt || 0)') &&
+     gj.includes('range + (t.hgt || 0)')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

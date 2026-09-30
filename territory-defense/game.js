@@ -1370,6 +1370,9 @@ class Unit {
     this.v = this.speed;                                     // 当前速度 (转弯/直行间渐变)
     this.hp = this.maxHp = c[3];
     this.bounty = c[4];
+    // 目标判定高度 (原版 fireOnEnnemi 精筛: dist > range + _height → 跳过;
+    //   _height = 单位容器像素高, H5 以渲染身高近似, TCS+66)
+    this.hgt = CHASSIS_ART[type] ? Math.abs(CHASSIS_ART[type].m[3]) * CHASSIS_ART[type].nat[1] : 40;
     this.aa = (type === 'tigre');             // 直升机
     this.weapon = weaponId !== 'null' ? WEAPONS[weaponId] : null;
     this.weaponId = weaponId;
@@ -1554,6 +1557,7 @@ class Turret {
     //   → 与单位不同: 塔没有"车体漂移", 但同样的三点爆炸
     this.dying = 0;
     this.dyingFired = 0;
+    this.hgt = 76;   // 185 结构容器 76x76 (fireOnEnnemi 精筛 range+_height, TCS+66)
   }
   aaUpgradeCost() { return Math.floor(this.cost * AA_UP_RATIO); }
   upgradeAA() {
@@ -1725,6 +1729,12 @@ function spawnShell(x, y, target, w, side, turretId, barrelAng, barrelIdx) {
   const K = SHELL_SPEED[turretId] || SHELL_SPEED._generic;
   G.shells.push({ x: mx, y: my, target, w, side, turretId,
     speed: K.v, curV: K.a, acc: K.a, vmax: K.v, trail: 0, born: G.frame });
+  // 发射音 (原版 400_obus 各 missile 帧子件 load/frame1: frame_12→crotale,
+  //   frame_9→mlrs, frame_10→pluton) —— pluton(466) 源为 Nellymoser 编码无法
+  //   解码为 H5 资产, 挂账无声 (TCS+66)
+  const knd = SHELL_KIND[turretId];
+  if (knd === 'missile' || knd === 'missileUnder') playSfx('crotale', 0.4);
+  else if (knd === 'missile2') playSfx('mlrs', 0.4);
   // 炮口细节: 枪口焰 + 弹壳 (原版 obus sprite 自带的子件, 都在炮口)
   //   枪口焰按弹型选 303/365 (见 muzzleFor)
   spawnMuzzleFx(mx, my, ang, side, SHELL_KIND[turretId] || 'bullet');
@@ -1816,7 +1826,7 @@ function shellHit(s) {
       for (const u of victims) {
         if (u.hp <= 0) continue;
         const d = Math.hypot(u.x - tx, u.y - ty);
-        if (d <= range * rr) {
+        if (d <= range * rr + (u.hgt || 0)) {   // 原版精筛 range + _height (TCS+66)
           if (u.aa) u.hp -= power * pm * ANTI_AIR_MULT;
           else u.hp -= power * pm;
           damaged.add(u);
@@ -1831,7 +1841,7 @@ function shellHit(s) {
   } else {
     for (const t of victims) {
       if (t.hp <= 0) continue;
-      if (Math.hypot(t.x - tx, t.y - ty) <= range * 2) {
+      if (Math.hypot(t.x - tx, t.y - ty) <= range + (t.hgt || 0)) {   // 原版精筛 (TCS+66)
         t.hp -= power;
         if (t.hp <= 0) killTurret(t);   // 塔被毁 → 启动阵亡序列 (原版 unitEtat 同款 destruction)
         // 原版 6_327 伤害分支 loc06d6: 掉血未毁 → structureDeco.autoRepair()
