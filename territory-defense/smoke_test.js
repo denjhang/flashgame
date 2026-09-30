@@ -1799,6 +1799,11 @@ console.log("--- 修理费 (819) ---");
   console.log("Su37 参数=原版 500/260/60s=" +
     (gj.includes('POWER: 500') && gj.includes('IMPACT: 260') &&
      gj.includes('COOL_MS: 60000')));
+  // TCS+41: 开火循环 (174_173 OCEEF setInterval 43ms; 许可次数 floor(t[2]/fpsc),
+  //   fpsc=1.13 全局倍率 → H5 毫秒制等价 floor(t2/1.13)*43)
+  console.log("射速模型=floor(t2/1.13)*43ms=" +
+    (gj.includes('const FPSC = 1.13;') && gj.includes('OCEEF_INTERVAL_MS = 43') &&
+     gj.includes('Math.floor(t2 / FPSC) * OCEEF_INTERVAL_MS')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

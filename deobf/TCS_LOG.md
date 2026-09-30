@@ -149,3 +149,12 @@
 - 结论：H5 SU37.POWER=500 / IMPACT=260 / COOL_MS=60000 逐值一致，无漂移。
   断言 +1 → 冒烟 199 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+41（2026-09-26）射速模型复核（方向2）
+
+- 取证：DefineSprite_174/frame_1/PlaceObject2_173_1——`setInterval(this,"OCEEF",43)`
+  循环 + `numberOfRequestForPermission = floor(typeData[2]/fpsc)`（GAME_LOGIC 9 行
+  fpsc=1.13 全局速度倍率，41 行冷却帧数公式）； numberOfRequest 累加至许可数才开火。
+- 结论：H5 `fireCooldownMs(t2) = floor(t2/1.13) × 43ms`——H5 以毫秒计时，
+  N 次 OCEEF tick × 43ms，逐值等价。断言 +1 → 冒烟 200 项全 `=true`、exit 0。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

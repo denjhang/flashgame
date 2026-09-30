@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+41: 射速模型复核（方向2）——原版 174_173: setInterval(OCEEF,43ms) +
+  numberOfRequestForPermission=floor(t[2]/fpsc), fpsc=1.13（GAME_LOGIC 9/41 行）;
+  H5 fireCooldownMs=floor(t2/1.13)*43ms 毫秒制等价。断言入冒烟（200 项全绿）
+
 - [x] TCS+40: Su37 空袭参数复核（方向2）——834/frame_1/PlaceObject2_793_23
   load 权威: puissance=500, impact=260; H5 POWER/IMPACT 逐值一致, 冷却
   comptDispo=60×1000ms=60s 亦同。断言入冒烟（199 项全绿）
