@@ -27,6 +27,7 @@
 
 ## 四、已完成（摘要，详见 deobf/PROGRESS.md N+1..）
 
+- TCS+11: 文档漂移修正(README 断言计数 164→182/补记断言覆盖面)
 - TCS+9: 1103 页签原版语义解码(prices/keys 帧标签+selectionUnite)+H5 补音
 - TCS+8: SHOP_INFO range/impact/life 三列与武器/结构表交叉验证(11 武器)入冒烟
 - TCS+7: 底盘表 hp/bounty 与 1103 第二页图示交叉验证(12 项全对上)入冒烟
