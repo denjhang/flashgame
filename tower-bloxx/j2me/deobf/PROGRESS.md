@@ -23,10 +23,10 @@
 | j.java | 584 | 23 (含 8 桥) | ✅ JD+3 | j_clean.java (MenuScriptInterpreter) |
 | p.java | 209 | 10 | ✅ JD+3 | p_clean.java (PhoneCanvas) |
 | h.java | 603 | 19 | ✅ JD+2 | h_clean.java (HallOfFameScreen) |
-| House.java | 4420 | 98 | 🔶 JD+5 (53/98, 第 1 分册) | House_clean_part1.java |
+| House.java | 4420 | 98 | 🔶 JD+6 (77/98, 第 1-2 分册) | House_clean_part1/2.java |
 | com/.../a.java | ~120 | 4 | ✅ JD+3 | nokia_lang_clean.java (NokiaLangPack) |
 
-**方法计数: 228 / ~340 (JD+5)。类: 16/18 (House 🔶)。**
+**方法计数: 252 / ~340 (JD+6)。类: 16/18 (House 🔶)。**
 
 ## JD+1 (2026-10-01) 小类全量 67 方法
 - a→ScreenCallback: 空标记接口 (extends e)。
@@ -99,3 +99,20 @@
 - 【勘误-补充证据】r(int) 摇摆阻尼为死代码 (乘 0), 此前"摇摆阻尼"语义撤销。
 - 待第 2 分册: d(int,int) 主状态机 (:3008-3288)、s(int) 块状态机 (:1852-1999)、b(int,int) 放块 (:350-679)、
   绘制组 f/g/h/i/j/k/l(Graphics) 与 b(Graphics,…) 系列、u(int)/B()/t(n2)/e(int,int) (G() 调用链)、J() 余段。
+
+## JD+6 (2026-10-01) House 第 2 分册 (24 新方法, 累计 77/98)
+- s(int) 落块物理 7 态全解 (挂钩/落空坠/砸地横躺/抛物线 n10=200/400/出屏 cm 记录);
+  G() 命中判定全解 (地基/完美 ≤127/挤歪 ≥128/连锁 n8=min(4,bs-1)-n4+1; 快速局计分公式);
+  d(int,int) 连锁生成 (aw=5 弹块 + aw=7 倾塌, 阈值 20 逐层×2)。
+- n()/o()/a(Graphics,boolean)/f(Graphics)/b(5) 主屏入口与绘制分派 + 3D 场景 (fov55, 落点标记,
+  起重机臂 cD/cE, aM/540 旋转); b(int)/c(int)/e()/f() 声音与 towermode RMS。
+- t(int)/B() 惊慌人群完整状态机 (跳/走缘/站立/掷飞/坠落, 出屏回收, bE[3] 帧公式) — N+60 移植
+  的 H5 panicPeople 与原版逐分支核对完毕, 原版多"掷飞 4 态 300ms 转 3"中转。
+- u(int) 天气导演 dq 0-3 (相机高度带触发雨/雪, 天色 dg 1024=1.0, 闪电); J() 菜单动作全解;
+  e(int,int) 键码表; h(int) 雨滴溅射【部分读, 下轮补】。
+- 转正 5 方法 (早前轮已实读): g/h/i/l/a(Graphics,int) 绘制组 (装载屏/落点角标/城市视图/天空/天际线)。
+- 配额说明: 本轮 24 新 + 5 转正 = 29, 不足 40 — House 剩余为 4 个大绘制方法
+  (j/k/b(6)/c(Graphics) 约 700 行) 与 e(int,int) 173 行, 留 JD+7 一次收尾。
+- 待第 3 分册: j(Graphics) HUD (:3467-3585), a/b(6) (:3585-3625), k(Graphics) (:3615),
+  b(6) 装饰 (:3625-3710), c(Graphics) 消息 (:4229-4277), e(int,int) 邻接 (:3793-3966),
+  h(int) 余段, B() 已入册。

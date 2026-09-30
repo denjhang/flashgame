@@ -253,3 +253,28 @@
 | q/p | 音效开关回读标志 (a(3)/a(1)) | y() |
 | g/h | 快速/城市局进行中 | a(boolean) |
 | I/J/K/N/R/S | 菜单阶段/时限/跳过/需绘/已起播 | d(int) |
+
+## House.java 字段 (JD+6 批次 — 落块/惊慌/天气)
+| aw[5] | 块状态机: 1挂钩 2掷(玩家放) 3落空坠 4已消 5掷(撞塔) 6提钩 7砸地横躺 | s(int) |
+| ax/ay[5] | 块 x 现值/目标 (500ms 收敛) | s(int) |
+| az/aA[5] | 块 x/高度 (定点 256) | s(int)/G() |
+| aB/aC[5] | 块水平速度(512 系)/抛物线初速 | s(int)/d(int,int) |
+| aD[5] | 块抛物线起点高度 | s(int) |
+| ay[5] | 块倾角 (±45) | d(int,int) |
+| cG/cH[5] | 块旋转 现值/目标 | s(int) |
+| cl[5]/ck[5] | 横躺延迟/基准 | d(int,int) |
+| cm[2][5] | 出屏块 (屏 x, 时刻) — 300ms 小人图 | s(int)/paint |
+| dD | 命中层游标 / 提钩层 | F()/s(int) |
+| cK | 本帧有罚块标志 | s(int) |
+| bq/bq=计分档 | 快速局 bB 计分方式 (1/2) | G() |
+| bB/bz/bC | 组合银行/连击数/最大连击 | G()/H() |
+| bo/bn/bm | 地基偏差/塔倾斜累计 | G()/z(int) |
+| cu/cs/cv | 雨滴溅射三池 (y=be) | h(int) |
+| cq/cr | 溅射累积/配额 | h(int) |
+| dq/dw | 天气导演态 (0-3)/雪模式 | u(int) |
+| ds/dt/du/dh/dg/di/dj | 天气生成节奏/天色 (1024=1.0) | v(int)/u(int) |
+| dc[2][7]/dd[300] | 粒子组头/粒子池 | C()/D()/w(int) |
+| cX/cY/da/db/de | 雨/雪触发带标志 | u(int) |
+| dl/dm/dn/do | 闪电相位 | u(int) |
+| dB[9]/dA[4][28]/dy[28]/dz[28] | 背景飞行物 (JD+5 已记) | E()/x(int) |
+| bP/bQ/bX/bY/bZ/ca/cb | 菜单分页组 (JD+5 已记) | l(int) |
