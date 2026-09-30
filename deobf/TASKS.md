@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+51: 988_6 解锁按钮逐行对照（方向2）——lockItem 守卫/成功 creationUnite
+  +alpha45+面板收起/失败 cannot 且 lockItem 保持(原版怪癖, H5 同构)。
+  H5 成功后 closeUnlockPanel 等价原版 _x=-500。断言入冒烟（205 项全绿）
+
 - [x] TCS+50: 解锁面板语义复核（方向2）——原版 988_3 on(press): lockItem 守卫 +
   creationUnite 音 + interest+=3 + 面板移出屏; 988_6 解锁下一件。H5 全对齐,
   INTEREST_STEP=3; 面板文案定案为 H5 中文改写(与整体 UI 文字口径一致,

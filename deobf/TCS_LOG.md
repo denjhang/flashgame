@@ -257,3 +257,13 @@
   原版面板为位图+系统字，H5 以 DOM 呈现），数值与流程零漂移。无码改。
   三件套通过，冒烟 204 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+51（2026-09-26）988_6 解锁按钮逐行对照（方向2）
+
+- 取证：989/988_6 on(press)——lockItem==false 守卫 → 上锁 →
+  unlockNextWeapon() 成功: creationUnite + this._alpha=45 + 面板 _x=-500;
+  失败: cannot，且 lockItem 保持 true、面板停留（原版怪癖，实际只在
+  iUnlock 耗尽时出现）。H5 panelPickUnlock 同构；成功后 closeUnlockPanel
+  （DOM 整面板收起 ≈ 原版移出屏），失败路径同样保持上锁。
+- 断言 +1 → 冒烟 205 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

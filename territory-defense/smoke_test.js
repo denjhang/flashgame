@@ -1824,6 +1824,12 @@ console.log("--- 修理费 (819) ---");
   //   非敌人抵达次数
   console.log("LOSSES=丢塔数 G.score (1079 actualiseInfo)=" +
     gj.includes("'LOSSES ' + G.score"));
+  // TCS+51: 988_3/988_6 on(press) 语义 (lockItem 守卫/creationUnite/cannot/
+  //   interest+=3/成功后面板收起; 失败 lockItem 保持=原版怪癖同构)
+  console.log("解锁面板按钮=原版988_3/988_6语义=" +
+    (gj.includes('function panelPickInterest') && gj.includes('function panelPickUnlock') &&
+     gj.includes('G.interest += INTEREST_STEP') &&
+     gj.includes("else playSfx('cannot', 0.45)")));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
