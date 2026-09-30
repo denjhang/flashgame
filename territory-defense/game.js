@@ -2100,11 +2100,13 @@ function briefingShow() {
 
 // ---------------- 终局演出播放器 (1132 perdu 30帧 / 1158 对白时间轴 / 1125 end 336帧) ----------------
 const CINE_FPS = 24;                      // 原版 Flash 24fps
-let cineTimer = null;
+let cineTimer = null, cineToken = 0;      // token: 胜局→败局切换/重开时废弃旧链
+let cineAliveFn = () => true;
 function playFrames(img, prefix, ext, count, done) {
   let f = 1;
   clearInterval(cineTimer);
   cineTimer = setInterval(() => {
+    if (!cineAliveFn()) { clearInterval(cineTimer); return; }
     if (f > count) { clearInterval(cineTimer); if (done) done(); return; }
     img.src = prefix + f + ext;
     f++;
@@ -2114,8 +2116,11 @@ function showCine(kind) {                 // 'perdu' = 败局; 'end' = 胜局 (�
   const box = document.getElementById('cineBox'), img = document.getElementById('cineImg'),
         txt = document.getElementById('cineTxt');
   if (!box || !img || !txt) return;
+  const token = ++cineToken;              // 新演出使旧的 setTimeout 链/帧 interval 全部失效
+  const alive = () => token === cineToken;
   box.style.display = 'flex';
   if (kind === 'perdu') {
+    cineAliveFn = alive;
     playFrames(img, 'assets/endgame/perdu/', '.png', 30, () => {
       txt.textContent = '营地失守 —— 点击重新开始';
       box.onclick = () => location.reload();
@@ -2124,8 +2129,10 @@ function showCine(kind) {                 // 'perdu' = 败局; 'end' = 胜局 (�
     // 原版顺序: endPass(1158) 6 句按 textesTempo 自动推进 → end(1125) 动画
     const st = { i: 0 };
     const step = () => {
+      if (!alive()) return;
       if (st.i >= END_DLG.length) {
         txt.textContent = '';
+        cineAliveFn = alive;
         playFrames(img, 'assets/endgame/end/', '.jpg', 336, () => { txt.textContent = '任务完成'; });
         return;
       }

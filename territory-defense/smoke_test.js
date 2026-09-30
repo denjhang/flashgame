@@ -1380,7 +1380,31 @@ console.log("--- 剧情码序列比对 ---");
   }
   console.log("44 关说话人码序列与原版逐句一致=" + (bad === 0) + (bad ? ' 不一致 ' + bad + ' 关' : ''));
 }
-// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
+// ---- 终局/败局路径执行 (N+100): showCine 两条分支从未被 sim 触发过 ----
+console.log("--- 终局路径 ---");
+{
+  // 败局: 抵达基地 → defeatT=120 → 120 tick 后 lost + perdu 分支
+  const sv = { lost: G.lost, defeatT: G.defeatT, aPerdu: G.aPerdu };
+  G.units.length = 0; G.turrets.length = 0; G.lost = false; G.won = false;
+  G.defeatT = 0; G.aPerdu = false; G.wave = 0; G.waveActive = true; briefState = null;
+  const u = new Unit('jeep', 'null', 'parcourt1');
+  const last = u.route[u.route.length - 1];
+  u.x = last[0]; u.y = last[1]; u.pt = u.route.length - 1;   // 站在末路点 → 一帧后 reached
+  G.units.push(u);
+  tick();
+  const armed = G.defeatT === 120 && G.aPerdu === true && G.lost === false;
+  for (let i = 0; i < 121 && !G.lost; i++) tick();
+  console.log("败局路径: 4s 延迟武装=" + armed + " 到点判负=" + G.lost);
+  G.lost = sv.lost; G.defeatT = sv.defeatT; G.aPerdu = sv.aPerdu;
+  // 胜局: 终波清场 → won + END_DLG/END_TEMPO 分支可执行
+  G.units.length = 0; G.wave = 44; G.waveActive = false; G.lost = false; G.won = false;
+  endWave();
+  console.log("胜局路径: won 触发=" + G.won + " END_DLG/END_TEMPO 可用=" +
+    (typeof END_DLG !== 'undefined' && END_DLG.length === 6 && END_TEMPO.length === 6));
+  G.won = false; G.wave = 0;
+  cineToken++;                              // 废弃胜局 setTimeout 链 (无头环境即时收尾)
+}
+// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----// ---- 存档/读档 (saveData/loadGame → localStorage, N+90) ----
 console.log("--- 存档系统 ---");
 {
   const sv = { wave: G.wave, euros: G.euros, score: G.score, interest: G.interest,
