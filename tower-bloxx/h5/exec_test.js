@@ -152,7 +152,8 @@ if (SCENARIO === 'tower') {
   if (title && title.onclick) title.onclick();          // STT_TITLE → STT_MENU
   const clicked = fire('id:mQuick', 'click');            // BTN_QUICK_GAME (GameSprites.as:347)
   check(clicked, '菜单 Quick Game 按钮已绑定');
-  for (let i = 0; i < 400 && performance.now() < t0 + 20000; i++) {
+  const menuEnd = performance.now() + 20000;
+  for (let i = 0; i < 400 && performance.now() < menuEnd; i++) {
     await new Promise(r => setTimeout(r, 16));
     t += 16;
     if (i % 30 === 15) for (const f of listeners.pointerdown || []) f({ stopPropagation() {} });
