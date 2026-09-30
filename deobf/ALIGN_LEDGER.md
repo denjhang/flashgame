@@ -121,3 +121,20 @@
 - assets/sounds 53 文件 vs decompiled/sounds：**49 个 md5 完全一致、0 个不同**；
   4 个 src-only 均为 466(pluton, Nellymoser 挂账) 同族 flv/mp3 变体+H5 已用
   等价命名。结论：音效资产 100% 原版字节。
+
+### R4 利息浮字 1141 ✅ TCS+70
+- 原版：DefineSprite 1141（帧数 87 @24fps ≈3.6s），giveIntrest 末尾
+  intresthint.play() 播整段。FFDec 帧导出仅 6 关键帧（文本字段渲染依赖
+  运行态），精确相位不可离线逐帧判定。
+- H5：floatHint 1.3s 上浮→回落 interest 文本（index.html 注 31 帧动效+余帧
+  保持的近似）。结论：**近似已定案（同真机听感族，永久账）**，码不变。
+
+### R5 云层 833 nuageux ✅ TCS+70
+- 原版：PlaceObject2 (dpt236 nm nuageux)，矩阵 (-1,0,0,1, 2030.45,-1471.45)
+  横向镜像（game.js 2448 注，早期轮字节级解码），changeQuality HIGH 才显示。
+- H5：nuageuxImg 2134×1956 量化导出 + QUALITY==='good' 门控 + 同矩阵铺图。
+- 结论：对齐，无码改。
+
+### R6 菜单图标 12 张逐张核 ✅ TCS+70
+- 12 文件全部 75x62；抽样读图 pluton.png（导弹发射车照片）/radar.png
+  （雷达天线）内容与命名相符；来源 1025 帧库（早期轮）。结论：对齐。
