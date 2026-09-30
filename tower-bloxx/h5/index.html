@@ -30,7 +30,9 @@
   #cityGrid{position:absolute;left:224px;top:107px;display:grid;grid-template-columns:repeat(5,52px);
     grid-template-rows:repeat(5,52px);cursor:pointer;}
   #cityGrid .cell{position:relative;}
-  #cityGrid .cell.ok{outline:2px solid #ffd700;background:#ffd70022;}
+  /* 可建格高亮=原版 774 黄框 (读图 47x47, 52 格内居中 inset≈2px) — updateCellHighlights:514-539 */
+  #cityGrid .cell.ok::after{content:'';position:absolute;left:2px;top:2px;width:47px;height:47px;
+    background:url('./assets/flash/fx/DefineSprite_774_city_place_highlight_spr/1.png') center/47px 47px no-repeat;}
   #cityGrid .tower{position:absolute;left:10px;bottom:13px;width:50px;height:50px;pointer-events:none;}
   /* 选择列读图实测: 图标行 y=109/157/205/253 (节距48, 高约44), x≈155-210; dozer y=302-362 */
   #cityMenu{position:absolute;left:152px;top:105px;display:flex;flex-direction:column;gap:4px;}

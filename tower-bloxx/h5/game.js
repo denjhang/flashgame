@@ -439,6 +439,17 @@ function cityCellClick(col, row) {
     if (getTowerColor(col, row) > 0) {
       playSound('snd_destroy');
       setTowerInfo(col, row, 0, 0, 0);
+      // placeInDozer:398-405: 拆除位置 city_demol_spr 翻页 1→6 帧/1000ms 后自毁 (读图 72x72)
+      const dem = document.createElement('img');
+      dem.src = './assets/flash/fx/DefineSprite_818_city_demol_spr/1.png';
+      dem.style.cssText = `position:absolute;left:${224 + col * 52 - 10}px;top:${107 + row * 52 - 10}px;` +
+        'width:72px;height:72px;z-index:2;pointer-events:none;';
+      hud.city.appendChild(dem);
+      let df = 1;
+      const div = setInterval(() => {
+        if (++df > 6) { clearInterval(div); dem.remove(); return; }
+        dem.src = `./assets/flash/fx/DefineSprite_818_city_demol_spr/${df}.png`;
+      }, 1000 / 6);
       updateCityLevelAndUnlockedTypes();
       saveModel();
       renderCity();

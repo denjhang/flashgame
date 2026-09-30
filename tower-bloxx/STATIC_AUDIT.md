@@ -342,3 +342,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - renderCity: CSS 色块 div（高度对数近似+★pop 文字）→ img 原版图标; 格内 left:10/bottom:13
   （restoreCity:74-75: cellX+10, 下一行底-13）; 人口数字改 title 属性（原版图标不含数字）
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 35 轮（2026-09-30）— T10 高亮/拆除特效原版化
+
+- 读图: 774=47x47 黄框单帧; 818=72x72 爆闪 6 帧
+- .cell.ok 金 outline → 774 黄框 ::after（格内居中 inset 2px）
+- dozer 拆除: 补 placeInDozer:398-405 的 city_demol_spr 翻页（1→6/1000ms→167ms/帧, 自毁）,
+  拆除格中心 (224+col*52-10, 107+row*52-10) 锚定; 原 H5 只放音效无视觉
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
