@@ -1502,7 +1502,16 @@ console.log("--- protecthint ---");
      hj.includes('id="protectHint"') && hj.includes('left:642px') &&
      gj.includes("protectHint") && gj.includes("G.wave + 1 === 1")));
 }
-// ---- 读档解锁阈值 (TCS+13): 6_564 严格 > 语义 (iMission>7 才给 canon75) ----
+// ---- keyDown 门禁 (TCS+17): S/R/C/G/Q 在简报/对白期禁用 (原版 !enScenario) ----
+console.log("--- 键位门禁 ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("enScenario 门禁接线 (S/R/C/G/Q 五键)=" +
+    (gj.includes('const enScenario = G.briefing || dlg !== null') &&
+     ['s','r','c','g','q'].every(k => gj.includes("k === '" + k + "' && !enScenario"))));
+}
+// ---- 读档解锁阈值 (TCS+13)// ---- 读档解锁阈值 (TCS+13): 6_564 严格 > 语义 (iMission>7 才给 canon75) ----
 console.log("--- 读档解锁阈值 ---");
 {
   global.localStorage.setItem('tcs_cookie', JSON.stringify({ units: [], iMission: 8, iUnlock: 0, euros: 850 }));
