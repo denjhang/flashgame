@@ -2092,6 +2092,10 @@ function loadGame() {                       // 原版 loadGame 分支 (6_333/834
 }
 function briefingShow() {
   G.briefing = true; briefState = 'mission';
+  // 原版 955 haloNoirOuverture: 每关 980.refresh() → gotoAndPlay("play") 开场黑闪
+  //   (f2..f5 黑 → f6 透明, ≈0.21s); 重启动画相位
+  const oc = document.getElementById('openCurtain');
+  if (oc) { oc.classList.remove('on'); void oc.offsetWidth; oc.classList.add('on'); }
   // 原版 victims(762): iMission<=3 时黑幕在屏 (frame_4: >3 永久移出), 开波淡出
   const fc = document.getElementById('fadeCurtain');
   if (fc) {

@@ -28,6 +28,13 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+31: 980 未翻子剪辑取证 + 开场黑幕接线——955=haloNoirOuverture
+  (30帧时间线: f1 arcadebomb 赞助商图(不播, 起播帧标签 play=f2), f2..f5 黑→f6 透明,
+  ≈0.21s; 每关 980.refresh() → gotoAndPlay("play")); H5 新增 #openCurtain 0.21s 淡出
+  于 briefingShow 重启相位; 956=黑矩形(955 用); 958=空 EditText 'txt'(FontID 957,
+  14px, 初始 '<p align=left></p>', 全库无代码引用) 判定调试遗留不复刻。
+  冒烟 191 项全绿
+
 - [x] TCS+30: 已定案事实补录两条（对白字号定案 / 说话人名为 H5 附加件）
 
 - [x] TCS+29: dlgBox 排版对齐原版（方向4）——取证 EditText 1156（实例 dialogue,

@@ -47,3 +47,15 @@
   （原版无名字字段）。防止后续轮次反复翻证。
 - 复核：三件套 node --check 通过；冒烟 190 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」清单为空，下轮按「五」自查生成新任务）。
+
+## TCS+31（2026-09-26）980 未翻子剪辑取证 + 开场黑幕接线（方向1）
+
+- 取证：980 装配表 9 个子剪辑中 955/956/958 此前未翻。955 = **haloNoirOuverture**
+  （PlaceObject2 dpt14 nm），30 帧时间线 f1 stop / f2 play(标签) / f30 stop；
+  FFDec 帧图：f1=arcadebomb.com 赞助商图（起播在 play=f2 故实际不显示），
+  f2..f5 全黑 → f6 全透明 ≈ **5帧@24fps=0.21s 开场黑闪**。调用点唯一：
+  6_329 → 980.refresh(iMission) → haloNoirOuverture.gotoAndPlay("play")，每关一次。
+- H5：新增 #openCurtain（z-index 28，在对白框之下），briefingShow 顶部重启相位播放
+  0.21s 淡出；958 = 空 EditText 'txt'（全库无代码引用）判调试遗留不复刻，
+  956 = 955 用黑矩形。防回归断言 +1 → 冒烟 191 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

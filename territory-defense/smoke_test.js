@@ -1746,6 +1746,11 @@ console.log("--- 对白演出素材 ---");
   console.log("对白字号=原版14px/leading2px (dlgTxt/dlgWho)=" +
     (/#dlgTxt \{[^}]*font-size:14px; line-height:1\.3/.test(hj) &&
      /#dlgWho \{[^}]*font-size:14px/.test(hj)));
+  // TCS+31: 开场黑幕 955 haloNoirOuverture (每关 refresh → play, ≈5帧 0.21s 淡出;
+  //   958 txt 空字段无代码引用不复刻)
+  console.log("开场黑幕 haloNoirOuverture 接线 (openCurtain 0.21s)=" +
+    (hj.includes('id="openCurtain"') && hj.includes('curtainOpenOut .21s') &&
+     gj.includes("openCurtain") && gj.includes('0.21s')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
