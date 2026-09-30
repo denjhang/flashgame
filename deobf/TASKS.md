@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+37: 对空 4 倍复核（方向2）——GAME_LOGIC 78 行权威:
+  目标 chassis=="tigre" → etat -= power*4（剧情台词说 2 倍, 代码是 4）;
+  H5 ANTI_AIR_MULT=4 一致（空袭 893 / 直射 1792/1801 三处全用）。
+  断言入冒烟（196 项全绿）
+
 - [x] TCS+36: costUpgraded 取证（方向2）——原版 1027 建造菜单三项
   costUpgraded=300/420/540（canon105 项锚定 420），全库仅赋值无读取点 → 判定
   废弃字段（同 m60AutoFire 族）；U 键对空升级 = H5 扩展，AA_UP_RATIO=0.6 为

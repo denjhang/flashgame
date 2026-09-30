@@ -1782,6 +1782,9 @@ console.log("--- 修理费 (819) ---");
     seen[match[1]] = 1;
   }
   console.log("顶层函数无重名 (TCS+34 缺陷防回归)=" + (dup === 0));
+  // TCS+37: 对空 4 倍证据 (GAME_LOGIC 78 行: 目标 chassis=="tigre" → etat -= power*4;
+  //   剧情台词说 2 倍, 代码是 4 —— H5 常量须为 4)
+  console.log("对空倍率=原版 power*4 (非台词的2)=" + gj.includes('const ANTI_AIR_MULT = 4;'));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
