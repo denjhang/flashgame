@@ -67,7 +67,9 @@
   /* 菜单流: 467 title / 473 menu 底图 (读图 648x480 与 640x480, cover 铺满) */
   #titleScr{position:absolute;inset:0;display:none;cursor:pointer;
     background:url('./assets/flash/fx/DefineSprite_467_title_spr/1.png') center/cover;}
-  #menuScr{position:absolute;inset:0;display:none;
+  #splashScr{z-index:20;position:absolute;inset:0;display:none;cursor:default;background:
+    url('./assets/flash/fx/DefineSprite_828_splash_spr/1.png') center/cover;background-color:#fff;}
+    #menuScr{position:absolute;inset:0;display:none;
     background:url('./assets/flash/fx/DefineSprite_473_menu_spr/1.png') center/cover;}
   #menuScr .mbtn{position:absolute;width:299px;height:67px;cursor:pointer;
     background-repeat:no-repeat;background-size:299px 67px;}
@@ -95,6 +97,7 @@
   <div id="summary"></div>
     <div id="hint">点击 / 空格 放下积木 · 还原自原版 Tower Bloxx（J2ME 3D 资产）</div>
   </div>
+  <div id="splashScr"></div>
   <div id="titleScr"></div>
   <div id="menuScr">
     <!-- menu_btn_spr(552) 帧=BTN 常量(Const.as:6-16); 坐标=makeMenuSprites:342-350 中心点, 尺寸读图 299x67 -->

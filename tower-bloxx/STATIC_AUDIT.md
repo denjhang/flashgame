@@ -476,3 +476,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   showResetConfirm 改 444 面板+Yes/No, 原 menuSub 文本路径停用; 360 msg_spr 无帧记档
 - 教训: 补丁切点中段落→孤儿代码, node --check 即时抓到并清理
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 55 轮（2026-09-30）— T30 splash 接入
+
+- 828 读图 (Digital Chocolate logo 640x480) → 启动流: logo 2s → title (仅无 URL 模式);
+  360 msg_spr 无帧记档
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

@@ -2,8 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T30.【资源】msg_spr/弹窗杂项收尾**：360 msg_spr 目录为空（无导出帧，记档）；下一批候选
-> ——scoreboard/结算数字位图、city_icon 悬停放大、splash 素材评估。自查后立任务。
+> **T31.【自查】结算数字位图核对**：结算面板 Population/Height/Combo 行的数字原版是位图字
+> （drawDataSet→digit 帧），读图后决定 HTML 字体是否够近；顺带评估 city_icon 悬停放大。
 >
 > **待办池**：（空）
 >
@@ -251,6 +251,12 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - Tower.panDown (:199-201): Path 到塔底, dur=min(DUR_PAN_DOWN=3000, stacked*250) → H5 原来
   camTarget=0 靠 500ms glide; 改 G.panDownDur/T/StartY 线性 tween 精确时长, 结算弹窗时序
   (1s+pan, 第49轮) 与镜头同步
+
+
+### 4.6 splash 接入（第 55 轮, T30 ✅）
+- 828_splash_spr 读图: Digital Chocolate logo 640x480 满屏 → 无 URL 模式启动先显 logo 2s
+  再进 title (STT_SPLASH 原版 case 为空, 时序在时间轴); 点击不做跳过 (原版时间轴亦无)
+- 360 msg_spr 无导出帧, 记档
 
 ## 6. 音频——✅ 闭环（2026-09-29）
 

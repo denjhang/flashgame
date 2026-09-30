@@ -50,6 +50,7 @@ const hud = {
   cityPop: document.getElementById('cityPop'), cityProgressFill: document.getElementById('cityProgressFill'),
   cityStatus: document.getElementById('cityStatus'), cityHint: document.getElementById('cityHint'),
   titleScr: document.getElementById('titleScr'), menuScr: document.getElementById('menuScr'),
+  splashScr: document.getElementById('splashScr'),
   menuSub: document.getElementById('menuSub'),
   hudEl: document.getElementById('hud'),   // 真实 HUD 容器 (浮字 append 用, hud 对象本身是引用表)
 };
@@ -333,6 +334,10 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   startGame(); // 先完成状态/HUD 初始化
   if (CITY_MODE) { stopGameVisual(); showCity(); playSong('sng_city'); }        // STT_CITY
   else if (TOTAL_BLOCKS !== 999) { /* ?mode=tower 直入 */ }
+  else if (document.getElementById('splashScr')) { // STT_SPLASH: logo 2s → STT_TITLE (时间轴自动)
+    hud.splashScr.style.display = 'block';
+    setTimeout(() => { hud.splashScr.style.display = 'none'; showTitle(); playSong('sng_title'); }, 2000);
+  }
   else { stopGameVisual(); showTitle(); playSong('sng_title'); }                // STT_TITLE
   window.__tpl = templates.map(t => ({ n: t.name, s: +t.userData.s.toFixed(3), cx: +t.userData.cx.toFixed(1), cy: +t.userData.cy.toFixed(1), kid: t.geometry?.attributes?.position?.count }));
   window.__dbg = { drops: 0, lands: [] };
