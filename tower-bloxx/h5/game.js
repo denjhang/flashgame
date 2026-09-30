@@ -1450,8 +1450,6 @@ function loop(now) {
         G.aimBird.visible = true;
         G.aimBird.position.set(px - ph * 13, py, 4);
       } else if (G.aimBird) G.aimBird.visible = false;
-        G.hanging.position.set(-(G.hanging.userData.cx || 0), -60 - (G.hanging.userData.cy || 0), 0);
-      }
     }
 
     // combo 计时
