@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+36: costUpgraded 取证（方向2）——原版 1027 建造菜单三项
+  costUpgraded=300/420/540（canon105 项锚定 420），全库仅赋值无读取点 → 判定
+  废弃字段（同 m60AutoFire 族）；U 键对空升级 = H5 扩展，AA_UP_RATIO=0.6 为
+  自定参数，game.js 注释已修正避免误标原版数据。入「六」已定案事实
+
 - [x] TCS+35: 全库重复定义扫描（TCS+34 教训推广）——顶层 function 零重名；
   类方法 constructor/update 重名跨类(Unit/Turret)属合法；顺带清理 Turret
   constructor 里重复的 this.cost 赋值。断言(顶层无重名)入冒烟(195 项全绿)
@@ -119,6 +124,8 @@
   尺寸微小不复刻。enScenario 门禁 = 作用域冲突死条件（TCS+18），按键实际永远可用。
 - canon75AutoFire = **反作弊哨兵**（newEvents mR==1: 旗标开启 → activePerdu 当关判负；
   TCS+2 取证）。H5 无作弊入口，不接线（行为即"不开挂则不触发"）。
+- costUpgraded（1027 菜单 300/420/540）= 原版废弃字段（全库无读取点）；
+  U 键对空升级 = H5 扩展，AA_UP_RATIO=0.6 为自定参数非原版数据（TCS+36）。
 - 1053 story 按钮 = 自含标签翻转（"action"/"story"，QEX 旗标无其他读取点），
   系开发遗留；H5 已在帮助板以等效标签翻转复刻（TCS+6）。
 - 真机听感验证：永久挂账（纪律禁止浏览器）。

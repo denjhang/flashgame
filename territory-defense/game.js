@@ -21,7 +21,8 @@ const AA_WEAPONS = ['m60', 'gatling', 'crotale']; // 天生可对空
 const RADAR_RANGE = 1200;       // 雷达站视野 (typeData radar distanceOfFire)
 const VIS_MARGIN = 60;          // 防御塔视野 = 射程外一小圈
 const BASE_VIS = 150;           // 基地基础视野
-const AA_UP_RATIO = 0.6;        // 对空升级费 = 塔造价 × 0.6
+const AA_UP_RATIO = 0.6;        // 对空升级费 = 塔造价 × 0.6 (H5 扩展自定参数;
+                                //   原版 costUpgraded 300/420/540 全库无读取点=废弃, TCS+36)
 
 // ---------------- 射速 (原版 OCEEF 循环模型) ----------------
 // 权威依据 DefineSprite_174/frame_1/PlaceObject2_173_1 onClipEvent(load):
