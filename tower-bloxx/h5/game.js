@@ -243,6 +243,7 @@ function restoreModel() { // GameModel.restoreModel:82-99
       sm_towerGridData: d.sm_towerGridData || [],
       sm_totalPopulation: d.sm_totalPopulation == null ? 0 : d.sm_totalPopulation,
       tipFlags: d.tipFlags && !Array.isArray(d.tipFlags) ? d.tipFlags : {}, // GameModel.as:7/83 持久化提示门控
+      sm_unlockedTrophyTowerType: d.sm_unlockedTrophyTowerType == null ? -1 : d.sm_unlockedTrophyTowerType,
     };
   } catch (e) { G.save = { sm_towerGridData: [], sm_totalPopulation: 0, tipFlags: {} }; }
 }
@@ -398,6 +399,8 @@ function updateCityLevelAndUnlockedTypes() { // GameModel.as:281-293 + TOWER_UNL
   for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (G.sm_totalPopulation >= CITY_LEVEL_LIMITS[i]) lv = i;
   G.sm_cityLevel = lv;
   G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
+  G.sm_unlockedTrophyTowerType = Math.max(G.sm_unlockedTrophyTowerType,
+    [8, 12, 14, 16].filter(t => t <= lv).length - 1);          // TROPHY_TOWER_UNLOCK_LIMITS (Const.as:218)
   if (lv !== prev) { // GameModel.as:315-323: 里程碑提示 (TIP_MSa + 阈值)
     queueCityTip('More than ' + CITY_LEVEL_LIMITS[lv] + ' citizens have moved in!  (Lv.' + lv + ')');
     // 升格称号 (CITY_PROMOTION_LEVELS → CITY_TYPES)
@@ -616,7 +619,8 @@ const G = {
   pendingCell: null, selectedType: -1, dozerMode: false,
   sm_towerGridTypesAllowed: new Array(25).fill(0),
   sm_cityLevel: 0, sm_unlockedTowerType: 0, sm_totalPopulation: 0,
-  cleanTower: false, trophyRoof: false,          // GameModel.updateCleanTower / Crane.setTarget
+  cleanTower: false, trophyRoof: false,
+  sm_unlockedTrophyTowerType: -1,                // GameModel.as:33          // GameModel.updateCleanTower / Crane.setTarget
   comboMax: 0,                                    // GameModel.setComboMax
   records: Object.assign({ populationRecord: 0, blockRecord: 0, comboRecord: 0 },
     JSON.parse(localStorage.getItem('twrblx_records') || '{}')), // 原版纪录仅会话内(GameModel.as:11-13), H5 持久化
@@ -631,6 +635,8 @@ restoreModel();
   for (let i = 0; i < CITY_LEVEL_LIMITS.length; i++) if (pop >= CITY_LEVEL_LIMITS[i]) lv = i; // :286-293
   G.sm_cityLevel = lv;
   G.sm_unlockedTowerType = TOWER_UNLOCK_LIMITS.filter(t => t <= lv).length - 1;
+  G.sm_unlockedTrophyTowerType = Math.max(G.sm_unlockedTrophyTowerType,
+    [8, 12, 14, 16].filter(t => t <= lv).length - 1);          // TROPHY_TOWER_UNLOCK_LIMITS (Const.as:218)
   G.sm_totalPopulation = pop;
 }
 
@@ -664,7 +670,7 @@ function addHud() {
   hud.combo.style.display = on ? 'block' : 'none';
   if (on) {
     hud.comboText.textContent = Math.min(5, secs) + ' x' + G.comboMult;
-    hud.comboFill.style.width = Math.round(163 * Math.min(1, G.comboT / ((TIMER_MAX + 1) * 1000))) + 'px';
+    hud.comboFill.style.width = Math.round(Math.min(136, G.comboT * 136 / 5000)) + 'px'; // eachTick:86 bar._width
   }
 }
 
@@ -679,6 +685,7 @@ function startGame() {
   G.people = []; G.sparks = []; G.fallingPeople = []; G.missFall = []; G.bounces = []; G.straighten = []; toppled.length = 0;
   G.blocks = []; G.landingY = 0; G.currCtr = 0; G.towerBdx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
+  G.sm_unlockedTrophyTowerType = G.save.sm_unlockedTrophyTowerType; // startGame 同步存档值
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
   G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false; G.dozerMode = false;
@@ -994,15 +1001,15 @@ function knockTopBlock() { // Tower.knockNextBlock
     - (top.mesh.position.x + (top.cx || 0));
   pushBounce(top.mesh, kOff, 250);
   spawnFallingPerson(top.mesh.position.x + (top.cx || 0), top.mesh.position.y + 40); // makeFallingPerson
+  changePopulation(-(top.pop || 0));             // makeFallingPerson:331 changePopulation(-popCount)
   G.landingY -= BLOCK_H;
   G.stacked--;                                   // Tower.as:176 setStackedBlocks(stackedBlocks - 1)
   const under = G.blocks[G.blocks.length - 1];
   if (under) G.currCtr = under.mesh.position.x + under.cx; // currCtr = 新顶块中心
-  G.population = Math.max(0, G.population - (top.pop || 0));
 }
 
 function updateCleanTower() { // GameModel.as:181
-  G.cleanTower = G.currColor <= 0 || G.population >= TROPHY_POP_LIMITS[G.currColor];
+  G.cleanTower = G.currColor <= G.sm_unlockedTrophyTowerType && G.population >= TROPHY_POP_LIMITS[G.currColor];
 }
 
 // ---- Tipper.incSway / updateTower ----
@@ -1028,7 +1035,9 @@ function swayAngle(dt) {
 // 落块人口 = floor(stackedBlocks/10 + inc); 连击期间银行 m_comboPopulation += floor(mult*(2+stacked/10*2))
 function changePopulation(inc) {
   if (G.comboMult > 0) G.comboBank += Math.floor(G.comboMult * (2 + G.stacked / 10 * 2));
-  const gain = Math.floor(G.stacked / 10 + inc);
+  let gain;
+  if (inc > 0) gain = Math.floor(G.stacked / 10 + inc);       // GameModel.as:165
+  else { gain = Math.floor(G.stacked / 10 - inc); G.population -= gain; popFloat('-' + gain); return; } // :174-177
   G.population += gain;
   popFloat('+' + gain); // showPopChange: 人口 HUD 增量文本 (GameModel.as:168-171)
 }

@@ -485,3 +485,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - popup displayText=纯文本/新 setDigits=动态文本 → H5 HTML 等价; city_icon 悬停原版不存在
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS（零代码变更取证轮）
+## 第 57 轮（2026-09-30）— T32 ComboTimer/计分复核（五处修复）
+
+- [P2] combo fill 136px/5s 基准; [P1] changePopulation 负分支 + knock 扣分走原函数;
+  [P1] cleanTower 条件修正 + sm_unlockedTrophyTowerType 全链补齐 (明细 PARITY 1.3)
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

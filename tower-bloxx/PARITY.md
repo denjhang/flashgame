@@ -2,8 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T32.【函数】ComboTimer/changePopulation 二遍细读**：同 T22/T23 方法并排复核
-> ComboTimer.as 全函数与 GameModel 计分三函数（changePopulation/setPopulation/setComboMult）。
+> **T33.【自查】碎片化收尾评估**：全量盘点 PARITY 各节剩余 ⬜/🟨 项与记档差异，判定哪些
+> 还值得做、哪些永久记档，输出收尾计划。
 >
 > **待办池**：（空）
 >
@@ -50,6 +50,18 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   → G.straighten 队列, H5 原来永久停倾
 - 已核实一致: 完美吸附清 blockDx (:206-210)/comboMult++ 先于判定 (:233)/makePeople 数量
   4/3/2/1 三档/roof aoff=128-aoff*256/BLOCK_H 折算 (:293-302)/updateCleanTower 时点
+
+
+### 1.3 ComboTimer/计分并排复核（第 57 轮, T32 ✅）——五处修复
+- [P2] combo fill 比例: bar._width=min(136, remaining*136/5000) (ComboTimer eachTick:86)
+  → H5 原来按 163px 槽整段缩放, 已改 136px/5s 基准
+- [P1] changePopulation 负分支缺失 (GameModel.as:174-177: 扣分=floor(stacked/10+|inc|))
+  → knockTopBlock 改走 changePopulation(-pop) 且先于 stacked-- (原版顺序), 原手写扣分删
+- [P1] cleanTower 条件错: 原版=currColor≤sm_unlockedTrophyTowerType 且 人口≥limit (:181);
+  H5 原来是猜的 (currColor≤0 或 人口) → 补 sm_unlockedTrophyTowerType 字段全链
+  (G 字面量 -1/存档持久化/updateCityLevel 解锁 [8,12,14,16] (Const:218)/startGame 同步)
+- 已核实一致: setTimer/addToTimer 上限公式 (:60-75)/setSecs 文本与 finishCombo 触发 (:97-105)/
+  combo 银行公式 (:163)
 
 ## 2. 塔楼目标与屋顶（quick/city 共用）——✅ 机制闭环（2026-09-29）
 
