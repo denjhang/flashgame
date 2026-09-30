@@ -1367,7 +1367,20 @@ console.log("--- 商店INFO原文比对 ---");
   console.log("SHOP_INFO 与原版逐字节一致 (" + checked + " 条)=" + (bad.length === 0) +
     (bad.length ? ' 差:' + bad.join(',') : ''));
 }
-// ---- STORY 翻译 QA (TCS+22): 中文文本无 >3 字母残留英文片段 ----
+// ---- 立绘覆盖 QA (TCS+23): STORY 全部说话人码的立绘文件存在 ----
+console.log("--- 立绘覆盖 ---");
+{
+  const fsx = require('fs');
+  const miss = new Set();
+  for (const m of Object.keys(STORY)) for (const [code] of STORY[m]) {
+    if (/^[A-Z]v$/.test(code)) continue;              // 旁白无立绘
+    const label = code.slice(1);
+    if (!fsx.existsSync('assets/story/perso/' + label + '.png')) miss.add(label);
+  }
+  console.log("STORY 说话人立绘 404 检查=" + (miss.size === 0) +
+    (miss.size ? ' 缺:' + [...miss].join(',') : ''));
+}
+// ---- STORY 翻译 QA (TCS+22): 中文文本无 >3 字母残留英文片段 ----// ---- STORY 翻译 QA (TCS+22): 中文文本无 >3 字母残留英文片段 ----
 console.log("--- 翻译QA ---");
 {
   const OK = new Set(['MLRS','MTHEL','Su37']);
