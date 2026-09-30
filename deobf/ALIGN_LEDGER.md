@@ -158,3 +158,22 @@
 - 原版：viseurUnit/cerclePortee _x=-500 移出 + afficheUnit 清空。
 - H5：G.selected=null + 选中视觉只在 t===G.selected 时绘制（等效移出）。
   空格 depressSpace 亦触发（TCS+60）。对齐。
+
+### R10 flame 弹座火 34 帧 ✅ TCS+72
+- 原版 createExplosion: 28000+i flame 与 26000+i explosion 同位(±10 抖动)attach;
+  assets/flame 34 文件 = chid 637 34 帧（game.js 285 注），循环消费一致。
+
+### R11 spark etincelle 7 帧 ✅ TCS+72
+- assets/spark 1..7 = 53x4 单画布 7 帧淡出（亮黄→白→灰），H5 SPARK_FRAMES
+  轮播 + 随机旋转 + ±8px 抖动 = createEclat 同构（game.js 253 注）。
+
+### F2 getIEclat/getIExplosion/getIObus 计数器族（函数补卡）✅ TCS+72
+- 原版：i<i上限 自增循环取实例深度（eclat<1000），防重叠命名。
+- H5：G.effects/G.sparks/G.shells 数组 + filter 生命周期 = 等效实现（DOM 深度
+  概念不存在）。对齐。
+
+### R12 gun 炮管原点 o 系统差定案 ✅ TCS+72
+- gun_origins.json（模板测量）vs H5 TURRET_GUNS o（173 库 PlaceObject 矩阵
+  字节解码）：12 门炮 y 差恒 +4、x 差 -3..+4 → 测量参考系系统偏移。
+- 结论：**H5 矩阵解码值为权威**（与 TURRET_LIB_ORIGIN 同一坐标系推导），
+  gun_origins.json 仅作参考存档，不改码。
