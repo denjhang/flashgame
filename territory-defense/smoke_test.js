@@ -954,6 +954,11 @@ console.log("--- 波次路线 + 整波生成 ---");
   const origRoutes = MISS.waves.map(w => w.route);
   const routesOk = WAVE_ROUTES.length === 44 && JSON.stringify(WAVE_ROUTES) === JSON.stringify(origRoutes);
   console.log("WAVE_ROUTES 44 波路线与 missions.json 逐波一致=" + routesOk);
+  // 全 44 波逐车编成比对 (type+weapon 序列)
+  const compOk = MISS.waves.length === 44 && WAVES.length === 44 &&
+    MISS.waves.every((w, i) => JSON.stringify(WAVES[i].map(u => [u.type, u.weapon])) ===
+                           JSON.stringify(w.units.map(u => [u.type, u.weapon])));
+  console.log("全 44 波逐车编成 (type+weapon 序列) 与 missions.json 一致=" + compOk);
   // 旧 guessRoute (wave%3 猜测) 与原版不一致的 16 波抽查
   const spot = [[6,'parcourt1'],[8,'parcourt2'],[9,'parcourt1'],[14,'parcourt2'],[23,'parcourt2'],[43,'parcourt2'],[44,'parcourt4']];
   const spotOk = spot.every(([w, r]) => WAVE_ROUTES[w - 1] === r);
