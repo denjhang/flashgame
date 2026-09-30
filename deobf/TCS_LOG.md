@@ -267,3 +267,13 @@
   （DOM 整面板收起 ≈ 原版移出屏），失败路径同样保持上锁。
 - 断言 +1 → 冒烟 205 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+52（2026-09-26）unlockNextWeapon 对照（方向2）
+
+- 取证：6_333 pcode——`iUnlock == unlockerLength(5)` 严格等值 → return false；
+  否则 `unlocker[weaponsToUnlock[iUnlock]] = true` + 建造槽 gotoAndStop("normal")
+  + `iUnlock++`。weaponsToUnlock 五项与 H5 WEAPONS_TO_UNLOCK 逐项一致。
+- 结论：H5 用 `>=` 判满——iUnlock 每次仅 +1、上限 5，永不过冲，等价。
+  建造槽刷新 ≈ buildShop()。冒烟已有连线断言（连续解锁 5 件/iUnlock=5）。
+  无码改。三件套通过，205 项全 `=true`、exit 0。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

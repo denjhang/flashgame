@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+52: unlockNextWeapon 对照（方向2）——原版 6_333: iUnlock==5(严格
+  等值)→false, 否则解锁 weaponsToUnlock[iUnlock] + iUnlock++ + 建造槽帧刷新
+  (gotoAndStop normal ≈ H5 buildShop); 列表五项 crotale/canon125/MLRS/MTHEL/
+  pluton 与 H5 一致; H5 的 >= 因步进+1上限5而等价。已有着线断言覆盖, 无码改
+
 - [x] TCS+51: 988_6 解锁按钮逐行对照（方向2）——lockItem 守卫/成功 creationUnite
   +alpha45+面板收起/失败 cannot 且 lockItem 保持(原版怪癖, H5 同构)。
   H5 成功后 closeUnlockPanel 等价原版 _x=-500。断言入冒烟（205 项全绿）
