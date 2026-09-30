@@ -41,6 +41,13 @@ const src = fs.readFileSync(path.join(h5, 'game.js'), 'utf8');
 check(/const CRANE_DUR = 2600/.test(src), '摆钩周期 CRANE_DUR=2600 (Const.as)');
 check(/const BLOCK_H = 64/.test(src), '积木高 BLOCK_H=64 (Const.as)');
 check(/const NUM_TRIES = 3/.test(src), '3 条命 NUM_TRIES=3 (Const.as)');
+// HTML 引用的本地资源必须存在 (防 404 类事故, fx28帧前科)
+{
+  const html = fs.readFileSync(path.join(h5, 'index.html'), 'utf8');
+  const refs = [...html.matchAll(/(?:src|href)=["'](\.\/[^"']+)["']/g)].map(m => m[1]);
+  const missing = refs.filter(r => !fs.existsSync(path.join(h5, r)));
+  check(missing.length === 0, 'index.html 引用的资源文件都存在' + (missing.length ? ' 缺: ' + missing.join(',') : ''));
+}
 check(/sm_unlockedTrophyTowerType: d\.sm_unlockedTrophyTowerType == null \? -1/.test(src)
   && /tipFlags: d\.tipFlags && !Array\.isArray\(d\.tipFlags\)/.test(src),
   'restoreModel 旧存档字段全兜底 (T34 存档兼容)');
