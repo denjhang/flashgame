@@ -383,3 +383,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   改 3s/条顺序队列 (statusQ/pumpStatus)
 - 记档: 216 高分三分页表格（H5 单榜简化→待办池）; 706/713/223 随机重播≈fx 槽位随机重生
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 40 轮（2026-09-30）— T15 image_10..17 贴图盘点
+
+- 逐张读图 + GLB md5 对比: 10/11/12/14 = GLB texture#8/#9/#11/#12 同hash（已间接接入）,
+  13 与 12 重复, 15/16/17 为 jar 另一版纹理（不在 GLB, 记档备用）→ 无需新增接入（明细 PARITY 5.2）
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS（本轮零代码变更, 纯盘点轮）

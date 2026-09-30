@@ -2,12 +2,11 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T15.【资源】image_10..17 未核对贴图盘点**：逐张读 h5/assets/image_10..17.png（J2ME/UI
-> 来源待考），确认内容后判定：复刻接入 / 记档不复刻 / 对应已有实现的质感替换。
+> **T16.【函数】miss 时 snd_destroy 延迟播放语义取证**：原版 fallPastTower/bounceOffTower
+> 后的音效时机（wait 参数与 STT_BLOCK_LANDED 顺序）对照 H5 playSound 即时播——差在哪补哪。
 >
-> **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
-> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧 /
-> 高分榜三分页表格（216 drawNetworkTableLines, H5 单榜简化）。
+> **待办池**：J2ME MIDI 曲库做可选 BGM（jar 静态提取）/ swoosh_spr 翻页小特效（1→3帧/150ms,
+> Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧 / 高分榜三分页表格（216）。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -169,6 +168,14 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   生成 fx/fx01..28.png 紧裁单图（与既有 5 张散装同规格, 读图比对 fx06=frame6 鸟群一致）
 - 未接入（有意/低优先）: fx/ 下其余 219 个 DefineSprite 目录多为 UI 弹窗/按钮/块模板的 FFDec
   整clip导出（HUD/菜单用 HTML 等价实现）; image_10/11/13..17（J2ME/UI 贴图, 用途待考）
+
+
+### 5.2 image_10..17 贴图盘点（第 40 轮, T15 ✅）
+- 逐张读图: 10/11=64x64 蓝/绿块面纹理, 12/13=16x16 吊钩件, 14=8x8 色点, 15=64x32 红蓝门面,
+  16=32x32 红屋顶, 17=32x32 绿块 —— J2ME jar 原始纹理导出
+- md5 对比 GLB: image_10/11/12/14 与 scene.glb 内 texture#8/#9/#11/#12 完全同hash → 已通过
+  GLB 间接接入; image_13 与 12 同内容重复; 15/16/17 不在 GLB（j2me jar 另一版纹理, 备用记档）
+- 结论: 无需新增接入, 全部已有归属
 
 ## 6. 音频——✅ 闭环（2026-09-29）
 
