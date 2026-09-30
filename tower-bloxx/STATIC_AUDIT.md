@@ -460,3 +460,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 胜利回卷: G.panDownDur=min(3000,stacked*250) 线性 tween (原 Path 语义), 替换 500ms glide;
   与第49轮的结算延时 (1s+pan) 同步
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 52 轮（2026-09-30）— T27 knockTopBlock 改 BPath
+
+- 抽 pushBounce 助手 (撞塔/knock 共用); knock 弹飞方向=新顶块x−被弹块x (确定性),
+  wait=DELAY_FINAL_TUMBLE=250ms 起跳前冻结; 替换随机翻倒物理
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

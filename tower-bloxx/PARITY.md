@@ -2,10 +2,10 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T27.【函数】knockTopBlock 弹飞改 BPath**：撞顶块弹飞方向确定性 (offset=新顶块x−被弹块x,
-> Tower.knockNextBlock:168-173) 替换随机翻倒; wait=DELAY_FINAL_TUMBLE=250ms。
+> **T28.【资源】HUD 位图化**：读原版 HUD 切片（population_spr/tries_spr/combo_spr/progress_spr，
+> fx/ 下 303/358/275/251），替换 HUD 文本近似；坐标用 makeGameSprites/buildGameSprites 证据。
 >
-> **待办池**：HUD 位图化（topbar/combo/tries 用原版切片）。
+> **待办池**：（空，做完再自查）
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -78,6 +78,11 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 地基塔身抖动 (landOnTower:217-219): y-5 osc 75ms×6 次=900ms, G.shakeT 施加于塔组
 - ✅ 挂块 combo 银火花 (makeBlock:135-138): comboMult!=0 且 rotateBlock 时挂 star 精灵,
   随块回收 (clearSparkles 语义)
+
+
+### 2.3 knockTopBlock 改 BPath（第 52 轮, T27 ✅）
+- knockNextBlock:169-173 弹飞方向确定 (offset=新顶块x−被弹块x), wait=DELAY_FINAL_TUMBLE=250ms
+  → 抽 pushBounce(mesh,offset,wait) 助手 (撞塔/knock 共用), bounces 更新支持 wait 冻结期
 
 ## 3. Build City 城市模式——🟨 机制闭环（底图+热区已用原版 city_spr_640.png+实测坐标, 第29轮; 塔格缩略图仍 CSS 近似）[P0]
 

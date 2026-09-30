@@ -787,19 +787,7 @@ function blockLanded(offset, releaseBdx, fallMesh) {
     tipperIncSway(offset);
     playSound('snd_destroy');                    // Tower.as:162
     G.lives--; showMsg('-1', '#ff6b6b');
-    // bounceOffTower (Tower.as:367-383): 块沿 BPath 三次贝塞尔弹飞 1000ms
-    // P1=(x+offset/2, y-50) P2=(x+offset, y+100) P3=(x+offset*2, 屏底), Rotater 0↔359/1000ms 循环
-    if (lastFallMesh) {
-      const p0 = { x: lastFallMesh.position.x, y: lastFallMesh.position.y };
-      scene.add(lastFallMesh);
-      G.bounces.push({
-        mesh: lastFallMesh, t: 0, p0,
-        p1: { x: p0.x + offset / 2, y: p0.y + 50 },   // Flash y 向下 → H5 y 向上取反
-        p2: { x: p0.x + offset, y: p0.y - 100 },
-        p3: { x: p0.x + offset * 2, y: G.camY - STAGE_H / 2 - 200 },
-        rotDir: offset > 0 ? 1 : -1,
-      });
-    }
+    if (lastFallMesh) pushBounce(lastFallMesh, offset, 0); // bounceOffTower (Tower.as:367-383)
     if (G.blocks.length > 1) knockTopBlock();
     addHud();
     if (G.lives <= 0) gameOver(false);
@@ -937,6 +925,16 @@ function spawnPeople(blockMesh, amt) {
   }
 }
 // 完美落地 4 向火花 (Tower.makeSpark:311-317, speed=100, angles 135/45/225/315, Flipbook 150ms)
+function pushBounce(mesh, offset, wait) { // bounceOffTower:367-383: BPath 三次贝塞尔 1000ms
+  // P1=(x+off/2, 上50) P2=(x+off, 下100) P3=(x+2off, 屏底); Rotater 0↔359/1000ms 循环; wait 后起跳
+  const p0 = { x: mesh.position.x, y: mesh.position.y };
+  scene.add(mesh);
+  G.bounces.push({ mesh, t: -wait, p0,
+    p1: { x: p0.x + offset / 2, y: p0.y + 50 },   // Flash y 向下 → H5 y 向上取反
+    p2: { x: p0.x + offset, y: p0.y - 100 },
+    p3: { x: p0.x + offset * 2, y: G.camY - STAGE_H / 2 - 200 },
+    rotDir: offset > 0 ? 1 : -1 });
+}
 function makeSpark(x, y, a) { // Tower.makeSpark:344-352: 单颗, speed=100, 角度方向飞散
   const mat = new THREE.SpriteMaterial({ map: G.texStar, transparent: true });
   const sp = new THREE.Sprite(mat);
@@ -969,8 +967,11 @@ function spawnFallingPerson(x, y) {
 
 function knockTopBlock() { // Tower.knockNextBlock
   const top = G.blocks.pop();
-  top.vy = 0; top.vx = (Math.random() - 0.5) * 0.4; top.vr = 0.03;
-  toppled.push(top);
+  // knockNextBlock:169-170: offset = 新顶块x − 被弹块x (确定性方向), wait=DELAY_FINAL_TUMBLE=250ms
+  const under0 = G.blocks[G.blocks.length - 1];
+  const kOff = (under0 ? under0.mesh.position.x + (under0.cx || 0) : G.currCtr)
+    - (top.mesh.position.x + (top.cx || 0));
+  pushBounce(top.mesh, kOff, 250);
   spawnFallingPerson(top.mesh.position.x + (top.cx || 0), top.mesh.position.y + 40); // makeFallingPerson
   G.landingY -= BLOCK_H;
   G.stacked--;                                   // Tower.as:176 setStackedBlocks(stackedBlocks - 1)
@@ -1280,6 +1281,7 @@ function loop(now) {
     for (let i = G.bounces.length - 1; i >= 0; i--) {
       const b = G.bounces[i];
       b.t += dt;
+      if (b.t < 0) continue;                     // wait 期 (bounceOffTower wait 参数)
       const u = Math.min(1, b.t / 1000), v = 1 - u;
       const bez = (a, b2, c, d) => v * v * v * a + 3 * v * v * u * b2 + 3 * v * u * u * c + u * u * u * d;
       b.mesh.position.set(
