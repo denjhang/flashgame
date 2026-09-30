@@ -2,7 +2,7 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 36/98 (清单第14节), 资源 19/89 (13.1)。**
+> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 56/98 (清单第14节), 资源 42/89 (13.1 已覆盖 id00-49 全部消费点)。**
 >
 > **T45.【资源】r0 素材鉴定与接入**：id00-80 拼图已读（滚轮/块面板/城市图标/软键/数值图标），
 > 对照 House.java 绘制调用（House.b(graphics,id,...)）确定每张的屏幕位置，替换 H5 对应 UI。
@@ -501,6 +501,26 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | r0id17 | 20x12 | k.java:187 U=g.c(17) | 记档: k.java UI |
 | r0id21 | 20x12 | k.java:158 L=g.c(21) | 记档同上 |
 | r0id22 | 20x12 | k.java:159 M=g.c(22) | 记档同上 |
+| r0id18 V | 20x12 | House:1295; :3500 draw(E-cn-42, F-co-21) 等右下角 | 记档: 城市 HUD |
+| r0id19 X | 20x12 | House:1296; :3495 右下数字列 | 记档: 城市 HUD |
+| r0id20 W | 20x12 | House:1297; :3530 draw(cn-9, F-co-50) | 记档: 城市 HUD |
+| r0id23 N | 20x12 | k.java:160; :777 draw(100+i*14, 10) 顶部数字串 | 记档: 高分榜页 |
+| r0id24 O | 20x12 | k.java:164; :887 draw(x-37, y+140) | 记档: 菜单页 |
+| r0id25-29 P[0-4] | 图标组 | k.java:166-176; :971 榜行图标 draw(x-n*w/4, y) | 记档: 高分榜 5 类型图标 |
+| r0id30 Q | 20x12 | k.java:177 | 记档: k UI |
+| r0id31 R | 20x12 | k.java:181 | 记档同上 |
+| r0id32 | 预载 | House:1288 g.c(32) 预热 | 记档 |
+| r0id33 ae | 城市图标 | House:1302; :3454 | 记档: 城市视图(条件加载) |
+| r0id34 af | 城市图标 | House:1303 | 记档同上 |
+| r0id35 ag | 城市图标 | House:1304; :3454 draw | 记档 |
+| r0id36 ah | 城市图标 | House:1305; :3439 draw((E/2)+(ap/2), y+9) | 记档 |
+| r0id37 ai | 鸟群帧 | House:1336; :3416-3420 四方向 | 记档: 环境(与 Flash fx 同族) |
+| r0id38 al | 鸟/云帧 | House:1346; :3544 翻帧 cg/80%4*22 | 记档: 动画帧 |
+| r0id39 am | 云帧 | House:1347; :3549/3556 翻帧 cg/100%3*44 | 记档 |
+| r0id40 an | 图标 | House:1351; :3279 draw(x-11-n*23, F-34) 底行 | 记档: 底部图标列 |
+| r0id41 ak | 图标 | House:1345; :3307 draw(x+4, y, 锚40=右底) | 记档 |
+| r0id42-44 | 未直接引用 | (dC[] 间接: ce[i]=g.c(dC[i]) 28 特效帧) | 记档: 特效帧表 |
+| r0id46-80 | ce[] 特效帧池 | House:1319 ce[i]=g.c(dC[i]); :2722-2734 翻帧绘制 | 记档: J2ME 28 特效(对应 Flash ambient) |
 
 ## 14. House.java 99 方法清单（T47 逐行填: 语义/差异; 已读标✅）
 
@@ -510,12 +530,12 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 2 | 308 | b | () |  |
 | 3 | 312 | c | () |  |
 | 4 | 317 | d | () |  |
-| 5 | 334 | a | (int n2) |  |
-| 6 | 344 | b | (int n2) |  |
-| 7 | 362 | c | (int n2) |  |
+| 5 | 334 | a | (int n2) | 音效开关查询 a(3)=f.b(8)==0 / a(1)=f.b(9)==0 | H5 soundOn/musicOn 等价 |
+| 6 | 344 | b | (int n2) | 音效开关写入+存档 | H5 localStorage 等价 |
+| 7 | 362 | c | (int n2) | 音效开关开启版: f.b(8,0)/f.b(9,0)+a(n,1)+存档 | 同上 等价 |
 | 8 | 381 | e | () | 存档写 towermode: cj[6] int + 音效2 bool (f.b RMS) | H5 saveModel 等价(字段更多) |
 | 9 | 400 | f | () | 存档读 towermode: cj[6]+2 bool, 默认开 | H5 restoreModel 等价 |
-| 10 | 443 | g | () |  |
+| 10 | 443 | g | () | 写 quickModeRS: e/f/bk/cg/aT.. 全状态 ~44 标量+数组 | H5 无 quick 续档, T48 待办(重大) |
 | 11 | 618 | h | () | 读 quickModeRS: ~44 标量+bi/bj/cF/bh 数组+bool → 全玩法状态(挂点/塔/连击等) | H5 无 quick 中断续档, 差异待T48评估(原版可断点续玩!) |
 | 12 | 828 | i | () | 写 cityModeRS: e/f/bk... 全量城市+塔状态 | H5 saveModel 字段子集, 待T48补中断续档 |
 | 13 | 1003 | j | () | 读 cityModeRS (loadTowerInfoCityMode) | 同上 |
@@ -526,28 +546,28 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 18 | 1388 | y | () | 场景资源装载: aT=E/2,aU=F/2(视中心), bd/be=256*E/F/32(定点视宽高), 载入状态图标组 | H5 启动装载 等价; 视口定点换算 256/32=8px/unit 已记档 |
 | 19 | 1456 | d | (int n2) | 带3s超时横幅: I=1→3000ms→y()收起, R&&!S 触发MIDI | 与 H5 showCityStatus 同型 |
 | 20 | 1479 | a | (Graphics graphics) | 过场绘制: N 时 I==0 白屏+L 图, I==1 蓝底(0x9AAAC A)+M 图居中 | H5 无过场, 记档 |
-| 21 | 1547 | a | (int var1_1, int var2_2) |  |
-| 22 | 1722 | a | (boolean bl) |  |
+| 21 | 1547 | a | (int var1_1, int var2_2) | 按键分派 a(x,y)(触摸/指针): O==0 且 f==7 释放 3D 组 | H5 无指针事件流, 记档 |
+| 22 | 1722 | a | (boolean bl) | 结算文本组装: g.a(93/94/96 语言串)+破纪录标记 bf/cj[3..4] | H5 showSummary 等价(无多语言) |
 | 23 | 1758 | e | (int n2) | 资源预载检查: cc=id, GameMIDlet.u(), 返回 !n(失败标志) | H5 启动全量加载, 无需对应 |
 | 24 | 1764 | z | () | 已读 |
 | 25 | 1785 | o | (int n2) | 已读 |
-| 26 | 1790 | p | (int n2) |  |
-| 27 | 1816 | q | (int n2) |  |
-| 28 | 1842 | r | (int n2) |  |
-| 29 | 1851 | s | (int n2) |  |
-| 30 | 1999 | A | () |  |
-| 31 | 2073 | c | (int n2, int n3) |  |
-| 32 | 2098 | t | (int n2) |  |
-| 33 | 2159 | B | () |  |
+| 26 | 1790 | p | (int n2) | p(dt) 摆钩运动学: aH 渐增至 1664/1408(bk==1); aK=cQ*sin(200*aP/cP%360)>>15 定点正弦摆! | H5 hookX 余弦椭圆(Flash 式) — 同为正弦摆但参数/定点精度不同, 待T48对表换算 |
+| 27 | 1816 | q | (int n2) | q(dt) 塔摇摆: bw=(bw+dt)%3600, cS=k(bw/10)正弦, bu=bv*cS>>16, br=-(cS*bv)/10000 摆角 | H5 swayAngle dt/20/30+cos — 同型异参, 待T48换算对齐 |
+| 28 | 1842 | r | (int n2) | r(dt) 摆角微调: 按 aB[0] 符号 ±(死代码*0) | H5 无, 原版乘0无效 记档 |
+| 29 | 1851 | s | (int n2) | s(dt) 块结算主循环: aw[i] 5 块状态机(6=下落/1=挂起等), 碰撞+落地分支 | H5 blockLanded 等价核心, 参数级差异待T48 |
+| 30 | 1999 | A | () | A() 塔身重建: var4=(bs-6)*256+128 定点起点, 自底向上逐块 | H5 blocks 数组 等价 |
+| 31 | 2073 | c | (int n2, int n3) | c(n2,n3) 生成下落块: bk==1 跳过, y(n2) 取块, bE[0] 8 槽占用 | H5 drop() 等价(槽位=单下落块, J2ME 8并发?)待T48 |
+| 32 | 2098 | t | (int n2) | t(n2) 逐块更新 | H5 falling 更新 等价 |
+| 33 | 2159 | B | () | B() 8 槽粒子/块生命周期: 按 cg-bE[4] 时差分派 case1/… | H5 bounces/sparks 分队列 等价 |
 | 34 | 2260 | u | (int var0) | 已读 |
-| 35 | 2372 | v | (int n2) |  |
+| 35 | 2372 | v | (int n2) | v(n2) cW 数组分派(特效池) | H5 fxSlots 等价 |
 | 36 | 2395 | a | (int n2, int n3, int n4, int n5, int n6) | lerp 关键帧插值: (d5-d4)*t/span+d4, u() 场景机用 | H5 setTimeout/线性tween 等价 |
-| 37 | 2402 | a | (int n2, int n3, int n4) |  |
+| 37 | 2402 | a | (int n2, int n3, int n4) | a(n2,n3,n4) 移位: n2>>n3/n4 | 工具函数, 内联等价 |
 | 38 | 2406 | a | (int n2, int n3, boolean bl) | 场景过渡变暗: de 时 RGB 三通道缩放 | H5 无场景过渡动画, 记档 |
 | 39 | 2423 | C | () |  |
 | 40 | 2441 | D | () |  |
-| 41 | 2464 | a | (int n2, int n3, int n4, int n5, int n6, int n7, int n8) |  |
-| 42 | 2476 | w | (int n2) |  |
+| 41 | 2464 | a | (int n2, int n3, int n4, int n5, int n6, int n7, int n8) | a(7参) dc 粒子源配置: [0]=数 [1]=层 [3/4]=范围 [5/6]=速度 | H5 generateEffect 参数 等价 |
+| 42 | 2476 | w | (int n2) | w(dt) 粒子推进: 层进度 + pos+=vel*dt + (256*aW>>8)+384 视口换算 + dw 分派渲染 | H5 updateEffects 等价; 视口定点 384 偏移记档 |
 | 43 | 2541 | b | (Graphics graphics, boolean bl) | 粒子渲染分派: dw 1=雨丝线段/2=方块/3=其他, dd[] 按 dc 源分前后景 | H5 无雨天粒子(Flash 28 种特效替代), 待T48评估 |
 | 44 | 2573 | a | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) | 雨丝绘制: 两段 drawLine (AAAACC 变暗 via dg) | 同上 |
 | 45 | 2597 | a | (Graphics graphics, int n2, int n3, int n4) | 方块粒子: >1 白框蓝底, ≤1 蓝点 | 同上 |
@@ -590,8 +610,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 82 | 3965 | K | () |  |
 | 83 | 4038 | L | () |  |
 | 84 | 4053 | l | (Graphics graphics) | 已读 |
-| 85 | 4107 | a | (Graphics graphics, int n2) |  |
-| 86 | 4121 | M | () |  |
+| 85 | 4107 | a | (Graphics graphics, int n2) | a(n2) ci 查表: <0 取 -ci[|n2|] | 三角函数查表(定点 sin/cos), H5 用 Math 等价 |
+| 86 | 4121 | M | () | M() 初始化: 大量字段默认值+ci 表 | H5 const 初始化 等价 |
 | 87 | 4133 | i | (int n2) | 已读 |
 | 88 | 4137 | j | (int n2) |  |
 | 89 | 4144 | k | (int n2) |  |
