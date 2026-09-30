@@ -73,8 +73,34 @@ const TIP_TEXTS = { // Const.TIP_INSTR_QUICK/BUILD/INTRO/ABOUT (Const.as:74-82)
   quick: "In the Quick Game mode your goal is to build as high and as stable a building as possible. At the bottom of the screen you'll see the current height of the building, how many tries you have left, and the current population of the building. The higher your building the more people you'll get for each placed block. The amount of people also depends on how well the block is placed. Centering a block perfectly on top of another will fill the combo meter. Placing more blocks before the meter empties will add to the combo, and perfect drops will refill the meter. Every block that's placed while a combo is active will increase the combo score. The combo score is added to the population score after the combo ends.",
   build: "In Build City mode your goal is to create a thriving Megalopolis! Build towers and place them wisely in the city grid to reach the goal. Increasing your city's population and level will unlock new building types. In tower building mode you are aiming to reach a target height. The better you place the roof the more bonus you'll get. You have three chances to finish the tower, if you fail, the building can still be placed in the city without a roof.",
   intro: "Left click anywhere on the screen with your mouse or press the spacebar or down arrow on your keyboard to drop the apartment blocks. You're allowed 3 misses before the construction is halted. The better you build the more people will move in. Good luck!",
-  about: "Tower Bloxx(TM) v.1.0. Copyright 2005-2007 Digital Chocolate, Inc. All Rights Reserved. www.DigitalChocolate.com. Flash version developed by Zero G Games (www.zeroggames.com)"
+  about: "Tower Bloxx(TM) v.1.0. Copyright 2005-2007 Digital Chocolate, Inc. All Rights Reserved. www.DigitalChocolate.com. Flash version developed by Zero G Games (www.zeroggames.com)",
+  combo: "You started a combo by centering a block precisely on the one below it! As long as the combo meter at the top stays active you'll get more people for each block placed! Precise drops will refill the combo meter. If you miss a drop, the combo will end automatically",
+  bought_land: "You've bought yourself a piece of land to fulfill your dream of building a thriving metropolis!",
+  new_tower_type0: "Your investors have supplied a crane and building materials for you to create blue Residential Towers!",
+  click_tower: "Select the blue Residential Tower on the left by clicking it with your mouse.",
+  place_tower: "Place the tower on the map with your mouse on any of the squares on the city grid highlighted in the same color as the tower.",
+  city_meter: "The meter on top shows the current city population.",
+  city_line: "The orange horizontal line above the city map shows how many people you need for the next city level."
 };
+// ---- 提示弹窗 (GameSprites.showTip:28-46): tipFlags 门控+持久化, 弹窗期 delayNextBlock(-1),
+// OK 后 delayNextBlock(100) (GameSprites.hideTip:60-63) ----
+function showTip(type, text, after) {
+  if (G.save.tipFlags[type]) return false;
+  G.save.tipFlags[type] = true;
+  saveModel();                                   // showTip 内 saveModel (:34)
+  G.blockTime = -1;                              // delayNextBlock(-1) 弹窗期禁放
+  globalThis.__tipOpen = true;                   // 测试钩子 (exec_test 模拟玩家点 OK)
+  hud.summary.innerHTML =
+    '<div>' + text.replace(/\r\r|\r/g, '<br><br>') + '</div><div class="ok">OK</div>';
+  hud.summary.style.display = 'block';
+  hud.summary.querySelector('.ok').onclick = () => {
+    hud.summary.style.display = 'none';
+    G.blockTime = performance.now() + 100;       // hideTip: delayNextBlock(100)
+    globalThis.__tipOpen = false;
+    if (after) after();
+  };
+  return true;
+}
 function showTitle() { // STT_TITLE
   craneGroup.visible = false;
   hud.titleScr.style.display = 'block';
@@ -174,9 +200,9 @@ function restoreModel() { // GameModel.restoreModel:82-99
     G.save = {
       sm_towerGridData: d.sm_towerGridData || [],
       sm_totalPopulation: d.sm_totalPopulation == null ? 0 : d.sm_totalPopulation,
-      tipFlags: d.tipFlags || [],
+      tipFlags: d.tipFlags && !Array.isArray(d.tipFlags) ? d.tipFlags : {}, // GameModel.as:7/83 持久化提示门控
     };
-  } catch (e) { G.save = { sm_towerGridData: [], sm_totalPopulation: 0, tipFlags: [] }; }
+  } catch (e) { G.save = { sm_towerGridData: [], sm_totalPopulation: 0, tipFlags: {} }; }
 }
 function saveModel() { // GameModel.saveModel:101-108
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.save)); } catch (e) {}
@@ -339,6 +365,17 @@ function showCity() {
   updateCityLevelAndUnlockedTypes();
   renderCity();
   hud.city.style.display = 'block';
+  // 首次进城提示链 (CityMap.as:105-118): bought_land → new_tower_type0 → click_tower →
+  // city_meter(1塔)/city_line(2塔); 里程碑队列由 pumpCityTips 承担 (原版 checkTipQueue 在两者之间)
+  const nTowers = (() => { let n = 0;
+    for (let c = 0; c < 5; c++) for (let r = 0; r < 5; r++) if (getTowerPop(c, r) > 0) n++;
+    return n; })();
+  if (!showTip('bought_land', TIP_TEXTS.bought_land) &&
+      !showTip('new_tower_type0', TIP_TEXTS.new_tower_type0) &&
+      !showTip('click_tower', TIP_TEXTS.click_tower)) {
+    if (nTowers === 1) showTip('city_meter', TIP_TEXTS.city_meter);      // num_city_towers==1
+    else if (nTowers === 2) showTip('city_line', TIP_TEXTS.city_line);   // num_city_towers==2
+  }
   pumpCityTips();
 }
 function renderCity() {
@@ -411,8 +448,8 @@ function cityCellClick(col, row) {
   // buildTower (CityMap.as:505-513): totalBlocks=(type+1)*10, currColor=type
   G.totalBlocks = (G.selectedType + 1) * 10;
   G.currColor = G.selectedType;
-  hud.city.style.display = 'none';
-  startGame();
+  const beginBuild = () => { hud.city.style.display = 'none'; startGame(); };
+  if (!showTip('place_tower', TIP_TEXTS.place_tower, beginBuild)) beginBuild(); // CityMap.as:140/167
 }
 function showCityStatus(txt) {
   hud.cityStatus.textContent = txt;
@@ -543,6 +580,7 @@ function startGame() {
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
   playSong('sng_tower');                       // GameState.as:102 STT_PLAY playSong("sng_tower")
   addHud();
+  showTip('intro', TIP_TEXTS.intro);           // GameState.as:104 STT_PLAY showTip("intro",TIP_INTRO)
 }
 
 function gameOver(won) {
@@ -662,7 +700,8 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   if (onGround) playSound('snd_foundation');   // Tower.as:203 地基块
   // 连击: 落地时 comboMult!=0 → +1 (Tower.as:233); 完美落地重置计时 (perfectLanding→ComboTimer.setTimer)
   if (G.comboMult !== 0) { G.comboMult++; G.comboMax = Math.max(G.comboMax, G.comboMult); } // Tower.as:233 + GameModel.as:192
-  if (perfect) { playSound('snd_combo'); comboSetTimer(); }   // Tower.as:228
+  if (perfect) { playSound('snd_combo');
+    if (!showTip('combo', TIP_TEXTS.combo, comboSetTimer)) comboSetTimer(); }   // Tower.as:356-358
   else if (G.comboMult !== 0) { playSound('snd_stacked'); comboAddTimer(-COMBO_ADJ); } // Tower.as:222-224
   else playSound('snd_stacked');                              // Tower.as:238/243/248
   // 人口 (Tower.makePeople:252-261): 地基块不结算; 屋顶块走 roof 换算

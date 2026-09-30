@@ -272,3 +272,18 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 勘误: dropY=400 仅 Crane.init 生效, restartGame→resetGameVars 不重置 → H5 不在 startGame 重置,
   G 字面量初始 400 一次
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 28 轮（2026-09-30）— T3 tipFlags 首次提示队列
+
+- [P1] H5 此前 tipFlags 只存不用。实现 showTip(type,text,after)（GameSprites.showTip:28-46）:
+  tipFlags 门控+持久化 saveModel、弹窗期 G.blockTime=-1（delayNextBlock(-1)）、OK 后 +100ms
+  （hideTip:62 delayNextBlock(100)）。restoreModel tipFlags 由数组改对象（旧数组存档兼容）
+- 调用点全对号: intro（GameState.as:104 每次 STT_PLAY, 首次弹过即不再）、combo（Tower.as:356-358
+  首次完美落地, showTip 命中则 comboSetTimer 延到 OK 后——after 回调语义）、进城链
+  bought_land→new_tower_type0→click_tower→city_meter(1塔)/city_line(2塔)（CityMap.as:105-118,
+  原版 checkTipQueue 里程碑队列位置由 pumpCityTips 承担）、place_tower（CityMap.as:140/167,
+  H5 无搬塔相位, 放在选格→建造入口, after=beginBuild）
+- 测试适配: exec_test 模拟玩家点掉弹窗（__tipOpen 钩子）；首段 600 帧循环补真实 2ms/帧延时——
+  发现纯虚拟时钟下 performance.now() 几乎不走, hideTip 的 100ms 锁永不过期（伪影非游戏 bug）
+- 勘误留存: 原版 dropY=400 仅 Crane.init 生效（上轮已记）; 本轮补充 showTip 会 saveModel——
+  提示弹过即写存档, 与 SharedObject 行为一致
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

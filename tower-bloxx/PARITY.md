@@ -2,8 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **T3. tipFlags 首次提示队列**：restoreModel 恢复 tipFlags（GameModel.as:86），首次游玩按
-> STT_INSTR1→TIP_INSTR_BUILD 等顺序弹提示（GameState.as:218-231）。H5 无提示系统。
+> **T4.（取自待办池）城市塔原版图形替换 CSS 近似**：city_spr 已导出 (flash/city_spr_640.png)，
+> 把 5×5 网格/塔块/拆机热区的 CSS 近似换成原版切片，注意热区坐标实测校准可一并做。
 >
 > **待办池**（T1-T3 做完后按序取）：城市塔原版图形替换 CSS 近似 / menu_spr 按钮热区实测校准 /
 > J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
@@ -92,6 +92,10 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   High Scores（本地 top10, HighScoreLocalProxy 语义）；无 URL 参数时从 title 进入
 - ⬜ Get More Games/Mobile League/Tell a Friend 外链按钮（平台依赖, 有意不复刻）
 - ⬜ splash 素材（828_splash_spr 已导出未接, portal logo 层）
+- ✅ tipFlags 首次提示弹窗（第28轮）：showTip 门控=tipFlags 持久化+弹窗期 delayNextBlock(-1)/
+  OK 后 +100ms（GameSprites.showTip:28-46/hideTip:60-63）。调用点: intro（STT_PLAY GameState.as:104）/
+  combo（首次完美落地 Tower.as:356-358, OK 后补 setTimer）/ bought_land→new_tower_type0→
+  click_tower→city_meter(1塔)/city_line(2塔) 进城链（CityMap.as:105-118）/ place_tower（选格进城时）
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 

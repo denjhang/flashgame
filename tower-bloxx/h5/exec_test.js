@@ -106,6 +106,8 @@ async function runRealtime(secs, dropEvery, dropFn, t0) {
     await new Promise(r => setTimeout(r, 16));
     n++;
     t = 500 + n * 16;
+    // 玩家语义: tip 弹窗开着就点掉 (game.js __tipOpen 钩子)
+    if (globalThis.__tipOpen) { const sm2 = document.getElementById('summary'); sm2.querySelector('.ok').onclick(); }
     if (dropEvery && n % dropEvery === 0) dropFn && dropFn();
     frame(t);
   }
@@ -131,7 +133,9 @@ await new Promise(r => setTimeout(r, 1400));
 let t = 1000;
 try {
   for (let i = 0; i < 600; i++) {
+    await new Promise(r => setTimeout(r, 2)); // 真实时钟: 放行 hideTip 的 blockTime=+100ms 锁
     t += 16;
+    if (globalThis.__tipOpen) document.getElementById('summary').querySelector('.ok').onclick(); // 关提示弹窗
     if (i % 30 === 15) for (const f of listeners.pointerdown || []) f({ stopPropagation() {} });
     if (i % 30 === 16) for (const f of listeners.keydown || []) f({ code: 'Space', preventDefault() {} });
     frame(t);
