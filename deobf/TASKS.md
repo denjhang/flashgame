@@ -35,7 +35,7 @@
 
 ### A. 函数账本（原版具名函数 95 个 = DefineFunction2×82 + DefineFunction×13）
 普查（TCS+63）：绝大多数已对号或定案废弃；按族补签「H5 对应点+证据行号」签名卡：
-- [ ] A1 单位族: selectUnit/changeCheckpoint/accelere/roule（428）
+- [x] A1 单位族（TCS+64, 签名卡见 deobf/ALIGN_LEDGER.md; selectUnit 补音）
 - [ ] A2 调度族: startMission/refreshVectors/newEvents/declencheMissionSuivante
 - [ ] A3 武器族: fireOnEnnemi/createObus/createExplosion/createEclat/chargeBombes
 - [ ] A4 索敌族: getTarget/OCEEF/OCEEM/askPermissionOfFire + e1..e14 编排
@@ -43,9 +43,9 @@
 - [ ] A6 散件定案表: edith/Yamato/playBirds/getSound/getPwd 等（外链/音效）
 
 ### B. 资源账本（assets 共 1948 文件）
-- [ ] B1 枪口/弹体系: shells/303(14帧)/304(29)/391(29)/400_obus(13) 逐帧核对引用集合
+- [x] B1 枪口/弹体系（TCS+64: 全部有消费点, shells 导出=源副本定案不接）
 - [ ] B2 敌塔序列: eturrets_spr/80(186帧)/128(157)/122(164)/164/83/161/167 逐帧核对
-- [ ] B3 散件判定: turrets/56..88.png、eturrets/100..172.png 逐一写定案表
+- [x] B3 散件判定（TCS+64: 线框标记层残片, 定案不接入）
 - [ ] B4 抽样复核: menu/turrets/units/ui/explosion 已有断言组抽查 5 组
 
 ## 三之一、已完成于本轮（滚动记录）

@@ -3203,9 +3203,10 @@ cv.addEventListener('click', (e) => {
       }
     }
   }
-  // 点中已有塔 → 选中 (供 U 升级对空)
+  // 点中已有塔 → 选中 (供 U 升级对空); 原版 selectUnit (426_1 loc0b0a):
+  //   selectionUnite 音 + afficheUnit=单位 (TCS+64 补音)
   const hit = G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);
-  if (hit) { G.selected = hit; return; }
+  if (hit) { G.selected = hit; playSfx('selectionUnite', 0.35); return; }
   G.selected = null;
   if (!G.shopSel) return;
   const s = STRUCTURES[G.shopSel];

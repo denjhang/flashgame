@@ -396,3 +396,17 @@
   显示 paused，本会话无法自行启用，需用户在任务列表手动启用）。
 - 账本进度：A: 0/6 族, B: 0/4 组（本轮为立账轮）。
 - 本轮仍未做：A1-A6、B1-B4 全部（下轮起按配额推进）。
+
+## TCS+64（2026-10-01）配额轮 1: A1 单位族 + B1 枪口弹体系 + B3 散件（3 条目）
+
+- **A1 ✅**：428/426_1 六函数签名卡（roule/changeCheckpoint/accelere/
+  selectUnit/destruction/autoRepair）入 deobf/ALIGN_LEDGER.md。
+  **修正**：原版 selectUnit 播 selectionUnite → H5 点选己方塔补音（3244）。
+- **B1 ✅**：muzzle 303×14/365×2 全用；shells/304=弹壳→assets/casing、
+  391=曳光弹壳→casing_bullet（各 29 帧全接）；shells/<chid> 目录导出为
+  源副本（冗余定案）。无缺失。
+- **B3 ✅**：turrets/56.png(17x81 黑竖条)、eturrets/100.png(12x15) 读图确认为
+  线框标记层残片（与"86 库=标记层"定案同族）→ 冗余不接入。
+- 断言：下轮补点选音断言（本轮 3 条目已满, 折算注记: selectUnit 卡含码改）。
+- **账本进度：A: 1/6 族, B: 2/4 组**。三件套通过，冒烟 209 全绿 exit 0。
+- 本轮仍未做：A2/A4-A6、B2/B4（下轮配额）。
