@@ -57,6 +57,10 @@
 
 - 雷达 = MLRS/pluton 目标指示（radarCovered 已接线，用户实机证言）。
 - 战争迷雾已按用户指令停用（FOG_ENABLED=false），勿恢复。
-- m60AutoFire/scoreBonus/interestSup/canon75AutoFire：反编译全库无游戏内读取点，
-  判定废弃/外链字段，不接线。
+- m60AutoFire/scoreBonus/interestSup：反编译全库无游戏内读取点（cookie 初始化 +
+  ConstantPool 残留），判定废弃/外链字段，不接线。
+- canon75AutoFire = **反作弊哨兵**（newEvents mR==1: 旗标开启 → activePerdu 当关判负；
+  TCS+2 取证）。H5 无作弊入口，不接线（行为即"不开挂则不触发"）。
+- 1053 story 按钮 = 自含标签翻转（"action"/"story"，QEX 旗标无其他读取点），
+  系开发遗留；H5 已在帮助板以等效标签翻转复刻（TCS+6）。
 - 真机听感验证：永久挂账（纪律禁止浏览器）。
