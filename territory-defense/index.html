@@ -141,6 +141,11 @@
              z-index:29; background:rgba(20,20,20,.95); color:#ffd; border:2px solid #e80;
              font-family:monospace; font-size:13px; padding:8px 16px; cursor:pointer; }
   #loadBtn:hover { background:#3a2a10; }
+  /* conseilIntroHelp (1154): 第1关简报时显示于舞台 (480,200) 居中, 点击关闭 */
+  #introHelp { position:absolute; left:480px; top:200px; transform:translate(-50%,-50%);
+               display:none; z-index:30; cursor:pointer; }
+  #introHelp.show { display:block; }
+  #introHelpImg { display:block; max-width:90%; }
   /* victims 黑幕 (762): dpt113 位于地图之上/菜单之下, 开波时 35帧@24fps ≈1.5s 淡出 */
   #fadeCurtain { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
                  background:#000; z-index:20; pointer-events:none; opacity:0; }
@@ -248,8 +253,11 @@
          其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
     <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
     <button id="saveBtn" title="保存进度">SAVE GAME</button>
-    <!-- 原版 victims 黑幕 (chid762, 35帧淡出): 仅前 3 关简报显示 (frame_4: iMission>3 移出屏) -->
     <div id="fadeCurtain"></div>
+    <!-- 原版 conseilIntroHelp (chid1154, 291x179): newEvents mR==1 时置 (480,200), 点X关 -->
+    <div id="introHelp">
+      <img id="introHelpImg" src="assets/ui/conseil_intro_help.png" width="291" height="179" alt="">
+    </div>
     <button id="loadBtn" title="读取存档继续">▶ CONTINUE</button>
     <!-- 原版 helpBoard (DefineSprite_1103, 463x283): helpB(1046) on(press) 置 (400,300) -->
     <div id="helpBoard">
@@ -283,7 +291,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600060"></script>
-<script src="game.js?v=1790600060"></script>
+<script src="data.js?v=1790600061"></script>
+<script src="game.js?v=1790600061"></script>
 </body>
 </html>

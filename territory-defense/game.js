@@ -2094,6 +2094,12 @@ function briefingShow() {
     if (G.wave + 1 <= 3) fc.classList.add('on');
     else fc.classList.remove('on');
   }
+  // 原版 conseilIntroHelp (773_189 newEvents mR==1): 置 (480,200) 播放, 点击关闭
+  const ih = document.getElementById('introHelp');
+  if (ih) {
+    ih.classList.toggle('show', G.wave + 1 === 1);
+    ih.onclick = () => ih.classList.remove('show');
+  }
   // 原版: 有对白的关卡先逐句播对白 (980 nextDialogue), 放完才到 1106 开战条
   if (!dlgOpen(G.wave + 1)) applyBriefBar();
 }

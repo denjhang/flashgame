@@ -13,8 +13,8 @@ const ctxStub = new Proxy(function () {}, {
 global.__ctxStub = ctxStub;
 global.localStorage = { _d: {}, getItem(k){ return this._d[k] ?? null; }, setItem(k,v){ this._d[k]=String(v); }, removeItem(k){ delete this._d[k]; } };
 global.document = {
-  getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {}, remove() {}, add() {} }, dataset: {}, addEventListener() {}, children: [], querySelector: () => null, querySelectorAll: () => [] }),
-  createElement: () => ({ onclick: null, classList: { toggle() {}, remove() {}, add() {} }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {}, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] }),
+  getElementById: () => ({ getContext: () => ctxStub, textContent: "", appendChild() {}, innerHTML: "", style: {}, classList: { toggle() {}, remove() {}, add() {}, contains() { return false; } }, dataset: {}, addEventListener() {}, children: [], querySelector: () => null, querySelectorAll: () => [] }),
+  createElement: () => ({ onclick: null, classList: { toggle() {}, remove() {}, add() {}, contains() { return false; } }, style: {}, getContext: () => ctxStub, width: 0, height: 0, appendChild() {}, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] }),
   querySelectorAll: () => [],
   createTextNode: () => ({}),
   addEventListener() {},
@@ -1412,7 +1412,18 @@ console.log("--- 非简报波对白门控 ---");
   console.log("非简报波对白: 打开=" + opened + " 倒计时冻结=" + frozen + " 放完重启=" + resumed);
   G.wave = sv.wave; G.interWave = sv.interWave; G.briefing = sv.briefing; dlg = null;
 }
-// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
+// ---- conseilIntroHelp (1154, N+105/TCS+2): 第1关简报弹操作提示框 ----
+console.log("--- 开场操作提示 ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8'), hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("1154 素材+接线 (wave1 弹出/点击关)=" +
+    (fsx.existsSync('assets/ui/conseil_intro_help.png') &&
+     hj.includes('id="introHelp"') && gj.includes("G.wave + 1 === 1")));
+  // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
+  console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
+}
+// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
 console.log("--- 极端存档 ---");
 {
   // 手工放置一个极端 cookie: 0 塔, iMission=44, iUnlock=5, 低钱低利率
