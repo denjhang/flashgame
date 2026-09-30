@@ -1412,7 +1412,27 @@ console.log("--- 非简报波对白门控 ---");
   console.log("非简报波对白: 打开=" + opened + " 倒计时冻结=" + frozen + " 放完重启=" + resumed);
   G.wave = sv.wave; G.interWave = sv.interWave; G.briefing = sv.briefing; dlg = null;
 }
-// ---- 终局/败局路径执行 (N+100)// ---- 终局/败局路径执行 (N+100): showCine 两条分支从未被 sim 触发过 ----
+// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
+console.log("--- 极端存档 ---");
+{
+  // 手工放置一个极端 cookie: 0 塔, iMission=44, iUnlock=5, 低钱低利率
+  require('fs').writeFileSync === undefined; // no-op guard
+  global.localStorage.setItem('tcs_cookie', JSON.stringify({
+    units: [], iMission: 44, score: 99999, euros: 10, interest: 3, iUnlock: 5 }));
+  G.turrets.length = 0; G.lost = false; G.won = false; G.wave = 0;
+  const ok = loadGame();
+  const shape = ok && G.wave === 43 && G.euros === 10 && G.interest === 3 &&
+    G.turrets.length === 0 &&
+    ['crotale','canon125','MLRS','MTHEL','pluton'].every(w => G.unlocker[w] === true);
+  console.log("0塔/满解锁/末关 读档形状=" + shape);
+  // 末关波间 sim 200 帧: 无塔受击路径 + 波推进不崩
+  G.waveActive = false; G.briefing = false; briefState = null; dlg = null;
+  G.interWave = 5; G.panelOpen = false;
+  let crashed = false;
+  try { for (let i = 0; i < 200; i++) tick(); } catch (e) { crashed = true; console.log('CRASH', e.message); }
+  console.log("0塔末关 200 帧 sim 无异常=" + (!crashed) + " (无塔守不住属预期)");
+}
+// ---- 终局/败局路径执行 (N+100)// ---- 终局/败局路径执行 (N+100)// ---- 终局/败局路径执行 (N+100): showCine 两条分支从未被 sim 触发过 ----
 console.log("--- 终局路径 ---");
 {
   // 败局: 抵达基地 → defeatT=120 → 120 tick 后 lost + perdu 分支
