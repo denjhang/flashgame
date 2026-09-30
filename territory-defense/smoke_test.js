@@ -654,20 +654,30 @@ console.log("磁场素材: %d 帧 (原版 sprite 183 七帧) 直径=%dpx 颜色=
   t3.autoRepair = true;
   G.euros = 99999;
   const hpA = t3.hp;
-  t3.update();
+  // TCS+57 勘误: 原版 autoRepair 只在受击掉血时触发 (6_327 伤害分支),
+  //   一次全额修复 (非 tick 持续回血) —— 直接调 autoRepairNow 模拟一次受击
+  autoRepairNow(t3);
   const healed = t3.hp - hpA;
-  console.log("autoRepair 一次 update: 修理 %d HP, magnetT=%d (应=%d)", healed, t3.magnetT, MAGNET_TICKS);
+  console.log("autoRepair 一次受击触发: 修理 %d HP (原版=一次全额 %d), magnetT=%d (应=%d)",
+    healed, 100, t3.magnetT, MAGNET_TICKS);
   // 关掉 autoRepair 再跑完剩余磁场, 确认单遍时长 = MAGNET_TICKS
   // (开着修理会每遍结束就重播 → 持续光环, 这正是原版 "every time a turret is auto-repaired" 语义)
   t3.autoRepair = false;
   let mf = 0; while (t3.magnetT > 0 && mf++ < 50) t3.update();
   console.log("单遍磁场用 %d 帧 (期望 %d = 7帧@24fps 折算到 30fps) 一致=%s", mf, MAGNET_TICKS, mf === MAGNET_TICKS);
-  // 持续修理 → 持续重播 (原版语义)
+  // 持续受击 → 全额保持 + 光环播完重开 (原版语义: 到 0 后下次修理再播)
   const t3b = new Turret('canon105', 0, 0);
-  t3b.hp = 1; t3b.autoRepair = true; G.euros = 99999;
-  let everZero = false;
-  for (let i = 0; i < 60; i++) { t3b.update(); if (t3b.magnetT === 0) everZero = true; }
-  console.log("持续修理 60 帧: 磁场从未熄灭=%s (原版每次修理重播) HP=%d/%d", !everZero, t3b.hp, t3b.maxHp);
+  t3b.hp = 1; t3b.autoRepair = true; G.euros = 999999;
+  let retrigs = 0, lastM = 9;
+  for (let i = 0; i < 60; i++) {
+    t3b.hp = Math.max(1, t3b.hp - 3);
+    const m0 = t3b.magnetT; autoRepairNow(t3b);
+    if (m0 === 0 && t3b.magnetT === MAGNET_TICKS) retrigs++;
+    t3b.update();
+    lastM = t3b.magnetT;
+  }
+  console.log("持续受击 60 帧: HP 全额保持=%s, 光环重开 %d 次 (>0 即受击触发生效) HP=%d/%d",
+    t3b.hp === t3b.maxHp, retrigs, t3b.hp, t3b.maxHp);
   G.euros = 850;
   // autoRepair 关闭时不触发
   const t4 = new Turret('canon105', 0, 0);

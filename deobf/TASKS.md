@@ -28,6 +28,13 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+57: 自动修理语义对齐（方向2, **行为修正**）——原版 autoRepair()
+  (185/86_1, 与修理条同构) = 一次性全额修复 (2×缺口, 够钱才修), 触发点 =
+  6_327 伤害分支 (掉血未毁时), 非持续回血。H5 旧实现每 tick 渐回 5HP 且
+  无伤也预回 → 改为 shellHit 塔受击分支调 autoRepairNow() 全额修复。
+  顺带审计 818_4 autor on(press): selectionUnite 音效原版就有, H5 一致。
+  冒烟断言更新（208 项全绿）
+
 - [x] TCS+56: 槽位点击音效勘误（方向2, **行为修正**）——1026_1 on(press):
   成功(unlocker && euros>=cost) = 设 viseurConstruction + ancienX=-548 +
   zoneBombardement 移出屏(取消 Su37 瞄准) + 槽位 gotoAndPlay("press"),

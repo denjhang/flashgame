@@ -1180,6 +1180,18 @@ function repairIfCan(t) {
 }
 function swithRepair(t) { t.autoRepair = !t.autoRepair; }
 
+// 原版 autoRepair() (185/86_1, 与修理条 refresh 同构): 一次性全额修复
+//   priceToPay = 2×(max-etat); euros 够 → 扣款 + etat=etatMax + light/light2 光环。
+//   触发点 = 6_327 伤害分支 (掉血未毁时) —— 非持续回血 (TCS+57 对齐)
+function autoRepairNow(t) {
+  if (!(t.autoRepair && t.hp > 0 && t.hp < t.maxHp)) return;
+  const price = REPAIR_COST * (t.maxHp - t.hp);
+  if (G.euros < price) return;
+  G.euros -= price;
+  t.hp = t.maxHp;
+  if (t.magnetT === 0) t.magnetT = MAGNET_TICKS;   // light/light2.gotoAndPlay(1)
+}
+
 const SFX_FILES = {
   boutonScroll: '450_boutonScroll.mp3', creationUnite: '452_creationUnite.mp3',
   selectionUnite: '471_selectionUnite.mp3', cannot: '451_cannot.mp3',
@@ -1575,13 +1587,7 @@ class Turret {
     if (this.fireT > 0) this.fireT--;   // 炮管开火帧倒计时
     tickBurst(this);                    // 连发队列推进 (帧位到点即 spawnShell)
     if (this.magnetT > 0) this.magnetT--;   // 蓝色磁场动画倒计时
-    if (this.autoRepair && this.hp < this.maxHp && G.euros >= REPAIR_COST) {
-      const n = Math.min(5, this.maxHp - this.hp, Math.floor(G.euros / REPAIR_COST));
-      this.hp += n; G.euros -= n * REPAIR_COST;
-      // 原版 autoRepair() 里 repairLogo.light/light2.gotoAndPlay(1): 每次实际修理播一遍光环
-      // 上一遍播完才重开, 避免逐帧修理把动画钉在第 1 帧
-      if (this.magnetT === 0) this.magnetT = MAGNET_TICKS;
-    }
+    // 自动修理不在 tick 里持续回血 —— 原版只在受击掉血时触发 (shellHit → autoRepairNow)
     if (!this.w || this.w[0] === 0) return;   // radar: 零属性 (原版鸡肋, 忠实还原)
     if (this.cool > 0) { this.cool -= G.dt; }   // 毫秒冷却 (原版 OCEEF 43ms 循环)
     // 索敌 (原版 getTarget + OCEEF 保持检查, DefineSprite_174 pcode):
@@ -1828,6 +1834,8 @@ function shellHit(s) {
       if (Math.hypot(t.x - tx, t.y - ty) <= range * 2) {
         t.hp -= power;
         if (t.hp <= 0) killTurret(t);   // 塔被毁 → 启动阵亡序列 (原版 unitEtat 同款 destruction)
+        // 原版 6_327 伤害分支 loc06d6: 掉血未毁 → structureDeco.autoRepair()
+        else autoRepairNow(t);
       }
     }
   }

@@ -320,3 +320,16 @@
   连成一致口径：原版的 cannot 只在"明确拒绝"时播，成功与静默失败均无声。
 - 断言 +1 → 冒烟 208 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+57（2026-09-26）自动修理语义对齐（方向2，行为修正）
+
+- 取证：185/86_1 `autoRepair()`——与修理条 refresh 同构（priceToPay=
+  2×(etatMax−etat)），euros 够 → 扣款 + etat=etatMax + light/light2 光环；
+  唯一触发点 = 6_327 伤害分支 loc06d6（掉血未毁时调用）。
+- **缺陷**：H5 在 Turret.update 里每 tick 渐回 min(5,…) HP 且无伤也持续回
+  （语义=持续回血）→ 改为 autoRepairNow()（一次全额）挂到 shellHit 塔受击
+  分支。经济行为差异：受击瞬间全额扣款 vs 逐 tick 小额。
+- 顺带审计：818_4 autor on(press) 原版即播 selectionUnite，H5 T 键一致 ✓。
+- 冒烟断言更新（一次全额 100HP/磁场 9 帧/持续受击全额保持+光环重开 7 次）
+  → 208 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。
