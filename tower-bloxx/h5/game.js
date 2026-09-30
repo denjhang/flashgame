@@ -467,6 +467,7 @@ const G = {
   falling: null,        // {mesh, vy, cy, bdx, vx}
   hanging: null, hangingFor: -1,
   craneDx: 0, towerBdx: 0,
+  dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
   people: [], sparks: [], fallingPeople: [], missFall: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
@@ -535,6 +536,7 @@ function startGame() {
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
   G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false; G.dozerMode = false;
   G.blockTime = performance.now() + 1000;      // Crane.restartGame: blockTime = getTimer()+1000
+  // 注意: dropY 不在此重置 — 原版 resetGameVars 不碰 dropY, 400 仅 Crane.init 后首块生效 (Crane.as:57)
   hud.summary.style.display = 'none';
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
@@ -600,13 +602,18 @@ let t0 = performance.now();
 // CPath.init: radx=r*2, rady=r=25 → 椭圆摆 (CPath.as:33, updateLoc: x+=radx*cosθ, y+=rady*sinθ)
 const CRANE_RADX = Math.min(70, 30 + TOTAL_BLOCKS);
 const CRANE_RADY = 25;
+const CRANE_AOFFSET = 270;   // CPath.init: aOffset=(a+180)%360, factory 传 a=90 (CPath.as:38, Crane.as:46)
+// firstTick/updateLoc: ccw=!cw=true → θ=(360-((t*360/DUR+aOffset)%360))°, 角度递减 → 首摆向右 (CPath.as:54,62)
+// 椭圆中心在枢轴上方 rady: ctrY = pivot + calcY(rady,270°) = pivot-25 (CPath.as:54-56); H5 y 向上取 +rady
+function hookTh(now) {
+  const t = ((now - t0) % CRANE_DUR + CRANE_DUR) % CRANE_DUR;
+  return (360 - (t / CRANE_DUR * 360 + CRANE_AOFFSET) % 360) * Math.PI / 180;
+}
 function hookX(now) {
-  const th = (2 * Math.PI * (now - t0)) / CRANE_DUR;
-  return TOWER_START_X - STAGE_W/2 + CRANE_RADX * Math.cos(th);
+  return TOWER_START_X - STAGE_W/2 + CRANE_RADX * Math.cos(hookTh(now));
 }
 function hookY(now) {
-  const th = (2 * Math.PI * (now - t0)) / CRANE_DUR;
-  return CRANE_HOOK_Y + CRANE_RADY * Math.sin(th);
+  return CRANE_HOOK_Y + CRANE_RADY + CRANE_RADY * Math.sin(hookTh(now));
 }
 
 // ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
@@ -872,9 +879,12 @@ function drop() {
   scene.add(mesh);
   // Crane.dropTarget: blockDx = dx (释放帧钩速 px/帧); 落块带惯性漂移 x + blockDx*3 (Crane.as:198-199)
   const bdx = G.craneDx || 0;
-  const topY = G.landingY + BLOCK_H / 2;
-  // 时长 = (dropY-y)*2ms → 速度 = 距离/时长 = 0.5 px/ms 恒定; 漂移总量 blockDx*3 匀速走完
-  G.falling = { mesh, vy: DROP_SPD, cy: tpl.userData.cy, bdx, vx: bdx * 3 / Math.max(1, topY - y) * 2 };
+  // Crane.dropTarget: 落程 = dropY - 块屏幕y (固定屏幕落点, 与塔高无关), 时长=落程*2ms → 0.5px/ms;
+  // dropY 首块 400、之后恒 340 (Crane.as:57,201)
+  const hangScreenY = STAGE_H / 2 - (y - G.camY);
+  const fallDist = Math.max(1, G.dropY - hangScreenY);
+  G.falling = { mesh, vy: DROP_SPD, cy: tpl.userData.cy, bdx, vx: bdx * 3 / (fallDist * 2), left: fallDist };
+  G.dropY = 340;                                 // Crane.dropTarget 末尾: this.dropY = 340
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
 // 原版鼠标语义: 按下仅置 mouseState=false, 松开才落块 (Crane.onMouseDown/Up:176-189, buttonPressed:155)
@@ -915,10 +925,11 @@ function loop(now) {
     // 下落块
     if (G.falling) {
       const f = G.falling;
-      f.mesh.position.y -= f.vy * dt;      // 匀速 tween (Crane.dropTarget Path)
+      const step = f.vy * dt;
+      f.mesh.position.y -= step;           // 匀速 tween (Crane.dropTarget Path)
       f.mesh.position.x += f.vx * dt;      // 惯性漂移 (Crane.as:199 path x+blockDx*3)
-      const topY = G.landingY + BLOCK_H / 2;
-      if (f.mesh.position.y + f.cy <= topY) {
+      f.left -= step;
+      if (f.left <= 0) {
         scene.remove(f.mesh);
         G.falling = null;
         // 块中心 - 塔顶中心(含摇晃倾斜投影): Tower.as:118 calcX(landingY, rot+90) = -h*sin(rot)

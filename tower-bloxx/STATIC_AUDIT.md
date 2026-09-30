@@ -259,3 +259,16 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 记录在案的剩余差异: 摆钩初始相位 (CPath aOffset, 只影响起始方向)、城市塔图形为 CSS 近似、
   Flash 数值 + J2ME 3D 视觉的混搭属用户指定组合
 - tower 7 PASS / city 10 PASS / smoke 17 PASS
+## 第 27 轮（2026-09-30）— T1 摆钩相位 + T2 dropY 落程语义
+
+- [P1] T1 摆钩相位: H5 原 cos/sin(th) 0 相位起、正向摆; 原版 CPath.init aOffset=(90+180)%360=270、
+  ccw=!cw=true → θ=(360-((t*360/DUR+270)%360))° 角度递减, t=0 钩子位于枢轴 (cos90=0,sin90=1),
+  首摆向右; 且 firstTick 把椭圆中心重算到枢轴上方 rady=25px (CPath.as:38,54-56)。
+  H5 已改 hookTh()/hookY(): 中心 y=CRANE_HOOK_Y+rady, 相位/方向对齐
+- [P1] T2 dropY: 原版落块终点是固定屏幕 y (首块 400, 之后恒 340, Crane.as:57,201), 与塔高无关;
+  Tower.blockDropped 判定只用 x 偏移 (Tower.as:123), dropY 仅决定下落时长 0.5px/ms 恒速。
+  H5 原来直接落到 landingY+BLOCK_H/2 (塔顶) → 改为固定屏幕落程: fallDist=dropY-块屏幕y,
+  惯性 vx=bdx*3/(fallDist*2); 落到点后由 blockLanded 吸附/转 miss 坠块 (与原版 STT_BLOCK_LANDED 同)
+- 勘误: dropY=400 仅 Crane.init 生效, restartGame→resetGameVars 不重置 → H5 不在 startGame 重置,
+  G 字面量初始 400 一次
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

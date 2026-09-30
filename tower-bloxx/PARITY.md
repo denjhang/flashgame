@@ -2,10 +2,6 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **T1. 摆钩初始相位对齐**：CPath.init 的 aOffset=(a+180)%360 且 ccw=!cw（CPath.as:30-31,38-43），
-> 首摆方向/相位与 H5 的 sin/cos 起点不同。取证后改 h5/game.js 的 hookX/hookY 相位。
-> **T2. dropY 语义**：原版首块落程到 dropY=400、之后 340（Crane.as:57,201），影响首块下落时长；
-> H5 目前落点直接是 landingY。评估并对齐。
 > **T3. tipFlags 首次提示队列**：restoreModel 恢复 tipFlags（GameModel.as:86），首次游玩按
 > STT_INSTR1→TIP_INSTR_BUILD 等顺序弹提示（GameState.as:218-231）。H5 无提示系统。
 >
@@ -23,8 +19,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 
 | 项 | 状态 | 证据 | 说明 |
 |---|---|---|---|
-| 摆钩椭圆轨迹/周期 2600ms | ✅ | CPath.as:33,62-64 / Crane.as:46 | radx=min(70,30+totalBlocks), rady=25 |
+| 摆钩椭圆轨迹/周期 2600ms | ✅ | CPath.as:33,54-64 / Crane.as:46 | radx=min(70,30+totalBlocks), rady=25; aOffset=270+ccw → 首摆向右, 椭圆中心在枢轴上方 rady (第27轮) |
 | 落块惯性漂移 blockDx*3 | ✅ | Crane.as:198-199 | |
+| 落程 dropY=400→340 固定屏幕落点 | ✅ | Crane.as:57,199-201 | 首块落程 400, 之后恒 340 且会话内不重置 (resetGameVars 不碰); 判定只用 x 偏移, dropY 仅定时长 |
 | 三档判定 hitLimit/BLOCK_H | ✅ | Tower.as:124-167 | |
 | 塔身倾斜保留 currCtr+=blockDx | ✅ | Tower.as:117/208-210/282 | |
 | 摇晃倾斜投影参与落点测量 | ✅ | Tower.as:118 + Utils.as:12-15 | |
