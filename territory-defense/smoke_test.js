@@ -1324,7 +1324,7 @@ console.log("--- 资产引用审计 ---");
   console.log("静态引用 " + refs.size + " 条全在=" + (missing.length === 0) +
     (missing.length ? ' 缺:' + missing.join(',') : '') + "  动态目录 12/12 在=" + dirOK);
 }
-// ---- victims 黑幕 (762, 前3关简报, N+91) ----// ---- victims 黑幕 (762, 前3关简报, N+91) ----
+// ---- victims 黑幕 (762, 前3关简报, N+91) ----
 console.log("--- victims 黑幕 ---");
 {
   const fsx = require('fs');
@@ -1332,7 +1332,37 @@ console.log("--- victims 黑幕 ---");
   console.log("前3关黑幕规则 (briefingShow 挂 / startWave 淡出)=" +
     (gj.includes("G.wave + 1 <= 3") && gj.includes("fadeCurtain") && hj.includes('id="fadeCurtain"')));
 }
-// ---- STORY 说话人码逐句比对 (N+95): data.js vs deobf/data/scenario_parsed.json ----
+// ---- SHOP_INFO 逐字节比对 (N+96): 与 deobf 1027 rollOver 原文一致 ----
+console.log("--- 商店INFO原文比对 ---");
+{
+  const fsx = require('fs'), path = require('path');
+  const root = '../deobf/scripts/DefineSprite_1027';
+  const NAMES = [['m60','gatling','canon75','canon105'], ['canon105D','radar','crotale','canon125'], ['MLRS','pluton','MTHEL','su37']];
+  const BS = String.fromCharCode(92);
+  const unesc = (t) => t.split(BS+'n').join(String.fromCharCode(10)).split(BS+'t').join(String.fromCharCode(9)).split(BS+String.fromCharCode(34)).join(String.fromCharCode(34));
+  let checked = 0, bad = [];
+  for (let f = 1; f <= 3; f++) {
+    const dir = path.join(root, 'frame_' + f);
+    const slots = fsx.readdirSync(dir).filter(d => d.startsWith('PlaceObject2_')).sort(
+      (a, b) => parseInt(a.split('_').pop()) - parseInt(b.split('_').pop()));
+    slots.forEach((sd, i) => {
+      const f2 = path.join(dir, sd, 'CLIPACTIONRECORD on(rollOver).as');
+      if (!fsx.existsSync(f2)) return;
+      const rows = fsx.readFileSync(f2, 'utf8').split(String.fromCharCode(10));
+      const li = rows.find(l => l.includes('price'));
+      if (!li) return;
+      let a = li.indexOf(String.fromCharCode(34), li.indexOf('info') + 5);
+      const b = li.lastIndexOf(String.fromCharCode(34));
+      const info = li.slice(a + 1, b);
+      const name = NAMES[f - 1][i];
+      checked++;
+      if (SHOP_INFO[name] !== unesc(info)) bad.push(name);
+    });
+  }
+  console.log("SHOP_INFO 与原版逐字节一致 (" + checked + " 条)=" + (bad.length === 0) +
+    (bad.length ? ' 差:' + bad.join(',') : ''));
+}
+// ---- STORY 说话人码逐句比对 (N+95)// ---- STORY 说话人码逐句比对 (N+95): data.js vs deobf/data/scenario_parsed.json ----
 console.log("--- 剧情码序列比对 ---");
 {
   const fsx2 = require('fs');
