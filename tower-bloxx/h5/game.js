@@ -572,7 +572,57 @@ function showCity() {
   }
   pumpCityTips();
 }
+// ---- 城市天际线 (House.w:1224 + a(Graphics,int):4107) ----
+// jar 文件 89 → bI[x,w,色]/bH[顶偏移,h]/bJ[调色板], 数据 176 单位宽→E 屏宽缩放,
+// 绘制 y = aU - bH[0] - h + scroll, aU=F>>1 地平线 (:1392); H5 画到 offscreen canvas 作 city 背景
+let skylineCache = null; let skylinePending = false;
+function loadSkyline(cb) {
+  if (skylineCache) { cb(); return; }
+  if (skylinePending) return;
+  skylinePending = true;
+  if (typeof fetch !== 'function') return;  // node stub 环境无 fetch
+  fetch('./assets/city_skyline.bin').then(r => r.arrayBuffer()).then(buf => {
+    const dv = new DataView(buf); let p = 0;
+    const rN = dv.getUint8(p++);
+    const bI = [], bH = [];
+    for (let i = 0; i < rN; i++) { bI.push([0, 0, 0]); bH.push([0, 0]); }
+    const sN = dv.getUint8(p++); const bJ = [];
+    for (let i = 0; i < sN; i++) { bJ.push(dv.getUint32(p)); p += 4; }  // readInt BE
+    for (let i = 0; i < rN; i++) {
+      const n3 = dv.getUint8(p++), n4 = dv.getUint8(p++);
+      const n5 = dv.getUint16(p); const n6 = dv.getUint16(p + 2); p += 4;
+      bI[i][0] = Math.floor(240 * n3 / 176);
+      bI[i][1] = Math.max(1, Math.floor(240 * (n3 + n4) / 176) - bI[i][0]);
+      bH[i][0] = n5 * 2;                            // (n5<<1)*32/32
+      bH[i][1] = Math.max(1, (n5 + n6) * 2 - n5 * 2);
+      bI[i][2] = dv.getUint8(p++);
+    }
+    skylineCache = { bI, bH, bJ };
+    cb();
+  }).catch(() => { skylinePending = false; });
+}
+function drawSkyline(cv) {
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height, aU = H >> 1;   // :1392 aU = F>>1
+  ctx.clearRect(0, 0, W, H);
+  for (let i = 0; i < skylineCache.bI.length; i++) {
+    const b = skylineCache.bI[i], h = skylineCache.bH[i];
+    const y = aU - h[0] - h[1];                     // aU - bH[0] - bH[1]
+    if (y + h[1] < 0) break;                        // :4111 提前裁剪
+    ctx.fillStyle = '#' + (0xFFFFFF & skylineCache.bJ[b[2]]).toString(16).padStart(6, '0');
+    ctx.fillRect(0xFF & b[0], y, 0xFF & b[1], h[1]);
+  }
+}
+
 function renderCity() {
+  loadSkyline(() => {  // J2ME 89 号天际线背景 (w:1224/a:4107)
+    const cv = document.createElement('canvas'); cv.width = 240; cv.height = 320;
+    if (!cv.toDataURL) return;               // node stub canvas 无 toDataURL
+    drawSkyline(cv);
+    hud.city.style.backgroundImage = 'url(' + cv.toDataURL() + ')';
+    hud.city.style.backgroundRepeat = 'no-repeat';
+    hud.city.style.backgroundPosition = 'bottom center';
+  });
   hud.cityLevel.textContent = 'Lv.' + G.sm_cityLevel + '/20 ' + (CITY_TYPES[Math.min(8, Math.floor(G.sm_cityLevel / 2.5))] || '');
   hud.cityPop.textContent = '👥 ' + G.sm_totalPopulation;
   const base = CITY_LEVEL_LIMITS[G.sm_cityLevel], next = CITY_LEVEL_LIMITS[Math.min(20, G.sm_cityLevel + 1)];

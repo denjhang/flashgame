@@ -553,7 +553,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 13 | 1003 | j | () | 读 cityModeRS (loadTowerInfoCityMode) | ✅ N94 beginBuild→loadTowerRS('city')+applyTowerRS |
 | 14 | 1214 | k | () | 过场载入: L=g.c(-1)空, M=g.c(11)全屏图 | H5 无过场, 记档 |
 | 15 | 1219 | l | () | 已读 |
-| 16 | 1224 | w | () | 私有检查: b.a() (调 f/b 存档层?) — 短方法 | 记档: 语义待深挖 |
+| 16 | 1224 | w | () | 城市视图初始化: 停乐+89 号天际线解码(bI/bH/bJ)+异步分段门控 | ✅ N+62 loadSkyline/drawSkyline (89 号文件消费, city 背景) |
 | 17 | 1362 | x | () | 资源全释放: 3D 组 cy-cE/UI 图 U-an 全 null + System.gc() | H5 scene 清理+GC 等价 |
 | 18 | 1388 | y | () | 场景资源装载: aT=E/2,aU=F/2(视中心), bd/be=256*E/F/32(定点视宽高), 载入状态图标组 | H5 启动装载 等价; 视口定点换算 256/32=8px/unit 已记档 |
 | 19 | 1456 | d | (int n2) | 带3s超时横幅: I=1→3000ms→y()收起, R&&!S 触发MIDI | 与 H5 showCityStatus 同型 |

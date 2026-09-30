@@ -51,6 +51,7 @@ check(/function panicPeople/.test(src), '惊慌人群 t:2098 (抛飞+走缘)');
 check(/function landFxSpawn/.test(src), '落地角标 h:3390 (白30/橙缩200/帧闪600)');
 check(/id37\.png/.test(src), 'r0id37 星形帧资产引用');
 check(/function playMidiJingle/.test(src) && /playMidiJingle\(won \? 85 : 84\)/.test(src), 'MIDI jingle 85/84/83 (House 负 id :1673/:1681/:1602)');
+check(/function loadSkyline/.test(src) && /city_skyline\.bin/.test(src), '城市天际线 89 号文件消费 (w:1224/a:4107)');
 // HTML 引用的本地资源必须存在 (防 404 类事故, fx28帧前科)
 {
   const html = fs.readFileSync(path.join(h5, 'index.html'), 'utf8');

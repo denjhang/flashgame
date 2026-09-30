@@ -710,3 +710,15 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   资产 h5/assets/midi/83/84/85.mid (nokia_v1011 原字节)
 - 验证: node --check ✅ / smoke 28 PASS (+1) / tower ✅ / city ✅
 - 待办池: l0-l6 语言包(暂缓) | MIDI 短音效项关闭 ✅
+
+## 97 (2026-10-01) N+62: 回归维护 + w:1224 定案 + 89 号天际线接入 H5
+- 基线: 三件套全绿后开工
+- w:1224 定案: 城市视图初始化器 — b.a() 音乐停 + 异步分段门控 (e(0)/e(10)/e(12)) + jar 文件 89 解码
+  (r=u8 建筑数 → s=u8 帧时长数 bJ[int 调色板] → 每条 n3,n4 u8/n5,n6 u16/色 u8; bI[0]=E*n3/176,
+  bI[1]=max(1,E*(n3+n4)/176-x), bH[0]=n5*2, bH[1]=n6*2; E/F=getWidth/getHeight (GameMIDlet:53-54), aU=F>>1 :1392)
+- 绘制定案 a(Graphics,int):4107-4119: y=aU-bH[0]-bH[1]+scroll, 色=House.a(bJ[bI[i2][2]],dg,true) 日光调色,
+  剪裁 y+h<0 break / y>F continue; 表行"语义待深挖"关闭
+- H5 落地: loadSkyline/drawSkyline (h5/assets/city_skyline.bin=dc_v1507_misc/89 原字节, 240 宽/aU=H>>1),
+  renderCity 首行挂载, offscreen canvas toDataURL → hud.city background-image bottom; stub 守卫 (fetch/toDataURL)
+- 勘误: 表行 w:1224 "私有检查 b.a()" 系误读 — b.a() 只是函数首行音乐停, 主体是天际线装载
+- 验证: node --check ✅ / smoke 29 PASS (+1) / tower ✅ / city ✅
