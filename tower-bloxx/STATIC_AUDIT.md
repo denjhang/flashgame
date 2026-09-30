@@ -319,3 +319,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   舞台原位）。读图比对 fx06 散装 = frame6 鸟群（同素材不同裁剪）→ 用 PIL alpha-bbox 离线把
   28 帧全画布紧裁生成 fx/fx01..28.png, 代码零改动, generateEffect 的纹理自然尺寸即原版尺寸
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 32 轮（2026-09-30）— T7 spawnFallingPerson 帧动画+运动学对号
+
+- 取证 Tower.makeFallingPerson:327-342: dudette/dude 随机; gotoAndStop(9) 初帧; Flipbook 11→35
+  /2000ms 循环（12.5fps 翻页）; Path 到 ±100/+100px / 5000ms → vx=±0.02, vy=0.02 px/ms
+- [P1] H5 原来静态第 1 帧 + vy=0.15（快了 7.5 倍）→ 改初帧 9、Flipbook 11-35 循环（80ms/帧）、
+  vy=0.02、vx=±100/5000、sprite 42x56 原尺寸（与 T5 的 toon 帧序列共用）
+- 记录待办: swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）未复刻 → 待办池
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

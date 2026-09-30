@@ -2,10 +2,11 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T7.【函数】spawnFallingPerson 帧动画补齐**：miss 坠落小人在原版也是 toon 帧动画
-> （Tower.makeFallingPerson:296-310），H5 目前静态第 1 帧；用已载入的 2×56 帧序列补齐。
+> **T8.【函数】CityMap.as 逐函数普查**：CityMap 剩余函数（setMode/checkButtons/showTowerSelections
+> /placeInDozer/highlight 链等）逐个列名+行号对照 h5/game.js，缺的补、偏的修。
 >
-> **待办池**：城市塔格缩略图原版化 / J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
+> **待办池**：城市塔格缩略图原版化 / J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
+> makeFallingPerson 的 swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）未复刻。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 

@@ -816,14 +816,17 @@ function makeSparks(x, y) {
     G.sparks.push({ sp, vx: 100 * Math.cos(a * Math.PI / 180), vy: 100 * Math.sin(a * Math.PI / 180), life: 500 });
   }
 }
-// miss 坠落小人 (Tower.makeFallingPerson:296-310: 5000ms, 漂移 ±100)
+// miss 坠落小人 (Tower.makeFallingPerson:327-342): toon 随机, 初帧 gotoAndStop(9),
+// Flipbook 11→35 / 2000ms 循环; Path 到 ±100 / +100px 时长 5000ms → vx=±0.02, vy=0.02 px/ms
 function spawnFallingPerson(x, y) {
-  const mat = new THREE.SpriteMaterial({ map: G.texPeople[Math.floor(Math.random() * 2)][0], transparent: true });
+  const toon = Math.floor(Math.random() * 2);
+  const mat = new THREE.SpriteMaterial({ map: G.texPeople[toon][8], transparent: true }); // 帧 9
   const sp = new THREE.Sprite(mat);
-  sp.scale.set(30, 40, 1);
+  sp.scale.set(42, 56, 1);
   sp.position.set(x, y, 2);
   scene.add(sp);
-  G.fallingPeople.push({ sp, vx: (Math.random() - 0.5) * 0.04, life: 5000 });
+  G.fallingPeople.push({ sp, toon, f: 9, animT: 0,
+    vx: (Math.random() - 0.5) * 2 * 100 / 5000, vy: 100 / 5000, life: 5000 });
 }
 
 function knockTopBlock() { // Tower.knockNextBlock
@@ -1047,7 +1050,14 @@ function loop(now) {
     // 坠落小人
     for (let i = G.fallingPeople.length - 1; i >= 0; i--) {
       const q = G.fallingPeople[i];
-      q.sp.position.x += q.vx * dt; q.sp.position.y -= 0.15 * dt;
+      q.sp.position.x += q.vx * dt; q.sp.position.y -= q.vy * dt;
+      // Flipbook 11→35 / 2000ms 循环 (makeFallingPerson:337): 25 帧/2000ms = 12.5fps 翻页
+      q.animT += dt;
+      while (q.animT >= 80) {
+        q.animT -= 80;
+        q.f = q.f >= 35 ? 11 : q.f + 1;
+        q.sp.material.map = G.texPeople[q.toon][q.f - 1];
+      }
       q.life -= dt;
       if (q.life <= 0 || q.sp.position.y < G.camY - STAGE_H) { scene.remove(q.sp); G.fallingPeople.splice(i, 1); }
     }
