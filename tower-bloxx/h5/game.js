@@ -119,12 +119,14 @@ function showMenu() { // STT_MENU (makeMenuSprites:341-355)
   playSong('sng_title');
 }
 function enterQuick() { // STT_QUICK (GameState.as:93-100): totalBlocks=999, currColor=3
+  G.hs = { hiPop: 0, hiBlocks: 0 };            // highScore.startGame(QUICK) session 复位
   G.cityMode = false; G.totalBlocks = 999; G.currColor = 3; G.pendingCell = null;
   hud.menuScr.style.display = 'none';
   craneGroup.visible = true;
   startGame();
 }
 function enterCity() { // STT_CITY (GameState.as:86-92)
+  G.hs = { hiPop: 0, hiBlocks: 0 };            // highScore.startGame(CITY) session 复位
   G.cityMode = true;
   hud.menuScr.style.display = 'none';
   showCity();
@@ -148,10 +150,34 @@ function showInstructions(page) { // STT_INSTRUCTIONS + INSTR fork (GameSprites.
     });
   }
 }
-function showHighScores() { // STT_HIGHSCORES + HighScoreLocalProxy (本地 top10)
-  const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
-  const rows = hs.map((h, i) => '<div>' + (i + 1) + '. ' + (h.name || '—') + ' — Population ' + h.pop + ', height ' + h.h + ', combo x' + h.combo + '</div>').join('') || '<div>No scores yet.</div>';
-  showSub('<h3>High Scores</h3>' + rows);
+// ---- HighScore 三表 (HighScoreLocalProxy: HS_TYPE_CITY=totPop/QUICK=hiPop/QUICK2=hiBlocks,
+// 预置 Player1-10 逐字对号; SharedObject hs_cookie 同义 → localStorage 'twrblx_hs') ----
+const HS_PRESETS = {
+  CITY:  ['Player 1,10000','Player 2,7500','Player 3,5000','Player 4,4000','Player 5,3000','Player 6,2000','Player 7,1000','Player 8,750','Player 9,500','Player 10,100'],
+  QUICK: ['Player 1,3000','Player 2,2000','Player 3,1000','Player 4,750','Player 5,500','Player 6,400','Player 7,300','Player 8,200','Player 9,100','Player 10,50'],
+  QUICK2:['Player 1,500','Player 2,300','Player 3,200','Player 4,100','Player 5,50','Player 6,40','Player 7,35','Player 8,30','Player 9,20','Player 10,10'],
+};
+function hsLoad() {
+  const hs = JSON.parse(localStorage.getItem('twrblx_hs') || 'null') || {};
+  for (const t of ['CITY', 'QUICK', 'QUICK2'])
+    if (!hs[t]) hs[t] = HS_PRESETS[t].map(r => { const [name, v] = r.split(','); return { name, v: Number(v) }; });
+  return hs;
+}
+function hsInsert(table, value, name) { // writeData: 插入+按值降序+截 10
+  const hs = hsLoad();
+  hs[table].push({ name, v: value });
+  hs[table].sort((a, b) => b.v - a.v);
+  hs[table] = hs[table].slice(0, 10);
+  localStorage.setItem('twrblx_hs', JSON.stringify(hs));
+}
+function hsEsc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function showHighScores() { // STT_HIGHSCORES → drawDataSet 三表
+  const hs = hsLoad();
+  const tbl = (title, rows, unit) => '<h3>' + title + '</h3>' +
+    rows.map((r, i) => '<div>' + (i + 1) + '. ' + hsEsc(r.name) + ' — ' + unit + ' ' + r.v + '</div>').join('');
+  showSub(tbl('City Population', hs.CITY, 'Pop') +
+    tbl('Quick Game Population', hs.QUICK, 'Pop') +
+    tbl('Quick Game Height', hs.QUICK2, 'Blocks'));
 }
 function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET
   showSub('<h3>Reset city?</h3><p>Reset the progress and population score in your city? (TIP_CONFIRM_RESET)</p>' +
@@ -630,6 +656,7 @@ function startGame() {
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
   G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false; G.dozerMode = false;
+  G.hs = { hiPop: 0, hiBlocks: 0 };            // highScore.startGame session 复位 (HighScore.as:139)
   G.blockTime = performance.now() + 1000;      // Crane.restartGame: blockTime = getTimer()+1000
   // 注意: dropY 不在此重置 — 原版 resetGameVars 不碰 dropY, 400 仅 Crane.init 后首块生效 (Crane.as:57)
   hud.summary.style.display = 'none';
@@ -668,14 +695,14 @@ function showSummary() {
   G.records.blockRecord = Math.max(G.records.blockRecord, G.stacked);              // setStackedBlocks
   G.records.comboRecord = Math.max(G.records.comboRecord, G.comboMax);             // setComboMult
   localStorage.setItem('twrblx_records', JSON.stringify(G.records));
-  // HighScore 本地榜 (HighScoreLocalProxy): 按人口 top10; 进榜标记 → 结算 OK 后名字输入
-  // (GameState STT_CHECK_HIGHSCORE:148-167 isQualified→showNameDialog→STT_NEW_HIGHSCORE→showPopup)
-  const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
-  const entry = { pop: G.population, h: G.stacked, combo: G.comboMax, name: '', id: Date.now() };
-  hs.push(entry);
-  hs.sort((a, b) => b.pop - a.pop);
-  G.pendingHS = (!G.cityMode && G.population > 0 && hs.indexOf(entry) < 10) ? entry : null; // isQualified
-  localStorage.setItem('twrblx_highscores', JSON.stringify(hs.slice(0, 10)));
+  // endOfRound (HighScore.as:185-194): session 内 hiPop/hiBlocks 取 max;
+  // isQualified (:200-219): hiPop 进 QUICK 榜 或 hiBlocks 进 QUICK2 榜 (仅 !cityMode, STT_CHECK_HIGHSCORE:148)
+  G.hs.hiPop = Math.max(G.hs.hiPop, G.population);
+  G.hs.hiBlocks = Math.max(G.hs.hiBlocks, G.stacked);
+  const hs = hsLoad();
+  G.pendingHS = (!G.cityMode && G.population > 0 && (
+    hs.QUICK.length < 10 || G.hs.hiPop > hs.QUICK[hs.QUICK.length - 1].v ||
+    hs.QUICK2.length < 10 || G.hs.hiBlocks > hs.QUICK2[hs.QUICK2.length - 1].v)) ? { name: '' } : null;
   G.save.sm_totalPopulation = Math.max(G.save.sm_totalPopulation, G.population); // 城市总人口占位(城市模式接入后为累计值)
   saveModel();
   const line = (label, v, rec) => label + v + (rec ? '  New record!' : '');        // Const.TIP_SUMMARY_REC
@@ -701,11 +728,11 @@ function showNameDialog() {
     '<div class="ok">OK</div>';
   hud.summary.style.display = 'block';
   hud.summary.querySelector('.ok').onclick = () => {
-    const nm = (document.getElementById('hsName').value || 'AAA').slice(0, 12);
-    const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
-    const e = hs.find(x => x.id === G.pendingHS.id);   // 回写同一上榜条目
-    if (e) e.name = nm;
-    localStorage.setItem('twrblx_highscores', JSON.stringify(hs));
+    // submitName (:249-268) + stripIllegalChars (:98-117): 去 , 与 |
+    const nm = String(document.getElementById('hsName').value || 'AAA').split(',').join('').split('|').join('').slice(0, 12);
+    const hs = hsLoad();
+    if (hs.QUICK.length < 10 || G.hs.hiPop > hs.QUICK[hs.QUICK.length - 1].v) hsInsert('QUICK', G.hs.hiPop, nm);
+    if (hs.QUICK2.length < 10 || G.hs.hiBlocks > hs.QUICK2[hs.QUICK2.length - 1].v) hsInsert('QUICK2', G.hs.hiBlocks, nm);
     G.pendingHS = null;
     showHighScores();                          // STT_NEW_HIGHSCORE → highScore.showPopup
   };

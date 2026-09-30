@@ -2,11 +2,11 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T19.【函数】HighScore.as 普查**：HighScore 类逐函数（isQualified/endOfRound/endOfGame/
-> showNameDialog/showPopup/startGame/sort 语义）对照 h5 高分实现，补齐偏差。
+> **T20.【函数】esg 根类补漏**：Sprite/SpriteManager/Utils/Animator 等bz/esg 根层类逐函数
+> 普查（spriteFactory/addAnim/findAnim/move/gotoAndStop 语义），对照 H5 three.js 封装找偏差。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
-> 挂块 combo 银火花帧 / 高分榜三分页表格（216）。
+> 挂块 combo 银火花帧。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -244,6 +244,18 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   clearCity+resetTips+saveModel）——原版重置城市后首次提示会重放, H5 漏了
 - 记档: updateCityBadge（cityBadge2 帧=max(1,cityLevel), GameModel.as:411-414）为 city_spr 内部
   实例, 资产未单独导出; H5 'Lv.N/20' 文本 = 等价实现
+
+
+### 7.2 HighScore.as 普查 + 三表落地（第 44 轮, T19 ✅）——game/*.as 十类普查全部收官
+- HighScore 17 函数 + HighScoreLocalProxy 全取证: 三榜语义 = CITY(nTotPop 城市总人口)/
+  QUICK(nHighPop session 最高单塔)/QUICK2(nHighBlocks 最高塔高), 预置榜 Player1-10
+  (sPreset_* 逐字对号: 10000..100/3000..50/500..10); stripIllegalChars 去 ,|;
+  startGame session 复位/endOfRound 取 max/isQualified 双源任一/submitName 写表+重读
+- H5 重写: 单榜 twrblx_highscores → 三表 twrblx_hs(CITY 展示用预置, QUICK/QUICK2 可进榜),
+  showSummary=endOfRound(hiPop/hiBlocks 取 max), 结算 OK→showNameDialog(名字去 ,|, 截 12)→
+  hsInsert 双榜→三表弹窗; hsEsc 防 name 注入 innerHTML; G.hs session 在 startGame 复位
+- 未复刻(记档): NETWORK 源(原版服务端已死)+CITY 榜写入(原版城市模式 CHECK_HIGHSCORE 直接
+  回 STT_CITY 不写榜, 语义一致)
 
 ## 8. 输入——🟨
 

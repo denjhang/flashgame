@@ -410,3 +410,13 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   game.js 删 hud.lives 死引用
 - 过程教训记录: 两处 Edit 假成功(超时), python 重打后 grep 验证才落稳
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 44 轮（2026-09-30）— T19 HighScore 普查 + 三表高分落地
+
+- 取证: HighScore 17 函数 + LocalProxy 预置榜逐字对号; 三榜= CITY(totPop)/QUICK(hiPop)/
+  QUICK2(hiBlocks)（明细 PARITY 7.2）
+- [P1] H5 单榜重写为三表: twrblx_hs, 预置 Player1-10 可见; endOfRound/isQualified/
+  submitName(stripIllegalChars 去 ,|)/showPopup 三表渲染; hsEsc 防 name 注入;
+  G.hs session 在 startGame 复位 (修复 exec_test 暴露的 G.hs undefined)
+- 过程: python 补丁 CRLF 变体匹配; 第一轮补丁因断言失败整体未写入, 二轮补齐——补丁脚本
+  必须"全部成功才写盘"或分轮验证
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
