@@ -375,3 +375,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   实现 G.bounces (P0/P1/P2/P3, Flash y 取反), 复用 lastFallMesh
 - [P2] title Message 5000ms 自动进菜单 (GameState.as:63), 点击提前取消
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 39 轮（2026-09-30）— T14 时间轴脚本普查（三层覆盖收官）
+
+- 46 个带脚本时间轴全归类（明细 PARITY 9.1）: 根帧=mochibot 追踪（不复刻）; 其余为 mx 框架/
+  UI 弹窗/stop 占位/特效随机重播
+- [P2] statusBar 队列语义 (DefineSprite_648): queueMessage 顺序播——showCityStatus 由覆盖式
+  改 3s/条顺序队列 (statusQ/pumpStatus)
+- 记档: 216 高分三分页表格（H5 单榜简化→待办池）; 706/713/223 随机重播≈fx 槽位随机重生
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

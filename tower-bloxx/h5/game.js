@@ -474,9 +474,22 @@ function cityCellClick(col, row) {
   const beginBuild = () => { hud.city.style.display = 'none'; startGame(); };
   if (!showTip('place_tower', TIP_TEXTS.place_tower, beginBuild)) beginBuild(); // CityMap.as:140/167
 }
+// 状态条=消息队列 (DefineSprite_648 statusBar: queueMessage 顺序播, forceMessage 插队;
+// H5 每条 3s 顺序显示——原为覆盖式, 连续消息会互吞)
+const statusQ = [];
+let statusTimer = 0;
 function showCityStatus(txt) {
-  hud.cityStatus.textContent = txt;
-  setTimeout(() => { hud.cityStatus.textContent = ''; }, 3000);
+  statusQ.push(txt);
+  if (statusQ.length === 1) pumpStatus();
+}
+function pumpStatus() {
+  hud.cityStatus.textContent = statusQ[0];
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    statusQ.shift();
+    if (statusQ.length) pumpStatus();
+    else hud.cityStatus.textContent = '';
+  }, 3000);
 }
 // 建造结束回城放置 (CityMap.placeInMap:411-460: setTowerInfo→calcCityPop→level/unlock→saveModel)
 function finishCityTower(won) {

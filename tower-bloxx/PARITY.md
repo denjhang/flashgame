@@ -2,11 +2,12 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T14.【深度自查】时间轴脚本普查**：翻 paperdefense_fla 时间轴脚本（根级/帧脚本），找
-> game/*.as 之外还没对号的行为（HUD 动画帧/菜单粒子/音效钩子），产出函数级新任务。
+> **T15.【资源】image_10..17 未核对贴图盘点**：逐张读 h5/assets/image_10..17.png（J2ME/UI
+> 来源待考），确认内容后判定：复刻接入 / 记档不复刻 / 对应已有实现的质感替换。
 >
 > **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
-> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧。
+> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧 /
+> 高分榜三分页表格（216 drawNetworkTableLines, H5 单榜简化）。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -233,6 +234,17 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - 3D 渲染取自 J2ME 版资产（Flash 版是 2D）——用户指定要 J2ME 3D
 - 去除 Kongregate/MochiBot/广告/Get More Games 外链（平台依赖，无法也无需复刻）
 - m3g 吊车 3D 模型未挂接（现用原版 hook 贴图公告牌）
+
+
+### 9.1 时间轴脚本普查（第 39 轮, T14 ✅）
+- 根帧: mochibot 追踪 + 广告 ID = 平台追踪, 有意不复刻; frame_3 stop() = 入口停帧
+- 46 个带脚本时间轴归类: mx 框架/滚动条/高分表格分页（216 drawNetworkTableLines, H5 单榜简化）/
+  calltoaction（不复刻）/ stop() 占位（317/330/343/355/437/444/606/622 等）
+- 行为类: 648 statusBar 消息队列（queueMessage 顺序播/forceMessage 插队/打字机）——第 39 轮把
+  showCityStatus 从覆盖式改为 3s/条顺序队列; 706/713/223 环境特效随机重播（50%/25% 概率
+  gotoAndPlay(1)）——H5 fx 槽位随机重生成语义等价; 39 HS_NameDialog/462 popup displayText/
+  214/124 高分页切换——均已有等价实现（T11 名字对话框/提示弹窗/单榜）
+- 普查至此完整: game 六主类 + anim 基类 + 时间轴脚本三层全覆盖
 
 ## 实施顺序建议（P0 → P1）
 
