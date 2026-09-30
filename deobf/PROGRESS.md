@@ -1,5 +1,15 @@
 # TCS 反混淆与资源还原进度
 
+## 第 TCS+25 轮补记（推流冲突处置）
+
+- 推送时远端已被 tower-bloxx 任务先行推进（其 TB+N40 也追加了共享的
+  deobf/PROGRESS.md 与 TASKS.md），rebase 出现三处冲突
+- 处置：union 合并保留双方条目（TCS+25 记录 + TB 记录互不冲突）；
+  rebase 期间临时 stash 的 tower-bloxx 在途改动已在完成后**原样恢复**到工作树，
+  由其所属任务自行继续——全程未丢对方任何工作
+- 教训：两项目共享 deobf/PROGRESS.md 与 TASKS.md，建议后续各自错峰或分文件
+  （本轮以 union 合并化解，无内容丢失）
+
 ## 第 TCS+25 轮记录（2026-09-30, fr 语种码序列比对 —— 校验矩阵补全）
 
 - 原版 fr/en 两语种码序列自身同构=true；STORY 与 fr 亦逐句一致=true
