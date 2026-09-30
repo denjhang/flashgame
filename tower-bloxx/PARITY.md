@@ -2,12 +2,12 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T12.【函数】GameModel/Tower 剩余函数抽查**：GameModel（updateCityBadge/showCityPop/
-> resetMaximums/clearCity 等）与 Tower（makePerson/move 视差链/gameOver/panDown）逐个列名+
-> 行号对照 h5/game.js，缺的补、偏的修——game/*.as 主类普查收官。
+> **T13.【函数】anim 基类层普查**：bz/esg/anim/（Path/CPath/Rotater/Fader/Flipbook/Message/
+> Anim）逐函数对照 h5 的运动学内联实现——重点 Flipbook 步进语义、Fader 曲线、Message 定时跳转,
+> 找还没覆盖的基类行为。
 >
 > **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
-> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材（原版 case 为空, 仅时间轴）。
+> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -194,6 +194,18 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   原版纪录仅会话内 GameModel.as:11-13，H5 按用户预期跨会话并保留字段名）
 - ✅ 音乐/音效偏好持久化（twrblx_music/sound）
 - 结算面板 "New record!"（setComboMult:190-193）前轮已实现
+
+
+### 7.1 GameModel/Tower 逐函数普查收官（第 37 轮, T12 ✅）
+- GameModel 28 函数: 已对号/等价全覆盖——getRoofType（H5 内联读 [..+2]）、resetMaximums
+  （startGame 重置 comboMax 等）、formatInfo（showSummary line()）、setMapTower/getMapTower
+  （renderCity 重渲等价）、clearCity（Reset Yes 清数据等价）、showCityPop（cityPop textContent）
+- Tower 21 函数: 全覆盖——getBGTileId/move（BG_TEX 视差 :236）、makePerson（spawnPeople）、
+  blockDropped（drop()+falling 流）、clearSparkles（挂块火花帧, H5 无 sprite 银火花, 视觉微差记档）
+- 第 37 轮修复: Reset Map Yes 补 resetTips（GameModel.as:91-94, STT_RESET_MAP_YES:242-248
+  clearCity+resetTips+saveModel）——原版重置城市后首次提示会重放, H5 漏了
+- 记档: updateCityBadge（cityBadge2 帧=max(1,cityLevel), GameModel.as:411-414）为 city_spr 内部
+  实例, 资产未单独导出; H5 'Lv.N/20' 文本 = 等价实现
 
 ## 8. 输入——🟨
 

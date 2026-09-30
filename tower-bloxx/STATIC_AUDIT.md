@@ -358,3 +358,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   HighScore.showNameDialog→dialogDone→showPopup 链
 - 普查归档: STT_SPLASH 原版 case 为空; 外链 5 态=有意不复刻; 其余 33 态 H5 等价实现
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 37 轮（2026-09-30）— T12 GameModel/Tower 普查收官
+
+- GameModel 28 + Tower 21 函数全部归位（明细 PARITY 7.1）; 唯一行为缺口:
+- [P2] Reset Map Yes 补 resetTips (GameModel.as:91-94): 原版 STT_RESET_MAP_YES 三连
+  clearCity+resetTips+saveModel, 提示（intro/bought_land 等）重置后会重放; H5 原来漏 tipFlags 清空
+- 记档: updateCityBadge 为 city_spr 内部实例帧（资产未单导出）, Lv.N 文本等价;
+  clearSparkles 的挂块银火花为视觉微差 → 待办池
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

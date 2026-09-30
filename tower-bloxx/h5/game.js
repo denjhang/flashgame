@@ -156,7 +156,9 @@ function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET
   hud.menuSub.querySelectorAll('[data-r]').forEach(el => {
     el.onclick = () => { // STT_RESET_MAP_YES/NO (GameState.as:242-248)
       if (el.dataset.r === '1') {
-        G.save.sm_towerGridData = []; G.save.sm_totalPopulation = 0; saveModel();
+        G.save.sm_towerGridData = []; G.save.sm_totalPopulation = 0;
+        G.save.tipFlags = {};                    // resetTips (GameModel.as:91-94): 提示重放
+        saveModel();
         updateCityLevelAndUnlockedTypes(); renderCity();
       }
       hud.menuSub.style.display = 'none';
