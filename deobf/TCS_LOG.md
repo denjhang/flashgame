@@ -353,3 +353,13 @@
   同步（3151 `set('tArea',...)`）+ C 键/按钮双向切换（3169/3258），一致。
   无码改。三件套通过，209 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+60（2026-09-26）空格键 depressSpace 对照（方向2）
+
+- 取证：6_1 load loc0207 depressSpace——viseurConstruction=false、
+  zoneBombardement=false、viseurConstruction._x=-500、indicateurPortee 收起、
+  unshowInfoOnUnit（取消选中）、helpBoard._x=-800、jukeboxPanel._y=-700。
+- 结论：H5 depressSpace 覆盖建造光标/Su37 瞄准/选中三项；射程指示为按需
+  绘制无需收起；helpBoard/jukebox 滑走属 800x600 舞台布局差异（侧栏常驻，
+  代码已注明定案）。无码改。三件套通过，209 项全 `=true`、exit 0。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

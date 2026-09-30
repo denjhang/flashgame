@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+60: 空格键 depressSpace 对照（方向2）——原版 6_1 load loc0207:
+  清建造光标/取消 Su37 区/收射程指示/取消选中/收起 helpBoard 与 jukeboxPanel。
+  H5 depressSpace 前四项一致; 面板滑走=布局差异定案(侧栏常驻, 已注明)。
+  无码改
+
 - [x] TCS+59: C 键建造区显示复核（方向2）——原版 6_1 keyDown(67):
   surfaceForBuild alpha 0↔35 + menuArea 按钮帧 on/off 同步; H5 showBuildArea
   掩码 35% 透明度 + 侧栏 tArea 按钮状态同步 (3151) 一致。无码改
