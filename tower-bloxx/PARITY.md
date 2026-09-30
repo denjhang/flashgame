@@ -9,7 +9,7 @@
 > **T46.【函数】id87/88 bin 鉴定**：686B/1347B，疑关卡或字体数据，读 House 中消费点。
 > **T47.【函数】House.java 方法清单推进**：按 99 方法清单逐个过（判定/计分/城市/存档四块，
 > 已完成 ~10），每方法一行差异记录。
-> **T48.【修】差异表逐项修 H5（J2ME 语义优先）: 摆钩✅/摇摆✅/连锁✅/瞄准鸟✅/天空✅/中断续档✅(N94: g:443/h:618/i:828/j:1003 → twrblx_quickRS/cityRS, btnExit 写档+enterQuick/beginBuild 恢复+gameOver 清档)。剩余可选: 8槽并发评估/落点预览子阶段。
+> **T48.【修】差异表逐项修 H5（J2ME 语义优先）: 摆钩✅/摇摆✅/连锁✅/瞄准鸟✅/天空✅/中断续档✅(N94: g:443/h:618/i:828/j:1003 → twrblx_quickRS/cityRS, btnExit 写档+enterQuick/beginBuild 恢复+gameOver 清档)。惊慌人群✅(N+60: t:2098 panicPeople, bE[8][12] 定性=8槽惊慌人群非下落块)/落地角标✅(N+60: h:3390 landFxSpawn, r0id37 三帧星)。T48 全部关闭 ✅
 >
 > **待办池**：MIDI 6 曲中 3 个短音效接入；l0-l6 语言包（本地化暂缓）。
 
@@ -521,7 +521,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | r0id34 af | 城市图标 | House:1303 | 记档同上 |
 | r0id35 ag | 城市图标 | House:1304; :3454 draw | 记档 |
 | r0id36 ah | 城市图标 | House:1305; :3439 draw((E/2)+(ap/2), y+9) | 记档 |
-| r0id37 ai | 鸟群帧 | House:1336; :3416-3420 四方向 | 记档: 环境(与 Flash fx 同族) |
+| r0id37 ai | 三帧星形闪光(13x13x3) | House:1336; h:3390 落地角标帧表 | ✅ N+60 landFxSpawn (h5/assets/id37.png) |
 | r0id38 al | 鸟/云帧 | House:1346; :3544 翻帧 cg/80%4*22 | 记档: 动画帧 |
 | r0id39 am | 云帧 | House:1347; :3549/3556 翻帧 cg/100%3*44 | 记档 |
 | r0id40 an | 图标 | House:1351; :3279 draw(x-11-n*23, F-34) 底行 | 记档: 底部图标列 |

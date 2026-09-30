@@ -46,6 +46,10 @@ check(/const RS_KEYS = \{ quick: 'twrblx_quickRS', city: 'twrblx_cityRS' \}/.tes
 check(/function saveTowerRS/.test(src) && /function applyTowerRS/.test(src), '中断续档 save/apply 函数');
 check(/saveTowerRS\(\);/.test(src), 'btnExit 写中断档 (House.d:317)');
 check(/applyTowerRS\(rs\)/.test(src), '进入塔模式恢复中断档 (House.h:618/j:1003)');
+// 惊慌人群 + 落地角标 (N+60, House.t:2098/h:3390)
+check(/function panicPeople/.test(src), '惊慌人群 t:2098 (抛飞+走缘)');
+check(/function landFxSpawn/.test(src), '落地角标 h:3390 (白30/橙缩200/帧闪600)');
+check(/id37\.png/.test(src), 'r0id37 星形帧资产引用');
 // HTML 引用的本地资源必须存在 (防 404 类事故, fx28帧前科)
 {
   const html = fs.readFileSync(path.join(h5, 'index.html'), 'utf8');

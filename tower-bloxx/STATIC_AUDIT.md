@@ -687,3 +687,14 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 差异记档: J2ME bE[8][8] 槽位塔数据 vs H5 blocks 线性数组—语义等价承载; dc[2][7]/cm[2][5] 为城市放置数据, H5 由 twrblx_cookie sm_towerGridData 承载
 - 验证: node --check ✅ / smoke 24 PASS (新增 RS_KEYS/save/apply/btnExit 写档/恢复 4 断言) / tower 7 ✅ / city 11 ✅
 - T48 进度 6/6 ✅ | 剩余可选项: 8槽并发评估/落点预览子阶段(白点<30ms/橙线<200ms)
+
+## 95 (2026-10-01) N+60: 8槽语义勘误 + 惊慌人群 + 落地角标
+- 勘误: bE[8][12] 不是"下落块", 是 8 槽并发惊慌人群粒子系统 (state 0空/1跳/2走缘/3坠落/4掷飞/5站定; bE[3]=帧, 定点数 256=1.0)
+- 触发取证: 落地 :2862-2880 (|aF|<25→c(4,bs+1) 4人 / 否则 3/2/1人—即人口结算, H5 spawnPeople 已覆盖);
+  撞塔 :1898/:3031 调 t(bs): 按命中层 |aF[n2%20]| 档 (>=80→0 / >=50→1 / >=25→1 / <25→2) 抛飞幸存者
+- H5 panicPeople(): knockTopBlock 尾调用, 按档抛飞 (spawnFallingPerson 复用) + 幸存者重新寻步至 ±64 块缘 (state2)
+- 落地角标 h:3390 勘误: 非"瞄准预览", 是落块后 600ms 反馈动画: 白<30ms / 橙缩(n4=16+n2*32/200)<200ms / 此后 n2/50%3 帧闪;
+  帧表=r0id37 (勘误 PARITY "鸟群帧"→三帧星形闪光, :3416 仅同图复用)
+- H5 landFxSpawn(): 落块尾调用, 3 Sprite (r0id37 切三帧, repeat.x=1/3), updateEffects 尾动画; 资产 h5/assets/id37.png
+- 验证: node --check ✅ / smoke 27 PASS (+3 断言) / tower ✅ / city ✅
+- T48 可选项全部关闭 ✅ | 待办池: MIDI 3 短音效/l0-l6 本地化暂缓
