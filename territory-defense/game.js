@@ -2841,6 +2841,13 @@ function draw() {
   if (G.shopSel && !G.su37Aiming) {
     const ok = buildAllowedAt(G.mx, G.my);
     const aff = G.euros >= (STRUCTURES[G.shopSel] || {}).cost;
+    // 原版 OCEMM (822_226 enterFrame): indicateurPortee 跟随光标,
+    //   _width/_height = portee*2 —— 建造时的射程预览圈 (TCS+67 补)
+    const wpn = WEAPONS[G.shopSel];
+    if (wpn && wpn[1] > 0 && SEL_RANGE.complete && SEL_RANGE.naturalWidth) {
+      const dia = wpn[1] * 2 * zoom;
+      ctx.drawImage(SEL_RANGE, w2sX(G.mx) - dia / 2, w2sY(G.my) - dia / 2, dia, dia);
+    }
     // 帧3(深红)=不可建; 帧1(浅绿)=可建; 帧2(粉)为 hover 中间态
     const fi = (ok && aff) ? 0 : 2;
     const im = CURSOR_FRAMES[fi];

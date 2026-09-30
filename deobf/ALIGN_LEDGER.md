@@ -1,6 +1,6 @@
 # TCS 对齐账本（签名卡；配额制，见 TASKS.md「二之一」）
 
-进度行：**A: 3/6 族, B: 5/6 组**（2026-10-01, TCS+66）
+进度行：**A: 4/6 族, B: 6/6 组**（2026-10-01, TCS+67）
 
 ## A. 函数账本（95 个具名函数 = DefineFunction2×82 + DefineFunction×13）
 
@@ -32,7 +32,16 @@
 | createEclat | 27000+i 火花 ±8px + 随机旋转 | spawnSpark (1913) | 对齐 |
 | chargeBombes (785_17) | comptDispo 60×1s 冷却 + disponible | SU37.COOL_MS=60000 (TCS+40) | 对齐 |
 
-### A4-A6: 未签（后续轮）
+### A4 索敌族 ✅ TCS+67
+| 原版函数 | 语义 | H5 对应点 | 结论 |
+|---|---|---|---|
+| getTarget (174) | 最近有效目标 ≤ distanceOfFire; 对空限制; 500ms 轮询 | 塔/单位两侧实现 (TCS+48 断言) | 对齐 |
+| OCEEF (174) | 43ms 循环 + 许可计数 floor(t[2]/fpsc) | fireCooldownMs (TCS+41 断言) | 对齐 |
+| askPermissionOfFire | 冷却满+有目标→开火, 多管轮换 canonToFire | fireT/tickBurst | 对齐 |
+| OCEMM (822_226) | 光标 enterFrame: 可建帧色 + 重叠红 + **射程圈随光标 (portee*2)** | buildAllowedAt+CURSOR_FRAMES (**TCS+67 补射程预览圈**) | 对齐 |
+| e1..e14 (1158) | 终局音效编排 | CINE_SFX (TCS+4) | 对齐 |
+
+### A5/A6: 未签（后续轮）
 
 ## B. 资源账本（assets 1948 文件）
 
@@ -59,6 +68,12 @@
   同族；H5 玩家塔用 turretlib/173 整帧（48x143）、敌塔用 eturrets_spr。
 - 结论：**导出冗余，定案不接入**（保留存档）。覆盖 turrets 14 张 + eturrets 27 张
   + sprites/DefineSprite_64 等同名小件。
+
+### B6 增量抽查 ✅ TCS+67
+- units 12 / sprites(64/80/83/98/103/108/113/115/121/122 等 gun chid 全集)
+  与 GUN_FIRE_SEQ/ETURRET 表逐 chid 相符; turretlib 173 帧 26 武器全在
+  （TURRET_LIB_FRAME 2..26）; ui/menu/build_ui 与六面板断言一致。
+- 无增量漂移。
 
 ### B5 音效资产表 ✅ TCS+66
 - SFX_FILES 53 文件 429..482(缺 466) 与 assets/sounds 磁盘逐一相符, 无缺文件。

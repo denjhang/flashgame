@@ -38,7 +38,7 @@
 - [x] A1 单位族（TCS+64, 签名卡见 deobf/ALIGN_LEDGER.md; selectUnit 补音）
 - [x] A2 调度族（TCS+65, 账本签名卡）
 - [x] A3 武器族（TCS+66, 含命中半径高度项修正）
-- [ ] A4 索敌族: getTarget/OCEEF/OCEEM/askPermissionOfFire + e1..e14 编排
+- [x] A4 索敌族（TCS+67, OCEMM 补射程预览圈）
 - [ ] A5 UI/存档族: saveData/loadData/actualiseInfo/showInfoOfItem/setScores
 - [ ] A6 散件定案表: edith/Yamato/playBirds/getSound/getPwd 等（外链/音效）
 

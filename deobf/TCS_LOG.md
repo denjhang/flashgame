@@ -436,3 +436,14 @@
 - **账本进度：A: 3/6 族, B: 5/6 组**。三件套通过，冒烟 211 项全 `=true`
   （连跑两次稳定）exit 0。
 - 本轮仍未做：A4 索敌族、A5/A6（下轮配额）。
+
+## TCS+67（2026-10-01）配额轮 4: A4 索敌族 + B6 增量抽查 + OCEMM 射程预览补缺（3 条目）
+
+- **A4 ✅**：getTarget/OCEEF/askPermissionOfFire/OCEMM/e1..e14 五项签名卡。
+  **补缺**：原版 OCEMM 建造光标 enterFrame 让 indicateurPortee 跟随鼠标
+  (w/h=portee×2) —— 建造时射程预览圈，H5 只有选中塔才有 → 已补
+  （shopSel 模式画 SEL_RANGE, 直径=WEAPONS[portee]×2×zoom）。
+- **B6 ✅**：units/gun chid 全集/turretlib 26 帧/ui 各目录与 H5 表逐项相符，
+  无增量漂移（此后每轮随配额滚动抽查一小组）。
+- **账本进度：A: 4/6 族, B: 6/6 组**。三件套通过，冒烟 211 项全 `=true`、exit 0。
+- 本轮仍未做：A5 UI/存档族、A6 散件定案表（下轮配额）。
