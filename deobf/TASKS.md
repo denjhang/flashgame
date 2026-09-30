@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+45: accelere 车速抖动补齐（方向2, **行为补全**）——原版 426_1
+  loc0a40: 每帧 1% 概率 vitesseToDoInitPrime = init + rand×(init/5) → 车队
+  +0..20% 随机巡航速; H5 缺失 → 补 vBase/vPrime 机制。对照 HEAD 验证既有
+  "=false"信息行非回归。断言入冒烟（203 项全绿）
+
 - [x] TCS+44: 路点推进对齐（方向2, **行为修正**）——原版 426_1 changeCheckpoint
   逐轴判定: |dx|<40 且 |dy|<40 → 入弯减速(vitesseFrein); |dx|<4 且 |dy|<4 →
   推进路点+恢复巡航速; 末点→activePerdu。H5 旧实现为径向 max(12,v×5) 且无

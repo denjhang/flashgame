@@ -1814,6 +1814,11 @@ console.log("--- 修理费 (819) ---");
   console.log("路点推进=原版逐轴 40px减速/4px推进=" +
     (gj.includes('< 40 && Math.abs(wp[1] - this.y) < 40') &&
      gj.includes('< 4 && Math.abs(wp[1] - this.y) < 4')));
+  // TCS+45: accelere 车速抖动 (426_1 loc0a40: 每帧 1% 概率
+  //   vitesseToDoInitPrime = init + rand×(init/5) → +0..20%)
+  console.log("车速抖动=原版 accelere 1%重roll(+0..20%)=" +
+    (gj.includes('Math.random() * 100 > 99') &&
+     gj.includes('this.vPrime = this.vBase + Math.random() * (this.vBase / 5)')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

@@ -1351,6 +1351,8 @@ class Unit {
     //   换算到 H5 30fps tick: px/帧@24 → px/tick@30 乘 24/30=0.8
     //   旧实现 c[0]*0.45 = 原版一半 (注释自承"×2.2平衡"的拍脑袋值), c[2]*0.09 快 6.4 倍 —— 已修正
     this.speed = c[0] * FPSC * (24 / 30);                    // 巡航 px/tick
+    this.vBase = this.speed;                                 // accelere() 抖动基值
+    this.vPrime = this.speed;                                // 巡航目标速 (每帧 1% 重roll +0..20%)
     this.turnSpeed = c[1] * FPSC * (24 / 30);                // 转弯中速度目标 (vitesseFrein)
     this.rotateSpeed = c[2] * (Math.PI / 180) * (24 / 30);   // 度/帧@24 → rad/tick@30
     this.v = this.speed;                                     // 当前速度 (转弯/直行间渐变)
@@ -1408,7 +1410,10 @@ class Unit {
     this.rot += Math.sign(da) * turn;
     // 原版 roule(): 转向中 (Δ>3°) 速度目标降为 vitesseFrein(chassis[1]), 直行恢复巡航(chassis[0]);
     //   当前速度以 freinVirage 为步长渐变 (原版 vitesse ±= freinVirage 的加减速模型)
-    let targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.speed;
+    // 原版 accelere() (426_1 loc0a40): 每帧 1% 概率重 roll 巡航目标速
+    //   vitesseToDoInitPrime = init + rand×(init/5) → 车速 +0..20% 随机抖动
+    if (Math.random() * 100 > 99) this.vPrime = this.vBase + Math.random() * (this.vBase / 5);
+    const targetV = Math.abs(da) > 3 * Math.PI / 180 ? this.turnSpeed : this.vPrime;
     this.v += Math.max(-this.turnSpeed, Math.min(this.turnSpeed, targetV - this.v));
     // 原版车队链表制动 (roule pcode 权威): if (dist < unitDevant._height × CONST_ELOIGNEMENT)
     //   { 每帧减速 1/14×1.8; 低速硬停 }。CONST_ELOIGNEMENT: 普通车 1.8, 舰(navire/Yamato) 4

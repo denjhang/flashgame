@@ -193,3 +193,14 @@
   塔存 15/15、非胜非败）。
 - 断言 +1 → 冒烟 202 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+45（2026-09-26）accelere 车速抖动补齐（方向2，行为补全）
+
+- 取证：426_1 loc0a40 `accelere()`——每帧 `if (random×100 > 99)`（1% 概率）
+  重 roll `vitesseToDoInitPrime = vitesseToDoInit + rand×(vitesseToDoInit/5)`
+  （+0..20%），作为路点推进后恢复的巡航目标速 → 原版车队车速各车不同且缓变。
+- 补全：H5 Unit 增 vBase/vPrime，每帧 1% 重 roll，直行 targetV 用 vPrime
+  （转向仍 turnSpeed）。对照 HEAD 验证冒烟中既有 "=false" 信息行为原样
+  （期望值即 false / 已知口径），非本轮回归。
+- 断言 +1 → 冒烟 203 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。
