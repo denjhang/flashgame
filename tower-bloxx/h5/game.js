@@ -1382,10 +1382,12 @@ function loop(now) {
         const ang = -((craneGroup.position.x + STAGE_W/2) - TOWER_START_X) / 5;
         const th = (ang + 90) * Math.PI / 180;
         G.hanging.rotation.z = THREE.MathUtils.degToRad(ang);
+        hookPlane.rotation.z = THREE.MathUtils.degToRad(ang);   // hookSpr._rotation=_loc3_ (Crane.as:73)
         G.hanging.position.set(-(G.hanging.userData.cx || 0) + 65 * Math.cos(th),
           -60 - (G.hanging.userData.cy || 0) - 65 * Math.sin(th), 0);
       } else {
         G.hanging.rotation.z = 0;                  // 首块/屋顶块直立 (else 分支 :76-80)
+        hookPlane.rotation.z = 0;                  // setTarget: hookSpr._rotation=0 (Crane.as:59)
         G.hanging.position.set(-(G.hanging.userData.cx || 0), -60 - (G.hanging.userData.cy || 0), 0);
       }
     }
