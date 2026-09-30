@@ -158,6 +158,35 @@
                  background:#000; z-index:20; pointer-events:none; opacity:0; }
   #fadeCurtain.on { display:block; animation:curtainOut 1.5s ease-out forwards; }
   @keyframes curtainOut { from { opacity:1; } to { opacity:0; } }
+  /* 开机链 (TCS+74): ①preloader(barre 410x5 进度条+百分比) ②arcadebomb 演出
+     (955 f1, 原版 2.5s/点击跳过) ③主菜单(frame_4: 标题光晕673+NEW GAME 656+
+     CONTINUE 659+难度面板 dff 703f3 easy/normal) → 进入简报 */
+  #bootBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#000;
+             z-index:90; display:none; align-items:center; justify-content:center;
+             flex-direction:column; color:#fff; font-family:monospace; cursor:default; }
+  #bootBox .barWrap { width:410px; height:9px; border:1px solid #666; }
+  #bootBox #bootBar { height:100%; width:0%; background:#aaa;
+                      background:url(assets/boot/barre.png); background-size:100% 100%; }
+  #bootPct { margin-top:8px; font-size:12px; }
+  #introBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#000;
+              z-index:89; display:none; cursor:pointer; }
+  #introBox img { display:block; width:800px; margin:0 auto; }
+  #menuBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#000;
+             z-index:88; display:none; flex-direction:column; align-items:center;
+             font-family:monospace; }
+  #menuTitle { margin-top:70px; width:508px; }
+  #menuBtns { margin-top:40px; display:flex; flex-direction:column; gap:14px; align-items:center; }
+  #menuBtns img { cursor:pointer; }
+  #menuBtns img:hover { filter:brightness(1.35); }
+  #menuNoData { color:#a33; font-size:11px; height:14px; }
+  #skillPanel { position:absolute; left:50%; top:220px; transform:translateX(-50%);
+                display:none; }
+  #skillPanel img { display:block; }
+  #skillHot { position:absolute; left:50%; top:220px; transform:translateX(-50%);
+              width:300px; height:96px; display:none; }
+  #skillEasy, #skillNormal { position:absolute; left:8px; width:130px; height:26px;
+                             cursor:pointer; }
+  #skillEasy { top:38px; } #skillNormal { top:66px; }
   /* 开场黑幕 (955 haloNoirOuverture): 每关 980.refresh() → gotoAndPlay("play"),
      f2..f5 黑 → f6 透明 ≈ 5帧@24fps ≈ 0.21s 淡出; dpt14 在对白UI之下 (956 黑矩形) */
   #openCurtain { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
@@ -263,6 +292,21 @@
          其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
     <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
     <button id="saveBtn" title="保存进度">SAVE GAME</button>
+    <div id="bootBox"><div class="barWrap"><div id="bootBar"></div></div><div id="bootPct">0 %</div></div>
+    <div id="introBox"><img id="introImg" src="assets/boot/arcadebomb.png" alt=""></div>
+    <div id="menuBox">
+      <img id="menuTitle" src="assets/boot/title.png" alt="">
+      <div id="menuBtns">
+        <img id="btnNew" src="assets/boot/btn_new.png" alt="NEW GAME">
+        <img id="btnContinue" src="assets/boot/btn_continue.png" alt="CONTINUE">
+        <div id="menuNoData"></div>
+      </div>
+      <div id="skillPanel"><img src="assets/boot/skill.png" alt=""></div>
+      <div id="skillHot">
+        <div id="skillEasy" title="Ideal for your first play"></div>
+        <div id="skillNormal" title="Need some experience"></div>
+      </div>
+    </div>
     <div id="openCurtain"></div>
     <div id="fadeCurtain"></div>
     <!-- 原版 836 全屏点击吞噬层 (chid835 形状, 对白/终局期间空按压防误触地图) -->

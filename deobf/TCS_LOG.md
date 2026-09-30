@@ -522,3 +522,25 @@
 - **提请用户决策**：败局动画为原版素材（含旗帜画面）。按"其他全用原版"指令
   保留；如需对该段演出做去政治化处理（替换帧图），请另行指示。
 - **账本进度：A: 6/6+F1/F2, B: 6/6, R: 12 项**。commit 带 LOSSES 修正与断言。
+
+## TCS+74（2026-10-01）开机链补齐（用户实机反馈：主界面/进度条/arcadebomb 缺失）
+
+- **取证**（原版开机序列）：frame1 预载(percent/barre) → arcadebomb 演出
+  (955 f1, 800x600 logo) → frame_4 停帧主菜单：NEW GAME(656)→dff(703) 难度
+  面板 "Select your skill level"（easy=gc 0.75 / normal=gc 1, 703 f3 实拍
+  面板图）→ _root.nextFrame()；LOAD GAME(659)→loadData（无档显示 no data）；
+  GAME_LOGIC: 敌方伤害 puissance *= gc。
+- **实现**：bootChain 状态机（真实素材预载+进度条→arcadebomb 2.6s/点击跳过→
+  主菜单[标题光晕 673+NEW GAME+LOAD GAME]→难度面板→briefingShow）；开机期间
+  tick 门禁 + HUD 隐藏；CONTINUE 无档提示 no data；**gc 倍率接入敌方伤害**
+  （spawnShell ennemy 侧 power×GC）。
+- **素材**：assets/boot/（barre/arcadebomb/title/btn_new/btn_continue/skill，
+  FFDec 原版直出）。菜单布局为视觉近似（放置矩阵解析受 dump 截断限制，
+  下轮精化——已记 R13 候补）。
+- **smoke**：boot 门禁适配（bootDone=true + briefingShow() 注入 sim）；
+  211 项全 `=true`、exit 0，三件套通过。
+- **实机复验**（浏览器）：preloader→arcadebomb→主菜单→难度面板→选 normal→
+  简报对白打开+HUD 恢复，全链路 ✓（截图逐段核对）。
+- **账本进度：A: 6/6+F1/F2, B: 6/6, R: 12 项 + 开机链大项（折算 ≥4 条）**。
+- 本轮仍未做：菜单放置矩阵像素级精化（R13）；about/language 按钮未复刻
+  （about 弹窗内容/language FR 文案无对应资源，已定案不复刻）。

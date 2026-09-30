@@ -32,6 +32,8 @@ src = src.replace(/function draw\(\) \{/, "function draw() { if (global.__noDraw
 src = src.replace(/function hud\(\) \{/, "function hud() { if (global.__noDraw) return;");
 
 src += "\nglobal.__noDraw = true;   // 无头: 跳过绘制只测逻辑";
+src += "\nbootDone = true; GC = 1;   // TCS+74: 过开机链门(normal 难度)";
+src += "\nbriefingShow();            // TCS+74: 菜单选难度后进入第 1 关简报";
 // 沿 parcourt1 真实路点放塔 (含 2 座雷达驱雾)
 src += "\nconst R1 = ROUTES.parcourt1;";
 src += "\nconst ids = ['canon105','canon105','crotale','canon105','crotale','canon105','canon105','crotale','canon105','crotale','canon105','canon105'];";
@@ -1605,6 +1607,7 @@ console.log("--- 极端存档 ---");
 // ---- 终局/败局路径执行 (N+100)// ---- 终局/败局路径执行 (N+100)// ---- 终局/败局路径执行 (N+100): showCine 两条分支从未被 sim 触发过 ----
 console.log("--- 终局路径 ---");
 {
+  bootDone = true;   // TCS+74: 开机链门 — sim 直接驱动 tick 需先过 boot 门
   // 败局: 抵达基地 → defeatT=120 → 120 tick 后 lost + perdu 分支
   const sv = { lost: G.lost, defeatT: G.defeatT, aPerdu: G.aPerdu };
   G.units.length = 0; G.turrets.length = 0; G.lost = false; G.won = false;

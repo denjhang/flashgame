@@ -14,6 +14,8 @@ let zoom = 1;                // 原版 G 键: 1 ↔ 0.39 全图视图
 // ---------------- 原版机制参数 (GAME_LOGIC.md) ----------------
 const REPAIR_COST = 2;          // 2$/HP
 const SELL_RATIO = 0.75;        // 75% 按余血
+// 难度倍率 (原版 frame_4 主菜单: normal→gc=1, easy→gc=0.75; GAME_LOGIC: 敌方伤害 *= gc)
+let GC = 1;
 const INTEREST_STEP = 3;        // 利率每次 +3
 const SPLIT = [ [0.25, 1], [0.5, 0.5], [1, 0.2] ];  // 溅射三段: 半径比例, 伤害比例
 const ANTI_AIR_MULT = 4;        // 打直升机 ×4 (fireOnEnnemi)
@@ -1816,7 +1818,9 @@ function casingFrame(c, fi) {
 
 function shellHit(s) {
   const tx = s.target.x, ty = s.target.y;
-  const range = s.w[5], power = s.w[4];
+  let range = s.w[5];
+  // 原版 fireOnEnnemi/GAME_LOGIC: 敌方伤害 puissance *= gc (easy 0.75 / normal 1)
+  const power = s.w[4] * (s.side === 'ennemy' ? GC : 1);
   const victims = s.side === 'ally' ? G.units : G.turrets;
   const mult = (u) => (u.aa ? ANTI_AIR_MULT : 1);
   if (s.side === 'ally') {
@@ -2331,8 +2335,86 @@ function endWave() {
   hud();
 }
 
+// ---------------- 开机链 (TCS+74): ①preloader ②arcadebomb 演出 ③主菜单 ----------------
+// 原版: frame1 预载(percent/barre) → arcadebomb 演出 → frame_4 停帧主菜单
+//   (NEW GAME→dff 难度面板 easy=gc0.75/normal=gc1 → nextFrame) → 游戏
+let bootDone = false;
+function bootChain() {
+  // 开机链期间隐藏底部 HUD 行 (原版页面只有 800x600 舞台)
+  const hudEl = document.getElementById('hud');
+  if (hudEl) hudEl.style.visibility = 'hidden';
+  const bb = document.getElementById('bootBox'), bar = document.getElementById('bootBar'),
+        pct = document.getElementById('bootPct');
+  bb.style.display = 'flex';
+  // 真实预载: 关键 UI/剧情/图标素材
+  const urls = ['assets/boot/arcadebomb.png','assets/boot/title.png','assets/boot/btn_new.png',
+    'assets/boot/btn_continue.png','assets/boot/skill.png','assets/ui/money_panel.png',
+    'assets/ui/sidebar.png','assets/ui/help_board.png','assets/menu/m60.png','assets/menu/canon75.png',
+    'assets/story/fond/G.png','assets/story/perso/MickFace.png','assets/briefing/start_mission.png'];
+  let done = 0;
+  const step = () => {
+    done++;
+    const p = Math.round(done / urls.length * 100);
+    bar.style.width = p + '%';
+    pct.textContent = p + ' %';
+    if (done >= urls.length) setTimeout(showIntro, 400);
+  };
+  urls.forEach(u => { const im = new Image(); im.onload = im.onerror = step; im.src = u; });
+}
+function showIntro() {
+  document.getElementById('bootBox').style.display = 'none';
+  const ib = document.getElementById('introBox');
+  ib.style.display = 'block';
+  ib.onclick = showMenu;                       // 原版点击可跳过演出
+  setTimeout(() => { if (ib.style.display === 'block') showMenu(); }, 2600);
+}
+function showMenu() {
+  const ib = document.getElementById('introBox');
+  if (ib.style.display !== 'block') return;
+  ib.style.display = 'none';
+  document.getElementById('menuBox').style.display = 'flex';
+  document.getElementById('skillPanel').style.display = 'none';
+  document.getElementById('skillHot').style.display = 'none';
+  const hasSave = hasSave();
+  document.getElementById('btnContinue').style.opacity = hasSave ? 1 : 0.35;
+  // 原版 frame_4: iMission>3 时 victims 移出 (开场人质演出只在 1..3 关前展示) — H5 无此层
+  if (typeof G !== 'undefined') G.gcLock = true;
+}
+function menuNewGame() {
+  playSfx('boutonScroll', 0.4);
+  document.getElementById('skillPanel').style.display = 'block';
+  document.getElementById('skillHot').style.display = 'block';
+}
+function menuPickDifficulty(g) {
+  GC = g;                                     // easy 0.75 / normal 1
+  playSfx('selectionUnite', 0.4);
+  const hudEl = document.getElementById('hud');
+  if (hudEl) hudEl.style.visibility = 'visible';
+  document.getElementById('menuBox').style.display = 'none';
+  bootDone = true;
+  G.gcLock = false;
+  briefingShow();                             // 进入第 1 关简报 (对白→开战条)
+}
+function menuContinue() {
+  if (!hasSave()) {
+    const nd = document.getElementById('menuNoData');
+    nd.textContent = 'no data';
+    setTimeout(() => { nd.textContent = ''; }, 1200);
+    return;
+  }
+  playSfx('selectionUnite', 0.4);
+  const hudEl = document.getElementById('hud');
+  if (hudEl) hudEl.style.visibility = 'visible';
+  if (loadGame()) {
+    document.getElementById('menuBox').style.display = 'none';
+    bootDone = true; G.gcLock = false;
+    briefingShow();                           // 进入存档关简报
+  }
+}
+
 // ---------------- 主循环 ----------------
 function tick() {
+  if (!bootDone) return;                      // 开机链(preloader/演出/菜单)期间不推进
   if (G.lost || G.won) return;
   if (G.defeatT > 0 && --G.defeatT === 0) {   // 原版 4s 内战局继续演, 到点 activePerdu
     G.lost = true;
@@ -3396,6 +3478,12 @@ hud();
     const sb = document.getElementById('hStory'), stt = document.getElementById('hStoryTxt');
     if (sb && stt) sb.onclick = (e) => { e.stopPropagation(); stt.textContent = stt.textContent === 'story' ? 'action' : 'story'; };
   }
-  if (BRIEFING_WAVES.includes(G.wave + 1)) briefingShow();
+  // TCS+74: 开局不再自动进简报 — 走开机链 bootChain → intro → 主菜单 → 难度选择
+  bootChain();
+  // 菜单按钮接线
+  document.getElementById('btnNew').onclick = menuNewGame;
+  document.getElementById('btnContinue').onclick = menuContinue;
+  document.getElementById('skillEasy').onclick = () => menuPickDifficulty(0.75);
+  document.getElementById('skillNormal').onclick = () => menuPickDifficulty(1);
 }
 setInterval(tick, 1000 / 30);
