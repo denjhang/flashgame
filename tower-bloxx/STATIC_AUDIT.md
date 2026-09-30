@@ -676,3 +676,14 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 教训固化: 大段搬移必须先画"作用域地图"(深度追踪), 再动刀
 - 全量回归: smoke 20 / tower 7 / city 11 PASS
 - T48 进度 5/6 | 待: 中断续档/8槽
+
+## 94 (2026-10-01) T48-6 J2ME 中断续档落地
+- 取证: d:317 退出分派 e==6→g() 写 quickModeRS / e==5→i() 写 cityModeRS; 进入 f.a(12)==4→h() 无条件恢复, ==3&&k.d→j() (:3103/:3118/:3230/:3235)
+- g:443 写 ~44 标量(e/f/bk/cg/aT..bw)+bi/bj/cF/bh+az/aA/aw/cG/ax/aB/aC/aD/ay/cH+bE[8][8]+cm[2][5]+dc[2][7]; h:618 对称读
+- H5: saveTowerRS/loadTowerRS/clearTowerRS/applyTowerRS 四函数 (game.js saveModel 后), 键 twrblx_quickRS/twrblx_cityRS v:1 JSON
+  - 序列化: stacked/population/lives/currCtr/landingY/blockDx/towerBdx/combo*(4)/dropY/camY/trophyRoof/cleanTower/hs/sway/blocks[n mesh.name,x,y,rz,cx,pop]/cityMode/totalBlocks/currColor/pendingCell
+  - 接线: btnExit→saveTowerRS (d:317); enterQuick→loadTowerRS('quick') 恢复 (h:618 无条件语义); beginBuild→'city' (j:1003); gameOver→clearTowerRS (结算塔不可续, k.d 清位语义)
+  - 网格重建: 按 mesh.name 找模板 clone+scale+rotation 还原; 人物精灵不序列化 (下次落块重生成, J2ME 亦无人物档)
+- 差异记档: J2ME bE[8][8] 槽位塔数据 vs H5 blocks 线性数组—语义等价承载; dc[2][7]/cm[2][5] 为城市放置数据, H5 由 twrblx_cookie sm_towerGridData 承载
+- 验证: node --check ✅ / smoke 24 PASS (新增 RS_KEYS/save/apply/btnExit 写档/恢复 4 断言) / tower 7 ✅ / city 11 ✅
+- T48 进度 6/6 ✅ | 剩余可选项: 8槽并发评估/落点预览子阶段(白点<30ms/橙线<200ms)

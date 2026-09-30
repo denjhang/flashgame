@@ -41,6 +41,11 @@ const src = fs.readFileSync(path.join(h5, 'game.js'), 'utf8');
 check(/const CRANE_DUR = 2600/.test(src), '摆钩周期 CRANE_DUR=2600 (Const.as)');
 check(/const BLOCK_H = 64/.test(src), '积木高 BLOCK_H=64 (Const.as)');
 check(/const NUM_TRIES = 3/.test(src), '3 条命 NUM_TRIES=3 (Const.as)');
+// J2ME 中断续档 (T48-6, House.g:443/h:618/i:828/j:1003)
+check(/const RS_KEYS = \{ quick: 'twrblx_quickRS', city: 'twrblx_cityRS' \}/.test(src), '中断续档 RS_KEYS (quickModeRS/cityModeRS)');
+check(/function saveTowerRS/.test(src) && /function applyTowerRS/.test(src), '中断续档 save/apply 函数');
+check(/saveTowerRS\(\);/.test(src), 'btnExit 写中断档 (House.d:317)');
+check(/applyTowerRS\(rs\)/.test(src), '进入塔模式恢复中断档 (House.h:618/j:1003)');
 // HTML 引用的本地资源必须存在 (防 404 类事故, fx28帧前科)
 {
   const html = fs.readFileSync(path.join(h5, 'index.html'), 'utf8');

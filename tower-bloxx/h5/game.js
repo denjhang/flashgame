@@ -129,6 +129,8 @@ function enterQuick() { // STT_QUICK (GameState.as:93-100): totalBlocks=999, cur
   hud.menuScr.style.display = 'none';
   craneGroup.visible = true;
   startGame();
+  const rs = loadTowerRS('quick');
+  if (rs) { applyTowerRS(rs); clearTowerRS('quick'); } // House.h:618 中断续档
 }
 function enterCity() { // STT_CITY (GameState.as:86-92)
   G.hs = { hiPop: 0, hiBlocks: 0 };            // highScore.startGame(CITY) session 复位
@@ -251,6 +253,48 @@ function restoreModel() { // GameModel.restoreModel:82-99
 }
 function saveModel() { // GameModel.saveModel:101-108
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.save)); } catch (e) {}
+}
+
+// ---- J2ME 中断续档: House.g:443 写 quickModeRS / h:618 读; i:828 写 cityModeRS / j:1003 读 ----
+// 退出分派 d:317: e==6 塔模式 g() / e==5 城市 i(); 进入时 f.a(12)==4→h() 无条件恢复 / ==3&&k.d→j()
+const RS_KEYS = { quick: 'twrblx_quickRS', city: 'twrblx_cityRS' };
+function saveTowerRS() {
+  if (G.over || (G.stacked === 0 && !G.pendingCell)) return;   // 结算后/空塔不存 (对号 k.d 门控语义)
+  const d = {
+    v: 1, cityMode: G.cityMode, totalBlocks: G.totalBlocks, currColor: G.currColor, pendingCell: G.pendingCell,
+    stacked: G.stacked, population: G.population, lives: G.lives,
+    currCtr: G.currCtr, landingY: G.landingY, blockDx: G.blockDx, towerBdx: G.towerBdx,
+    comboMult: G.comboMult, comboT: G.comboT, comboBank: G.comboBank, comboMax: G.comboMax,
+    dropY: G.dropY, camY: G.camY, trophyRoof: G.trophyRoof, cleanTower: G.cleanTower, hs: G.hs,
+    sway: G.sway,
+    blocks: G.blocks.map(b => ({ n: b.mesh.name, x: b.mesh.position.x, y: b.mesh.position.y, rz: b.mesh.rotation.z, cx: b.cx, pop: b.pop })),
+  };
+  try { localStorage.setItem(G.cityMode ? RS_KEYS.city : RS_KEYS.quick, JSON.stringify(d)); } catch (e) {}
+}
+function loadTowerRS(mode) {
+  try {
+    const d = JSON.parse(localStorage.getItem(RS_KEYS[mode === 'city' ? 'city' : 'quick']) || 'null');
+    return (d && d.v === 1) ? d : null;
+  } catch (e) { return null; }
+}
+function clearTowerRS(mode) { try { localStorage.removeItem(RS_KEYS[mode === 'city' ? 'city' : 'quick']); } catch (e) {} }
+function applyTowerRS(d) { // h:618/j:1003: 全玩法状态回填 + 塔块网格重建
+  G.cityMode = d.cityMode; G.totalBlocks = d.totalBlocks; G.currColor = d.currColor; G.pendingCell = d.pendingCell || null;
+  G.stacked = d.stacked; G.population = d.population; G.lives = d.lives;
+  G.currCtr = d.currCtr; G.landingY = d.landingY; G.blockDx = d.blockDx || 0; G.towerBdx = d.towerBdx || 0;
+  G.comboMult = d.comboMult; G.comboT = d.comboT; G.comboBank = d.comboBank; G.comboMax = d.comboMax;
+  G.dropY = d.dropY; G.camY = d.camY; G.trophyRoof = d.trophyRoof; G.cleanTower = d.cleanTower;
+  G.sway = d.sway || { recent: [0, 0, 0], idx: 0, adj: 0.5, timer: 0 };
+  G.hs = d.hs || { hiPop: 0, hiBlocks: 0 };
+  for (const bd of d.blocks) {
+    const tpl = templates.find(t => t.name === bd.n) || templates[0];
+    const mesh = tpl.clone(); mesh.scale.setScalar(tpl.userData.s);
+    mesh.rotation.z = bd.rz || 0;
+    mesh.position.set(bd.x, bd.y, 0);
+    towerGroup.add(mesh);
+    G.blocks.push({ mesh, cx: bd.cx, pop: bd.pop });
+  }
+  addHud();
 }
 
 // ---- 资产载入 ----
@@ -602,7 +646,11 @@ function cityCellClick(col, row) {
   // buildTower (CityMap.as:505-513): totalBlocks=(type+1)*10, currColor=type
   G.totalBlocks = (G.selectedType + 1) * 10;
   G.currColor = G.selectedType;
-  const beginBuild = () => { hud.city.style.display = 'none'; startGame(); };
+  const beginBuild = () => {
+    hud.city.style.display = 'none'; startGame();
+    const rs = loadTowerRS('city');
+    if (rs) { applyTowerRS(rs); clearTowerRS('city'); }   // House.j:1003 中断续档
+  };
   if (!showTip('place_tower', TIP_TEXTS.place_tower, beginBuild)) beginBuild(); // CityMap.as:140/167
 }
 // 状态条=消息队列 (DefineSprite_648 statusBar: queueMessage 顺序播, forceMessage 插队;
@@ -752,6 +800,7 @@ function startGame() {
 
 function gameOver(won) {
   G.over = true;
+  clearTowerRS(G.cityMode ? 'city' : 'quick');  // 结算后塔不可续 (k.d 门控清位)
   hud.msg.textContent = won ? 'Tower complete!' : 'Too many blocks missed!'; // Const.MSG_GAME_WON/MSG_GAME_LOST
   hud.msg.style.color = won ? '#ffd700' : '#ff6b6b';
   hud.msg.style.display = 'block';
@@ -1292,6 +1341,7 @@ hud.btnSound.onclick = e => { e.stopPropagation(); G.soundOn = !G.soundOn; hud.b
   localStorage.setItem('twrblx_sound', G.soundOn ? '1' : '0'); sndClick(); }; // STT_SOUND_TOGGLE
 hud.btnExit.onclick = e => { // BTN_EXIT_QUICK (GameState STT_EXIT_PLAY → 菜单; 菜单未实现, 先回模式入口)
   e.stopPropagation();
+  saveTowerRS();                               // House.d:317 退出分派 → g()/i() 中断存档
   location.href = location.pathname + (G.totalBlocks !== 999 ? '' : '?mode=tower');
 };
 
