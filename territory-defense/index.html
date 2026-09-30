@@ -146,6 +146,9 @@
                display:none; z-index:30; cursor:pointer; }
   #introHelp.show { display:block; }
   #introHelpImg { display:block; max-width:90%; }
+  /* protecthint (1166): 原版屏位 (641.9,1.95), 指基地所在北缘 */
+  #protectHint { position:absolute; left:642px; top:2px; display:none; z-index:30; pointer-events:none; }
+  #protectHint.show { display:block; }
   /* victims 黑幕 (762): dpt113 位于地图之上/菜单之下, 开波时 35帧@24fps ≈1.5s 淡出 */
   #fadeCurtain { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
                  background:#000; z-index:20; pointer-events:none; opacity:0; }
@@ -258,6 +261,10 @@
     <div id="introHelp">
       <img id="introHelpImg" src="assets/ui/conseil_intro_help.png" width="291" height="179" alt="">
     </div>
+    <!-- 原版 protecthint (chid1166, 108x25 "protect this area"): m1 显示于舞台 (642,2) -->
+    <div id="protectHint">
+      <img src="assets/ui/protect_hint.png" width="108" height="25" alt="">
+    </div>
     <button id="loadBtn" title="读取存档继续">▶ CONTINUE</button>
     <!-- 原版 helpBoard (DefineSprite_1103, 463x283): helpB(1046) on(press) 置 (400,300) -->
     <div id="helpBoard">
@@ -291,7 +298,7 @@
     <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
   </div>
 </div>
-<script src="data.js?v=1790600061"></script>
-<script src="game.js?v=1790600061"></script>
+<script src="data.js?v=1790600062"></script>
+<script src="game.js?v=1790600062"></script>
 </body>
 </html>

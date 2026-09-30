@@ -27,6 +27,7 @@
 
 ## 四、已完成（摘要，详见 deobf/PROGRESS.md N+1..）
 
+- TCS+3: protecthint(1166) "protect this area" 原位(642,2)上图接线
 - N+105/TCS+2: conseilIntroHelp(1154) 第 1 关操作提示框上图接线
 - N+104: 极端存档边界（0 塔/满解锁/末关读档+200 帧 sim 无异常）
 

@@ -1423,7 +1423,17 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
+// ---- protecthint (1166, TCS+3): 原版屏位 (642,2) m1 显示 ----
+console.log("--- protecthint ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8'), hj = fsx.readFileSync('index.html', 'utf8');
+  console.log("1166 素材+原位接线 (m1 显示/开波收)=" +
+    (fsx.existsSync('assets/ui/protect_hint.png') &&
+     hj.includes('id="protectHint"') && hj.includes('left:642px') &&
+     gj.includes("protectHint") && gj.includes("G.wave + 1 === 1")));
+}
+// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
 console.log("--- 极端存档 ---");
 {
   // 手工放置一个极端 cookie: 0 塔, iMission=44, iUnlock=5, 低钱低利率
