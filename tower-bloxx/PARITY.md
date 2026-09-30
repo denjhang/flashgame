@@ -11,7 +11,7 @@
 > 已完成 ~10），每方法一行差异记录。
 > **T48.【修】差异表逐项修 H5（J2ME 语义优先）: 摆钩✅/摇摆✅/连锁✅/瞄准鸟✅/天空✅/中断续档✅(N94: g:443/h:618/i:828/j:1003 → twrblx_quickRS/cityRS, btnExit 写档+enterQuick/beginBuild 恢复+gameOver 清档)。惊慌人群✅(N+60: t:2098 panicPeople, bE[8][12] 定性=8槽惊慌人群非下落块)/落地角标✅(N+60: h:3390 landFxSpawn, r0id37 三帧星)。T48 全部关闭 ✅
 >
-> **待办池**：l0-l6 语言包（本地化暂缓）。MIDI 短音效已关 (N+61)。
+> **待办池**：l0-l6 语言包 ✅ N+63 启用 (nokia_v1011/lang.zh-CN 88 条全量接入, 界面全中文)。MIDI 短音效已关 (N+61)。待查: intro 弹窗实机自动关闭时序。
 
 盘点源：`scripts/scripts/__Packages/bz/esg/game/*.as`（Const/GameState/GameModel/GameSprites/
 CityMap/Tower/Crane/Tipper/ComboTimer/Person/HighScore）、时间轴脚本（paperdefense_fla）、

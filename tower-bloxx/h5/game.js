@@ -24,7 +24,7 @@ const TOWER_GRID_TOWERS = 5, TOWER_GRID_PARAMS = 3;              // Const.TOWER_
 const CITY_MAP_CELL = 52;                                        // Const.CITY_MAP_CELL_W/H
 const CITY_LEVEL_LIMITS = [0,75,150,250,400,600,800,1000,1400,1800,2200,3000,4000,5000,6500,8000,9500,11500,14000,17000,19000]; // Const
 const TOWER_UNLOCK_LIMITS = [0,3,6,10];                          // Const
-const CITY_TYPES = ['Tiny Town','Small Town','Town','Small City','Medium City','Big City','Capital','Metropolis','Megalopolis'];
+const CITY_TYPES = ['小小镇','小镇','镇','小城市','中型城市','大都市','首都','特大都市','特大都市'];  // ZH[70-77]
 const TOWER_TYPE_NAMES = ['Residential Tower','Commercial Tower','Office Tower','Luxury Tower']; // Const.TOWER_TYPES
 const TOWER_TYPE_COLORS = ['#4a90d9','#d94a4a','#7aa04a','#d9c04a'];
 const SWAY_MAX_ANGLE = 1;       // Const.SWAY_MAX_ANGLE (度, GameModel:239 上限)
@@ -74,20 +74,21 @@ scene.add(sun);
 
 
 // ---- 菜单流 (GameState.as:53-257 状态机; GameSprites.makeMenuSprites:341-355 按钮坐标) ----
-const TIP_TEXTS = { // Const.TIP_INSTR_QUICK/BUILD/INTRO/ABOUT (Const.as:74-82)
-  quick: "In the Quick Game mode your goal is to build as high and as stable a building as possible. At the bottom of the screen you'll see the current height of the building, how many tries you have left, and the current population of the building. The higher your building the more people you'll get for each placed block. The amount of people also depends on how well the block is placed. Centering a block perfectly on top of another will fill the combo meter. Placing more blocks before the meter empties will add to the combo, and perfect drops will refill the meter. Every block that's placed while a combo is active will increase the combo score. The combo score is added to the population score after the combo ends.",
-  build: "In Build City mode your goal is to create a thriving Megalopolis! Build towers and place them wisely in the city grid to reach the goal. Increasing your city's population and level will unlock new building types. In tower building mode you are aiming to reach a target height. The better you place the roof the more bonus you'll get. You have three chances to finish the tower, if you fail, the building can still be placed in the city without a roof.",
-  intro: "Left click anywhere on the screen with your mouse or press the spacebar or down arrow on your keyboard to drop the apartment blocks. You're allowed 3 misses before the construction is halted. The better you build the more people will move in. Good luck!",
-  about: "Tower Bloxx(TM) v.1.0. Copyright 2005-2007 Digital Chocolate, Inc. All Rights Reserved. www.DigitalChocolate.com. Flash version developed by Zero G Games (www.zeroggames.com)",
-  combo: "You started a combo by centering a block precisely on the one below it! As long as the combo meter at the top stays active you'll get more people for each block placed! Precise drops will refill the combo meter. If you miss a drop, the combo will end automatically",
-  bought_land: "You've bought yourself a piece of land to fulfill your dream of building a thriving metropolis!",
-  new_tower_type0: "Your investors have supplied a crane and building materials for you to create blue Residential Towers!",
-  click_tower: "Select the blue Residential Tower on the left by clicking it with your mouse.",
-  place_tower: "Place the tower on the map with your mouse on any of the squares on the city grid highlighted in the same color as the tower.",
-  city_meter: "The meter on top shows the current city population.",
-  city_line: "The orange horizontal line above the city map shows how many people you need for the next city level."
-};
-// ---- 提示弹窗 (GameSprites.showTip:28-46): tipFlags 门控+持久化, 弹窗期 delayNextBlock(-1),
+const ZH = ["您的目标是建造一座特大都市。要达到此目标，就需要建造摩天楼并将它们放在城市地图中适当的位置。增加城市的人口和提升城市级别可解锁新的摩天楼类型。您可在屏幕上方看到当前城市级别和人口。右上角显示您刚建起的摩天楼的人口以及它将取代的建筑。\n\n您建造摩天楼是为了达到目标高度。目标高度显示在屏幕左下方。您的楼顶安放得越好，得到的奖励越多。您有三次机会完成一座摩天楼，若失败了，城市中就会出现一座没有楼顶的摩天楼。\n\n一座楼建造完成后，您可以从城市地图中选择一个有闪亮瓦片的位置，按%U键放置高楼。可用新摩天楼替换旧的摩天楼。废弃的摩天楼可在左侧的废弃建筑堆中进行摧毁。","尽您所能来建造高入云端而又稳如泰山的摩天楼。\n\n您可在屏幕下方看到摩天楼高度，所剩机会次数及摩天楼中的当前人口。\n\n按%U释放建筑块。您建造得越高，每个建筑块中的居民越多。居民的多少还取决于建筑块的稳固程度。若能严丝合缝地堆叠建筑块，则可增加组合计时器中的时间。在时间用完之前堆叠的建筑块多也可增加时间，堆叠位置准确则还可额外增加时间。在计时器中的时间用完之前，每释放一个建筑块都可增加组合得分。在组合计时结束时，组合得分将增加到人口得分中。","开始新游戏会结束您的当前游戏。确认？","现在，静下心来仔细考虑一下，争取达到我们的终极目标：打造一座%U人口的城市。","您买了一块土地，要圆一个打造繁华大都市的梦。","您的投资商提供了一台起重机以及建筑材料，供您建造住宅摩天楼。","屏幕右上角的对比图标显示了您的新建筑以及要翻盖建筑中的居民数。","按%U键选择左侧的蓝色住宅摩天楼。","已到达第一个里程碑！超过%U居民已在您的城市安家落户。","城市上方橙色的地平线显示下一个城市级别所需的人口。","已有超过%U的市民在此安家落户！您的城市在国内新闻中广受赞誉。","已有超过%U的市民在此安家落户！您的城市在国内民意测验中已成为最适合居住的地方。","您的城市的居民为您建造了雕像，以感谢您为城市作出的贡献。恭喜您！","恭喜您！在您精心的建设和科学的管理下，您的城市已经达到了最高级别。衷心感谢您的参与！","您收到的税金源源不断，现在有资金建造新类型的摩天楼了！使用%0U和%1U在蓝色住宅摩天楼和红色商业摩天楼之间选择。","不同类型的楼对建筑位置有特定要求。红色摩天楼只能建在蓝色摩天楼的后面。闪亮的瓦片表示了它们的许可建造位置。","现在，您可以建造绿色的办公摩天楼了！绿色摩天楼必须毗邻红色和蓝色的摩天楼。","恭喜您！现在，您有资金建造最高的建筑了。黄色的豪华摩天楼需要建筑在红色、蓝色和绿色摩天楼都已存在地方。","上方的计时器显示当前的城市人口。您的主要目标是通过20个里程碑尽力建造一座人口密集的城市。可从左上角的里程碑计算器查看进展。","将摩天楼放在地图上的任何位置。使用%0U、%1U、%2U、%3U键移动摩天楼，用%4U键将其放置到位。","%U有特别的楼顶可用。如果您建造了很棒的摩天楼，会得到特别的楼顶。","按%0U键释放建筑块。您可以有%1U次失误，此后建筑将被取消。您建造得越好，到此安家落户的人越多。祝您好运！","太棒了！您精湛的建筑技术为您赢得了奖励楼顶。奖励楼顶将为它所覆盖的摩天楼带来奖励人口。","建造一座摩天楼，让尽可能多的人居住在里面。按%0U释放建筑块。只允许有%1U次失误。","您释放的建筑块与下面的那块严丝合缝。只要上方组合计时器中的时间未用完，您就能让更多的人住进您堆起的建筑块。建筑块位置放置准确可增加组合计时器中的时间。","开始新游戏会删除您的当前游戏，并重新设置您的城市的进程和人口得分。","开始新游戏会删除您的当前游戏。继续？","可用新摩天楼替换旧的摩天楼。废弃的摩天楼可以在左侧的废弃建筑堆中进行摧毁。","重新设定城市","重新设定快速游戏","都市摩天楼","返回","取消","清除","退出","最高分","游戏规则说明","功能表","否","确认","新游戏","继续建设城市","继续快速游戏","选择","是","高度","最高成绩：","姓名","人口","摩天楼高度","按%U键拆除当前建筑","按%U键将摩天楼放在此处","您不能把摩天楼放在此处","可放在任何位置","%0U\n挑战：%1U人口","让%U市民解锁此摩天楼类型","没有地方可以建造这种类型的摩天楼","所需的临近建筑\n蓝色和红色摩天楼","人口减少了%U","人口增加了%U","新建筑对总体人口数\n没有影响","所需的临近建筑：\n蓝色摩天楼","所需的临近建筑\n蓝色、红色和绿色摩天楼","建造城市","快速游戏","您的%U中所有区域都已经占满。市民专门为您安排了一次游行。","超过%U居民已经在您的城市安家落户","恭喜您！您的%0U现在是%1U。","您的城市现已具备了一个小小镇的规模","您的机会已用完，您无法达到目标高度了","小小镇","小镇","镇","小城市","中型城市","大都市","首都","特大都市","最长组合时间：%U","摩天楼高度：%U","新记录！","人口：%U","输入姓名","商业摩天楼","办公摩天楼","豪华摩天楼","住宅摩天楼","0"];
+const zh = i => ZH[i];
+const TIP_TEXTS = { // 文案全部取自 J2ME 中文语言包 lang.zh-CN (nokia_v1011) — 都市摩天楼
+  quick: zh(24),
+  build: zh(0),
+  intro: zh(1).replace('%U', '鼠标左键'),
+  about: '都市摩天楼(TM) v1.0　版权所有 2005-2007 Digital Chocolate, Inc. 保留所有权利。 www.DigitalChocolate.com',
+  combo: zh(24),
+  bought_land: zh(4),
+  new_tower_type0: zh(5),
+  click_tower: zh(7).replace('%U', '鼠标'),
+  place_tower: zh(19).replace('%0U', '鼠标').replace('%1U', '移动').replace('%2U', '').replace('%3U', '').replace('%4U', '点击'),
+  city_meter: zh(18),
+  city_line: zh(9)
+};// ---- 提示弹窗 (GameSprites.showTip:28-46): tipFlags 门控+持久化, 弹窗期 delayNextBlock(-1),
 // OK 后 delayNextBlock(100) (GameSprites.hideTip:60-63) ----
 function showTip(type, text, after) {
   if (G.save.tipFlags[type]) return false;
@@ -106,8 +107,18 @@ function showTip(type, text, after) {
   };
   return true;
 }
-function showTitle() { // STT_TITLE
+function showTitle() { // STT_TITLE = J2ME a(Graphics):1487 标题屏 (绿底+id45 logo+云+气球)
   craneGroup.visible = false;
+  hud.titleScr.innerHTML =
+    '<div class="j2scr">' +
+
+    '<img src="./assets/j2me_cloud_s.png" style="position:absolute;left:15px;top:60px">' +
+    '<img src="./assets/j2me_cloud_b.png" style="position:absolute;left:240px;top:90px">' +
+    '<img src="./assets/j2me_cloud_s.png" style="position:absolute;left:270px;top:420px">' +
+    '<img src="./assets/j2me_balloon.png" style="position:absolute;left:50%;top:240px;transform:translateX(-50%);width:360px">' +
+    '<div style="position:absolute;left:0;right:0;top:120px;text-align:center;font-size:30px;color:#123;font-weight:bold;letter-spacing:6px">' + zh(30) + '</div>' +
+    '<div style="position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:13px;color:#234">' + zh(43) + '</div>' +
+'</div>';
   hud.titleScr.style.display = 'block';
   playSong('sng_title');
   hud.titleScr.onclick = () => { clearTimeout(titleMsgT); hud.titleScr.onclick = null; showMenu(); };
@@ -140,16 +151,16 @@ function enterCity() { // STT_CITY (GameState.as:86-92)
   playSong('sng_city');
 }
 function showSub(html) { // 子页容器 (Instructions/About/HighScores)
-  hud.menuSub.innerHTML = '<span class="close">✕ close</span>' + html;
+  hud.menuSub.innerHTML = '<span class="close">✕ 返回</span>' + html;
   hud.menuSub.style.display = 'block';
   hud.menuSub.querySelector('.close').onclick = () => { hud.menuSub.style.display = 'none'; };
 }
 function showInstructions(page) { // STT_INSTRUCTIONS + INSTR fork (GameSprites.as:322-330)
-  const fork = '<h3>Instructions</h3>' +
-    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="quick">Quick Game</div>' +
-    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="build">Build City</div>' +
-    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="about">About</div>';
-  if (page) showSub('<h3>Instructions — ' + page + '</h3><p>' + TIP_TEXTS[page].replace(/\r\r|\r/g, '<br><br>') + '</p>');
+  const fork = '<h3>游戏规则说明</h3>' +
+    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="quick">快速游戏</div>' +
+    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="build">建造城市</div>' +
+    '<div class="mbtn" style="position:static;display:block;margin:8px 0;padding:6px;border:1px solid #456" data-p="about">关于</div>';
+  if (page) showSub('<h3>游戏规则说明 — ' + page + '</h3><p>' + TIP_TEXTS[page].replace(/\r\r|\r/g, '<br><br>') + '</p>');
   else {
     showSub(fork);
     hud.menuSub.querySelectorAll('[data-p]').forEach(el => {
@@ -184,15 +195,15 @@ function showHighScores() { // STT_HIGHSCORES → drawDataSet 三表
   const hs = hsLoad();
   const tbl = (title, rows, unit) => '<h3>' + title + '</h3>' +
     rows.map((r, i) => '<div>' + (i + 1) + '. ' + hsEsc(r.name) + ' — ' + unit + ' ' + r.v + '</div>').join('');
-  showSub(tbl('City Population', hs.CITY, 'Pop') +
-    tbl('Quick Game Population', hs.QUICK, 'Pop') +
-    tbl('Quick Game Height', hs.QUICK2, 'Blocks'));
+  showSub(tbl('城市人口', hs.CITY, '人口') +
+    tbl('快速游戏人口', hs.QUICK, '人口') +
+    tbl('快速游戏高度', hs.QUICK2, '高度'));
 }
 function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET; confirmation_reset_spr(444) 面板
   hud.summary.className = 'reset';
-  hud.summary.innerHTML = '<div class="t">Reset city?</div>' +
-    '<div>Reset the progress and population score in your city?</div>' +
-    '<div style="margin-top:14px"><div class="mbtn" data-r="1" style="display:inline-block;margin:8px;padding:6px 14px;background:#2a6b2a;border-radius:6px;color:#fff;cursor:pointer">Yes</div>' +
+  hud.summary.innerHTML = '<div class="t">重新设定城市？</div>' +
+    '<div>开始新游戏会删除您的当前游戏，并重新设置您的城市的进程和人口得分。</div>' +
+    '<div style="margin-top:14px"><div class="mbtn" data-r="1" style="display:inline-block;margin:8px;padding:6px 14px;background:#2a6b2a;border-radius:6px;color:#fff;cursor:pointer">是</div>' +
     '<div class="mbtn" data-r="0" style="display:inline-block;margin:8px;padding:6px 14px;background:#888;border-radius:6px;color:#fff;cursor:pointer">No</div></div>';
   hud.summary.style.display = 'block';
   hud.summary.querySelectorAll('[data-r]').forEach(el => {
@@ -454,8 +465,15 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   startGame(); // 先完成状态/HUD 初始化
   if (CITY_MODE) { stopGameVisual(); showCity(); playSong('sng_city'); }        // STT_CITY
   else if (TOTAL_BLOCKS !== 999) { /* ?mode=tower 直入 */ }
-  else if (document.getElementById('splashScr')) { // STT_SPLASH: logo 2s → STT_TITLE (时间轴自动)
+  else if (document.getElementById('splashScr')) { // STT_SPLASH = J2ME g():3363 (白底+id09 DCH logo+橙进度条)
+    hud.splashScr.innerHTML =
+      '<div class="j2scr" style="background:#fff">' +
+      '<img src="./assets/j2me_logo_dch.png" style="position:absolute;left:50%;top:255px;transform:translateX(-50%);width:158px">' +
+      '<div style="position:absolute;left:60px;top:300px;width:240px;height:15px;background:#140b2c;padding:1px">' +
+      '<div id="j2loadbar" style="width:0%;height:13px;background:#f89100;transition:width 1.4s"></div></div>' +
+      '</div>';
     hud.splashScr.style.display = 'block';
+    requestAnimationFrame(() => { const bar = document.getElementById('j2loadbar'); if (bar) bar.style.width = '100%'; });
     setTimeout(() => { hud.splashScr.style.display = 'none'; showTitle(); playSong('sng_title'); }, 2000);
   }
   else { stopGameVisual(); showTitle(); playSong('sng_title'); }                // STT_TITLE
@@ -539,7 +557,7 @@ function updateCityLevelAndUnlockedTypes() { // GameModel.as:281-293 + TOWER_UNL
     queueCityTip('More than ' + CITY_LEVEL_LIMITS[lv] + ' citizens have moved in!  (Lv.' + lv + ')');
     // 升格称号 (CITY_PROMOTION_LEVELS → CITY_TYPES)
     for (let k = 0; k < CITY_PROMOTION_LEVELS.length; k++) {
-      if (CITY_PROMOTION_LEVELS[k] === lv && k > 0) queueCityTip('Your city is now a ' + CITY_TYPES[Math.min(8, k - 1)] + '!');
+      if (CITY_PROMOTION_LEVELS[k] === lv && k > 0) queueCityTip(zh(67).replace('%0U', CITY_TYPES[Math.min(8, k - 1)]).replace('%1U', CITY_TYPES[Math.min(8, k - 1)]));  // ZH[67]
     }
   }
 }
@@ -695,7 +713,7 @@ function cityCellClick(col, row) {
     return;
   }
   if (G.selectedType < 0) return;
-  if (!isValid(col, row, G.selectedType)) { showCityStatus("You can't place the tower here."); return; } // STATUS_PLACE_TOWER3
+  if (!isValid(col, row, G.selectedType)) { showCityStatus(zh(52)); return; } // STATUS_PLACE_TOWER3 → ZH[52]
   const oldPop = getTowerPop(col, row);
   if (oldPop > 0) showCityStatus('New: ? / Old: ' + oldPop + '  (TIP_CITY_COMPARE)'); // 替换对比
   G.pendingCell = { col, row };
@@ -735,9 +753,9 @@ function finishCityTower(won) {
   const before = G.sm_totalPopulation;
   G.sm_totalPopulation = calcCityPop();                                      // :447
   const diff = G.sm_totalPopulation - before;
-  showCityStatus(diff > 0 ? 'Population increased by ' + diff + ' citizens!'
-    : diff < 0 ? 'Population decreased by ' + diff + ' citizens.'
-    : 'The new building had no effect on overall population.');              // STATUS_POP_INC*
+  showCityStatus(diff > 0 ? zh(59).replace('%U', diff)
+    : diff < 0 ? zh(58).replace('%U', -diff)
+    : zh(60).replace('\n', ''));              // STATUS_POP_INC*
   playMidiJingle(83);                                                        // -2147483565 放置 jingle
   spinReels();                                                               // :463
   updateCityLevelAndUnlockedTypes();
@@ -858,7 +876,7 @@ function startGame() {
 function gameOver(won) {
   G.over = true;
   clearTowerRS(G.cityMode ? 'city' : 'quick');  // 结算后塔不可续 (k.d 门控清位)
-  hud.msg.textContent = won ? 'Tower complete!' : 'Too many blocks missed!'; // Const.MSG_GAME_WON/MSG_GAME_LOST
+  hud.msg.textContent = won ? '摩天楼建成！' : zh(69);      // 败=ZH[69] 机会用完 // Const.MSG_GAME_WON/MSG_GAME_LOST
   hud.msg.style.color = won ? '#ffd700' : '#ff6b6b';
   hud.msg.style.display = 'block';
   // GameState.as:128: 胜利 fanfare 按 trophyRoof 分 med/good; 失败 bad (:122)
@@ -899,13 +917,13 @@ function showSummary() {
     hs.QUICK2.length < 10 || G.hs.hiBlocks > hs.QUICK2[hs.QUICK2.length - 1].v)) ? { name: '' } : null;
   G.save.sm_totalPopulation = Math.max(G.save.sm_totalPopulation, G.population); // 城市总人口占位(城市模式接入后为累计值)
   saveModel();
-  const line = (label, v, rec) => label + v + (rec ? '  New record!' : '');        // Const.TIP_SUMMARY_REC
+  const line = (label, v, rec) => label + v + (rec ? '  ' + zh(80) : '');   // 新记录！        // Const.TIP_SUMMARY_REC
   hud.summary.innerHTML =
     '<div class="t">' + hud.msg.textContent + '</div>' +
-    '<div>' + line('Population: ', G.population, G.population >= G.records.populationRecord && G.population > 0) + '</div>' +
-    '<div>' + line('Tower height:  ', G.stacked, G.stacked >= G.records.blockRecord && G.stacked > 0) + '</div>' +
-    '<div>' + line('Longest combo: ', G.comboMax, G.comboMax >= G.records.comboRecord && G.comboMax > 0) + '</div>' +
-    '<div class="ok">Click here to play again</div>';                               // Const.MSG_RESTART
+    '<div>' + line(zh(81).replace('%U', '') + ' ', G.population, G.population >= G.records.populationRecord && G.population > 0) + '</div>' +
+    '<div>' + line(zh(79).replace('%U', '') + ' ', G.stacked, G.stacked >= G.records.blockRecord && G.stacked > 0) + '</div>' +
+    '<div>' + line(zh(78).replace('%U', '') + ' ', G.comboMax, G.comboMax >= G.records.comboRecord && G.comboMax > 0) + '</div>' +
+    '<div class="ok">' + zh(39) + '</div>';                               // 确认=ZH[39]    '<div class="ok">Click here to play again</div>';                               // Const.MSG_RESTART
   G.blockTime = -1;                          // GameSprites.showSummary:35 delayNextBlock(-1)
   hud.summary.style.display = 'block';
   hud.summary.querySelector('.ok').onclick = () => {
@@ -1465,6 +1483,10 @@ function toggleMidi() {
   }
 }
 G.midiOn = localStorage.getItem('twrblx_midi') === '1';
+{ // 菜单音乐项中文态同步 (功能表=ZH[37])
+  const el = document.getElementById('mMidi');
+  if (el) { const sync = () => el.textContent = '音乐: ' + (G.midiOn ? '开' : '关'); sync(); el.addEventListener('click', () => setTimeout(sync, 0)); }
+}
 hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4;
   localStorage.setItem('twrblx_music', G.musicOn ? '1' : '0'); sndClick();
   if (!G.musicOn) stopSong(); else playSong('sng_tower'); };  // STT_MUSIC_TOGGLE toggleSongs

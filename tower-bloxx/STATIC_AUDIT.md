@@ -722,3 +722,19 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   renderCity 首行挂载, offscreen canvas toDataURL → hud.city background-image bottom; stub 守卫 (fetch/toDataURL)
 - 勘误: 表行 w:1224 "私有检查 b.a()" 系误读 — b.a() 只是函数首行音乐停, 主体是天际线装载
 - 验证: node --check ✅ / smoke 29 PASS (+1) / tower ✅ / city ✅
+
+## 98 (2026-10-01) N+63: 中文语言包破译 + 全界面中文化 + J2ME 三屏换皮 (浏览器实机验证)
+- lang.zh-CN 破译 (nokia_v1011): 头 2B=0x00BC→188B 段(94x u16 偏移表)→其后为 [u16 len][UTF-8] 串流, 88 条精确消费全文件;
+  dc_v1507/lang_*.bin 为另一布局 (skipBytes(7)+readUTF+153x int32 偏移, g.java f():166-178)
+- 文案对号: 都市摩天楼(30)/快速游戏(64)/建造城市(63)/最高分(35)/游戏规则说明(36)/重新设定城市(28)/继续快速游戏(42)/
+  高度(45)/人口(48)/新记录！(80)/机会用完(69)/城市等级 70-77/楼型 83-86/提示 0,1,4,5,7,9,18,19,24 等
+- H5: game.js 嵌 ZH[88]+zh(), TIP_TEXTS/结算/状态条/CITY_TYPES/菜单/高分表/确认框全中文化;
+  index.html 三屏换皮: splash=白底+id09 DCH logo+橙进度条 (g():3363), title=绿底 0x9ACC2A(:1487)+云 id69/70+气球 logo id11(240x195)+ZH[30],
+  menu=中文文字列表 (.mitem); .j2scr=240x320 x1.5 竖屏容器
+- 勘误: id45 实为 23x29 小精灵 (此前 Read 放大渲染误判为标题 logo); id11=气球+TOWER BLOXX 椭圆 logo 本体 (240x195, 原版锚点 F/2 底部裁切一致)
+- 资产: h5/assets/j2me_{logo_dch,balloon,cloud_b,cloud_s}.png (id09/id11/id69/id70 原字节); lang.zh-CN.json 存档
+- 实机验证 (内置浏览器 127.0.0.1:8090): splash→title(绿底+都市摩天楼+气球)→menu(中文列表)→快速游戏(3D 块/HUD/渐变天空)→中文提示弹窗 ✓
+- 修复: showSummary 'Longest combo' 行拼接断裂 / zh(60) 
+ 转义 / TIP_TEXTS 闭括号 (ESM 检查引入: cat | node --input-type=module --check)
+- 验证: node --check ✅ / ESM check ✅ / smoke 29 PASS / tower ✅ / city ✅
+- 待查: intro 弹窗在实机点击流中曾被自动关闭 (文本/flag 正确落盘, OK 流程正常) — 疑 titleMsgT 时序, 下轮排查

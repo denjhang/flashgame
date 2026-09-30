@@ -8,6 +8,7 @@
   body{margin:0;height:100vh;display:flex;justify-content:center;align-items:center;background:#202020;}
   /* FluidLayout 对号: Stage.scaleMode=noscale + align=C → 舞台恒居中 (FluidLayout.as:9-11,29-33) */
   #stage{position:relative;width:640px;height:480px;box-shadow:0 0 40px #000;}
+  .j2scr{position:absolute;left:140px;top:0;width:360px;height:480px;overflow:hidden;}  /* J2ME 240x320 ×1.5 */
   canvas{display:block;}
   #hud{position:absolute;inset:0;pointer-events:none;color:#fff;text-shadow:1px 1px 2px #000;}
   #pop{position:absolute;top:40px;right:52px;font-size:22px;letter-spacing:2px;}
@@ -67,15 +68,12 @@
   #cityHint{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;color:#234;opacity:.85;}
   #hint{position:absolute;bottom:8px;width:100%;text-align:center;font-size:13px;opacity:.7;}
   /* 菜单流: 467 title / 473 menu 底图 (读图 648x480 与 640x480, cover 铺满) */
-  #titleScr{position:absolute;inset:0;display:none;cursor:pointer;
-    background:url('./assets/flash/fx/DefineSprite_467_title_spr/1.png') center/cover;}
-  #splashScr{z-index:20;position:absolute;inset:0;display:none;cursor:default;background:
-    url('./assets/flash/fx/DefineSprite_828_splash_spr/1.png') center/cover;background-color:#fff;}
-    #menuScr{position:absolute;inset:0;display:none;
-    background:url('./assets/flash/fx/DefineSprite_473_menu_spr/1.png') center/cover;}
-  #menuScr .mbtn{position:absolute;width:299px;height:67px;cursor:pointer;
-    background-repeat:no-repeat;background-size:299px 67px;}
-  #menuScr .mbtn:hover{filter:brightness(1.2);}
+  #titleScr{position:absolute;inset:0;display:none;cursor:pointer;background:#9acc2a;}
+  #splashScr{z-index:20;position:absolute;inset:0;display:none;cursor:default;background:#fff;}
+    #menuScr{position:absolute;inset:0;display:none;background:#9acc2a;}
+  .mitem{position:relative;margin:14px auto;width:240px;padding:10px 0;text-align:center;
+    font-size:20px;color:#123;cursor:pointer;background:#c6e37a;border:2px solid #456a1d;border-radius:8px;}
+  .mitem:hover{background:#d8f19a;}
   #menuSub{position:absolute;inset:0;display:none;background:#000000d0;color:#fff;
     font-size:14px;padding:40px 24px;overflow:auto;}
 </style>
@@ -108,12 +106,15 @@
   <div id="titleScr"></div>
   <div id="menuScr">
     <!-- menu_btn_spr(552) 帧=BTN 常量(Const.as:6-16); 坐标=makeMenuSprites:342-350 中心点, 尺寸读图 299x67 -->
-    <div class="mbtn" id="mBuild" style="left:144px;top:49px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/1.png')"></div>
-    <div class="mbtn" id="mQuick" style="left:143px;top:104px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/2.png')"></div>
-    <div class="mbtn" id="mReset" style="left:157px;top:170px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/3.png')"></div>
-    <div class="mbtn" id="mInstr" style="left:152px;top:212px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/4.png')"></div>
-    <div class="mbtn" id="mHS" style="left:151px;top:294px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/10.png')"></div>
-    <div class="mbtn" id="mMidi" style="left:153px;top:338px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/12.png')"></div>
+    <div class="j2scr">
+      <div style="height:90px"></div>
+      <div class="mitem" id="mQuick">快速游戏</div>
+      <div class="mitem" id="mBuild">建造城市</div>
+      <div class="mitem" id="mHS">最高分</div>
+      <div class="mitem" id="mInstr">游戏规则说明</div>
+      <div class="mitem" id="mMidi">音乐: 关</div>
+      <div class="mitem" id="mReset">重新设定城市</div>
+    </div>
     <div id="menuSub"></div>
   </div>
   <div id="city">

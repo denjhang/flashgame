@@ -70,6 +70,7 @@ check(/sm_unlockedTrophyTowerType: d\.sm_unlockedTrophyTowerType == null \? -1/.
   const refs = new Set([...src.matchAll(/getElementById\('([^']+)'\)/g)].map(m => m[1]));
   for (const m of src.matchAll(/\bb\('(m[A-Za-z]+)',/g)) refs.add(m[1]); // bindMenu 辅助
   refs.delete('hsName');                                            // 动态 innerHTML, 打开时才存在
+  refs.delete('j2loadbar');                                         // N+63: splash 动态进度条 (innerHTML)
   const missing = [...refs].filter(id => !ids.has(id));
   check(missing.length === 0, 'game.js 引用的 DOM id 都存在于 index.html' + (missing.length ? ' 缺: ' + missing.join(',') : ''));
 }
