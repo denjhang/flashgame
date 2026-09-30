@@ -287,3 +287,16 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 勘误留存: 原版 dropY=400 仅 Crane.init 生效（上轮已记）; 本轮补充 showTip 会 saveModel——
   提示弹过即写存档, 与 SharedObject 行为一致
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 29 轮（2026-09-30）— T4 city_spr_640.png 读图核对 + 城市热区实测校准
+
+- 读图 (640x480 RGBA): 完整城市底版——5×5 蓝格网格/左侧 4 塔型图标列+推土机/顶部等级与人口
+  HUD/底部白色消息框。坐标解密: Const.CITY_MAP_X=-96/Y=-133 为相对舞台中心(320,240)局部坐标
+  → 网格左上 (224,107), 与 Const.CITY_MAP_CELL=52 (CityMap.as:216,286) 完全一致, H5 已对
+- 像素实测 vs 旧 CSS 的偏差并修复:
+  1) 选择列图标行 y=109/157/205/253 (节距 48, 高约 44, x≈155-210) — 旧 gap:10 节距 56,
+     每档漂移 8px → 改 top:105/gap:4
+  2) dozer 黄色区 x162-204/y302-362 — 旧 margin-top:14 落在 ≈340-384 偏 35px+ → margin-top:5
+  3) 白色消息框 x146-493/y391-445 — cityStatus 原来挂在顶部 30px → 移入框内 (top:395 居中)
+- 叠加层减重: 图标/色板已在底图中, .sel 的 .sw 色板 display:none, 只留文字标签+选中红框;
+  locked 用白色半透明遮罩盖住底图图标（底图 4 个塔都是可选状态画的）
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

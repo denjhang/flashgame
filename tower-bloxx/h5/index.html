@@ -24,21 +24,24 @@
   #cityPop{position:absolute;right:14px;top:8px;font-weight:bold;}
   #cityProgressBar{position:absolute;top:34px;left:2px;width:338px;height:6px;background:#00000033;}
   #cityProgressFill{height:100%;background:#f80;width:0;}
-  #cityStatus{position:absolute;top:30px;left:110px;right:10px;font-size:12px;color:#7a2020;z-index:3;}
+  /* cityStatus 落在原版白色消息框内 (读图实测: x146-493, y391-445) */
+  #cityStatus{position:absolute;top:395px;left:150px;width:340px;height:46px;font-size:12px;
+    color:#333;display:flex;align-items:center;justify-content:center;text-align:center;z-index:3;}
   #cityGrid{position:absolute;left:224px;top:107px;display:grid;grid-template-columns:repeat(5,52px);
     grid-template-rows:repeat(5,52px);cursor:pointer;}
   #cityGrid .cell{position:relative;}
   #cityGrid .cell.ok{outline:2px solid #ffd700;background:#ffd70022;}
   #cityGrid .tower{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:36px;
     display:flex;align-items:flex-end;justify-content:center;font-size:9px;color:#fff;text-shadow:1px 1px 1px #000;}
-  /* 塔型选择器/dozer 对齐原版左侧面板 (menu_spr 布局, CityMap.showMenu/showTowerSelections) */
-  #cityMenu{position:absolute;left:156px;top:102px;display:flex;flex-direction:column;gap:10px;}
+  /* 选择列读图实测: 图标行 y=109/157/205/253 (节距48, 高约44), x≈155-210; dozer y=302-362 */
+  #cityMenu{position:absolute;left:152px;top:105px;display:flex;flex-direction:column;gap:4px;}
   #cityMenu .sel{width:60px;height:44px;border:2px solid transparent;border-radius:4px;
-    cursor:pointer;text-align:center;font-size:10px;color:#234;position:relative;}
-  #cityMenu .sel .sw{width:30px;height:14px;margin:4px auto 0;border-radius:2px;}
-  #cityMenu .sel.locked{opacity:.35;cursor:default;}
+    cursor:pointer;text-align:center;font-size:10px;line-height:40px;color:#134;position:relative;}
+  #cityMenu .sel .sw{display:none;} /* 图标已在底图中, 叠加层只留文字标签与选中框 */
+  #cityMenu .sel.locked{cursor:default;}
+  #cityMenu .sel.locked::after{content:'';position:absolute;inset:0;background:#ffffffcc;border-radius:4px;}
   #cityMenu .sel.active{border-color:#e33;}
-  #cityMenu .sel.dozer{margin-top:14px;background:#e8e0c8;}
+  #cityMenu .sel.dozer{margin-top:5px;}
   #cityHint{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;color:#234;opacity:.85;}
   #hint{position:absolute;bottom:8px;width:100%;text-align:center;font-size:13px;opacity:.7;}
 </style>

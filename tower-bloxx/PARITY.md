@@ -2,9 +2,6 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T4.【资源】city_spr_640.png 切片接入城市视图**：先自己读 h5/assets/flash/city_spr_640.png
-> 确认内容/尺寸/网格与塔块的切片坐标（不凭名字猜），再替换 renderCity 的 CSS 近似；顺带校准
-> dozer 格与塔块热区坐标（CityMap.as isClicked 证据）。
 > **T5.【函数】GameSprite/Person 逐函数普查**：GameSprites.as 与 Person.as 里尚未对号的函数
 > （逐个列名+行号对照 h5/game.js），缺的补、偏的修。
 > **T6.【资源】flash/ 下未接入切片盘点**：逐张读图（bg2/3/4、fx01-28、star、dude/dudette…），
@@ -47,7 +44,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   GameModel.getSummary:204-207, Const.TIP_SUMMARY_REC/MSG_RESTART），OK 点击重开
 - ⬜ tries 用尽未达标仍可无屋顶入城（TIP_OUT_OF_TRIES）——依赖城市模式，归入第 3 节
 
-## 3. Build City 城市模式——🟨 机制闭环（2026-09-29, 视觉用 CSS 简排, city_spr 原版美术待导）[P0]
+## 3. Build City 城市模式——🟨 机制闭环（底图+热区已用原版 city_spr_640.png+实测坐标, 第29轮; 塔格缩略图仍 CSS 近似）[P0]
 
 - ✅ 5×5 网格（CITY_MAP_CELL=52px）+ 放置校验 isValid（CityMap.as:561-567）
 - ✅ 邻接解锁 allowed 表（CityMap.updateAllowedTowerTypes:569-632: 红1需蓝邻, 绿2需蓝+红, 黄3需蓝+红+绿）
