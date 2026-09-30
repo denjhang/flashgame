@@ -554,3 +554,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - placeTower:477-492: bulldozer 热区优先→网格 placeInMap→恒 saveModel — H5 dozer 分支/
   finishCityTower/saveModel 等价覆盖 (T8 已归档建造-放置结构差) — 无偏差
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 73 轮（2026-09-30）— T35 回归维护
+
+- 全量回归: smoke 19 / tower 7 / city 11 / SAVE_SEED=3 7 — 全绿
+- 简巡: 退出流 (原版 calltoaction 确认→H5 回菜单, 已归档等价)/comboSpr 隐藏时机一致
