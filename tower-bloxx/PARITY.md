@@ -477,3 +477,106 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 5. 存档记录（第 7 节）
 6. Build City 城市模式（第 3 节，最大件）
 7. 菜单流（第 4 节菜单子项，依赖城市模式）
+
+## 14. House.java 99 方法清单（T47 逐行填: 语义/差异; 已读标✅）
+
+| # | 行 | 方法 | 参数 | 语义 | 与H5差异 |
+|---|---|---|---|---|---|
+| 1 | 303 | a | () |  |
+| 2 | 308 | b | () |  |
+| 3 | 312 | c | () |  |
+| 4 | 317 | d | () |  |
+| 5 | 334 | a | (int n2) |  |
+| 6 | 344 | b | (int n2) |  |
+| 7 | 362 | c | (int n2) |  |
+| 8 | 381 | e | () | 已读 |
+| 9 | 400 | f | () |  |
+| 10 | 443 | g | () |  |
+| 11 | 618 | h | () |  |
+| 12 | 828 | i | () | 已读 |
+| 13 | 1003 | j | () |  |
+| 14 | 1214 | k | () |  |
+| 15 | 1219 | l | () | 已读 |
+| 16 | 1224 | w | () |  |
+| 17 | 1362 | x | () |  |
+| 18 | 1388 | y | () |  |
+| 19 | 1456 | d | (int n2) |  |
+| 20 | 1479 | a | (Graphics graphics) |  |
+| 21 | 1547 | a | (int var1_1, int var2_2) |  |
+| 22 | 1722 | a | (boolean bl) |  |
+| 23 | 1758 | e | (int n2) | 已读 |
+| 24 | 1764 | z | () | 已读 |
+| 25 | 1785 | o | (int n2) | 已读 |
+| 26 | 1790 | p | (int n2) |  |
+| 27 | 1816 | q | (int n2) |  |
+| 28 | 1842 | r | (int n2) |  |
+| 29 | 1851 | s | (int n2) |  |
+| 30 | 1999 | A | () |  |
+| 31 | 2073 | c | (int n2, int n3) |  |
+| 32 | 2098 | t | (int n2) |  |
+| 33 | 2159 | B | () |  |
+| 34 | 2260 | u | (int var0) | 已读 |
+| 35 | 2372 | v | (int n2) |  |
+| 36 | 2395 | a | (int n2, int n3, int n4, int n5, int n6) |  |
+| 37 | 2402 | a | (int n2, int n3, int n4) |  |
+| 38 | 2406 | a | (int n2, int n3, boolean bl) |  |
+| 39 | 2423 | C | () |  |
+| 40 | 2441 | D | () |  |
+| 41 | 2464 | a | (int n2, int n3, int n4, int n5, int n6, int n7, int n8) |  |
+| 42 | 2476 | w | (int n2) |  |
+| 43 | 2541 | b | (Graphics graphics, boolean bl) |  |
+| 44 | 2573 | a | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) |  |
+| 45 | 2597 | a | (Graphics graphics, int n2, int n3, int n4) |  |
+| 46 | 2611 | b | (Graphics graphics, int n2, int n3, int n4) |  |
+| 47 | 2625 | E | () |  |
+| 48 | 2645 | x | (int n2) |  |
+| 49 | 2702 | e | (Graphics graphics) | 已读 |
+| 50 | 2737 | a | (Graphics graphics, int n2, boolean bl, boolean bl2) |  |
+| 51 | 2775 | F | () |  |
+| 52 | 2789 | G | () |  |
+| 53 | 2919 | y | (int n2) |  |
+| 54 | 2934 | H | () |  |
+| 55 | 2944 | z | (int var0) | 已读 |
+| 56 | 2997 | A | (int n2) |  |
+| 57 | 3007 | d | (int n2, int n3) |  |
+| 58 | 3058 | m | () |  |
+| 59 | 3082 | n | () |  |
+| 60 | 3203 | o | () | 已读 |
+| 61 | 3247 | a | (Graphics graphics, boolean bl) |  |
+| 62 | 3287 | f | (Graphics graphics) |  |
+| 63 | 3339 | b | (int n2, int n3, int n4, int n5, int n6) |  |
+| 64 | 3364 | g | (Graphics graphics) |  |
+| 65 | 3390 | h | (Graphics graphics) |  |
+| 66 | 3423 | i | (Graphics graphics) | 已读 |
+| 67 | 3466 | j | (Graphics graphics) |  |
+| 68 | 3584 | a | (Graphics graphics, int n2, int n3, int n4, int n5, boolean bl) |  |
+| 69 | 3599 | b | (Graphics graphics, int n2, int n3, int n4, int n5, boolean bl) |  |
+| 70 | 3614 | k | (Graphics graphics) |  |
+| 71 | 3624 | b | (Graphics graphics, int n2, int n3, int n4, int n5, int n6) |  |
+| 72 | 3651 | b | (int n2, int n3) |  |
+| 73 | 3685 | f | (int n2) |  |
+| 74 | 3689 | a | (Command command) |  |
+| 75 | 3701 | p | () |  |
+| 76 | 3705 | g | (int n2) |  |
+| 77 | 3709 | I | () |  |
+| 78 | 3715 | J | () | 已读 |
+| 79 | 3792 | e | (int n2, int n3) | 已读 |
+| 80 | 3824 | h | (int n2) |  |
+| 81 | 3914 | b | (Graphics graphics) |  |
+| 82 | 3965 | K | () |  |
+| 83 | 4038 | L | () |  |
+| 84 | 4053 | l | (Graphics graphics) | 已读 |
+| 85 | 4107 | a | (Graphics graphics, int n2) |  |
+| 86 | 4121 | M | () |  |
+| 87 | 4133 | i | (int n2) | 已读 |
+| 88 | 4137 | j | (int n2) |  |
+| 89 | 4144 | k | (int n2) |  |
+| 90 | 4148 | N | () |  |
+| 91 | 4160 | a | (String string, Font font, int n2) |  |
+| 92 | 4202 | a | (String string, String[] stringArray, Image image) |  |
+| 93 | 4228 | c | (Graphics graphics) |  |
+| 94 | 4276 | l | (int n2) | 已读 |
+| 95 | 4304 | O | () |  |
+| 96 | 4313 | P | () |  |
+| 97 | 4317 | q | () |  |
+| 98 | 4321 | a | (Graphics graphics, int n2, int n3, int n4, int n5) |  |
