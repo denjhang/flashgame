@@ -30,7 +30,7 @@ const TOWER_TYPE_COLORS = ['#4a90d9','#d94a4a','#7aa04a','#d9c04a'];
 const SWAY_MAX_ANGLE = 1;       // Const.SWAY_MAX_ANGLE (度, GameModel:239 上限)
 const TIMER_MAX = 5;            // Const.TIMER_MAX (ComboTimer 计时上限 TIMER_MAX+1 秒)
 const DELAY_PAN_UP = 500;       // Const.DELAY_PAN_UP
-const DROP_G = 0.0045;          // 落块加速度 (px/ms^2, 调校值, 对应原版 ~0.55s 落程)
+const DROP_SPD = 0.5;           // 落块匀速 px/ms: 原版 Path 时长=(dropY-y)*2ms → 速度恒 0.5 (Crane.dropTarget:200-201)
 const CRANE_FPS = 30;           // Flash 帧率: blockDx 以 px/帧 计 (Crane.animate dx=endx-lastX)
 
 const stage = document.getElementById('stage');
@@ -467,7 +467,7 @@ const G = {
   falling: null,        // {mesh, vy, cy, bdx, vx}
   hanging: null, hangingFor: -1,
   craneDx: 0, towerBdx: 0,
-  people: [], sparks: [], fallingPeople: [],
+  people: [], sparks: [], fallingPeople: [], missFall: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
@@ -526,8 +526,9 @@ function startGame() {
   for (const q of G.people) towerGroup.remove(q.sp);          // 上一局残留清理
   for (const q of G.sparks) scene.remove(q.sp);
   for (const q of G.fallingPeople) scene.remove(q.sp);
+  for (const q of G.missFall) scene.remove(q.mesh);
   for (const b of toppled) { towerGroup.remove(b.mesh); scene.remove(b.mesh); }
-  G.people = []; G.sparks = []; G.fallingPeople = []; toppled.length = 0;
+  G.people = []; G.sparks = []; G.fallingPeople = []; G.missFall = []; toppled.length = 0;
   G.blocks = []; G.landingY = 0; G.currCtr = 0; G.towerBdx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
@@ -609,7 +610,9 @@ function hookY(now) {
 }
 
 // ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
-function blockLanded(offset, releaseBdx) {
+let lastFallMesh = null;
+function blockLanded(offset, releaseBdx, fallMesh) {
+  lastFallMesh = fallMesh;
   window.__dbg && (window.__dbg.lands.push(offset), window.__dbg.drops++);
   // Tower.blockLanded: blockDx = floor(nextBlock.blockDx/2); 有效偏移 _loc3_ = 视觉偏移 + blockDx (Tower.as:117-121)
   const bd = Math.floor((releaseBdx || 0) / 2);
@@ -626,9 +629,10 @@ function blockLanded(offset, releaseBdx) {
     if (G.lives <= 0) gameOver(false);
     return;
   }
-  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145, snd_destroy 延迟触发此处直接播)
+  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145): 块继续坠到屏幕底再回收
     finishCombo();
     playSound('snd_destroy');
+    G.missFall.push({ mesh: lastFallMesh, vy: DROP_SPD });
     G.lives--; showMsg('MISS', '#ff6b6b'); addHud();
     if (G.lives <= 0) gameOver(false);
     return;
@@ -869,8 +873,8 @@ function drop() {
   // Crane.dropTarget: blockDx = dx (释放帧钩速 px/帧); 落块带惯性漂移 x + blockDx*3 (Crane.as:198-199)
   const bdx = G.craneDx || 0;
   const topY = G.landingY + BLOCK_H / 2;
-  const fallMs = Math.sqrt(2 * Math.max(1, topY - y) / DROP_G);
-  G.falling = { mesh, vy: 0, cy: tpl.userData.cy, bdx, vx: bdx * 3 / fallMs };
+  // 时长 = (dropY-y)*2ms → 速度 = 距离/时长 = 0.5 px/ms 恒定; 漂移总量 blockDx*3 匀速走完
+  G.falling = { mesh, vy: DROP_SPD, cy: tpl.userData.cy, bdx, vx: bdx * 3 / Math.max(1, topY - y) * 2 };
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
 // 原版鼠标语义: 按下仅置 mouseState=false, 松开才落块 (Crane.onMouseDown/Up:176-189, buttonPressed:155)
@@ -911,9 +915,8 @@ function loop(now) {
     // 下落块
     if (G.falling) {
       const f = G.falling;
-      f.vy += DROP_G * dt;
-      f.mesh.position.y -= f.vy * dt;
-      f.mesh.position.x += f.vx * dt; // 惯性漂移 (Crane.as:199 path x+blockDx*3)
+      f.mesh.position.y -= f.vy * dt;      // 匀速 tween (Crane.dropTarget Path)
+      f.mesh.position.x += f.vx * dt;      // 惯性漂移 (Crane.as:199 path x+blockDx*3)
       const topY = G.landingY + BLOCK_H / 2;
       if (f.mesh.position.y + f.cy <= topY) {
         scene.remove(f.mesh);
@@ -921,12 +924,19 @@ function loop(now) {
         // 块中心 - 塔顶中心(含摇晃倾斜投影): Tower.as:118 calcX(landingY, rot+90) = -h*sin(rot)
         const lean = Math.sin(towerGroup.rotation.z) * G.landingY;
         const offset = Math.round(f.mesh.position.x + f.cx - (G.currCtr - lean));
-        blockLanded(offset, f.bdx);
+        blockLanded(offset, f.bdx, f.mesh);
       }
     }
 
     // 摇晃 (Tipper.updateTower): 塔绕底部枢轴旋转
     if (!G.over) towerGroup.rotation.z = THREE.MathUtils.degToRad(swayAngle(dt));
+
+    // miss 坠块 (fallPastTower: 坠到 viewHeight+200)
+    for (let i = G.missFall.length - 1; i >= 0; i--) {
+      const q = G.missFall[i];
+      q.mesh.position.y -= q.vy * dt;
+      if (q.mesh.position.y < G.camY - STAGE_H) { scene.remove(q.mesh); G.missFall.splice(i, 1); }
+    }
 
     // 掉落中的碎块
     for (let i = toppled.length - 1; i >= 0; i--) {

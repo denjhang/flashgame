@@ -250,3 +250,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - Crane.fakeDrop/fakePerfect (Crane.as:213-220) 取证: 无调用方的作弊死代码, 与 sm_cheatsOn
   同类, 记入 PARITY "考证不移植项"
 - 全量回归: tower 7 PASS / city 10 PASS / smoke 17 PASS (上一轮已跑, 本轮无代码变动)
+## 第 26 轮（2026-09-30）— "真的一样吗"追问: 修正下落运动学 + miss 坠块展示
+
+- [P1] 下落运动学: H5 误用重力加速度 (DROP_G), 原版是匀速 Path tween —— 时长公式
+  (dropY-y)*2ms 即恒速 0.5px/ms (Crane.dropTarget:199-201)。改为匀速, 惯性漂移量不变
+- [P2] miss 坠块展示: 原版 miss 后块沿 fallPastTower 路径坠出屏幕 (Tower.as:139-145),
+  H5 原来直接消失 → 改为继续坠出屏幕再回收
+- 记录在案的剩余差异: 摆钩初始相位 (CPath aOffset, 只影响起始方向)、城市塔图形为 CSS 近似、
+  Flash 数值 + J2ME 3D 视觉的混搭属用户指定组合
+- tower 7 PASS / city 10 PASS / smoke 17 PASS
