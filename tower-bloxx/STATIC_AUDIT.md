@@ -366,3 +366,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 记档: updateCityBadge 为 city_spr 内部实例帧（资产未单导出）, Lv.N 文本等价;
   clearSparkles 的挂块银火花为视觉微差 → 待办池
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 38 轮（2026-09-30）— T13 anim 基类层普查（9 类全取证）
+
+- Path/CPath/Fader/Flipbook/Rotater/Message/Transformer/BPath/Anim 逐类读毕（明细 PARITY 8.1）;
+  Flipbook 80ms/帧 与 T7 一致、Fader 线性与 H5 一致, 证实既有实现
+- [P1] 落块 Rotater (dropTarget:202): 下落期间倾斜角线性回正——H5 原来落地才摆正
+- [P1] bounceOffTower BPath (Tower.as:382): 撞塔块三次贝塞尔弹飞+旋转循环 1000ms——H5 原来直接消失;
+  实现 G.bounces (P0/P1/P2/P3, Flash y 取反), 复用 lastFallMesh
+- [P2] title Message 5000ms 自动进菜单 (GameState.as:63), 点击提前取消
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

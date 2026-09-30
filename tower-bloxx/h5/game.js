@@ -105,8 +105,12 @@ function showTitle() { // STT_TITLE
   craneGroup.visible = false;
   hud.titleScr.style.display = 'block';
   playSong('sng_title');
-  hud.titleScr.onclick = () => { hud.titleScr.onclick = null; showMenu(); };
+  hud.titleScr.onclick = () => { clearTimeout(titleMsgT); hud.titleScr.onclick = null; showMenu(); };
+  // Message.factory(msg,titleSpr,STT_MENU,5000) (GameState.as:63): title 5s 自动进菜单
+  clearTimeout(titleMsgT);
+  titleMsgT = setTimeout(() => { if (hud.titleScr.style.display === 'block') showMenu(); }, 5000);
 }
+let titleMsgT = 0;
 function showMenu() { // STT_MENU (makeMenuSprites:341-355)
   hud.titleScr.style.display = 'none';
   hud.menuSub.style.display = 'none';
@@ -544,7 +548,7 @@ const G = {
   hanging: null, hangingFor: -1,
   craneDx: 0, towerBdx: 0,
   dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
-  people: [], sparks: [], fallingPeople: [], missFall: [],
+  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
@@ -602,10 +606,11 @@ function startGame() {
   for (const b of G.blocks) towerGroup.remove(b.mesh);
   for (const q of G.people) towerGroup.remove(q.sp);          // 上一局残留清理
   for (const q of G.sparks) scene.remove(q.sp);
+  for (const q of G.bounces) scene.remove(q.mesh);
   for (const q of G.fallingPeople) scene.remove(q.sp);
   for (const q of G.missFall) scene.remove(q.mesh);
   for (const b of toppled) { towerGroup.remove(b.mesh); scene.remove(b.mesh); }
-  G.people = []; G.sparks = []; G.fallingPeople = []; G.missFall = []; toppled.length = 0;
+  G.people = []; G.sparks = []; G.fallingPeople = []; G.missFall = []; G.bounces = []; toppled.length = 0;
   G.blocks = []; G.landingY = 0; G.currCtr = 0; G.towerBdx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
@@ -729,6 +734,19 @@ function blockLanded(offset, releaseBdx, fallMesh) {
     tipperIncSway(offset);
     playSound('snd_destroy');                    // Tower.as:162
     G.lives--; showMsg('-1', '#ff6b6b');
+    // bounceOffTower (Tower.as:367-383): 块沿 BPath 三次贝塞尔弹飞 1000ms
+    // P1=(x+offset/2, y-50) P2=(x+offset, y+100) P3=(x+offset*2, 屏底), Rotater 0↔359/1000ms 循环
+    if (lastFallMesh) {
+      const p0 = { x: lastFallMesh.position.x, y: lastFallMesh.position.y };
+      scene.add(lastFallMesh);
+      G.bounces.push({
+        mesh: lastFallMesh, t: 0, p0,
+        p1: { x: p0.x + offset / 2, y: p0.y + 50 },   // Flash y 向下 → H5 y 向上取反
+        p2: { x: p0.x + offset, y: p0.y - 100 },
+        p3: { x: p0.x + offset * 2, y: G.camY - STAGE_H / 2 - 200 },
+        rotDir: offset > 0 ? 1 : -1,
+      });
+    }
     if (G.blocks.length > 1) knockTopBlock();
     addHud();
     if (G.lives <= 0) gameOver(false);
@@ -986,7 +1004,10 @@ function drop() {
   // dropY 首块 400、之后恒 340 (Crane.as:57,201)
   const hangScreenY = STAGE_H / 2 - (y - G.camY);
   const fallDist = Math.max(1, G.dropY - hangScreenY);
-  G.falling = { mesh, vy: DROP_SPD, cy: tpl.userData.cy, bdx, vx: bdx * 3 / (fallDist * 2), left: fallDist };
+  // Rotater (dropTarget:202 rotateBlock 时): 挂块倾斜角在下落期间线性回正到 0
+  mesh.rotation.z = G.hanging ? G.hanging.rotation.z : 0;
+  G.falling = { mesh, vy: DROP_SPD, cy: tpl.userData.cy, bdx, vx: bdx * 3 / (fallDist * 2), left: fallDist,
+    left0: fallDist, rot0: mesh.rotation.z };
   G.dropY = 340;                                 // Crane.dropTarget 末尾: this.dropY = 340
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
@@ -1032,6 +1053,7 @@ function loop(now) {
       f.mesh.position.y -= step;           // 匀速 tween (Crane.dropTarget Path)
       f.mesh.position.x += f.vx * dt;      // 惯性漂移 (Crane.as:199 path x+blockDx*3)
       f.left -= step;
+      f.mesh.rotation.z = f.rot0 * Math.max(0, f.left) / f.left0; // Rotater 线性回正 (dropTarget:202)
       if (f.left <= 0) {
         scene.remove(f.mesh);
         G.falling = null;
@@ -1095,6 +1117,18 @@ function loop(now) {
       }
     }
     // 火花
+    // 撞塔弹飞块 (bounceOffTower BPath 三次贝塞尔 + Rotater 359°/s 循环, 1000ms 后自毁)
+    for (let i = G.bounces.length - 1; i >= 0; i--) {
+      const b = G.bounces[i];
+      b.t += dt;
+      const u = Math.min(1, b.t / 1000), v = 1 - u;
+      const bez = (a, b2, c, d) => v * v * v * a + 3 * v * v * u * b2 + 3 * v * u * u * c + u * u * u * d;
+      b.mesh.position.set(
+        bez(b.p0.x, b.p1.x, b.p2.x, b.p3.x),
+        bez(b.p0.y, b.p1.y, b.p2.y, b.p3.y), 0);
+      b.mesh.rotation.z += b.rotDir * 2 * Math.PI * dt / 1000;
+      if (u >= 1) { scene.remove(b.mesh); G.bounces.splice(i, 1); }
+    }
     for (let i = G.sparks.length - 1; i >= 0; i--) {
       const q = G.sparks[i];
       q.sp.position.x += q.vx * dt / 1000; q.sp.position.y += q.vy * dt / 1000;

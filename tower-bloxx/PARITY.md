@@ -2,9 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T13.【函数】anim 基类层普查**：bz/esg/anim/（Path/CPath/Rotater/Fader/Flipbook/Message/
-> Anim）逐函数对照 h5 的运动学内联实现——重点 Flipbook 步进语义、Fader 曲线、Message 定时跳转,
-> 找还没覆盖的基类行为。
+> **T14.【深度自查】时间轴脚本普查**：翻 paperdefense_fla 时间轴脚本（根级/帧脚本），找
+> game/*.as 之外还没对号的行为（HUD 动画帧/菜单粒子/音效钩子），产出函数级新任务。
 >
 > **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
 > swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧。
@@ -214,6 +213,20 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   restartGame blockTime=getTimer()+1000）—— 第 22 轮自查发现并修正
 - ❌ 下方向键（TIP_INTRO: "spacebar or down arrow"，Key.isDown 34）
 - ❌ 菜单鼠标导航、城市模式拖放定位、暂停按钮（fla 有 bt_pause/bt_restart/bt_speed? 仅快速游戏音速）
+
+
+### 8.1 anim 基类层普查（第 38 轮, T13 ✅）
+- Anim 基类: 工厂+对象池/wait 首帧/loop/osc/repCnt/killSprite/nextState 语义——H5 事件驱动等价
+- Path(线性 tween)/CPath(第27轮已对号)/BPath(三次贝塞尔)/Fader(线性 alpha)/Flipbook
+  (start→target+0.99 线性翻页, floor 取帧)/Rotater(角度线性)/Message(定时→nextState)/
+  Transformer(值插值基类)——9 类全取证
+- 第 38 轮补齐三个缺口:
+  1) [P1] 落块 Rotater (Crane.dropTarget:202): 挂块倾斜角在下落期间线性回正到 0
+     (H5 原来落地瞬间才摆正)——drop() 存 rot0/left0, falling 每帧 rotation=rot0*left/left0
+  2) [P1] bounceOffTower 的 BPath (Tower.as:367-383): 撞塔块沿三次贝塞尔弹飞
+     P1=(x+off/2,y+50) P2=(x+off,y-100) P3=(x+off*2,屏底), 1000ms 自毁 + Rotater 359°/s 循环
+     (H5 原来块直接消失)
+  3) [P2] title 自动进菜单 (GameState.as:63 Message 5000ms): showTitle 挂 5s 定时, 点击取消
 
 ## 9. 已知有意差异（不属于"不一样"）
 
