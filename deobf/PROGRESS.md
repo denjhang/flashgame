@@ -1,5 +1,28 @@
 # TCS 反混淆与资源还原进度
 
+## 第 TCS+4 轮记录（2026-09-30, 终局音效编排 —— 1158 frame_2 e1..e14 全量对齐）
+
+### 1. 【取证】
+
+- 1158 frame_2 定义 **e1..e14** 音效回调（explosionMlrs×4 / explosionLarge /
+  Su37S / uniteMoveTigre1×5 / uniteMoveLight3 / uniteMoveHeavy1 / uniteMoveHeavy3），
+  以 setInterval(iN, "eN", tN) 随终局对白时间轴铺开；tN 延迟算式被混淆不可精确还原
+
+### 2. 【H5 实现】
+
+- data.js 增 **CINE_SFX**（14 项按原版顺序，全部命中既有 SFX 池）；
+  showCine 胜局分支按各句 END_TEMPO 时长比例铺放音效（延迟算式近似，如实记录），
+  受 cineToken 存活校验约束（与对白链同生命周期）
+
+### 3. 验证
+
+- `CINE_SFX 14 项=true  胜局分支铺放接线=true`
+- 178 项 `=true`；exit 0；三件套通过
+
+### 4. 本轮仍未做
+
+- 编排延迟为比例近似（原版算式混淆）；下轮继续方向 1
+
 ## 第 TCS+3 轮记录（2026-09-30, protecthint(1166) 屏位定位 + 原位接线 —— 上轮挂账清掉）
 
 ### 1. 【取证（主时间线 frame_6 SVG）】

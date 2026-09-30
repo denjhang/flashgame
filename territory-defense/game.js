@@ -2138,7 +2138,7 @@ function showCine(kind) {                 // 'perdu' = 败局; 'end' = 胜局 (�
     });
   } else {
     // 原版顺序: endPass(1158) 6 句按 textesTempo 自动推进 → end(1125) 动画
-    const st = { i: 0 };
+    const st = { i: 0, sfx: 0 };
     const step = () => {
       if (!alive()) return;
       if (st.i >= END_DLG.length) {
@@ -2148,6 +2148,12 @@ function showCine(kind) {                 // 'perdu' = 败局; 'end' = 胜局 (�
         return;
       }
       txt.textContent = END_DLG[st.i][0] + '：' + END_DLG[st.i][1];
+      // 音效编排: 该句时长按比例铺 e1..e14 (1158 frame_2)
+      const n = Math.min(CINE_SFX.length, Math.round(END_TEMPO[st.i] / 3200)) || 1;
+      for (let k = 0; k < n; k++) {
+        const name = CINE_SFX[st.sfx % CINE_SFX.length]; st.sfx++;
+        setTimeout(() => { if (alive()) playSfx(name, 0.5); }, Math.round(END_TEMPO[st.i] * k / n));
+      }
       setTimeout(step, END_TEMPO[st.i]);
       st.i++;
     };

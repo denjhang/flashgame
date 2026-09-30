@@ -1423,7 +1423,18 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- protecthint (1166, TCS+3): 原版屏位 (642,2) m1 显示 ----
+// ---- 终局音效编排 (1158 frame_2 e1..e14, TCS+4) ----
+console.log("--- 终局音效编排 ---");
+{
+  const fsx = require('fs');
+  const BS2 = String.fromCharCode(92);
+  const gj = fsx.readFileSync('game.js', 'utf8'), dj = fsx.readFileSync('data.js', 'utf8');
+  const st0 = dj.indexOf('CINE_SFX'); const names = dj.slice(st0, dj.indexOf('];', st0));
+  const cnt = (names.match(/'/g) || []).length / 2;
+  console.log("CINE_SFX cnt=" + cnt + " 14项=" + (cnt === 14) + "  胜局分支铺放接线=" +
+    (gj.includes('CINE_SFX') && gj.includes('st.sfx')));
+}
+// ---- protecthint (1166, TCS+3)// ---- protecthint (1166, TCS+3): 原版屏位 (642,2) m1 显示 ----
 console.log("--- protecthint ---");
 {
   const fsx = require('fs');

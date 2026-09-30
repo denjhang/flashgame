@@ -333,6 +333,12 @@ const STORY = {
 //   336 帧动画; 败局 = activePerdu (6_329/327): 单位抵达后延迟 4s, "perdu"(1132) 30 帧动画
 //   + gameOverStart 段落 (已接线), aPerdu 防重入。文本已中文去政治化。
 const END_TEMPO = [13300, 13300, 5600, 4200, 6200, 2800];
+// 原版 1158 frame_2 音效编排 (e1..e14 → master_sounds, 随对白时间轴铺开;
+//   延迟算式被混淆, 按 END_DLG 累计时间比例铺放 —— 近似, 如实记录)
+const CINE_SFX = ['explosionMlrs','explosionMlrs','explosionLarge','Su37',
+  'uniteMoveTigre1','uniteMoveTigre1','uniteMoveLight3','uniteMoveTigre1',
+  'uniteMoveHeavy1','uniteMoveTigre1','explosionMlrs','uniteMoveHeavy3',
+  'explosionMlrs','uniteMoveTigre1'];
 const END_DLG = [
 ["朱(敌方将领)","报告长官，调虎离山成功了。那场自我了断没有白费——我们的炮手袭掠了他们的阵地，通路已经打开，营地已在我们的掌控之中。"],
 ["沈(敌方参谋)","……干得好，林将军。荣誉没有蒙尘，我们会记得他。……她呢？"],
