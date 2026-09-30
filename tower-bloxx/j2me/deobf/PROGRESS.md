@@ -153,3 +153,12 @@
 - House 98/98: 三分册 95 条 + JD+8 补读 4 条 - 1 重记 = 98, 与签名图一致。
 - 【定案】反混淆项目完结: 17 类 / 292 方法 / ~260 字段全部语义化建档 (deobf/src/ + FIELDS.md)。
   后续任务 (H5 表现层重做) 引用底本时以 FIELDS.md 行号为准。
+
+## JD+10 (2026-10-01) 数据底本补全 — 反混淆项目最终关账
+- STRING_IDS.md: g.java 153 项 switch 全量抽出 94 条逻辑串 id→包序号映射, 对齐 lang.zh-CN 原文;
+  【新证据】g.b() 尾行 `return com.nokia.mid.appl.bloxx.a.a(var2_2, var3_3)` — dc_v1507 构建
+  的串解析最终委托 NokiaLangPack, 与 nokia_v1011 的 lang.* 读取链汇合 (两代构建共用一条语言包链)。
+- MENU_SCRIPT.md: "m" 菜单脚本 (599B/25 屏) 布局解码 (头表 9×int32 + 每屏 7 型记录格式,
+  屏栈/软键/FIRE 位分派语义), 首屏抽查 (屏6=型4→游戏屏衔接); 25 屏逐屏展开为纯数据解析, 按需程序化。
+- 反混淆项目全部产物: deobf/src/ 17 类语义源码 + FIELDS.md (~260 字段) + STRING_IDS.md +
+  MENU_SCRIPT.md + PROGRESS.md。方法 292/292, 类 17/17 — 项目完结。
