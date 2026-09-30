@@ -46,7 +46,7 @@ FFDec 导出的 SVG 矩阵/帧位、`../deobf/data/*.json`、`../swf_dump.txt`�
 ## 文件
 
 - `index.html` + `game.js` + `data.js` — 全部代码（无依赖）
-- `smoke_test.js` — 无头冒烟（182 项断言：逻辑/素材尺寸/资产引用/去政治化审计/
+- `smoke_test.js` — 无头冒烟（189 项断言：逻辑/素材尺寸/资产引用/去政治化审计/
   剧情码序列/存档往返/读档实战/文本原文逐字节）
 - `assets/` — FFDec 直出素材（按系统分目录）
-- 解码工具：`../tools/parse_scenario.py` 等；逐轮记录：`../deobf/PROGRESS.md`
+- 解码工具：`../tools/parse_scenario.py` 等；逐轮记录：`../deobf/TCS_LOG.md`（历史轮见 `../deobf/PROGRESS.md`）
