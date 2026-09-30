@@ -4,7 +4,7 @@
 
 - `环绕翻页 1←=3 / 3→=1=true`（原版 turnConstruction: left 从 1 绕到 3，
   right 从 3 绕到 1）；第 3 页内容 = MLRS,MTHEL,pluton,su37 与 SHOP_PAGES 一致
-- 174 项 `=true`；exit 0；node --check 通过
+- 173 项 `=true`；exit 0；node --check 通过（计数口径：以 `=true` 行计）
 
 ### 本轮仍未做：无（维持收官待命）
 
