@@ -2,11 +2,11 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T16.【函数】miss 时 snd_destroy 延迟播放语义取证**：原版 fallPastTower/bounceOffTower
-> 后的音效时机（wait 参数与 STT_BLOCK_LANDED 顺序）对照 H5 playSound 即时播——差在哪补哪。
+> **T17.【资源】J2ME MIDI 曲库提取 + 可选 BGM**：从 j2me/jars/*.jar 静态解包 MIDI 资源
+> （不碰浏览器），读 MIDI 文件确认曲目，接入 H5 作城市/标题可选 BGM（音效开关同款持久化）。
 >
-> **待办池**：J2ME MIDI 曲库做可选 BGM（jar 静态提取）/ swoosh_spr 翻页小特效（1→3帧/150ms,
-> Tower.as:333）/ STT_SPLASH 素材 / 挂块 combo 银火花帧 / 高分榜三分页表格（216）。
+> **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
+> 挂块 combo 银火花帧 / 高分榜三分页表格（216）。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -191,6 +191,14 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 考证不移植项: Crane.fakeDrop/fakePerfect (Crane.as:213-220) 为原版内部作弊死代码,
   无任何 UI 调用方, 与 sm_cheatsOn 一样属调试残留
 - 备注：J2ME 9 首 MIDI 为手机版曲目，与 Flash 版曲库不同源；Flash 版即权威，MIDI 不再转码
+
+
+### 6.1 音效时机普查（第 41 轮, T16 ✅）
+- [P1] fallPastTower 的 snd_destroy 是延迟播: Path 坠到 viewHeight+200 (dur=(屏底-y)*2ms) 后
+  Message(STT_SOUND+"snd_destroy", dur+100ms) 才触发 (Tower.as:386-390); H5 原来即时播 →
+  改为 missFall 块坠出屏幕回收时 +100ms 播
+- bounceOffTower 分支 (Tower.as:146) 即时播 ✓ H5 一致; CityMap placeInMap:425-429
+  foundation/destroy 即时 ✓; fanfare 三态 (GameState:120/128) ✓ (第 N23 轮已对号)
 
 ## 7. 存档/记录——✅ 闭环（2026-09-29）
 

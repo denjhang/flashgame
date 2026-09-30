@@ -765,9 +765,9 @@ function blockLanded(offset, releaseBdx, fallMesh) {
     if (G.lives <= 0) gameOver(false);
     return;
   }
-  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145): 块继续坠到屏幕底再回收
+  if (abs > BLOCK_H) { // fallPastTower (Tower.as:139-145): 块坠出屏幕后 Message 定时播 snd_destroy (dur+100ms)
     finishCombo();
-    playSound('snd_destroy');
+    G.missFall.push({ mesh: lastFallMesh, vy: DROP_SPD });
     G.missFall.push({ mesh: lastFallMesh, vy: DROP_SPD });
     G.lives--; showMsg('MISS', '#ff6b6b'); addHud();
     if (G.lives <= 0) gameOver(false);
@@ -1084,7 +1084,10 @@ function loop(now) {
     for (let i = G.missFall.length - 1; i >= 0; i--) {
       const q = G.missFall[i];
       q.mesh.position.y -= q.vy * dt;
-      if (q.mesh.position.y < G.camY - STAGE_H) { scene.remove(q.mesh); G.missFall.splice(i, 1); }
+      if (q.mesh.position.y < G.camY - STAGE_H) {
+        scene.remove(q.mesh); G.missFall.splice(i, 1);
+        setTimeout(() => playSound('snd_destroy'), 100); // Message dur+100ms (Tower.as:389-390)
+      }
     }
 
     // 掉落中的碎块

@@ -388,3 +388,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 逐张读图 + GLB md5 对比: 10/11/12/14 = GLB texture#8/#9/#11/#12 同hash（已间接接入）,
   13 与 12 重复, 15/16/17 为 jar 另一版纹理（不在 GLB, 记档备用）→ 无需新增接入（明细 PARITY 5.2）
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS（本轮零代码变更, 纯盘点轮）
+## 第 41 轮（2026-09-30）— T16 miss 音效延迟语义
+
+- 取证: fallPastTower (Tower.as:384-392) 块先坠到屏底 (Path dur=(viewH+200-y)*2), 到达后
+  Message 触发 STT_SOUND+"snd_destroy" (wait=dur+100) — 即"坠出屏幕才响"; 撞塔分支即时响
+- [P1] H5 miss 即时播 → 改为 missFall 回收时 +100ms playSound('snd_destroy'), 即时播只留撞塔分支
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
