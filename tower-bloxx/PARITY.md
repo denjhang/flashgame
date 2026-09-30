@@ -72,7 +72,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   TROPHY_TOWER_POP_LIMITS[currColor]，GameModel.as:181）→ mesh254 放大 variant（3D 替代外观）
 - ✅ GAME_WON 结算：showSummary 面板 人口/塔高/最长连击 + New record!（GameSprites.showSummary:48-59,
   GameModel.getSummary:204-207, Const.TIP_SUMMARY_REC/MSG_RESTART），OK 点击重开
-- ⬜ tries 用尽未达标仍可无屋顶入城（TIP_OUT_OF_TRIES）——依赖城市模式，归入第 3 节
+- ✅ tries 用尽未达标无屋顶入城: gameOver(false)→finishCityTower 无屋顶放置, 行为已对号;
+  TIP_OUT_OF_TRIES 经查为死常量 (Const.as:108, 全源码无调用点), 原版也无提示
 
 
 ### 2.1 gameOver/knockNextBlock 并排复核（第 49 轮, T24 ✅）
@@ -80,7 +81,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   (dur=min(DUR_PAN_DOWN=3000, stacked*250)) 回卷塔底后才弹结算 → H5 原来立即弹, 已改
   setTimeout(1000+pan); won 时 camTarget=0 触发回卷 (camera glide≈panDown 视觉)
 - knockNextBlock 已核实一致: 弹顶块+dumpPerson/landingY 回退/currCtr=新顶块/stacked-1;
-  差异记档: 弹飞用 BPath(确定方向 offset=新顶-被弹) vs H5 随机翻倒物理(视觉近似)
+  弹飞 BPath 已在第52轮对号 (pushBounce 确定性方向)
 - checkTipQueue 顺序 T3 轮已核实 (pumpCityTips 2.6s 间隔)
 
 
@@ -96,7 +97,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - knockNextBlock:169-173 弹飞方向确定 (offset=新顶块x−被弹块x), wait=DELAY_FINAL_TUMBLE=250ms
   → 抽 pushBounce(mesh,offset,wait) 助手 (撞塔/knock 共用), bounces 更新支持 wait 冻结期
 
-## 3. Build City 城市模式——🟨 机制闭环（底图+热区已用原版 city_spr_640.png+实测坐标, 第29轮; 塔格缩略图仍 CSS 近似）[P0]
+## 3. Build City 城市模式——✅ 闭环（底图/热区/塔格缩略图/滚轮动画全原版, 第29/34/33轮）
 
 - ✅ 5×5 网格（CITY_MAP_CELL=52px）+ 放置校验 isValid（CityMap.as:561-567）
 - ✅ 邻接解锁 allowed 表（CityMap.updateAllowedTowerTypes:569-632: 红1需蓝邻, 绿2需蓝+红, 黄3需蓝+红+绿）
@@ -167,7 +168,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   Instructions（Quick Game/Build City/About 三页, TIP_INSTR*/TIP_ABOUT 全文）/
   High Scores（本地 top10, HighScoreLocalProxy 语义）；无 URL 参数时从 title 进入
 - ⬜ Get More Games/Mobile League/Tell a Friend 外链按钮（平台依赖, 有意不复刻）
-- ⬜ splash 素材（828_splash_spr 已导出未接, portal logo 层）
+- ✅ splash 素材（828 logo 已接, 第55轮: 无 URL 模式 2s→title）
 - ✅ tipFlags 首次提示弹窗（第28轮）：showTip 门控=tipFlags 持久化+弹窗期 delayNextBlock(-1)/
   OK 后 +100ms（GameSprites.showTip:28-46/hideTip:60-63）。调用点: intro（STT_PLAY GameState.as:104）/
   combo（首次完美落地 Tower.as:356-358, OK 后补 setTimer）/ bought_land→new_tower_type0→
@@ -223,7 +224,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - 教训: python 补丁切点落在旧函数体中段会留孤儿代码——node --check 必须在补丁后立即跑
   (本轮 node --check 抓到 Unexpected '}', 已清)
 
-## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
+## 5. 视觉表现层——✅ 全接入（背景/特效/小人/特效帧/HUD/菜单/弹窗/splash 全原版位图）
 
 - ✅ 视差背景 3 层 bg2/3/4（FFDec 导出原版位图 640×2000/912/316，Tower.move:93-104
   `worldY = camY×(1-ratio)`，BG_RATIOS 0.05/0.1/0.2；bg4 纵向平铺 6 次覆盖太空段；
@@ -329,7 +330,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   （startGame 重置 comboMax 等）、formatInfo（showSummary line()）、setMapTower/getMapTower
   （renderCity 重渲等价）、clearCity（Reset Yes 清数据等价）、showCityPop（cityPop textContent）
 - Tower 21 函数: 全覆盖——getBGTileId/move（BG_TEX 视差 :236）、makePerson（spawnPeople）、
-  blockDropped（drop()+falling 流）、clearSparkles（挂块火花帧, H5 无 sprite 银火花, 视觉微差记档）
+  blockDropped（drop()+falling 流）、clearSparkles（挂块银火花已接, 第50轮）
 - 第 37 轮修复: Reset Map Yes 补 resetTips（GameModel.as:91-94, STT_RESET_MAP_YES:242-248
   clearCity+resetTips+saveModel）——原版重置城市后首次提示会重放, H5 漏了
 - 记档: updateCityBadge（cityBadge2 帧=max(1,cityLevel), GameModel.as:411-414）为 city_spr 内部
@@ -352,8 +353,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - ✅ 点击/空格/下方向键/PgDn 放块（TIP_INTRO; Tipper.as:62 Key.isDown(34)）
 - ✅ 放块时机: 鼠标松开判定 + 重开后 1s 落块锁（Crane.buttonPressed:153-156 (!mouseState||Key40||Key32),
   restartGame blockTime=getTimer()+1000）—— 第 22 轮自查发现并修正
-- ❌ 下方向键（TIP_INTRO: "spacebar or down arrow"，Key.isDown 34）
-- ❌ 菜单鼠标导航、城市模式拖放定位、暂停按钮（fla 有 bt_pause/bt_restart/bt_speed? 仅快速游戏音速）
+- ✅ 下方向键/PageDn（Key.isDown 34 → e.code PageDown, 已接）
+- ✅ 菜单鼠标导航（menu 位图五按钮）/城市点击定位（原版亦为点击非拖放）
+- ⬜ 暂停按钮: 原版脚本无 pause 逻辑 (全源码无引用), 记档不复刻
 
 
 ### 8.1 anim 基类层普查（第 38 轮, T13 ✅）
@@ -413,6 +415,15 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   不再误判
 
 ## 实施顺序建议（P0 → P1）
+
+> ### ▣ 收尾计划（第 58 轮 T33 盘点结论）
+> 全源码四层（game 六主类/anim 基类/时间轴 46 轴/esg 根类）普查完毕；视觉层全原版位图化；
+> 待办池清零。剩余项全部为"永久记档"性质：
+> 1. 外链按钮 5 态（平台依赖）/暂停按钮（原版无实现）——有意不复刻
+> 2. NETWORK 高分源（服务端已死）/CITY 榜写入（原版城市模式亦不写）——语义等价
+> 3. J2ME 载体差异（七维判定表第 11 节）——以 Flash 为权威
+> 4. 高分三分页表格（H5 单屏三表已并列展示, 等价）
+> 后续轮次转为：回归维护（三件套全绿守护）+ 玩家实测反馈驱动的微修。
 
 1. 屋顶块+目标高度+结算面板（第 2 节，闭环 quick game）
 2. HUD 完整化（第 4 节）

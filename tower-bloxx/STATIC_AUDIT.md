@@ -490,3 +490,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - [P2] combo fill 136px/5s 基准; [P1] changePopulation 负分支 + knock 扣分走原函数;
   [P1] cleanTower 条件修正 + sm_unlockedTrophyTowerType 全链补齐 (明细 PARITY 1.3)
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 58 轮（2026-09-30）— T33 收尾盘点
+
+- 陈旧状态刷新 7 处: TIP_OUT_OF_TRIES 实为死常量(行为已一致)/下方向键已接/splash 已接/
+  塔格缩略图已原版化/弹飞 BPath 已对号/挂块火花已接/城市模式升 ✅
+- 收尾计划落档 (PARITY 实施顺序节): 剩余项全为永久记档性质; 后续转回归维护+实测反馈微修
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
