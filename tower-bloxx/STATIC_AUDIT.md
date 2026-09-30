@@ -549,3 +549,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - resetMaximums 仅复位 comboMax (GameModel:117-120) = H5 startGame; m_maxTowerAngle
   原版随 updateCleanTower 重算 vs H5 每帧现算 — 同状态同值等价 — 无偏差
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 72 轮（2026-09-30）— T35 回归维护 + placeTower 巡检（洁净）
+
+- placeTower:477-492: bulldozer 热区优先→网格 placeInMap→恒 saveModel — H5 dozer 分支/
+  finishCityTower/saveModel 等价覆盖 (T8 已归档建造-放置结构差) — 无偏差
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
