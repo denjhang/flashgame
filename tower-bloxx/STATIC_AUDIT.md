@@ -420,3 +420,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 过程: python 补丁 CRLF 变体匹配; 第一轮补丁因断言失败整体未写入, 二轮补齐——补丁脚本
   必须"全部成功才写盘"或分轮验证
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 45 轮（2026-09-30）— T20 esg 根类普查（四层覆盖收官）
+
+- Sprite 12/SpriteMgr 9/FluidLayout 5/StateMach/Animator/Recycler/Utils 8 函数全部归类等价
+  （明细 PARITY 10）; 唯一差距: FluidLayout noscale+alignC 的舞台居中 → body flex 居中补齐
+- 覆盖链收官: game 六主类 → anim 基类 → 时间轴脚本 → esg 根类, 反编译源四层全普查
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

@@ -2,8 +2,9 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T20.【函数】esg 根类补漏**：Sprite/SpriteManager/Utils/Animator 等bz/esg 根层类逐函数
-> 普查（spriteFactory/addAnim/findAnim/move/gotoAndStop 语义），对照 H5 three.js 封装找偏差。
+> **T21.【深度自查】J2ME 版差异盘点**：House.java 反编译源逐段过一遍（塔建造/城市视图/存档
+> 格式），列出 J2ME 与 Flash 版行为差异表——H5 以 Flash 为玩法权威（用户已定），差异表用于
+> 说明"哪边才是原版"，防审计时误判。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
 > 挂块 combo 银火花帧。
@@ -295,6 +296,16 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   gotoAndPlay(1)）——H5 fx 槽位随机重生成语义等价; 39 HS_NameDialog/462 popup displayText/
   214/124 高分页切换——均已有等价实现（T11 名字对话框/提示弹窗/单榜）
 - 普查至此完整: game 六主类 + anim 基类 + 时间轴脚本三层全覆盖
+
+
+### 10. esg 根类层普查（第 45 轮, T20 ✅）——反编译源码树全覆盖收官
+- Sprite(12 函数): addAnim/findAnim/move/gotoAndStop → three.js 对象方法+game.js 内联;
+  setClick/clickAction → HTML onclick; returnToFactory 对象池 → JS GC 等价
+- SpriteMgr(9): spriteFactory/makeSpr/makeMovie/killSpr → scene.add/remove + DOM;
+  FluidLayout(5): noscale+alignC 舞台居中 → 第 45 轮补 body flex 居中 (原 H5 靠左上)
+- StateMach/Animator/Recycler(接口+池): STT 分发在 GameState(T11), 池=GC; Utils(8):
+  randRange/calcX/calcY/calcDist 内联等价, isClicked=hitTest → DOM 命中测试等价
+- 至此覆盖链完整: game 六主类+anim 基类+时间轴+esg 根类, 四层全普查
 
 ## 实施顺序建议（P0 → P1）
 
