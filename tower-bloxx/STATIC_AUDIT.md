@@ -531,3 +531,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - ♪/🔊/✕ 文本按钮 → menu_btn_spr 帧 12/11/9 裁切位图 (bbox 实测 71x28/79x26),
   按 makeGameButton 中心 594,20/50/80 布置
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 67 轮（2026-09-30）— T35 回归维护 + msg 描边样式
+
+- 362/360 读图: 500x44 黑底动态文字容器 (原版白字黑描边双层) → #msg 补 -webkit-text-stroke 2px
+- 全量回归: smoke 19 / tower 7 / city 11 PASS

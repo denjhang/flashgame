@@ -27,7 +27,8 @@
   #btns{position:absolute;inset:0;pointer-events:none;font-size:0;}
   #btns img{position:absolute;pointer-events:auto;cursor:pointer;}
   #btns span{display:block;margin:6px 0;padding:2px 6px;background:#00000066;border-radius:4px;cursor:pointer;font-size:15px;}
-  #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;}
+  #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;
+  -webkit-text-stroke:2px #000;} /* msg_spr(362)+msg_stroke(360): 白字黑描边双层 (导出帧为黑底容器, 样式实证) */
   /* 结算/提示弹窗面板 (GameSprites.showSummary/showTip 共用 popupSpr 语义) */
   /* popup_spr(462)/confirmation_reset(444) 绿色面板, 原版 popupSpr CTR 0,40 → (320,280) (读图 433x219) */
   #summary{position:absolute;left:104px;top:170px;width:433px;height:219px;font-size:14px;color:#14501e;
