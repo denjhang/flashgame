@@ -314,7 +314,7 @@ const G = {
   hanging: null, hangingFor: -1,
   craneDx: 0, towerBdx: 0, j2me: true, j2AP: 0,             // T48: J2ME 开关 + House.aP 相位累子
   dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
-  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [], straighten: [],
+  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [], straighten: [], landFx: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
@@ -382,6 +382,12 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   G.texSwoosh = [1, 2, 3].map(i => {
     const t = new THREE.TextureLoader().load(`./assets/flash/fx/DefineSprite_790_swoosh_spr/${i}.png`);
     t.colorSpace = THREE.SRGBColorSpace; return t;
+  });
+  // J2ME r0 id37 三帧星形 (House.ai:1336, 13x13x3): h:3390 落地角标帧表
+  G.texLandFx = [0, 1, 2].map(i => {
+    const t = new THREE.TextureLoader().load('./assets/id37.png');
+    t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter;
+    t.repeat.set(1 / 3, 1); t.offset.x = i / 3; return t;
   });
   // 环境特效 28 帧 (ambient_spr chid734 帧→子剪辑 670..733, FFDec 逐帧导出)
   G.txFX = [];
@@ -923,6 +929,17 @@ function j2Hook(dt) {                           // 对应 House.p(n2): 每帧推
 
 // ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
 let lastFallMesh = null;
+// House.h:3390 落地反馈: 落块后 600ms 塔顶三颗星标 (r0id37),
+// 白<30ms / 橙缩<200ms (n4=16+n2*32/200, n5=16+n2*32/400) / 此后 n2/50%3 帧闪
+function landFxSpawn(cx, cy) {
+  if (!G.texLandFx) return;
+  const sp = [0, 1, 2].map(() => {
+    const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: G.texLandFx[0], transparent: true }));
+    m.scale.set(13, 13, 1); scene.add(m); return m;
+  });
+  G.landFx.push({ sp, x: cx, y: cy, t0: performance.now() });
+}
+
 function blockLanded(offset, releaseBdx, fallMesh) {
   lastFallMesh = fallMesh;
   window.__dbg && (window.__dbg.lands.push(offset), window.__dbg.drops++);
@@ -996,6 +1013,7 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   // currCtr = blockx + blockDx (Tower.as:282): 塔顶中心带保留倾斜
   G.towerBdx = (Math.abs(offset) < TOON_LIMIT_1) ? 0 : bd;
   G.currCtr += x;  // :282 currCtr=blockx+bd 与 :120 的 offset+bd 恰好抵消 bd, 不再另加 towerBdx
+  landFxSpawn(cx, G.landingY - BLOCK_H / 2);   // House.h:3390 落地角标
   G.stacked++;
   panUp();
   addHud();
@@ -1047,6 +1065,21 @@ function updateEffects(dt, now) { // GameSprites.updateEffects:154-208
         slot.next = now + Math.random() * 2000;
       }
     } else if (now >= slot.next) generateEffect(slot);
+  }
+  // 落地角标 (House.h:3390): 角标位移 n4/n5 扩张 + 橙→黏 tint + 帧闪
+  for (let i = G.landFx.length - 1; i >= 0; i--) {
+    const fx = G.landFx[i]; const n2 = now - fx.t0;
+    if (n2 >= 600) { for (const sp of fx.sp) scene.remove(sp); G.landFx.splice(i, 1); continue; }
+    const n4 = n2 < 30 ? 48 : 16 + n2 * 32 / 200;
+    const n5 = n2 < 30 ? 32 : 16 + n2 * 32 / 400;
+    const idx = n2 < 200 ? 0 : Math.floor(n2 / 50) % 3;
+    const col = n2 < 30 ? 0xffffff : ((255 << 16) | ((255 - (n2 >> 2)) & 255) << 8);
+    const pts = [[n4, n5], [-n4, n5], [-n4, -n4]];
+    fx.sp.forEach((sp, k) => {
+      sp.material.map = G.texLandFx[idx];
+      sp.material.color.setHex(col);
+      sp.position.set(fx.x + pts[k][0] - 6, fx.y + pts[k][1] - 6, 300);
+    });
   }
 }
 
@@ -1122,6 +1155,7 @@ function knockTopBlock(dir = 1) { // J2ME d(n2,n3):3007 — 撞塔按偏移深�
   if (Math.abs(G.currCtr - TOWER_START_X) > 200) n8 = 3;
   if (Math.abs(G.currCtr - TOWER_START_X) > 256) n8 = 4;
   n8 = Math.min(n8, G.blocks.length - 1, 4);
+  const topY = top ? top.mesh.position.y : 0;
   for (let k = 0; k < n8; k++) {
     const b = G.blocks.pop();
     if (!b) break;
@@ -1134,6 +1168,24 @@ function knockTopBlock(dir = 1) { // J2ME d(n2,n3):3007 — 撞塔按偏移深�
   }
   const under = G.blocks[G.blocks.length - 1];
   if (under) G.currCtr = under.mesh.position.x + under.cx; // currCtr = 新顶块中心
+  panicPeople(topY, Math.abs(G.currCtr - TOWER_START_X));
+}
+
+// House.t:2098-2150 惊慌人群 (bE[8][12] 8槽): 撞塔后按落点档位抛飞幸存者
+// (|aF[命中层]|>=80→0 / >=50→1 / >=25→1 / <25→2), 其余小人进入 state2 走向块缘 ±64
+function panicPeople(hitY, off) {
+  let n6 = off >= 80 ? 0 : off >= 50 ? 1 : off >= 25 ? 1 : 2;
+  for (let i = G.people.length - 1; i >= 0 && n6 > 0; i--) {
+    const q = G.people[i];
+    if (Math.abs(q.ty - hitY) > BLOCK_H * 2) continue;
+    spawnFallingPerson(q.sp.position.x, q.sp.position.y);
+    towerGroup.remove(q.sp); G.people.splice(i, 1); n6--;
+  }
+  for (const q of G.people) {                      // state2: 重新寻步至块缘, 到达后走既有 Fader 淡出
+    q.arrived = false; q.fading = 0;
+    q.tx = q.sp.position.x + ((Math.random() < 0.5 ? -1 : 1) * 64);
+    q.seekMax = Math.max(q.seekMax, 20);
+  }
 }
 
 function updateCleanTower() { // GameModel.as:181
