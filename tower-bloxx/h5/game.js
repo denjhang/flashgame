@@ -258,6 +258,9 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   else { stopGameVisual(); showTitle(); playSong('sng_title'); }                // STT_TITLE
   window.__tpl = templates.map(t => ({ n: t.name, s: +t.userData.s.toFixed(3), cx: +t.userData.cx.toFixed(1), cy: +t.userData.cy.toFixed(1), kid: t.geometry?.attributes?.position?.count }));
   window.__dbg = { drops: 0, lands: [] };
+  window.__drop = drop;                    // 执行测试钩子
+  window.__state = () => ({ bt: G.blockTime, now: performance.now(), over: G.over,
+    vis: craneGroup.visible, falling: !!G.falling, city: hud.city.style.display });
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
 
 // ---- Build City: CityMap/GameModel 对号 ----
@@ -529,6 +532,7 @@ function startGame() {
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
   G.comboMult = 0; G.comboT = 0; G.comboBank = 0; G.camY = 0; G.over = false;
   G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false; G.dozerMode = false;
+  G.blockTime = performance.now() + 1000;      // Crane.restartGame: blockTime = getTimer()+1000
   hud.summary.style.display = 'none';
   hud.msg.style.display = 'none';
   craneGroup.visible = true;
@@ -542,7 +546,8 @@ function gameOver(won) {
   hud.msg.textContent = won ? 'Tower complete!' : 'Too many blocks missed!'; // Const.MSG_GAME_WON/MSG_GAME_LOST
   hud.msg.style.color = won ? '#ffd700' : '#ff6b6b';
   hud.msg.style.display = 'block';
-  playSound(won ? 'snd_fanfare_good' : 'snd_fanfare_bad'); // GameState.as:121-131
+  // GameState.as:128: 胜利 fanfare 按 trophyRoof 分 med/good; 失败 bad (:122)
+  playSound(won ? (G.trophyRoof ? 'snd_fanfare_good' : 'snd_fanfare_mediocre') : 'snd_fanfare_bad');
   if (won) showSummary();
   if (!won) {
     // 塔散架 (Tower.clearBlocks(topple))
@@ -853,6 +858,7 @@ function drop() {
   if (!ready || G.over || G.falling || !craneGroup.visible ||
       hud.city.style.display === 'block' || hud.menuScr.style.display === 'block' ||
       hud.titleScr.style.display === 'block') return;
+  if (performance.now() < G.blockTime) return;  // restartGame: blockTime = now+1000 (Crane.as:139)
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);
@@ -866,8 +872,11 @@ function drop() {
   G.falling = { mesh, vy: 0, cy: tpl.userData.cy, bdx, vx: bdx * 3 / fallMs };
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
-addEventListener('pointerdown', drop);
+// 原版鼠标语义: 按下仅置 mouseState=false, 松开才落块 (Crane.onMouseDown/Up:176-189, buttonPressed:155)
+addEventListener('pointerdown', () => { G.mouseState = false; });
+addEventListener('pointerup', () => { G.mouseState = true; drop(); });
 addEventListener('keydown', e => {
+  // Key.isDown(40)/Key.isDown(32): 按住即落 (buttonPressed:155) — keydown 触发一次等价
   if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'PageDown') { e.preventDefault(); drop(); } // TIP_INTRO
 });
 // 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好

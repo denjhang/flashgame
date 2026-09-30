@@ -229,3 +229,10 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - GLB 载入轮询窗口 2s→5s: 一次回归轮出现偶发 "PASS=2"（高负载下 GLB 未及载入, 后续断言跳过）,
   三连跑验证 7 PASS 稳定; 属测试自身不稳定, 非游戏代码回归
+## 第 23 轮（2026-09-30）— 深度自查第二轮: 修正 2 处真实偏差 + 执行测试实时化
+
+- [P1] 放块时机偏差: 原版鼠标"松开"才落块(buttonPressed=!mouseState||Key40||Key32, Crane.as:153-156)
+  + 重开后 1s 落块锁(restartGame blockTime=now+1000); H5 原为按下即放/无锁 → 已对号
+- [P2] 胜利号声: trophyRoof ? snd_fanfare_good : snd_fanfare_mediocre (GameState.as:128), 原恒 good → 已对号
+- exec_test 改真实时钟节奏(runRealtime), 修复 1s 门锁导致的假阴性; tower 7 PASS/city 10 PASS/smoke 17
+- 自查方法论: 每轮主动挑 2-3 个从未取证的行为点翻原版源码, 而非只跑回归

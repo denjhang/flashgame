@@ -123,6 +123,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 ## 8. 输入——🟨
 
 - ✅ 点击/空格/下方向键/PgDn 放块（TIP_INTRO; Tipper.as:62 Key.isDown(34)）
+- ✅ 放块时机: 鼠标松开判定 + 重开后 1s 落块锁（Crane.buttonPressed:153-156 (!mouseState||Key40||Key32),
+  restartGame blockTime=getTimer()+1000）—— 第 22 轮自查发现并修正
 - ❌ 下方向键（TIP_INTRO: "spacebar or down arrow"，Key.isDown 34）
 - ❌ 菜单鼠标导航、城市模式拖放定位、暂停按钮（fla 有 bt_pause/bt_restart/bt_speed? 仅快速游戏音速）
 

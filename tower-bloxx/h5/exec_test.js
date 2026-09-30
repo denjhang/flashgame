@@ -98,6 +98,19 @@ const hudCityGridChildren = () => {
   return g ? g.children.length : 0;
 };
 
+// 真实时钟帧驱动: secs 秒内每 16ms 一帧, 可选每 dropEvery 帧调 dropFn
+async function runRealtime(secs, dropEvery, dropFn, t0) {
+  let n = 0;
+  const end = performance.now() + secs * 1000;
+  while (performance.now() < end) {
+    await new Promise(r => setTimeout(r, 16));
+    n++;
+    t = 500 + n * 16;
+    if (dropEvery && n % dropEvery === 0) dropFn && dropFn();
+    frame(t);
+  }
+}
+
 // ---- 运行 ----
 try {
   await import('./game.js');
@@ -111,6 +124,8 @@ try {
 for (let i = 0; i < 100; i++) { await new Promise(r => setTimeout(r, 50)); frame(500 + i * 16); if (globalThis.__ready) break; } // 5s 轮询, 防高负载偶发
 console.log('[dbg] errs=' + JSON.stringify(globalThis.__errs) + ' ready=' + globalThis.__ready);
 check(globalThis.__ready === true, 'GLB 载入完成 (window.__ready)' + (globalThis.__errs && globalThis.__errs.length ? ' errs=' + JSON.stringify(globalThis.__errs) : ''));
+// 等 Crane.restartGame 的 1s 落块锁走完 (真实时钟, 含 GLB 回调延迟)
+await new Promise(r => setTimeout(r, 1400));
 
 // 跑 600 帧 × 16ms ≈ 10 秒游戏时间, 期间按空格放块
 let t = 1000;
@@ -137,7 +152,8 @@ if (SCENARIO === 'tower') {
   if (title && title.onclick) title.onclick();          // STT_TITLE → STT_MENU
   const clicked = fire('id:mQuick', 'click');            // BTN_QUICK_GAME (GameSprites.as:347)
   check(clicked, '菜单 Quick Game 按钮已绑定');
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 400 && performance.now() < t0 + 20000; i++) {
+    await new Promise(r => setTimeout(r, 16));
     t += 16;
     if (i % 30 === 15) for (const f of listeners.pointerdown || []) f({ stopPropagation() {} });
     if (i % 30 === 16) for (const f of listeners.keydown || []) f({ code: 'Space', preventDefault() {} });
@@ -156,11 +172,8 @@ if (SCENARIO === 'city') {
   const cell0 = document.getElementById('cityGrid').children[0];
   cell0.onclick();
   // 放块至 10 层 (含屋顶)
-  for (let i = 0; i < 900 && (globalThis.__dbg.lands || []).length < 10; i++) {
-    t += 16;
-    if (i % 30 === 15) for (const f of listeners.pointerdown || []) f({ stopPropagation() {} });
-    frame(t);
-  }
+  await runRealtime(25, 30, () => globalThis.__drop && globalThis.__drop());
+  console.log('[dbg] state=' + JSON.stringify(globalThis.__state()));
   check((globalThis.__dbg.lands || []).length >= 10, `城市塔建造落地 = ${(globalThis.__dbg.lands || []).length} (期望 ≥10)`);
   // 过关 → 结算面板 OK → finishCityTower(true) → 放置+存档
   const sm = document.getElementById('summary');
