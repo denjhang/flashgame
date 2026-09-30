@@ -501,3 +501,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - exec_test SAVE_SEED=1/2/3 三代存档种子 × tower/city 双场景全 PASS; smoke +1 断言(19 项):
   restoreModel 字段兜底必须在位 (明细 PARITY 7.3)
 - 进入回归维护期
+## 第 60 轮（2026-09-30）— T35 回归维护
+
+- 全量回归: node --check + smoke 19 PASS / tower 7 PASS / city 10 PASS / SAVE_SEED=2 7 PASS
+- 巡检: 无死引用残留、工作区干净、提交范围无跨项目混入
