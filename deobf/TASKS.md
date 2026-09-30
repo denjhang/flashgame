@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+59: C 键建造区显示复核（方向2）——原版 6_1 keyDown(67):
+  surfaceForBuild alpha 0↔35 + menuArea 按钮帧 on/off 同步; H5 showBuildArea
+  掩码 35% 透明度 + 侧栏 tArea 按钮状态同步 (3151) 一致。无码改
+
 - [x] TCS+58: R 键满血怪癖对齐（方向2, **行为修正**）——原版 repairIfCan:
   满血时 priceToPay=0 → 照样扣款(0)+selectionUnite, 无 cannot ("no reparations
   needed" 只改条上文本)。H5 两处 (R 键 guard sel.hp<max / 修理条点击
