@@ -1,5 +1,17 @@
 # TCS 反混淆与资源还原进度
 
+## 第 TCS+13 轮记录（2026-09-30, 方向1 收尾 —— 6_321/6_335/6_564 翻证）
+
+- **6_321** = master_pointeur 状态初始化：鼠标滚屏阈值 35px、速度 24*fpsc、
+  viseurConstruction/zoneBombardement 初始 false —— 与 H5 操作基准逐项一致
+- **6_564** = 读档自动解锁：严格 `>` 阈值（>7 canon75 / >11 canon105 /
+  >16 canon105D / >27 radar / >31 su37）—— 与 H5 loadGame 的 `k < iMission`
+  完全等价，并新增边界断言（iMission=8 给 canon75 / =7 不给）
+- 6_335 = 两个归零混淆计数器（无行为）
+- 冒烟 183 项 `=true`、exit 0；三件套通过
+
+### 本轮仍未做：无新挂账（frame_6 剪辑全部翻证完毕）
+
 ## 第 TCS+12 轮记录（2026-09-30, 方向4/5 离线审计 —— CSS/HTML 漂移检查，零漂移）
 
 - 扫描 index.html 全部 CSS id 选择器 vs HTML id：**无孤儿选择器**；

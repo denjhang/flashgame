@@ -1488,7 +1488,18 @@ console.log("--- protecthint ---");
      hj.includes('id="protectHint"') && hj.includes('left:642px') &&
      gj.includes("protectHint") && gj.includes("G.wave + 1 === 1")));
 }
-// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
+// ---- 读档解锁阈值 (TCS+13): 6_564 严格 > 语义 (iMission>7 才给 canon75) ----
+console.log("--- 读档解锁阈值 ---");
+{
+  global.localStorage.setItem('tcs_cookie', JSON.stringify({ units: [], iMission: 8, iUnlock: 0, euros: 850 }));
+  G.wave = 0; loadGame();
+  const at8 = G.unlocker.canon75 === true && G.unlocker.canon105 === false;
+  global.localStorage.setItem('tcs_cookie', JSON.stringify({ units: [], iMission: 7, iUnlock: 0, euros: 850 }));
+  G.wave = 0; loadGame();
+  const at7 = G.unlocker.canon75 === false;
+  console.log("读档阈值 iMission>7 语义 (8给/7不给)=" + (at8 && at7));
+}
+// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104)// ---- 极端存档边界 (N+104): 0塔/满解锁/末关 读档+sim ----
 console.log("--- 极端存档 ---");
 {
   // 手工放置一个极端 cookie: 0 塔, iMission=44, iUnlock=5, 低钱低利率
