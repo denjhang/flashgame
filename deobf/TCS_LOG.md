@@ -204,3 +204,15 @@
   （期望值即 false / 已知口径），非本轮回归。
 - 断言 +1 → 冒烟 203 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+46（2026-09-26）金钱面板 LOSSES 勘误（方向2，行为修正）
+
+- 取证：1079/frame_1/1074_30 `actualiseInfo()`——金钱面板三字段 euros/interest/
+  score，其中 score.text = master_menuItems.score；score 只在塔 destruction 时
+  ++（185帧2 DoAction_2: iMission<45 → score++，战斗被毁与 S 键卖出同路径），
+  即 **LOSSES = 丢塔数**（原版教程台词"your score is the losses you suffered"
+  佐证）。敌方抵达基地 → activePerdu，不进 score。
+- **缺陷**：H5 hLoss 显示 'LOSSES ' + G.losses（敌人抵达次数）→ 改为 G.score。
+  G.losses 变量保留（smoke sim 快照用），不再上屏。
+- 断言 +1 → 冒烟 204 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

@@ -1819,6 +1819,10 @@ console.log("--- 修理费 (819) ---");
   console.log("车速抖动=原版 accelere 1%重roll(+0..20%)=" +
     (gj.includes('Math.random() * 100 > 99') &&
      gj.includes('this.vPrime = this.vBase + Math.random() * (this.vBase / 5)')));
+  // TCS+46: 金钱面板 LOSSES = master_menuItems.score 丢塔数 (1079 actualiseInfo),
+  //   非敌人抵达次数
+  console.log("LOSSES=丢塔数 G.score (1079 actualiseInfo)=" +
+    gj.includes("'LOSSES ' + G.score"));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

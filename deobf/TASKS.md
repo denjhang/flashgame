@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+46: 金钱面板 LOSSES 勘误（方向2, **行为修正**）——原版 1079
+  actualiseInfo: infoMoneyAndScore.score.text = master_menuItems.score
+  (丢塔数, 185帧2 iMission<45 时 score++, 卖出/被毁都算); H5 误接 G.losses
+  (敌人抵达次数) → 改接 G.score。断言入冒烟（204 项全绿）
+
 - [x] TCS+45: accelere 车速抖动补齐（方向2, **行为补全**）——原版 426_1
   loc0a40: 每帧 1% 概率 vitesseToDoInitPrime = init + rand×(init/5) → 车队
   +0..20% 随机巡航速; H5 缺失 → 补 vBase/vPrime 机制。对照 HEAD 验证既有

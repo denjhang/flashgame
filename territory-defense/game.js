@@ -2987,7 +2987,10 @@ function hud() {
   document.getElementById('hScore').textContent = G.score;
   document.getElementById('hCash').textContent = G.euros + ' $';
   document.getElementById('hInt2').textContent = 'interest ' + G.interest + '%';
-  document.getElementById('hLoss').textContent = 'LOSSES ' + G.losses;
+  // 原版 actualiseInfo (1079/1074_30): infoMoneyAndScore.score.text =
+  //   master_menuItems.score —— LOSSES 值 = 丢塔数 (185帧2: iMission<45 时 score++),
+  //   非敌人抵达次数 (TCS+46 勘误: 旧实现误接 G.losses)
+  document.getElementById('hLoss').textContent = 'LOSSES ' + G.score;
   if (typeof syncPanel === 'function') syncPanel();
 }
 // 预热全部炮塔素材 (173 塔体层 + 86 结构层 + 敌方武器塔)
