@@ -947,7 +947,10 @@ function spawnPeople(blockMesh, amt) {
     sp.scale.set(42, 56, 1);                           // 帧原始尺寸 (读图 42x56)
     const bx = blockMesh.position.x + (blockMesh.userData.cx || 0);
     const side = Math.random() < 0.5 ? -1 : 1;
-    sp.position.set(bx + side * (160 + Math.random() * 160), G.landingY + 100 + Math.random() * 100, 2);
+    // makePerson:320-322: 偏移 = ±viewWidth/2 (=±320), 右侧出生镜像 (_xscale=-100)
+    const off = side * 320;
+    if (off > 0) sp.scale.x = -42;
+    sp.position.set(bx + off, G.landingY + 100 + Math.random() * 100, 2);
     towerGroup.add(sp);
     G.people.push({ sp, tx: bx + (12 - Math.floor(Math.random() * 2) * 24), ty: G.landingY - 17,
       seekMax: 10 + Math.random() * 20, next: 0, fading: 0,

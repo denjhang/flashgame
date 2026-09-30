@@ -282,6 +282,8 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - Crane.animate:86-92: lineStyle(3,0,50)=黑 3px 20% 透明; moveTo(320,-100)=固定枢轴斜拉
   → H5 原来竖直不透明线, 改斜线 (起点=枢轴 x−钩 x) + 透明黑材质
   - 补: 钩贴图随倾斜旋转 (hookSpr._rotation=_loc3_ Crane.as:73 / setTarget 归零 :59) — 第 63 轮
+  - 补: 小人生成坐标 (第 68 轮) — makePerson:320-322 偏移=±viewWidth/2 (±320, H5 原 ±160..320),
+    右侧出生镜像 (_xscale=-100)
   - 补: 右上角三按钮位图化 (第 66 轮) — menu_btn_spr 帧 12(MUSIC)/11(EFFECTS)/9(EXIT) 按中心
     594,20/50/80 裁切布置 (bbox 实测), 替换 ♪/🔊/✕ 文本
 

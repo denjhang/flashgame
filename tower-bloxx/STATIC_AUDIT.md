@@ -535,3 +535,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - 362/360 读图: 500x44 黑底动态文字容器 (原版白字黑描边双层) → #msg 补 -webkit-text-stroke 2px
 - 全量回归: smoke 19 / tower 7 / city 11 PASS
+## 第 69 轮（2026-09-30）— T35 回归维护 + 小人生成坐标
+
+- makePerson:320-322: 偏移 ±viewWidth/2 (±320) + 右侧镜像 → H5 原 ±160..320 无镜像, 已修
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
