@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+42: 行进速度模型复核（方向2）——原版 chassis[0]×fpsc px/帧@24 +
+  转弯减速 chassis[1] + 转向 chassis[2] 度/帧；H5 已按 ×1.13×(24/30) 换算实现，
+  且冒烟已有逐车型实战断言（926 行起，8 车型+转向）→ 已覆盖，无需新增
+
 - [x] TCS+41: 射速模型复核（方向2）——原版 174_173: setInterval(OCEEF,43ms) +
   numberOfRequestForPermission=floor(t[2]/fpsc), fpsc=1.13（GAME_LOGIC 9/41 行）;
   H5 fireCooldownMs=floor(t2/1.13)*43ms 毫秒制等价。断言入冒烟（200 项全绿）

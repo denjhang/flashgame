@@ -158,3 +158,13 @@
 - 结论：H5 `fireCooldownMs(t2) = floor(t2/1.13) × 43ms`——H5 以毫秒计时，
   N 次 OCEEF tick × 43ms，逐值等价。断言 +1 → 冒烟 200 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+42（2026-09-26）行进速度模型复核（方向2，重复覆盖确认）
+
+- 取证：GAME_LOGIC 35（巡航速度 = chassis[0]×fpsc，转弯减速 vitesseFrein=
+  chassis[1]，旋转 chassis[2] 度/帧@24fps）+ game.js Unit 构造注释（旧实现
+  c[0]*0.45/c[2]*0.09 偏差已在此前轮修正，×1.13×(24/30) 换算正确）。
+- 结论：冒烟 926 行起已有逐车型断言（camion1/jeep/bradley/abrams/t90/navire/
+  Yamato/camionBlinde/tigre 巡航 + camion1 转向），本方向已被覆盖——本轮
+  重复确认，无码改。三件套通过，冒烟 200 项全 `=true`、exit 0。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。
