@@ -2215,11 +2215,11 @@ function autoUnlockForWave(waveNo) {
   if (id && !G.unlocker[id]) { G.unlocker[id] = true; buildShop(); }
 }
 function shouldShowUnlockPanel(waveNo) { return PANEL_WAVES.includes(waveNo); }
-// 面板弹出: 原版 _x=400/_y=300 居中, 冻结演出直到玩家二选一
+// 面板弹出: 原版 _x=400/_y=300 居中, lockItem=false, 无音效 (TCS+53 勘误:
+//   773_189 调用点与 6_333 函数体均无 start() —— 旧实现多播了一个 boutonScroll)
 function showPanelForUnlock() {
   G.panelOpen = true;
   G.lockItem = false;
-  playSfx('boutonScroll', 0.4);
   refreshPanelButtons();
   syncPanel();          // 函数声明提升, 定义在输入段
 }

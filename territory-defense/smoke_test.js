@@ -1830,6 +1830,12 @@ console.log("--- 修理费 (819) ---");
     (gj.includes('function panelPickInterest') && gj.includes('function panelPickUnlock') &&
      gj.includes('G.interest += INTEREST_STEP') &&
      gj.includes("else playSfx('cannot', 0.45)")));
+  // TCS+53: 面板弹出无音效 (6_333 showPanelForUnlock + 773_189 调用点均无 start());
+  //   newEvents 全分支 (16/18/20/25/26/27/31/37/39/44) 已接线
+  const iSP = gj.indexOf('function showPanelForUnlock');
+  const bodySP = gj.slice(iSP, gj.indexOf('}', iSP));
+  console.log("面板弹出静音+newEvents全分支=" +
+    (!bodySP.includes('playSfx') && gj.includes('if (nextWave === 25) G.euros += 2400;')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

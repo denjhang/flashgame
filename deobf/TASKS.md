@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+53: newEvents 全分支复核 + 面板弹出静音勘误（方向2, **行为修正**）——
+  773_189: 16→canon105D自动解锁(无面板)/18,20,37,39→仅面板/27→radar解锁+面板/
+  31→su37解锁+面板/25→euros+2400/26→edith/44→Yamato; H5 全接线。
+  原版 showPanelForUnlock 无音效 → 移除 H5 多播的 boutonScroll。断言入冒烟(206)
+
 - [x] TCS+52: unlockNextWeapon 对照（方向2）——原版 6_333: iUnlock==5(严格
   等值)→false, 否则解锁 weaponsToUnlock[iUnlock] + iUnlock++ + 建造槽帧刷新
   (gotoAndStop normal ≈ H5 buildShop); 列表五项 crotale/canon125/MLRS/MTHEL/

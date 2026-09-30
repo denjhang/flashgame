@@ -277,3 +277,14 @@
   建造槽刷新 ≈ buildShop()。冒烟已有连线断言（连续解锁 5 件/iUnlock=5）。
   无码改。三件套通过，205 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+53（2026-09-26）newEvents 全分支复核 + 面板弹出静音勘误（方向2）
+
+- 取证：773_189 newEvents 全分支——16→canon105D 自动解锁（**无面板**）；
+  18/20/37/39→仅 showPanelForUnlock；27/31→radar/su37 解锁+面板；
+  25→euros+2400（法英补助，H5 在计息前入账，正确吃息）；26→edith 语音；
+  44→Yamato。H5 全部接线，PANEL_WAVES/AUTO_UNLOCK 与之逐项吻合。
+- **勘误**：6_333 showPanelForUnlock 函数体与 773_189 调用点均无任何
+  sound.start() → 移除 H5 多播的 boutonScroll（面板弹出应为静音）。
+- 断言 +1 → 冒烟 206 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。
