@@ -1764,6 +1764,18 @@ console.log("--- 初始经济 (6_333) ---");
   console.log("卖出价=原版公式 floor(hp/maxHp*(cost*0.75))=" +
     gj.includes('Math.floor(this.hp / this.maxHp * (this.cost * SELL_RATIO))'));
 }
+// ---- TCS+34: 修理费公式 (819 refresh 权威: round(2*(etatMax-etat))=2$/HP;
+//      819 repairIfCan: 欧不足播 cannot, 扣款后 etat=etatMax + selectionUnite) ----
+console.log("--- 修理费 (819) ---");
+{
+  const fsx = require('fs');
+  const gj = fsx.readFileSync('game.js', 'utf8');
+  const nRep = (gj.match(/function repairIfCan/g) || []).length +
+               (gj.match(/function repairPrice/g) || []).length;
+  console.log("修理费=round(2$/HP) 且无重复定义 (repairPrice/IfCan 各1)=" +
+    (gj.includes('return REPAIR_COST * (t.maxHp - t.hp);') &&
+     gj.includes('const REPAIR_COST = 2;') && nRep === 2));
+}
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
 {

@@ -79,3 +79,17 @@
 - 断言 +1 → 冒烟 193 项全 `=true`、exit 0；三件套通过。
   （插曲: 断言正则插入 eval 模板串被吃反斜杠 → 改 includes() 写法, 与 N+7x 教训一致）
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+34（2026-09-26）修理费取证 + 重复定义缺陷清除（方向2）
+
+- 取证：819 onClipEvent(load) 两个函数——refresh(): repairPrice.text =
+  priceToPay = **round(2×(etatMax−etat))**（pcode 中 r3=(r3/2); r3=(r3/r5) 是混淆
+  死代码，随后 r3=2 覆盖）；"no reparations needed" 当差 0。repairIfCan():
+  euros<priceToPay → cannot 音效；否则扣款、etat=etatMax、selectionUnite 音效。
+  另: autor 标签随 repairLogo.autoRepair 翻转 ON/OFF。
+- **缺陷**：game.js 中 repairPrice/repairIfCan/swithRepair 各有两份定义，第二份
+  repairIfCan 只扣固定 2$（非 per-HP 计价）且因函数提升成为生效版本——潜伏缺陷，
+  幸而所有调用点（R 键/修理条点击）均直接调 repairPrice() 自行扣款，未踩雷。
+  已删除错误副本，保留与原版一致的第一份。
+- 防回归断言（公式+唯一性）+1 → 冒烟 194 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

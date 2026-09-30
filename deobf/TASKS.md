@@ -28,6 +28,13 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+34: 修理费取证 + 重复定义缺陷清除（方向2）——原版 819 refresh:
+  priceToPay=round(2×(etatMax−etat))（pcode 前两行 r3/2、r3/r5 为混淆死代码）;
+  repairIfCan: euros<priceToPay→cannot 音效, 否则扣款+etat=etatMax+selectionUnite。
+  发现 game.js 里 repairPrice/repairIfCan/swithRepair 被第二个错误副本遮蔽
+  (副本只收固定 2$, 无 per-HP 计价; 因函数提升生效, 幸所有调用点直接用
+  repairPrice() 未踩雷) → 删除重复副本。断言入冒烟(194 项全绿)
+
 - [x] TCS+33: 卖出价公式抽查（方向2）——原版 6_1 keyDown(83):
   floor(etatC/etatM × (price×0.75))；H5 分组改为照抄原版（避免浮点结合序差 1），
   断言入冒烟（193 项全绿）。另: 利息公式(giveIntrest)已对齐(TCS 早期轮)

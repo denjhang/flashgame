@@ -1179,21 +1179,6 @@ function repairIfCan(t) {
 }
 function swithRepair(t) { t.autoRepair = !t.autoRepair; }
 
-// 修理费公式 (原版 819 refresh() 权威): round(2 * (etatMax - etat)) = 2 $/HP
-//   注: pcode 里 r3=(r3/2); r3=(r3/r5); 是混淆死代码, 随后 `r3 = 2` 直接覆盖,
-//   最终 r3 = round(2 * (maxHP - curHP))。H5 的 REPAIR_COST=2 与之完全一致
-function repairPrice(t) {
-  if (t.hp >= t.maxHp) return 0;
-  return REPAIR_COST * (t.maxHp - t.hp);
-}
-function repairIfCan(t) {
-  if (G.euros < REPAIR_COST) { playSfx('cannot', 0.4); return false; }
-  t.hp = t.maxHp;
-  playSfx('selectionUnite', 0.4);
-  return true;
-}
-function swithRepair(t) { t.autoRepair = !t.autoRepair; }
-
 const SFX_FILES = {
   boutonScroll: '450_boutonScroll.mp3', creationUnite: '452_creationUnite.mp3',
   selectionUnite: '471_selectionUnite.mp3', cannot: '451_cannot.mp3',
