@@ -3341,8 +3341,9 @@ hud();
     const hi = document.getElementById('helpImg');
     const tk = document.getElementById('tabKeys'), tu = document.getElementById('tabUnits');
     if (tk && tu && hi) {
-      tk.onclick = (e) => { e.stopPropagation(); hi.src = 'assets/ui/help_board.png'; };
-      tu.onclick = (e) => { e.stopPropagation(); hi.src = 'assets/ui/help_board_fr.png'; };
+      // 原版页签 on(press): selectionUnite + gotoAndStop("keys"/"prices")
+      tk.onclick = (e) => { e.stopPropagation(); hi.src = 'assets/ui/help_board.png'; playSfx('selectionUnite', 0.35); };
+      tu.onclick = (e) => { e.stopPropagation(); hi.src = 'assets/ui/help_board_fr.png'; playSfx('selectionUnite', 0.35); };
     }
     // 原版 qualityB(1040 → changeQuality) / storyB(1053 模式标签翻转)
     const qb = document.getElementById('hQual'), qt = document.getElementById('hQualTxt');
