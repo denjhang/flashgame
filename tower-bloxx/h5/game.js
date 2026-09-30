@@ -583,6 +583,7 @@ function showSummary() {
     '<div>' + line('Tower height:  ', G.stacked, G.stacked >= G.records.blockRecord && G.stacked > 0) + '</div>' +
     '<div>' + line('Longest combo: ', G.comboMax, G.comboMax >= G.records.comboRecord && G.comboMax > 0) + '</div>' +
     '<div class="ok">Click here to play again</div>';                               // Const.MSG_RESTART
+  G.blockTime = -1;                          // GameSprites.showSummary:35 delayNextBlock(-1)
   hud.summary.style.display = 'block';
   hud.summary.querySelector('.ok').onclick = () => {
     if (G.cityMode && G.pendingCell) finishCityTower(wonRef.won);
@@ -857,7 +858,8 @@ function drop() {
   if (!ready || G.over || G.falling || !craneGroup.visible ||
       hud.city.style.display === 'block' || hud.menuScr.style.display === 'block' ||
       hud.titleScr.style.display === 'block') return;
-  if (performance.now() < G.blockTime) return;  // restartGame: blockTime = now+1000 (Crane.as:139)
+  if (G.blockTime === -1 || performance.now() < G.blockTime) return;
+  // blockTime=-1 = 弹窗期禁放 (Crane.delayNextBlock:123 delayNextBlock(-1)/buttonPressed:155)
   const tpl = blockTemplate(G.stacked);
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);

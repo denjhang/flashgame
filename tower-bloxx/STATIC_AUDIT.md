@@ -236,3 +236,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - [P2] 胜利号声: trophyRoof ? snd_fanfare_good : snd_fanfare_mediocre (GameState.as:128), 原恒 good → 已对号
 - exec_test 改真实时钟节奏(runRealtime), 修复 1s 门锁导致的假阴性; tower 7 PASS/city 10 PASS/smoke 17
 - 自查方法论: 每轮主动挑 2-3 个从未取证的行为点翻原版源码, 而非只跑回归
+
+## 第 24 轮（2026-09-30）— delayNextBlock 对号
+
+- 结算弹窗期间禁放: showSummary → delayNextBlock(-1) (GameSprites.as:35; Crane.delayNextBlock:121-127
+  blockTime=-1, buttonPressed:155 要求 !=-1), OK 后由 startGame 的 +1000 重启 (restartGame:52)
+- drop() 门禁补 blockTime===-1 分支; tower 7 PASS / city 10 PASS / smoke 17 PASS
