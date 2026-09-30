@@ -3045,9 +3045,10 @@ function buildShop() {
 // 键盘翻页 (原版 turnConstruction 只由箭头触发; H5 额外给 [,] / Q,E 方便操作, 如实记录)
 window.addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
-  // 原版 keyDown 门禁: S/R/C/G/Q 带 !enScenario (简报/对白期间禁用); H/M/空格/方向键不受限
-  const enScenario = G.briefing || dlg !== null;
-  if (k === 'q' && !enScenario) { changeQuality(); e.preventDefault(); }   // 原版 keyDown: Q → changeQuality
+  // 原版 keyDown 的 !enScenario 门禁经查为作用域冲突死条件 (enScenario 置 true 后
+  //   全库无置 false, 且 keyDown 在另一剪辑时间线上读到的是未定义变量 → 按键实际
+  //   永远可用, TCS+18 取证) —— H5 不复刻该死条件
+  if (k === 'q') { changeQuality(); e.preventDefault(); }   // 原版 keyDown: Q → changeQuality
   if (k === '[') { turnConstruction('left'); e.preventDefault(); }
   if (k === 'e' || k === ']') { turnConstruction('right'); e.preventDefault(); }
 });
@@ -3204,7 +3205,7 @@ window.addEventListener('keydown', (e) => {
   const sel = G.selected || G.turrets.find(t => Math.hypot(t.x - G.mx, t.y - G.my) < 20);
   const k = e.key.toLowerCase();
   // 原版 keyDown 映射: S=卖出(按血量75%折价) R=修理 空格=取消 H=血条 M=滚屏 C=建造区 G=全图
-  if (k === 's' && !enScenario) {
+  if (k === 's') {
     // 原版 (6_1 keyDown, key==83):
     //   priceOfSell = floor(etatC/etatM * (price*0.75)); euros += priceOfSell;
     //   afficheUnit._parent.unitEtat.destruction();     ← 走【同一套阵亡序列】
@@ -3217,7 +3218,7 @@ window.addEventListener('keydown', (e) => {
       G.selected = null;
     }
   }
-  if (k === 'r' && !enScenario) {   // 原版 819 repairIfCan(): 全额修复, 扣 repairPrice
+  if (k === 'r') {   // 原版 819 repairIfCan(): 全额修复, 扣 repairPrice
     if (sel && sel.hp < sel.maxHp) {
       const price = repairPrice(sel);
       if (G.euros < price) playSfx('cannot', 0.4);
@@ -3235,8 +3236,8 @@ window.addEventListener('keydown', (e) => {
   }
   if (k === 'h') G.showHp = !G.showHp;
   if (k === 'm') G.mouseScroll = !G.mouseScroll;
-  if (k === 'c' && !enScenario) G.showBuildArea = !G.showBuildArea;
-  if (k === 'g' && !enScenario) toggleZoom();
+  if (k === 'c') G.showBuildArea = !G.showBuildArea;
+  if (k === 'g') toggleZoom();
   if (dlg && (e.key === ' ' || e.key === 'Enter')) { dlgNext(); e.preventDefault(); return; }
   if (e.key === ' ') { depressSpace(); e.preventDefault(); buildShop(); }
 });
