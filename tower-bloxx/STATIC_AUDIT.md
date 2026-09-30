@@ -573,3 +573,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 第 77 轮"J2ME 钩可操控、与 Flash 根本不同"结论作废: l(dir) 是 UI 光标/菜单导航
   (bZ 滑 bY 数组), J2ME 玩法同为单键落块+自动摆
 - 教训入档: 混淆变量必须先确认运行态归属再下结论; 禁止跳到"重大差异"
+## 第 79 轮（2026-09-30）— r0 解包完成（J2ME 资源主线开工）
+
+- tools/r0_unpack.py (g.java 偏移表逆向); dc_v1507 r0 → 89 条目全解 (81 PNG + 6 MIDI + 2 bin)
+- 拼图鉴定完成 (明细 PARITY 13); 下一任务 T45: 对照 House.b(graphics,id) 调用点接入
