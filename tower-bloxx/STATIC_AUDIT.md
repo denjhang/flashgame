@@ -242,3 +242,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 结算弹窗期间禁放: showSummary → delayNextBlock(-1) (GameSprites.as:35; Crane.delayNextBlock:121-127
   blockTime=-1, buttonPressed:155 要求 !=-1), OK 后由 startGame 的 +1000 重启 (restartGame:52)
 - drop() 门禁补 blockTime===-1 分支; tower 7 PASS / city 10 PASS / smoke 17 PASS
+
+## 第 25 轮（2026-09-30）— 考证收尾轮
+
+- 全库 grep fanfare: GameState.as:128 是唯一胜利分档点, 资产名 snd_fanfare_med(原版内名)
+  ↔ snd_fanfare_mediocre(ExportAssets 导出名), H5 映射正确
+- Crane.fakeDrop/fakePerfect (Crane.as:213-220) 取证: 无调用方的作弊死代码, 与 sm_cheatsOn
+  同类, 记入 PARITY "考证不移植项"
+- 全量回归: tower 7 PASS / city 10 PASS / smoke 17 PASS (上一轮已跑, 本轮无代码变动)

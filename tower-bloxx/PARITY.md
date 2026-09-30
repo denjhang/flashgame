@@ -108,6 +108,10 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   非完美堆叠（:222-248）、snd_destroy miss/撞塔（:139-167）、snd_fanfare_bad/good 胜负
   （GameState.as:121-131）、playSong("sng_tower") 开局（GameState.as:102）、按钮 snd_click
 - ✅ 音乐/音效开关生效（STT_MUSIC_TOGGLE/STT_SOUND_TOGGLE, GameState.as:249-255）
+- ✅ 胜利号声分档: trophyRoof ? snd_fanfare_good : snd_fanfare_med (GameState.as:128;
+  原版资产名 "snd_fanfare_med", ExportAssets 导出名为 snd_fanfare_mediocre, H5 用后者 1:1)
+- ✅ 考证不移植项: Crane.fakeDrop/fakePerfect (Crane.as:213-220) 为原版内部作弊死代码,
+  无任何 UI 调用方, 与 sm_cheatsOn 一样属调试残留
 - 备注：J2ME 9 首 MIDI 为手机版曲目，与 Flash 版曲库不同源；Flash 版即权威，MIDI 不再转码
 
 ## 7. 存档/记录——✅ 闭环（2026-09-29）
