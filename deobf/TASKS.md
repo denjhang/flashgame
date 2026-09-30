@@ -27,6 +27,7 @@
 
 ## 四、已完成（摘要，详见 deobf/PROGRESS.md N+1..）
 
+- TCS+5: 836 全屏点击吞噬层(对白/终局期间防误触地图)
 - TCS+4: 终局音效编排(1158 frame_2 e1..e14 → CINE_SFX 随对白时间轴铺放)
 - TCS+3: protecthint(1166) "protect this area" 原位(642,2)上图接线
 - N+105/TCS+2: conseilIntroHelp(1154) 第 1 关操作提示框上图接线

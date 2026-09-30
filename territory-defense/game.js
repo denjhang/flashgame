@@ -2038,6 +2038,8 @@ function dlgNext() {
   if (box) box.style.display = 'none';
   if (wasBriefing) applyBriefBar();       // 亮出 start mission 条
   else G.interWave = INTERWAVE_TICKS;     // 原版 nextMission → haloNoir 窗口重新计时
+  const dc = document.getElementById('dlgCatch');
+  if (dc) dc.classList.remove('on');      // 836 吞噬层收起
   return true;
 }
 // ---------------- 存档 (原版 frame_4 saveData → SharedObject "cookie";
@@ -2096,6 +2098,9 @@ function briefingShow() {
     if (G.wave + 1 <= 3) fc.classList.add('on');
     else fc.classList.remove('on');
   }
+  // 原版 836 全屏点击吞噬层: 对白期间盖住地图 (on(press) 为空 = 吞掉防误触)
+  const dc = document.getElementById('dlgCatch');
+  if (dc) dc.classList.add('on');
   // 原版 conseilIntroHelp (773_189 newEvents mR==1): 置 (480,200) 播放, 点击关闭
   const ih = document.getElementById('introHelp');
   if (ih) {

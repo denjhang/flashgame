@@ -1423,7 +1423,16 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- 终局音效编排 (1158 frame_2 e1..e14, TCS+4) ----
+// ---- 836 点击吞噬层 (TCS+5) ----
+console.log("--- 836 吞噬层 ---");
+{
+  const fsx = require('fs');
+  const hj = fsx.readFileSync('index.html', 'utf8'), gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("吞噬层接线 (对白开/放完收)=" +
+    (hj.includes('id="dlgCatch"') && gj.includes("dc.classList.add('on')") &&
+     gj.includes("dc.classList.remove('on')")));
+}
+// ---- 终局音效编排 (1158 frame_2 e1..e14, TCS+4) ----// ---- 终局音效编排 (1158 frame_2 e1..e14, TCS+4) ----
 console.log("--- 终局音效编排 ---");
 {
   const fsx = require('fs');
