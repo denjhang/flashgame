@@ -438,3 +438,9 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - [P2] showPopChange(-999) → popClear 挂两个 miss 分支
 - [P1] 第41轮补丁幻影叠加致 missFall.push 重复 → 去重 (T16 引入, 测试不敏感未暴露)
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 48 轮（2026-09-30）— T23 landOnTower 并排复核
+
+- [P1] currCtr 双计 bd (偏移累加漂移) → 修; [P1] makeSpark 未接线 → 完美落地 4 角火花;
+  [P2] 落块 500ms 渐正 (G.straighten) — 明细 PARITY 1.2
+- 已核实一致清单入档 (吸附/连击顺序/人口档位/roof 折算/cleanTower 时点)
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

@@ -2,11 +2,11 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T23.【函数】blockLanded/landOnTower 并排复核**：继续二遍细读（landOnTower 人口公式/
-> makePeople 数量/roof 分支 aoff 折算 vs Tower.as:204-288），产微修任务。
+> **T24.【函数】其余核心并排抽查**：checkTipQueue/pumpCityTips 顺序、gameOver/panDown 流、
+> knockNextBlock 回退逻辑做第二遍细读（同 T22/T23 方法），产微修任务。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
-> 挂块 combo 银火花帧。
+> 地基块塔身抖动 (landOnTower:217-219 osc ±5px×6 次)。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -40,6 +40,17 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   → H5 popClear() 挂到两个 miss 分支 (原来自然过期 1.2s)
 - [P1] 第41轮 T16 补丁幻影叠加: miss 分支 G.missFall.push 重复两行 (视觉双块, 测试不敏感
   未暴露) → 去重。二遍细读的直接战果
+
+
+### 1.2 landOnTower 并排复核（第 48 轮, T23 ✅）
+- [P1] currCtr 双计 blockDx: 原版 :120 offset 已含 +bd、:282 currCtr=blockx+bd 恰好抵消
+  (blockx=currCtr+offset-bd) → H5 原来再 +towerBdx 多漂 bd/块, 已修 (currCtr += x)
+- [P1] makeSpark 从未被调用: 原版完美落地 4 角各一颗 (landOnTower:248-251, 角度 135/45/225/315),
+  H5 定义了 makeSparks 却没接 → 重写单颗 makeSpark + perfect 分支 4 调用
+- [P2] 落块 Rotater 渐正 (landOnTower:211: offset/2→0 over DELAY_PAN_UP=500ms)
+  → G.straighten 队列, H5 原来永久停倾
+- 已核实一致: 完美吸附清 blockDx (:206-210)/comboMult++ 先于判定 (:233)/makePeople 数量
+  4/3/2/1 三档/roof aoff=128-aoff*256/BLOCK_H 折算 (:293-302)/updateCleanTower 时点
 
 ## 2. 塔楼目标与屋顶（quick/city 共用）——✅ 机制闭环（2026-09-29）
 

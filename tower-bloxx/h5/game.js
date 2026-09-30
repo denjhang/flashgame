@@ -588,7 +588,7 @@ const G = {
   hanging: null, hangingFor: -1,
   craneDx: 0, towerBdx: 0,
   dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
-  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [],
+  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [], straighten: [],
   sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
   comboMult: 0, comboT: 0, comboBank: 0,
   camY: 0,
@@ -650,7 +650,7 @@ function startGame() {
   for (const q of G.fallingPeople) scene.remove(q.sp);
   for (const q of G.missFall) scene.remove(q.mesh);
   for (const b of toppled) { towerGroup.remove(b.mesh); scene.remove(b.mesh); }
-  G.people = []; G.sparks = []; G.fallingPeople = []; G.missFall = []; G.bounces = []; toppled.length = 0;
+  G.people = []; G.sparks = []; G.fallingPeople = []; G.missFall = []; G.bounces = []; G.straighten = []; toppled.length = 0;
   G.blocks = []; G.landingY = 0; G.currCtr = 0; G.towerBdx = 0;
   G.lives = NUM_TRIES; G.population = 0; G.stacked = 0; G.falling = null;
   G.sway = { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 };
@@ -814,6 +814,7 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   const mesh = tpl.clone();
   mesh.scale.setScalar(tpl.userData.s);
   mesh.rotation.z = perfect ? 0 : offset / 2;      // Rotater offset/2 度 (Tower.as:211)
+  if (!perfect && !onGround) G.straighten.push({ mesh, rot0: offset / 2, t: 0 });
   const cx = G.currCtr + x;
   towerGroup.add(mesh);
   mesh.position.set(cx - tpl.userData.cx, G.landingY - tpl.userData.cy, 0);
@@ -821,6 +822,10 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   // 连击: 落地时 comboMult!=0 → +1 (Tower.as:233); 完美落地重置计时 (perfectLanding→ComboTimer.setTimer)
   if (G.comboMult !== 0) { G.comboMult++; G.comboMax = Math.max(G.comboMax, G.comboMult); } // Tower.as:233 + GameModel.as:192
   if (perfect) { playSound('snd_combo');
+    // makeSpark ×4 (landOnTower:248-251): 块底两角+顶两角, 角度 135/45/225/315
+    const sw = tpl.userData.w || BLOCK_H;
+    makeSpark(cx - sw / 2, G.landingY, 135); makeSpark(cx + sw / 2, G.landingY, 45);
+    makeSpark(cx - sw / 2, G.landingY + BLOCK_H, 225); makeSpark(cx + sw / 2, G.landingY + BLOCK_H, 315);
     if (!showTip('combo', TIP_TEXTS.combo, comboSetTimer)) comboSetTimer(); }   // Tower.as:356-358
   else if (G.comboMult !== 0) { playSound('snd_stacked'); comboAddTimer(-COMBO_ADJ); } // Tower.as:222-224
   else playSound('snd_stacked');                              // Tower.as:238/243/248
@@ -840,7 +845,7 @@ function blockLanded(offset, releaseBdx, fallMesh) {
   G.landingY += BLOCK_H;
   // currCtr = blockx + blockDx (Tower.as:282): 塔顶中心带保留倾斜
   G.towerBdx = (Math.abs(offset) < TOON_LIMIT_1) ? 0 : bd;
-  G.currCtr += x + G.towerBdx;
+  G.currCtr += x;  // :282 currCtr=blockx+bd 与 :120 的 offset+bd 恰好抵消 bd, 不再另加 towerBdx
   G.stacked++;
   panUp();
   addHud();
@@ -920,15 +925,13 @@ function spawnPeople(blockMesh, amt) {
   }
 }
 // 完美落地 4 向火花 (Tower.makeSpark:311-317, speed=100, angles 135/45/225/315, Flipbook 150ms)
-function makeSparks(x, y) {
-  for (const a of [135, 45, 225, 315]) {
-    const mat = new THREE.SpriteMaterial({ map: G.texStar, transparent: true });
-    const sp = new THREE.Sprite(mat);
-    sp.scale.set(26, 24, 1);
-    sp.position.set(x, y, 3);
-    scene.add(sp);
-    G.sparks.push({ sp, vx: 100 * Math.cos(a * Math.PI / 180), vy: 100 * Math.sin(a * Math.PI / 180), life: 500 });
-  }
+function makeSpark(x, y, a) { // Tower.makeSpark:344-352: 单颗, speed=100, 角度方向飞散
+  const mat = new THREE.SpriteMaterial({ map: G.texStar, transparent: true });
+  const sp = new THREE.Sprite(mat);
+  sp.scale.set(26, 24, 1);
+  sp.position.set(x, y, 3);
+  scene.add(sp);
+  G.sparks.push({ sp, vx: 100 * Math.cos(a * Math.PI / 180), vy: 100 * Math.sin(a * Math.PI / 180), life: 500 });
 }
 // miss 坠落小人 (Tower.makeFallingPerson:327-342): toon 随机, 初帧 gotoAndStop(9),
 // Flipbook 11→35 / 2000ms 循环; Path 到 ±100 / +100px 时长 5000ms → vx=±0.02, vy=0.02 px/ms
@@ -1236,6 +1239,15 @@ function loop(now) {
         if (q.sp.material.opacity <= 0) { towerGroup.remove(q.sp); G.people.splice(i, 1); }
       }
     }
+    // 落块 Rotater 渐正 (landOnTower:211: offset/2→0 over DELAY_PAN_UP=500ms)
+    for (let i = G.straighten.length - 1; i >= 0; i--) {
+      const q = G.straighten[i];
+      q.t += dt;
+      const u = Math.min(1, q.t / 500);
+      q.mesh.rotation.z = q.rot0 * (1 - u);
+      if (u >= 1) G.straighten.splice(i, 1);
+    }
+
     // 火花
     // 撞塔弹飞块 (bounceOffTower BPath 三次贝塞尔 + Rotater 359°/s 循环, 1000ms 后自毁)
     for (let i = G.bounces.length - 1; i >= 0; i--) {
