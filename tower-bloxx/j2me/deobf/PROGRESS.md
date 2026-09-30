@@ -23,10 +23,10 @@
 | j.java | 584 | 23 (含 8 桥) | ✅ JD+3 | j_clean.java (MenuScriptInterpreter) |
 | p.java | 209 | 10 | ✅ JD+3 | p_clean.java (PhoneCanvas) |
 | h.java | 603 | 19 | ✅ JD+2 | h_clean.java (HallOfFameScreen) |
-| House.java | 4420 | 98 | ⬜ (字段表起步见 FIELDS.md) | |
+| House.java | 4420 | 98 | 🔶 JD+5 (53/98, 第 1 分册) | House_clean_part1.java |
 | com/.../a.java | ~120 | 4 | ✅ JD+3 | nokia_lang_clean.java (NokiaLangPack) |
 
-**方法计数: 175 / ~340 (JD+4)。类: 16/18。**
+**方法计数: 228 / ~340 (JD+5)。类: 16/18 (House 🔶)。**
 
 ## JD+1 (2026-10-01) 小类全量 67 方法
 - a→ScreenCallback: 空标记接口 (extends e)。
@@ -84,3 +84,18 @@
   aA 虚线相位 >>8=÷256 定点证实。
 - H5 表现层重做的权威依据已齐: k.a(Graphics) 即城市屏逐像素版式 (本次浏览器验证暴露的乱象全部可对表修)。
 - 下一轮: House.java (4420 行/98 方法, 分 3-4 轮) — 最后也是最大的类。
+
+## JD+5 (2026-10-01) House 第 1 分册 (53/98)
+- 生命周期组: ctor(JAD 天气参数/cW 表/6 首 MIDI 预挂/世界 1024=1.0 定点)、a()(正弦表+键名)、
+  b()(BGM)、c()(暂停)、d()(退出分派: 城市 HoF 提交/citymode/quickRS)、a(int)(音效开关查询)。
+- 装载组: w()(城市视图初始化+89 号文件)、x()(释放 UI)、y()(世界初始化: 锚点/跳弧表/相机迭代)、
+  e(int)(装载门控 cc)、d(int)(菜单 tick)、a(Graphics)(菜单绘制: 绿底 0x9ACC2A 等逐像素)。
+- 玩法运动学组: p()(摆钩: aK=cQ*sin(200aP/cP%360)>>15, aH 提钩, 速度 256=1.0/帧)、
+  q()(摇摆 bw%3600)、z(int)(层数变更总响应: bv/cP/cQ/cR 插值公式全量)、A()(摇摆投影 5 层窗)、
+  H()(组合银行)、z()/o(int)(相机跟随+随机抖动)、A(int)(机会变更)、K()(塔数组)、F()(命中层定位)。
+- 天气/环境组: v()/C()/D()/a(7)/w(int) 雨雪粒子全套、E()/x(int) 背景飞行物、L() 远景楼群表。
+- 工具组: M() 正弦表(32768=1.0)、i/j/k 随机/sin/cos、a(5) lerp、a(3) 移位、a(int,boolean) 昼光、
+  N() CRC32 表【用途待证】、a(String,Font,int) 折行、l()/O()/P() 菜单导航、q() 字体、a(Graphics,4) setClip。
+- 【勘误-补充证据】r(int) 摇摆阻尼为死代码 (乘 0), 此前"摇摆阻尼"语义撤销。
+- 待第 2 分册: d(int,int) 主状态机 (:3008-3288)、s(int) 块状态机 (:1852-1999)、b(int,int) 放块 (:350-679)、
+  绘制组 f/g/h/i/j/k/l(Graphics) 与 b(Graphics,…) 系列、u(int)/B()/t(n2)/e(int,int) (G() 调用链)、J() 余段。
