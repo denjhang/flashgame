@@ -1423,7 +1423,21 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- 1103 第二页(敌方价目) 与底盘表交叉验证 (TCS+7) ----
+// ---- SHOP_INFO 数值列 vs 武器/结构表交叉验证 (TCS+8) ----
+console.log("--- 商店INFO数值列交叉 ---");
+{
+  const rows = Object.keys(SHOP_INFO).filter(n => WEAPONS[n] && STRUCTURES[n]);
+  const bad = rows.filter(n => {
+    const t = SHOP_INFO[n];
+    const g = (lbl) => { const m = t.match(new RegExp(lbl + String.fromCharCode(9) + '([0-9.]+)')); return m ? +m[1] : null; };
+    const w = WEAPONS[n], st = STRUCTURES[n];
+    const chk = (v, ref) => v === null ? ref === 0 : v === ref;   // info 用 '/' 表示 0/无
+    return !(chk(g('range'), w[1]) && chk(g('impact'), w[5]) && chk(g('life'), st.maxHp));
+  });
+  console.log("range/impact/life 三列与表一致 (" + rows.length + " 武器)=" + (bad.length === 0) +
+    (bad.length ? ' 差:' + bad.join(',') : ''));
+}
+// ---- 1103 第二页(敌方价目) 与底盘表交叉验证 (TCS+7) ----// ---- 1103 第二页(敌方价目) 与底盘表交叉验证 (TCS+7) ----
 console.log("--- 底盘表交叉验证 ---");
 {
   const imgPairs = [[160,50],[345,155],[1200,500],[200,50],[440,250],[2800,250],

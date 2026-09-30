@@ -1,5 +1,23 @@
 # TCS 反混淆与资源还原进度
 
+## 第 TCS+8 轮记录（2026-09-30, 自查方向2: SHOP_INFO 数值列 vs 武器/结构表交叉验证）
+
+### 1. 【方法与结果】
+
+- SHOP_INFO 的 **range / impact / life** 三列（1027 rollOver 原文）与
+  WEAPONS[typeData][1]/[5]、STRUCTURES.maxHp 逐武器比对：**11 武器全一致**
+  （su37 无 WEAPONS 行跳过；radar 的 '/' 表示 0/无，按零值匹配）
+- 两个独立反编译源（1027 文本 vs typeData/structureData）互证通过
+
+### 2. 验证
+
+- 182 项 `=true`；exit 0；三件套通过
+
+### 3. 本轮仍未做
+
+- 无新挂账。注意：power 列（如 MLRS "70 * 6"）为展示口径（弹×连发），与
+  typeData[4] 引擎值口径不同，不做直接比对
+
 ## 第 TCS+7 轮记录（2026-09-30, 自查方向2 数值抽查 —— 底盘表 vs 1103 第二页图示交叉验证）
 
 ### 1. 【方法与结果】
