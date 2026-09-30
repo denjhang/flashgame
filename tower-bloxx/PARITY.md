@@ -2,9 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T18.【P0 回归】真实 DOM 冒烟**：exec_test 的 getElementById stub 会为任意 id 造元素，
-> 掩盖了 index.html 缺元素类崩溃（第 42 轮已修一例）——给 smoke_test 加"game.js 引用的
-> 所有 getElementById id 必须存在于 index.html"静态断言，防再犯。
+> **T19.【函数】HighScore.as 普查**：HighScore 类逐函数（isQualified/endOfRound/endOfGame/
+> showNameDialog/showPopup/startGame/sort 语义）对照 h5 高分实现，补齐偏差。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
 > 挂块 combo 银火花帧 / 高分榜三分页表格（216）。
@@ -142,6 +141,15 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - 第 36 轮补齐: 进榜名字输入流 ✅——isQualified(top10 且 !cityMode)→结算 OK 后 showNameDialog
   （输入→回写同条目 by id）→showHighScores 弹榜（STT_CHECK_HIGHSCORE:148-167 +
   STT_NEW_HIGHSCORE:168-173 + HighScore.showNameDialog/showPopup 链）; 榜单行加名字列
+
+
+### 4.3 smoke 防线 + summary 面板补齐（第 43 轮, T18 ✅）
+- [P0] 第二个同类缺失: summary 面板（结算/提示共用弹窗）无 markup 无 CSS → 已补
+  （居中白面板+标题/.ok 样式, popupSpr 语义）
+- [P2] 死引用: hud.lives=getElementById('lives') 从未使用 → 删
+- smoke_test 新增断言(第18项): game.js 的 getElementById(...) 与 bindMenu b('m...') 引用的
+  id 必须存在于 index.html（hsName 除外=动态 innerHTML）——断言首跑即抓出上述两项,
+  防线生效。教训: Edit 工具超时可能假成功, 重补后必须 grep 验证
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 

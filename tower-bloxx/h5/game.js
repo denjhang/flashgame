@@ -35,7 +35,7 @@ const CRANE_FPS = 30;           // Flash 帧率: blockDx 以 px/帧 计 (Crane.a
 
 const stage = document.getElementById('stage');
 const hud = {
-  pop: document.getElementById('pop'), lives: document.getElementById('lives'),
+  pop: document.getElementById('pop'),
   combo: document.getElementById('combo'), msg: document.getElementById('msg'),
   summary: document.getElementById('summary'),
   progress: document.getElementById('progress'), tries: document.getElementById('tries'),

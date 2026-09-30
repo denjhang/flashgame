@@ -42,4 +42,14 @@ check(/const CRANE_DUR = 2600/.test(src), '摆钩周期 CRANE_DUR=2600 (Const.as
 check(/const BLOCK_H = 64/.test(src), '积木高 BLOCK_H=64 (Const.as)');
 check(/const NUM_TRIES = 3/.test(src), '3 条命 NUM_TRIES=3 (Const.as)');
 
+// DOM id 存在性: game.js 引用的 id 必须在 index.html (防 stub 掩盖的 null 崩, 第42轮教训)
+{
+  const html = fs.readFileSync(path.join(h5, 'index.html'), 'utf8');
+  const ids = new Set([...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]));
+  const refs = new Set([...src.matchAll(/getElementById\('([^']+)'\)/g)].map(m => m[1]));
+  for (const m of src.matchAll(/\bb\('(m[A-Za-z]+)',/g)) refs.add(m[1]); // bindMenu 辅助
+  refs.delete('hsName');                                            // 动态 innerHTML, 打开时才存在
+  const missing = [...refs].filter(id => !ids.has(id));
+  check(missing.length === 0, 'game.js 引用的 DOM id 都存在于 index.html' + (missing.length ? ' 缺: ' + missing.join(',') : ''));
+}
 process.exit(fail ? 1 : 0);

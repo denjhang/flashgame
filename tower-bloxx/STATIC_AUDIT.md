@@ -402,3 +402,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   补 titleScr(467)/menuScr(473)/menuSub/五按钮(552 帧=BTN 常量, 坐标 makeMenuSprites:342-350)
 - 教训同第 20 轮 TDZ: stub 类测试测不出 DOM 缺失 → 新任务 T18: smoke 加 id 存在性断言
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 43 轮（2026-09-30）— T18 DOM id 存在性断言（18 项）
+
+- smoke_test +1 断言: game.js 引用的所有 DOM id（getElementById + bindMenu b('m*')）必须在
+  index.html, hsName 除外; 首跑即抓出 summary 缺失(第2个同类P0)与 lives 死引用, 已修
+- 修复: index.html 补 #summary markup+CSS(居中白面板, showSummary/showTip 共用);
+  game.js 删 hud.lives 死引用
+- 过程教训记录: 两处 Edit 假成功(超时), python 重打后 grep 验证才落稳
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
