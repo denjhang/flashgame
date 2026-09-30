@@ -1423,7 +1423,16 @@ console.log("--- 开场操作提示 ---");
   // 反作弊陷阱取证: canon75AutoFire==1 → activePerdu (newEvents 原文, 仅记录不接线)
   console.log("反作弊陷阱已取证入档 (canon75AutoFire→activePerdu, 字段本为废弃)");
 }
-// ---- 836 点击吞噬层 (TCS+5) ----
+// ---- 1103 双页 (TCS+6): 键位页 + 敌方单位价目页 ----
+console.log("--- 帮助板双页 ---");
+{
+  const fsx = require('fs');
+  const hj = fsx.readFileSync('index.html', 'utf8'), gj = fsx.readFileSync('game.js', 'utf8');
+  console.log("双页素材+页签热区=" +
+    (fsx.existsSync('assets/ui/help_board_fr.png') && hj.includes('id="tabKeys"') &&
+     gj.includes('help_board_fr.png')));
+}
+// ---- 836 点击吞噬层 (TCS+5) ----// ---- 836 点击吞噬层 (TCS+5) ----
 console.log("--- 836 吞噬层 ---");
 {
   const fsx = require('fs');

@@ -3337,6 +3337,13 @@ hud();
       playSfx('selectionUnite', 0.35);
     };
     if (board) board.onclick = () => board.classList.remove('show');
+    // 原版 1103 双页: 左页签=键位(f1), 右页签=敌方单位价目(f2)
+    const hi = document.getElementById('helpImg');
+    const tk = document.getElementById('tabKeys'), tu = document.getElementById('tabUnits');
+    if (tk && tu && hi) {
+      tk.onclick = (e) => { e.stopPropagation(); hi.src = 'assets/ui/help_board.png'; };
+      tu.onclick = (e) => { e.stopPropagation(); hi.src = 'assets/ui/help_board_fr.png'; };
+    }
     // 原版 qualityB(1040 → changeQuality) / storyB(1053 模式标签翻转)
     const qb = document.getElementById('hQual'), qt = document.getElementById('hQualTxt');
     if (qb && qt) qb.onclick = (e) => { e.stopPropagation(); changeQuality(); qt.textContent = QUALITY; };
