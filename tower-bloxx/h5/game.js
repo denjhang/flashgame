@@ -663,6 +663,7 @@ function startGame() {
   G.comboMax = 0; G.cleanTower = false; G.trophyRoof = false; G.dozerMode = false;
   G.hs = { hiPop: 0, hiBlocks: 0 };            // highScore.startGame session 复位 (HighScore.as:139)
   G.blockTime = performance.now() + 1000;      // Crane.restartGame: blockTime = getTimer()+1000
+  G.panDownDur = null; G.panDownT = 0;
   // 注意: dropY 不在此重置 — 原版 resetGameVars 不碰 dropY, 400 仅 Crane.init 后首块生效 (Crane.as:57)
   hud.summary.style.display = 'none';
   hud.msg.style.display = 'none';
@@ -683,8 +684,9 @@ function gameOver(won) {
   wonRef.won = won;
   // Tower.gameOver (:194-203): won → panDown 回卷塔底 (dur=min(DUR_PAN_DOWN=3000, stacked*250)),
   // Message wait=GAME_OVER_DELAY=1000 → 输 1s / 赢 1s+pan 后才弹结算
-  if (won) G.camTarget = 0;
-  const goDelay = 1000 + (won ? Math.min(3000, G.stacked * 250) : 0);
+  if (won) { G.camTarget = 0; G.panDownDur = Math.min(3000, G.stacked * 250);
+    G.panDownStartY = G.camY; G.panDownT = 0; } // Tower.panDown (:200) Path 到塔底
+  const goDelay = 1000 + (won ? G.panDownDur : 0);
   setTimeout(showSummary, goDelay);
   if (!won && !(G.cityMode && G.pendingCell)) {
     // 塔散架 (Tower.clearBlocks(topple)); 城市模式失败楼保留待无屋顶放置
@@ -1307,9 +1309,16 @@ function loop(now) {
       if (q.life <= 0 || q.sp.position.y < G.camY - STAGE_H) { scene.remove(q.sp); G.fallingPeople.splice(i, 1); }
     }
 
-    // 相机跟随 (pan up)
-    const camTargetY = Math.max(0, G.landingY - STAGE_H / 2 + 3 * BLOCK_H);
-    G.camY += (camTargetY - G.camY) * Math.min(1, dt / DELAY_PAN_UP);
+    // 相机跟随 (pan up); 胜利 panDown 用精确 tween 时长 (Tower.panDown:199-201 Path dur)
+    if (G.panDownDur != null) {
+      G.panDownT = (G.panDownT || 0) + dt;
+      const u = Math.min(1, G.panDownT / G.panDownDur);
+      G.camY = G.panDownStartY * (1 - u);
+      if (u >= 1) G.panDownDur = null;
+    } else {
+      const camTargetY = Math.max(0, G.landingY - STAGE_H / 2 + 3 * BLOCK_H);
+      G.camY += (camTargetY - G.camY) * Math.min(1, dt / DELAY_PAN_UP);
+    }
     camera.position.y = G.camY;
 
     // 挂钩待放积木 (Crane.updateBlock: targetSpr 随钩, _rotation = -(endx-320)/5 度, 挂点 hook.y+100)

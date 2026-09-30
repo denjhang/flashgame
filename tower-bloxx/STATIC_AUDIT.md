@@ -455,3 +455,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - swoosh 烟雾轨迹 (790 三帧) / 地基塔身抖动 (±5px×6×75ms) / 挂块 combo 银火花 — 全部接线,
   参数此前已取证 (明细 PARITY 2.2)
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 51 轮（2026-09-30）— T26 panDown 时长精确化
+
+- 胜利回卷: G.panDownDur=min(3000,stacked*250) 线性 tween (原 Path 语义), 替换 500ms glide;
+  与第49轮的结算延时 (1s+pan) 同步
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

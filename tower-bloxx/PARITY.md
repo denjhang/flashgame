@@ -2,11 +2,10 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T26.【自查】重生成新任务**：池已清零。自由自查方向——HUD 位图化（topbar/combo/tries 数字
-> 用原版切片替换文本）、镜头 panDown 时长精确化（当前 glide≈500ms vs 原版 2.5-3s）、
-> knockTopBlock 弹飞改 BPath。任选其一做成任务。
+> **T27.【函数】knockTopBlock 弹飞改 BPath**：撞顶块弹飞方向确定性 (offset=新顶块x−被弹块x,
+> Tower.knockNextBlock:168-173) 替换随机翻倒; wait=DELAY_FINAL_TUMBLE=250ms。
 >
-> **待办池**：（空）
+> **待办池**：HUD 位图化（topbar/combo/tries 用原版切片）。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -223,6 +222,12 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - md5 对比 GLB: image_10/11/12/14 与 scene.glb 内 texture#8/#9/#11/#12 完全同hash → 已通过
   GLB 间接接入; image_13 与 12 同内容重复; 15/16/17 不在 GLB（j2me jar 另一版纹理, 备用记档）
 - 结论: 无需新增接入, 全部已有归属
+
+
+### 5.3 panDown 时长精确化（第 51 轮, T26 ✅）
+- Tower.panDown (:199-201): Path 到塔底, dur=min(DUR_PAN_DOWN=3000, stacked*250) → H5 原来
+  camTarget=0 靠 500ms glide; 改 G.panDownDur/T/StartY 线性 tween 精确时长, 结算弹窗时序
+  (1s+pan, 第49轮) 与镜头同步
 
 ## 6. 音频——✅ 闭环（2026-09-29）
 
