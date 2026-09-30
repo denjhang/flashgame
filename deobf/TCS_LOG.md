@@ -245,3 +245,15 @@
 - 顺带确认：1176 "start in N" 倒计时条两态接线齐全（点击可跳过开波），
   17帧@24fps ≈ 21 tick 换算一致。三件套通过，冒烟 204 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+50（2026-09-26）解锁面板语义复核（方向2）
+
+- 取证：989/frame_1/988_3 on(press)——lockItem==false 守卫 → lockItem=true +
+  creationUnite 音 + `interest += 3` + this._alpha=45 + 面板 _x=-500；
+  988_6 = unlockNextWeapon（失败 cannot）。6_333 的 unlockEnd/unlock1/unlock2
+  消息结构（"已解锁全部武器/可提利率至 X%"）与 H5 refreshPanelButtons 文案
+  逐段对应，INTEREST_STEP=3 一致。
+- 定案：面板文字为 H5 中文改写（与整体 H5 UI 文字口径一致；非剧情文字但
+  原版面板为位图+系统字，H5 以 DOM 呈现），数值与流程零漂移。无码改。
+  三件套通过，冒烟 204 项全 `=true`、exit 0。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

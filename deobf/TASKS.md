@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+50: 解锁面板语义复核（方向2）——原版 988_3 on(press): lockItem 守卫 +
+  creationUnite 音 + interest+=3 + 面板移出屏; 988_6 解锁下一件。H5 全对齐,
+  INTEREST_STEP=3; 面板文案定案为 H5 中文改写(与整体 UI 文字口径一致,
+  数值/结构与 6_333 unlockEnd/unlock1/unlock2 消息一致)。无码改
+
 - [x] TCS+49: 存档/车队链表边界确认（方向3）——存档仅存塔(units)+iMission
   (=下一关, 原版 saveData 同构), 敌人不落盘; 读档从该关简报重新开波,
   devant 链表在 startWave 生成时重建 → 无跨存档生命周期, 无缺口。
