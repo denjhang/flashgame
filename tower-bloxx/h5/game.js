@@ -646,9 +646,10 @@ const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr.
 scene.add(towerGroup);
 const craneGroup = new THREE.Group();  // 吊钩/缆绳/下落块
 scene.add(craneGroup);
+// Crane.animate:86 lineStyle(3,0,50) → 黑色 3px 20% 透明; 缆线自固定枢轴 (320,-100) 斜拉至钩 (clear/moveTo)
 const cable = new THREE.Line(
   new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, CABLE_TOP_Y - 1000, 0), new THREE.Vector3(0, 0, 0)]),
-  new THREE.LineBasicMaterial({ color: 0x222222 })
+  new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.2 })
 );
 craneGroup.add(cable);
 
@@ -1218,7 +1219,10 @@ function loop(now) {
     G.craneDx = (hookX(now) - craneGroup.position.x) / (dt / (1000 / CRANE_FPS)); // 折算 px/帧 (Crane.animate dx)
     if (!G.falling && !G.over) craneGroup.position.x = hookX(now);
     craneGroup.position.y = G.camY + hookY(now);
-    cable.geometry.setFromPoints([new THREE.Vector3(0, STAGE_H/2 - CRANE_HOOK_Y + 10, 0), new THREE.Vector3(0, 0, 0)]);
+    // moveTo(320,-100): 缆线起点=固定枢轴 (TOWER_START_X, 顶), 钩偏摆时呈斜线 (Crane.animate:88-92)
+    cable.geometry.setFromPoints([
+      new THREE.Vector3(TOWER_START_X - STAGE_W/2 - craneGroup.position.x, STAGE_H/2 - CRANE_HOOK_Y + 10, 0),
+      new THREE.Vector3(0, 0, 0)]);
 
     // 下落块
     if (G.falling) {

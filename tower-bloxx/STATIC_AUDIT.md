@@ -509,3 +509,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - 巡检发现: hsLoad 惰性播种不落盘 → 补回写 (SharedObject 读取即写语义);
   exec_test city +1 高分三表断言 (11 PASS), 全量 smoke 19 / tower 7
+## 第 62 轮（2026-09-30）— T35 回归维护 + 钩缆线对号
+
+- 巡检发现: 缆线应为固定枢轴 (320,-100) 斜拉至钩 (Crane.animate:88-92), 样式 3px 黑 20% 透明
+  → H5 竖直不透明线已修 (材质 + 每帧斜率)
+- 全量回归: smoke 19 / tower 7 / city 11 PASS

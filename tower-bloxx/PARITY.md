@@ -277,6 +277,11 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   无位图字需求; HUD 数字 setDigits 也是动态文本字段 (digit0..4) → HTML 数字等价
 - city_icon 悬停放大: CityMap 无 rollOver/_xscale, 原版不存在 → 不做
 
+
+### 5.5 钩缆线对号（第 62 轮, T35 ✅）
+- Crane.animate:86-92: lineStyle(3,0,50)=黑 3px 20% 透明; moveTo(320,-100)=固定枢轴斜拉
+  → H5 原来竖直不透明线, 改斜线 (起点=枢轴 x−钩 x) + 透明黑材质
+
 ## 6. 音频——✅ 闭环（2026-09-29）
 
 - ✅ 歌曲与音效全部为原版 SWF 内嵌音频，FFDec 整体导出（ExportAssets 1:1）：
