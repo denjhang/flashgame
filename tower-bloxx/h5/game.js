@@ -176,6 +176,7 @@ function bindMenu() {
   b('mReset', showResetConfirm); // BTN_RESET_MAP → STT_RESET_MAP (:348)
   b('mInstr', () => showInstructions()); // BTN_INSTRUCTIONS (:349)
   b('mHS', showHighScores);      // BTN_HIGHSCORES (:350)
+  b('mMidi', toggleMidi);        // 可选: J2ME MIDI BGM (menu_btn_spr 帧12 MUSIC 位, Get More 空位)
 }
 bindMenu();
 
@@ -1037,6 +1038,76 @@ G.soundOn = localStorage.getItem('twrblx_sound') !== '0';
 if (!G.musicOn) hud.btnMusic.style.opacity = 0.4;
 if (!G.soundOn) hud.btnSound.style.opacity = 0.4;
 function sndClick() { if (G.soundOn && SND.snd_click) { SND.snd_click.currentTime = 0; SND.snd_click.play().catch(() => {}); } }
+
+// ---- J2ME MIDI 可选 BGM (j2me/res/nokia_v1011/80-82.mid, format0/480tick;
+// 原版 o.java: Manager.createPlayer "audio/midi" + VolumeControl 40) —— WebAudio 合成, 默认关 ----
+function parseMidi(buf) {
+  const dv = new DataView(buf);
+  let p = 0;
+  if (dv.getUint32(0) !== 0x4d546864) return null;                 // MThd
+  const div = dv.getUint16(12); p = 14;
+  const notes = []; let secPerTick = 500000 / 1000 / div;
+  for (let t = 0; t < dv.getUint16(10); t++) {
+    if (dv.getUint32(p) !== 0x4d54726b) return null;               // MTrk
+    p += 8;
+    const end = p + dv.getUint32(p - 4);
+    let tick = 0;
+    const readVar = () => { let v = 0; for (;;) { const b = dv.getUint8(p++); v = (v << 7) | (b & 0x7f); if (!(b & 0x80)) return v; } };
+    while (p < end) {
+      tick += readVar();
+      const st = dv.getUint8(p++);
+      if (st === 0xff) {
+        const type = dv.getUint8(p++), l = readVar();
+        if (type === 0x51 && l === 3) secPerTick = ((dv.getUint8(p) << 16) | (dv.getUint8(p + 1) << 8) | dv.getUint8(p + 2)) / 1e6 / div;
+        p += l;
+      } else if (st === 0xf0 || st === 0xf7) p += readVar();
+      else {
+        const hi = st & 0xf0, n = dv.getUint8(p++), v = dv.getUint8(p++);
+        if (hi === 0x90 && v > 0) notes.push({ t: tick * secPerTick, n, d: 0 });
+        else if (hi === 0x80 || (hi === 0x90 && v === 0)) {
+          for (let i = notes.length - 1; i >= 0; i--) if (notes[i].n === n && !notes[i].d) { notes[i].d = tick * secPerTick - notes[i].t; break; }
+        }
+      }
+    }
+    p = end;
+  }
+  const good = notes.filter(x => x.d > 0);
+  return { notes: good, total: Math.max(1, ...good.map(x => x.t + x.d)) };
+}
+let midiCtx = null, midiTimer = 0, midiTrack = 81;                 // 81.mid = 主旋律 (10.4KB 最长)
+function playMidiSchedule() {
+  if (!G.midiOn || !midiCtx) return;
+  const t0 = midiCtx.currentTime + 0.1;
+  for (const x of midiCtx._notes) {
+    const osc = midiCtx.createOscillator(), g = midiCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = 440 * Math.pow(2, (x.n - 69) / 12);
+    g.gain.setValueAtTime(0.0001, t0 + x.t);
+    g.gain.linearRampToValueAtTime(0.09, t0 + x.t + 0.02);         // 原版 VolumeControl 40 → 低音量
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + x.t + x.d);
+    osc.connect(g).connect(midiCtx.destination);
+    osc.start(t0 + x.t); osc.stop(t0 + x.t + x.d + 0.05);
+  }
+  midiTimer = setTimeout(playMidiSchedule, midiCtx._total * 1000); // setLoop
+}
+function toggleMidi() {
+  G.midiOn = !G.midiOn;
+  localStorage.setItem('twrblx_midi', G.midiOn ? '1' : '0');
+  if (G.midiOn) {
+    if (!midiCtx) midiCtx = new (window.AudioContext || window.webkitAudioContext)();
+    midiCtx.resume && midiCtx.resume();
+    fetch(`./assets/midi/${midiTrack}.mid`).then(r => r.arrayBuffer()).then(buf => {
+      const parsed = parseMidi(buf);
+      if (!parsed) { G.midiOn = false; return; }
+      midiCtx._notes = parsed.notes; midiCtx._total = parsed.total;
+      clearTimeout(midiTimer); playMidiSchedule();
+    });
+  } else {
+    clearTimeout(midiTimer);
+    if (midiCtx) midiCtx.close(), midiCtx = null;
+  }
+}
+G.midiOn = localStorage.getItem('twrblx_midi') === '1';
 hud.btnMusic.onclick = e => { e.stopPropagation(); G.musicOn = !G.musicOn; hud.btnMusic.style.opacity = G.musicOn ? 1 : 0.4;
   localStorage.setItem('twrblx_music', G.musicOn ? '1' : '0'); sndClick();
   if (!G.musicOn) stopSong(); else playSong('sng_tower'); };  // STT_MUSIC_TOGGLE toggleSongs

@@ -1367,7 +1367,18 @@ console.log("--- 商店INFO原文比对 ---");
   console.log("SHOP_INFO 与原版逐字节一致 (" + checked + " 条)=" + (bad.length === 0) +
     (bad.length ? ' 差:' + bad.join(',') : ''));
 }
-// ---- 立绘覆盖 QA (TCS+23): STORY 全部说话人码的立绘文件存在 ----
+// ---- 布景覆盖 QA (TCS+24): STORY 说话人码首字母的 fond 文件存在 ----
+console.log("--- 布景覆盖 ---");
+{
+  const fsx = require('fs');
+  const letters = new Set();
+  for (const m of Object.keys(STORY)) for (const [code] of STORY[m]) letters.add(code[0]);
+  const have = new Set(fsx.readdirSync('assets/story/fond').map(f => f.slice(0, -4)));
+  const miss = [...letters].filter(l => !have.has(l));
+  console.log("STORY 首字母布景覆盖=" + (miss.length === 0) +
+    (miss.length ? ' 缺:' + miss.join(',') : '  (' + letters.size + ' 字母)'));
+}
+// ---- 立绘覆盖 QA (TCS+23): STORY 全部说话人码的立绘文件存在 ----// ---- 立绘覆盖 QA (TCS+23): STORY 全部说话人码的立绘文件存在 ----
 console.log("--- 立绘覆盖 ---");
 {
   const fsx = require('fs');

@@ -45,6 +45,16 @@
   #cityMenu .sel.dozer{margin-top:5px;}
   #cityHint{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;color:#234;opacity:.85;}
   #hint{position:absolute;bottom:8px;width:100%;text-align:center;font-size:13px;opacity:.7;}
+  /* 菜单流: 467 title / 473 menu 底图 (读图 648x480 与 640x480, cover 铺满) */
+  #titleScr{position:absolute;inset:0;display:none;cursor:pointer;
+    background:url('./assets/flash/fx/DefineSprite_467_title_spr/1.png') center/cover;}
+  #menuScr{position:absolute;inset:0;display:none;
+    background:url('./assets/flash/fx/DefineSprite_473_menu_spr/1.png') center/cover;}
+  #menuScr .mbtn{position:absolute;width:299px;height:67px;cursor:pointer;
+    background-repeat:no-repeat;background-size:299px 67px;}
+  #menuScr .mbtn:hover{filter:brightness(1.2);}
+  #menuSub{position:absolute;inset:0;display:none;background:#000000d0;color:#fff;
+    font-size:14px;padding:40px 24px;overflow:auto;}
 </style>
 <script>window.__errs=[];addEventListener('error',e=>__errs.push(e.message+' @ '+e.filename+':'+e.lineno));addEventListener('unhandledrejection',e=>__errs.push('rej: '+e.reason));</script>
 <script type="importmap">
@@ -64,6 +74,17 @@
     <div id="btns"><span id="btnMusic">♪</span><span id="btnSound">🔊</span><span id="btnExit">✕</span></div>
     <div id="msg"></div>
     <div id="hint">点击 / 空格 放下积木 · 还原自原版 Tower Bloxx（J2ME 3D 资产）</div>
+  </div>
+  <div id="titleScr"></div>
+  <div id="menuScr">
+    <!-- menu_btn_spr(552) 帧=BTN 常量(Const.as:6-16); 坐标=makeMenuSprites:342-350 中心点, 尺寸读图 299x67 -->
+    <div class="mbtn" id="mBuild" style="left:144px;top:49px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/1.png')"></div>
+    <div class="mbtn" id="mQuick" style="left:143px;top:104px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/2.png')"></div>
+    <div class="mbtn" id="mReset" style="left:157px;top:170px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/3.png')"></div>
+    <div class="mbtn" id="mInstr" style="left:152px;top:212px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/4.png')"></div>
+    <div class="mbtn" id="mHS" style="left:151px;top:294px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/10.png')"></div>
+    <div class="mbtn" id="mMidi" style="left:153px;top:338px;background-image:url('./assets/flash/fx/DefineSprite_552_menu_btn_spr/12.png')"></div>
+    <div id="menuSub"></div>
   </div>
   <div id="city">
     <div id="cityHead">

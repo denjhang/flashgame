@@ -394,3 +394,11 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   Message 触发 STT_SOUND+"snd_destroy" (wait=dur+100) — 即"坠出屏幕才响"; 撞塔分支即时响
 - [P1] H5 miss 即时播 → 改为 missFall 回收时 +100ms playSound('snd_destroy'), 即时播只留撞塔分支
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 42 轮（2026-09-30）— T17 J2ME MIDI 可选 BGM + [P0] 菜单 HTML 落地
+
+- MIDI: 80..88.mid 读头全 format0; parseMidi + WebAudio triangle 合成循环播放 (音量≈原版 40);
+  菜单 552 帧12 MUSIC 位开关, 'twrblx_midi' 持久化, 默认关 (明细 PARITY 6.2)
+- [P0] 菜单流 HTML 从未落地 (N14 只改 game.js) — 真浏览器 null 崩被 exec_test stub 掩盖。
+  补 titleScr(467)/menuScr(473)/menuSub/五按钮(552 帧=BTN 常量, 坐标 makeMenuSprites:342-350)
+- 教训同第 20 轮 TDZ: stub 类测试测不出 DOM 缺失 → 新任务 T18: smoke 加 id 存在性断言
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

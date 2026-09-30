@@ -2,8 +2,9 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T17.【资源】J2ME MIDI 曲库提取 + 可选 BGM**：从 j2me/jars/*.jar 静态解包 MIDI 资源
-> （不碰浏览器），读 MIDI 文件确认曲目，接入 H5 作城市/标题可选 BGM（音效开关同款持久化）。
+> **T18.【P0 回归】真实 DOM 冒烟**：exec_test 的 getElementById stub 会为任意 id 造元素，
+> 掩盖了 index.html 缺元素类崩溃（第 42 轮已修一例）——给 smoke_test 加"game.js 引用的
+> 所有 getElementById id 必须存在于 index.html"静态断言，防再犯。
 >
 > **待办池**：swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材 /
 > 挂块 combo 银火花帧 / 高分榜三分页表格（216）。
@@ -199,6 +200,20 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   改为 missFall 块坠出屏幕回收时 +100ms 播
 - bounceOffTower 分支 (Tower.as:146) 即时播 ✓ H5 一致; CityMap placeInMap:425-429
   foundation/destroy 即时 ✓; fanfare 三态 (GameState:120/128) ✓ (第 N23 轮已对号)
+
+
+### 6.2 J2ME MIDI 曲库 + 可选 BGM（第 42 轮, T17 ✅）
+- 取证: MIDI 已解包 j2me/res/nokia_v1011/80..88.mid（全部 format0/480tick, 读头验证）;
+  80(3.8K)/81(10.4K 主旋律)/82(5.1K) 为曲目, 84-88 短音效; 原版 o.java "audio/midi"+
+  VolumeControl 40; 歌曲经 r0 打包负数 id 解码 (g.a: (id&0x7FFF) 索引)
+- 接入: parseMidi(格式0 解析+tempo) + WebAudio triangle 合成 (gain 0.09≈40/100 音量,
+  线性起音+指数衰减), 整曲 setTimeout 循环; 菜单 MUSIC 位 (552 帧12, Get More 空位) 开关,
+  localStorage 'twrblx_midi' 持久化, 默认关（可选 BGM, Flash mp3 歌曲仍是权威）
+- [P0] 同轮修复: 菜单流 HTML 从未落地 (N14 只写了 game.js, index.html 缺
+  titleScr/menuScr/menuSub/五个 mBtn)——真实浏览器 showMenu() 必 null 崩, exec_test 的
+  getElementById stub 掩盖。已补齐: titleScr=467 位图(648x480 读图), menuScr=473 底图
+  (640x480), 五按钮=552 帧1/2/3/4/10 (帧号=BTN 常量 Const.as:6-14, 299x67 读图),
+  坐标=makeMenuSprites:342-350 中心点换算
 
 ## 7. 存档/记录——✅ 闭环（2026-09-29）
 
