@@ -28,6 +28,11 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+55: 建造落点音效勘误（方向2, **行为修正**）——822_226 on(press):
+  surfaceForBuild hitTest→塔重叠 hitTest→euros<cost 三处失败均为【静默 return】
+  (cannot 只在 1026 槽位点击播); 成功: euros-=cost + gotoAndStop("red") +
+  creationUnite + createUnit。H5 落点失败时多播 cannot → 移除。断言入冒烟(207)
+
 - [x] TCS+54: 834 子剪辑审计闭环（方向1）——766 地图位图/768 可建掩码/773 事件/
   785 瞄准区/793 飞机/811 植被/822 光标/833 云层, 八个子剪辑全部此前已翻证且
   H5 接线（game.js 均有取证注释）, 无遗漏。方向1 对 834 子树正式关账

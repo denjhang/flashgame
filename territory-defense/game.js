@@ -3200,8 +3200,10 @@ cv.addEventListener('click', (e) => {
   G.selected = null;
   if (!G.shopSel) return;
   const s = STRUCTURES[G.shopSel];
-  if (G.euros < s.cost) { playSfx('cannot', 0.35); return; }
-  if (!buildAllowedAt(G.mx, G.my)) { playSfx('cannot', 0.35); return; }
+  // 原版 822_226 on(press): 落点失败 (surfaceForBuild 不含/重叠/钱不够) = 静默
+  //   return —— cannot 音只在建造菜单槽位点击时播 (1026 on press, shopSlotPick)
+  if (G.euros < s.cost) return;
+  if (!buildAllowedAt(G.mx, G.my)) return;
   G.euros -= s.cost;
   G.turrets.push(new Turret(G.shopSel, G.mx, G.my));
   playSfx('creationUnite', 0.4);   // 原版 creationUnite.start()

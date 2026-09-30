@@ -1836,6 +1836,12 @@ console.log("--- 修理费 (819) ---");
   const bodySP = gj.slice(iSP, gj.indexOf('}', iSP));
   console.log("面板弹出静音+newEvents全分支=" +
     (!bodySP.includes('playSfx') && gj.includes('if (nextWave === 25) G.euros += 2400;')));
+  // TCS+55: 落点失败静默 (822_226 on(press): 不可建/重叠/钱不够 = 静默 return;
+  //   cannot 只在 1026 槽位点击播) — 扣款在落点成功时: euros-=cost + creationUnite
+  const iBC = gj.indexOf('if (G.euros < s.cost) return;');
+  console.log("落点失败静默+成功扣款+creationUnite=" +
+    (iBC > -1 && gj.includes('G.euros -= s.cost;') &&
+     gj.slice(iBC, iBC + 200).includes('creationUnite')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");

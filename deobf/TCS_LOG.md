@@ -298,3 +298,14 @@
 - 结论：8/8 均已翻证且接线，无遗漏——方向1（未取证剪辑）对 834 子树正式
   关账。三件套通过，冒烟 206 项全 `=true`、exit 0。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+55（2026-09-26）建造落点音效勘误（方向2，行为修正）
+
+- 取证：822_226 on(press) 全流程——surfaceForBuild.hitTest(x,y,true) →
+  逐塔 hitTest 重叠检查 → `euros < cost → return false`（三处失败均静默，
+  无音效）；成功：euros-=cost + viseur gotoAndStop("red") + creationUnite +
+  createUnit。cannot 音只在 1026/1026_* 建造槽 on(press)（shopSlotPick）。
+- **修正**：H5 落点失败两分支多播 cannot → 移除，静默失败对齐原版。
+  扣款/音效/建造顺序本已一致。
+- 断言 +1 → 冒烟 207 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。
