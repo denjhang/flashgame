@@ -17,15 +17,15 @@
 | o.java | 144 | 10 | ✅ JD+1 | o_clean.java (MidiPlayer) |
 | f.java | 141 | 11 | ✅ JD+1 | f_clean.java (SettingsStore) |
 | g.java | 656 | 9 | ✅ JD+1 | g_clean.java (ResourceStore; 153 项 id 表保留原文) |
-| GameMIDlet.java | 476 | ~25 | ⬜ | |
+| GameMIDlet.java | 476 | 26 | ✅ JD+2 | GameMIDlet_clean.java |
 | k.java | 1491 | ~60 | ⬜ | |
 | i.java | 867 | ~40 | ⬜ | |
 | j.java | 584 | ~30 | ⬜ | |
 | p.java | 209 | ~15 | ⬜ | |
-| h.java | 603 | ~25 | ⬜ | |
+| h.java | 603 | 19 | ✅ JD+2 | h_clean.java (HallOfFameScreen) |
 | House.java | 4420 | 98 | ⬜ (字段表起步见 FIELDS.md) | |
 
-**方法计数: 67 / ~340 (JD+1)。类: 10/17。**
+**方法计数: 112 / ~340 (JD+2)。类: 12/17。**
 
 ## JD+1 (2026-10-01) 小类全量 67 方法
 - a→ScreenCallback: 空标记接口 (extends e)。
@@ -47,3 +47,15 @@
 ## 待下一轮
 - GameMIDlet (476 行): 状态机 d(int)/a(Graphics)/key 分派/m()/Command。
 - House 字段表补全 (aa-cW)。
+
+## JD+2 (2026-10-01) GameMIDlet + h
+- GameMIDlet→(抽象宿主): 主循环 run() (dt=j() 8 帧滑动平均, 屏幕 q() 解析/切换 hide-show),
+  计时 v()/j(), paint d(Graphics), 按键 m/n/f, 软键 b(Command), splash 路由 c(int,int)/d(int,int)/c(Graphics),
+  RMS "settings" w() (l[0] 语言 + l[3] 音效)。26 方法全建档。
+- h→HallOfFameScreen: 高分榜屏 (实现 ScreenCallback) — RMS "HoF" (lastName+榜×3 行×(名+分[])),
+  submitScore 排位插入, 名字录入软键流, 横竖屏两套绘制 (f.a(4)), 图例 g.d(155/156/157), 图标 r0 id6/7/8。19 方法。
+- 【勘误】f.g 语义: JD+1 误记 vibrationLevel → 实为 screenMode (q():444 switch 分派; :392 f.e(0) 进 splash)。
+  FIELDS.md 已改。
+- 新证实: A 字段 (h) = 高分榜屏而非"键位处理" (JD+1 注释误判, h implements a 且作为 q() case2 屏返回);
+  keymaps p() 由本类键位表兼榜数定义; l[13]=游戏达标标记 (h.n())。
+- 下一轮: j.java (584, SplashScreen, 被 GameMIDlet/h 依赖) → p.java → k.java → i.java → House。
