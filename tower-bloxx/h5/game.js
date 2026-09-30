@@ -252,8 +252,14 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
     return m;
   });
   // 小人/火花纹理 (dude_spr 753 / dudette_spr 772 / star_spr 783)
+  // Person 帧动画全 56 帧: 走路循环 11-35 / 到达 36-56 / 56 淡出 (Person.as TOON_FRM_*)
   G.texPeople = ['DefineSprite_753_dude_spr', 'DefineSprite_772_dudette_spr'].map(n => {
-    const t = new THREE.TextureLoader().load(`./assets/flash/${n}/1.png`); t.colorSpace = THREE.SRGBColorSpace; return t;
+    const arr = [];
+    for (let i = 1; i <= 56; i++) {
+      const t = new THREE.TextureLoader().load(`./assets/flash/${n}/${i}.png`);
+      t.colorSpace = THREE.SRGBColorSpace; arr.push(t);
+    }
+    return arr;
   });
   G.texStar = new THREE.TextureLoader().load('./assets/flash/DefineSprite_783_star_spr/1.png');
   G.texStar.colorSpace = THREE.SRGBColorSpace;
@@ -786,16 +792,17 @@ function updateEffects(dt, now) { // GameSprites.updateEffects:154-208
 // 步长 min(PEOPLE_MAX_MV±10, dist/2), 每 50ms; 到达后 250ms 淡出 ----
 function spawnPeople(blockMesh, amt) {
   for (let k = 0; k < amt; k++) {
-    const tex = G.texPeople[Math.floor(Math.random() * 2)];
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+    const toon = Math.floor(Math.random() * 2);
+    const mat = new THREE.SpriteMaterial({ map: G.texPeople[toon][0], transparent: true });
     const sp = new THREE.Sprite(mat);
-    sp.scale.set(30, 40, 1);
+    sp.scale.set(42, 56, 1);                           // 帧原始尺寸 (读图 42x56)
     const bx = blockMesh.position.x + (blockMesh.userData.cx || 0);
     const side = Math.random() < 0.5 ? -1 : 1;
     sp.position.set(bx + side * (160 + Math.random() * 160), G.landingY + 100 + Math.random() * 100, 2);
     towerGroup.add(sp);
     G.people.push({ sp, tx: bx + (12 - Math.floor(Math.random() * 2) * 24), ty: G.landingY - 17,
-      seekMax: 10 + Math.random() * 20, next: 0, fading: 0 });
+      seekMax: 10 + Math.random() * 20, next: 0, fading: 0,
+      toon, f: 1, animT: 0 });   // Person.init: gotoAndPlay(1), eachTick frame==1 → randRange(0,9) 重定位
   }
 }
 // 完美落地 4 向火花 (Tower.makeSpark:311-317, speed=100, angles 135/45/225/315, Flipbook 150ms)
@@ -811,7 +818,7 @@ function makeSparks(x, y) {
 }
 // miss 坠落小人 (Tower.makeFallingPerson:296-310: 5000ms, 漂移 ±100)
 function spawnFallingPerson(x, y) {
-  const mat = new THREE.SpriteMaterial({ map: G.texPeople[Math.floor(Math.random() * 2)], transparent: true });
+  const mat = new THREE.SpriteMaterial({ map: G.texPeople[Math.floor(Math.random() * 2)][0], transparent: true });
   const sp = new THREE.Sprite(mat);
   sp.scale.set(30, 40, 1);
   sp.position.set(x, y, 2);
@@ -1005,12 +1012,24 @@ function loop(now) {
     // 小人寻步 (Person.eachTick: 每 50ms 半步逼近, 上限 seekMax; 到达后 250ms 淡出)
     for (let i = G.people.length - 1; i >= 0; i--) {
       const q = G.people[i];
+      // Person.eachTick 帧状态机 (30fps=每 33.3ms 一帧): frame==1→randRange(0,9) 起播;
+      // frame==35→11 走路循环; 到达后 <36→36 播到 56, 56 帧起 Fader 250ms (Person.as:32-66)
       if (!q.fading) {
+        q.animT += dt;
+        while (q.animT >= 1000 / CRANE_FPS) {
+          q.animT -= 1000 / CRANE_FPS;
+          if (q.f === 1) q.f = 1 + Math.floor(Math.random() * 10);      // randRange(0, TOON_FRM_START_LOOP-2)
+          else if (q.f === 35 && !q.arrived) q.f = 11;                  // TOON_FRM_END_LOOP → START_LOOP
+          else if (q.arrived && q.f < 36) q.f = 36;
+          else if (q.arrived && q.f >= 56) { q.f = 56; q.fading = now; } // TOON_FRM_LAST → Fader
+          else q.f++;
+          q.sp.material.map = G.texPeople[q.toon][q.f - 1];
+        }
         if (now >= q.next) {
           q.next = now + 50;
           const dx = Math.max(-q.seekMax, Math.min(q.seekMax, (q.sp.position.x + (0 - q.tx)) / -2));
           const dy = Math.max(-q.seekMax, Math.min(q.seekMax, (q.sp.position.y + (0 - q.ty)) / -2));
-          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) q.fading = now + 250;
+          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) q.arrived = true;
           else q.sp.position.x += dx, q.sp.position.y += dy;
         }
       } else if (now >= q.fading) {

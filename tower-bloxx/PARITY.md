@@ -2,13 +2,12 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T5.【函数】GameSprite/Person 逐函数普查**：GameSprites.as 与 Person.as 里尚未对号的函数
-> （逐个列名+行号对照 h5/game.js），缺的补、偏的修。
-> **T6.【资源】flash/ 下未接入切片盘点**：逐张读图（bg2/3/4、fx01-28、star、dude/dudette…），
-> 标出已接入/未接入/接错位置，未接入的写接入任务。
+> **T6.【资源】flash/ 下未接入切片盘点**：逐张读图（DefineSprite_231/423/426 背景三件、
+> fx/ 下 224 项、image_10..17、783 star），标出已接入/未接入/接错位置，未接入的写接入任务。
+> **T7.【函数】spawnFallingPerson 帧动画补齐**：miss 坠落小人在原版也是 toon 帧动画
+> （Tower.makeFallingPerson:296-310），H5 目前静态第 1 帧；用 T5 已载入的 56 帧序列补齐。
 >
-> **待办池**（T1-T3 做完后按序取）：城市塔原版图形替换 CSS 近似 / menu_spr 按钮热区实测校准 /
-> J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
+> **待办池**：城市塔格缩略图原版化 / J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -98,6 +97,17 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   OK 后 +100ms（GameSprites.showTip:28-46/hideTip:60-63）。调用点: intro（STT_PLAY GameState.as:104）/
   combo（首次完美落地 Tower.as:356-358, OK 后补 setTimer）/ bought_land→new_tower_type0→
   click_tower→city_meter(1塔)/city_line(2塔) 进城链（CityMap.as:105-118）/ place_tower（选格进城时）
+
+
+### 4.1 GameSprites/Person 逐函数普查（第 30 轮, T5 ✅）
+- 逻辑 1:1 对号: generateEffect/updateEffects（Const 三表+m_effectOccurences 全量）、showTip/hideTip、
+  showSummary、setDigits、showBonusPopulation、restartGame、stopGame、
+  Person.init/eachTick/factory（行走 (T-p)/2 半步+±seekMax(10..30)+50ms 节拍+250ms 淡出）
+- HTML/overlay 等价（交互语义在, 非逐像素）: buildGameSprites/enableMainMenu/make-kill 三组弹窗/
+  makeGameButton/makeMenuButton/makeMenuSprites/updateCityMap（594,80 菜单钮=btnExit）
+- 第 30 轮升级: Person toon 帧动画全 56 帧接入（读图 42x56）——eachTick 帧状态机
+  frame==1→rand(0..9) 起播 / 35→11 走路循环 / 到达后 <36→36 / 56 淡出, 30fps 每帧 33.3ms
+- 剩余: spawnFallingPerson 静态帧 → T7
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 

@@ -300,3 +300,13 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 叠加层减重: 图标/色板已在底图中, .sel 的 .sw 色板 display:none, 只留文字标签+选中红框;
   locked 用白色半透明遮罩盖住底图图标（底图 4 个塔都是可选状态画的）
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 30 轮（2026-09-30）— T5 GameSprites/Person 逐函数普查 + toon 56 帧动画接入
+
+- 普查结论（22+3 函数）: 特效/提示/结算/计数字/加成/重启/停止/Person 三函数全部已对号或 HTML
+  等价（明细记 PARITY 4.1）; 唯一实质缺口 = Person 帧动画
+- [P1] toon 帧动画: 发现 dude_spr/dudette_spr 已导出全 56 帧（读图 42x56）→ 载入 2×56 纹理,
+  实现 eachTick 帧状态机: frame==1→randRange(0,9) 起播; frame==35→11 走路循环（仅 !arrived,
+  原版到达帧同 tick 被覆盖到 36 语义等价）; arrived 后 <36→36, >=56 停 56 起 Fader 250ms;
+  步进 30fps（1000/CRANE_FPS ms/帧, CRANE_FPS=30 即 Flash 帧率证据）; sprite 放大到原尺寸 42x56
+- miss 坠落小人仍静态帧 → 记 T7
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
