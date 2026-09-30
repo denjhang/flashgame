@@ -349,3 +349,12 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - dozer 拆除: 补 placeInDozer:398-405 的 city_demol_spr 翻页（1→6/1000ms→167ms/帧, 自毁）,
   拆除格中心 (224+col*52-10, 107+row*52-10) 锚定; 原 H5 只放音效无视觉
 - 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS
+## 第 36 轮（2026-09-30）— T11 GameState 逐函数普查 + 进榜名字输入流
+
+- 39 个 STT_* 状态逐一核对（明细 PARITY 4.2）: 唯一交互缺口 = 进榜名字输入流
+- [P2] 补齐: showSummary 判 isQualified（!cityMode && pop>0 && rank<10, 条目带 id）→ 结算 OK →
+  showNameDialog（输入 12 字符, 缺省 AAA, 回写同 id 条目）→ showHighScores 弹榜,
+  榜单行加名字列——对号 STT_CHECK_HIGHSCORE:148-167 / STT_NEW_HIGHSCORE:168-173 /
+  HighScore.showNameDialog→dialogDone→showPopup 链
+- 普查归档: STT_SPLASH 原版 case 为空; 外链 5 态=有意不复刻; 其余 33 态 H5 等价实现
+- 全量回归: smoke 17 PASS / tower 7 PASS / city 10 PASS

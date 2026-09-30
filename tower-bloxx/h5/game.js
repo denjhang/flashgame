@@ -146,7 +146,7 @@ function showInstructions(page) { // STT_INSTRUCTIONS + INSTR fork (GameSprites.
 }
 function showHighScores() { // STT_HIGHSCORES + HighScoreLocalProxy (本地 top10)
   const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
-  const rows = hs.map((h, i) => '<div>' + (i + 1) + '. Population ' + h.pop + ' — height ' + h.h + ', combo x' + h.combo + '</div>').join('') || '<div>No scores yet.</div>';
+  const rows = hs.map((h, i) => '<div>' + (i + 1) + '. ' + (h.name || '—') + ' — Population ' + h.pop + ', height ' + h.h + ', combo x' + h.combo + '</div>').join('') || '<div>No scores yet.</div>';
   showSub('<h3>High Scores</h3>' + rows);
 }
 function showResetConfirm() { // STT_RESET_MAP + TIP_CONFIRM_RESET
@@ -647,10 +647,13 @@ function showSummary() {
   G.records.blockRecord = Math.max(G.records.blockRecord, G.stacked);              // setStackedBlocks
   G.records.comboRecord = Math.max(G.records.comboRecord, G.comboMax);             // setComboMult
   localStorage.setItem('twrblx_records', JSON.stringify(G.records));
-  // HighScore 本地榜 (HighScoreLocalProxy): 按人口 top10
+  // HighScore 本地榜 (HighScoreLocalProxy): 按人口 top10; 进榜标记 → 结算 OK 后名字输入
+  // (GameState STT_CHECK_HIGHSCORE:148-167 isQualified→showNameDialog→STT_NEW_HIGHSCORE→showPopup)
   const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
-  hs.push({ pop: G.population, h: G.stacked, combo: G.comboMax });
+  const entry = { pop: G.population, h: G.stacked, combo: G.comboMax, name: '', id: Date.now() };
+  hs.push(entry);
   hs.sort((a, b) => b.pop - a.pop);
+  G.pendingHS = (!G.cityMode && G.population > 0 && hs.indexOf(entry) < 10) ? entry : null; // isQualified
   localStorage.setItem('twrblx_highscores', JSON.stringify(hs.slice(0, 10)));
   G.save.sm_totalPopulation = Math.max(G.save.sm_totalPopulation, G.population); // 城市总人口占位(城市模式接入后为累计值)
   saveModel();
@@ -665,7 +668,25 @@ function showSummary() {
   hud.summary.style.display = 'block';
   hud.summary.querySelector('.ok').onclick = () => {
     if (G.cityMode && G.pendingCell) finishCityTower(wonRef.won);
+    else if (G.pendingHS) showNameDialog();   // afterHighScore = STT_NEW_HIGHSCORE
     else showMenu(); // afterHighScore = STT_MENU (GameState.as:145)
+  };
+}
+// 高分名字输入 (HighScore.showNameDialog → dialogDone → STT_NEW_HIGHSCORE: showPopup)
+function showNameDialog() {
+  hud.summary.innerHTML =
+    '<div>Congratulations! You made the high score list!</div>' +              // HighScoreLocalProxy 语义
+    '<div><input id="hsName" maxlength="12" style="font-size:16px;width:180px" placeholder="Your name"></div>' +
+    '<div class="ok">OK</div>';
+  hud.summary.style.display = 'block';
+  hud.summary.querySelector('.ok').onclick = () => {
+    const nm = (document.getElementById('hsName').value || 'AAA').slice(0, 12);
+    const hs = JSON.parse(localStorage.getItem('twrblx_highscores') || '[]');
+    const e = hs.find(x => x.id === G.pendingHS.id);   // 回写同一上榜条目
+    if (e) e.name = nm;
+    localStorage.setItem('twrblx_highscores', JSON.stringify(hs));
+    G.pendingHS = null;
+    showHighScores();                          // STT_NEW_HIGHSCORE → highScore.showPopup
   };
 }
 const toppled = [];

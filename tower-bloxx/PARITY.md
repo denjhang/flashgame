@@ -2,11 +2,12 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T11.【函数】GameState.as 逐函数普查**：状态机 STT_* 各 case 与剩余函数（toggleSongs/
-> toggleSounds/updateCityBadge/showCityPop 链等）逐个对照 h5/game.js，缺的补、偏的修。
+> **T12.【函数】GameModel/Tower 剩余函数抽查**：GameModel（updateCityBadge/showCityPop/
+> resetMaximums/clearCity 等）与 Tower（makePerson/move 视差链/gameOver/panDown）逐个列名+
+> 行号对照 h5/game.js，缺的补、偏的修——game/*.as 主类普查收官。
 >
 > **待办池**：J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义 /
-> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）。
+> swoosh_spr 翻页小特效（1→3帧/150ms, Tower.as:333）/ STT_SPLASH 素材（原版 case 为空, 仅时间轴）。
 >
 > （每轮完成后：把完成的项标 ✅ 移入对应章节，并在此区写下一轮任务——任务来源是本文件, 不是定时任务提示词。）
 
@@ -129,6 +130,18 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - 第 30 轮升级: Person toon 帧动画全 56 帧接入（读图 42x56）——eachTick 帧状态机
   frame==1→rand(0..9) 起播 / 35→11 走路循环 / 到达后 <36→36 / 56 淡出, 30fps 每帧 33.3ms
 - 剩余: spawnFallingPerson 静态帧 → T7
+
+
+### 4.2 GameState.as 逐函数普查（第 36 轮, T11 ✅）
+- 39 个 STT_* 状态逐一归位: 核心流（PLAY/BLOCK_LANDED/CLEAR_TO_SEND/GAME_WON/LOST/OVER/RESTART/
+  HIDE_POPUP/INSTR1-4/HIGHSCORES/RESET_MAP*/CITY/SOUND/MUSIC/EXIT*）H5 均有等价实现;
+  STT_SPLASH 原版 case 为空 break（素材在时间轴, 等效跳过）; 外链 5 态（CALLTOACT*/GET_MORE_GAMES/
+  MOBILE_LEAGUE/TELL_A_FRIEND）= 有意不复刻项
+- 7 个函数: setTargetState/cngState/onEnterFrame=H5 直接事件驱动等价; toggleSongs/toggleSounds/
+  playSound/playSong/stopSong ✅; dialogDone=OK 回调等价
+- 第 36 轮补齐: 进榜名字输入流 ✅——isQualified(top10 且 !cityMode)→结算 OK 后 showNameDialog
+  （输入→回写同条目 by id）→showHighScores 弹榜（STT_CHECK_HIGHSCORE:148-167 +
+  STT_NEW_HIGHSCORE:168-173 + HighScore.showNameDialog/showPopup 链）; 榜单行加名字列
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 
