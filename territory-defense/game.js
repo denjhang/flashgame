@@ -3018,9 +3018,10 @@ function hud() {
   document.getElementById('hCash').textContent = G.euros + ' $';
   document.getElementById('hInt2').textContent = 'interest ' + G.interest + '%';
   // 原版 actualiseInfo (1079/1074_30): infoMoneyAndScore.score.text =
-  //   master_menuItems.score —— LOSSES 值 = 丢塔数 (185帧2: iMission<45 时 score++),
-  //   非敌人抵达次数 (TCS+46 勘误: 旧实现误接 G.losses)
-  document.getElementById('hLoss').textContent = 'LOSSES ' + G.score;
+  //   master_menuItems.score —— 值 = 丢塔数 (185帧2: iMission<45 时 score++),
+  //   非敌人抵达次数 (TCS+46 勘误)。TCS+73: money_panel.png 已烤入 "LOSSES"
+  //   标签 → DOM 只填数字 (原版 score 文本字段即纯数字)
+  document.getElementById('hLoss').textContent = G.score;
   if (typeof syncPanel === 'function') syncPanel();
 }
 // 预热全部炮塔素材 (173 塔体层 + 86 结构层 + 敌方武器塔)

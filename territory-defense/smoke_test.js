@@ -1830,10 +1830,10 @@ console.log("--- 修理费 (819) ---");
   console.log("车速抖动=原版 accelere 1%重roll(+0..20%)=" +
     (gj.includes('Math.random() * 100 > 99') &&
      gj.includes('this.vPrime = this.vBase + Math.random() * (this.vBase / 5)')));
-  // TCS+46: 金钱面板 LOSSES = master_menuItems.score 丢塔数 (1079 actualiseInfo),
-  //   非敌人抵达次数
-  console.log("LOSSES=丢塔数 G.score (1079 actualiseInfo)=" +
-    gj.includes("'LOSSES ' + G.score"));
+  // TCS+46/73: LOSSES 值 = 丢塔数 (1079 actualiseInfo); 面板图已烤标签,
+  //   DOM 只填数字 (原版 score 字段即纯数字)
+  console.log("LOSSES=丢塔数纯数字(面板已烤标签)=" +
+    (gj.includes(".textContent = G.score;") && !gj.includes("'LOSSES ' + G.score")));
   // TCS+51: 988_3/988_6 on(press) 语义 (lockItem 守卫/creationUnite/cannot/
   //   interest+=3/成功后面板收起; 失败 lockItem 保持=原版怪癖同构)
   console.log("解锁面板按钮=原版988_3/988_6语义=" +
