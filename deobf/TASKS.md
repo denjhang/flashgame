@@ -24,10 +24,11 @@
 
 ## 三、当前任务（自查自纠，持续自更新；做完一项划掉并补新项）
 
-- [ ] 文档（方向5）：已定案事实补录「对白字号 14px/leading 2px（EditText 1156）
-  」「dlgNext/dlgWho 说话人名为 H5 附加件（原版 979 仅 nextDialogue，无名字字段）」
+- [ ]（空）
 
 ## 三之一、已完成于本轮（滚动记录）
+
+- [x] TCS+30: 已定案事实补录两条（对白字号定案 / 说话人名为 H5 附加件）
 
 - [x] TCS+29: dlgBox 排版对齐原版（方向4）——取证 EditText 1156（实例 dialogue,
   放置于 980 深度3）: FontHeight=280twips=14px、白色、左对齐、Leading=40twips=2px；
@@ -95,3 +96,8 @@
 - 1053 story 按钮 = 自含标签翻转（"action"/"story"，QEX 旗标无其他读取点），
   系开发遗留；H5 已在帮助板以等效标签翻转复刻（TCS+6）。
 - 真机听感验证：永久挂账（纪律禁止浏览器）。
+- 对白文本排版 = EditText 1156（实例 dialogue，放入 980 dpt3）：FontHeight
+  280twips=14px、白、左对齐、Leading 40twips=2px（TCS+29 字节级解码，H5 已对齐
+  14px/line-height:1.3 并有防回归断言）。
+- 说话人名显示（dlgWho）与「▼ 点击继续」提示（dlgNext）= H5 附加件：原版 979
+  按钮仅调 nextDialogue()，对白字段只写正文，无名字字段（TCS+29 取证）。
