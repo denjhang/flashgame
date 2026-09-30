@@ -558,3 +558,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - 全量回归: smoke 19 / tower 7 / city 11 / SAVE_SEED=3 7 — 全绿
 - 简巡: 退出流 (原版 calltoaction 确认→H5 回菜单, 已归档等价)/comboSpr 隐藏时机一致
+## 第 74 轮（2026-09-30）— T35 回归维护
+
+- 巡检: fanfare 文件名 (snd_fanfare_mediocre 导出名与代码一致) / playSound currentTime 复位与
+  soundsEnabled 门控 (GameState:293-298) — 均无问题
+- 全量回归: smoke 19 / tower 7 / city 11 PASS
