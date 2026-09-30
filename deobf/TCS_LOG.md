@@ -130,3 +130,13 @@
   两处使用（Su37 空袭 889 / 导弹溅射 1796）同构，亦不去重 → 行为等价。
 - 断言 +1 → 冒烟 197 项全 `=true`、exit 0，三件套通过。
 - 本轮仍未做：无（「三」空，下轮按「五」生成）。
+
+## TCS+39（2026-09-26）MTHEL 激光复核（方向2）
+
+- 取证：GAME_LOGIC 56 + obus frame13 (chid399 onClipEvent(load)) —— MTHEL 的
+  "laser" 弹在子件 load 时以 _height=目标距离拉出光束、同帧 fireOnEnnemi 结算，
+  之后仅播动画，无飞行过程。
+- 结论：H5 spawnShell 的 laser 分支（shellHit 即发即中 + G.beams 12 帧光束）
+  与原版语义一致；冒烟本就有实战断言（当帧掉血 120 = MTHEL 单发威力）。
+  本轮补接线断言 +1 → 198 项全 `=true`、exit 0，三件套通过。
+- 本轮仍未做：无（「三」空，下轮按「五」生成）。

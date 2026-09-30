@@ -1789,6 +1789,11 @@ console.log("--- 修理费 (819) ---");
   //   原版三次独立调用不去重 → 内圈叠 1.7x, H5 同构)
   console.log("溅射三段=原版 [[.25,1],[.5,.5],[1,.2]]=" +
     gj.includes('const SPLIT = [ [0.25, 1], [0.5, 0.5], [1, 0.2] ];'));
+  // TCS+39: MTHEL 激光 (GAME_LOGIC 56: 无弹道直接结算; obus frame13 chid399 load
+  //   _height=目标距离 同帧 fireOnEnnemi → H5 即发即中 + beams 光束动画)
+  console.log("MTHEL 激光=即发即中+laser 光束=" +
+    (gj.includes("MTHEL: 'laser'") && gj.includes("SHELL_KIND[turretId] === 'laser'") &&
+     gj.includes('G.beams.push')));
 }
 // ---- 主攻方向二 #3: 终局演出 (activePerdu 4s 延迟 + 1158 对白时间轴 + 1125/1132 动画帧, N+79) ----
 console.log("--- 终局演出 ---");
