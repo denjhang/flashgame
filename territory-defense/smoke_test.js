@@ -1380,7 +1380,26 @@ console.log("--- 剧情码序列比对 ---");
   }
   console.log("44 关说话人码序列与原版逐句一致=" + (bad === 0) + (bad ? ' 不一致 ' + bad + ' 关' : ''));
 }
-// ---- 终局/败局路径执行 (N+100): showCine 两条分支从未被 sim 触发过 ----
+// ---- 非简报波对白门控 (N+101): endWave→dlg 冻结倒计时→放完重启窗口 ----
+console.log("--- 非简报波对白门控 ---");
+{
+  // 进入第 2 波 (非简报波, 有 1 句对白) 的波间: 清场触发 endWave
+  const sv = { wave: G.wave, interWave: G.interWave, briefing: G.briefing };
+  G.wave = 1; G.waveActive = false; G.units.length = 0; G.briefing = false;
+  G.lost = false; G.won = false; G.panelOpen = false; briefState = null; dlg = null;
+  endWave();
+  const opened = dlg !== null && dlg.m === 2 && G.interWave === INTERWAVE_TICKS + 1;
+  // 倒计时被冻结 (dlg 存在时 tick 不推进)
+  let frozen = true;
+  try { for (let i = 0; i < 10; i++) tick(); } catch (e) { frozen = false; }
+  frozen = frozen && G.interWave === INTERWAVE_TICKS + 1;
+  // 放完对白 → 重启标准窗口
+  while (dlg) dlgNext();
+  const resumed = !dlg && G.interWave === INTERWAVE_TICKS;
+  console.log("非简报波对白: 打开=" + opened + " 倒计时冻结=" + frozen + " 放完重启=" + resumed);
+  G.wave = sv.wave; G.interWave = sv.interWave; G.briefing = sv.briefing; dlg = null;
+}
+// ---- 终局/败局路径执行 (N+100)// ---- 终局/败局路径执行 (N+100): showCine 两条分支从未被 sim 触发过 ----
 console.log("--- 终局路径 ---");
 {
   // 败局: 抵达基地 → defeatT=120 → 120 tick 后 lost + perdu 分支
