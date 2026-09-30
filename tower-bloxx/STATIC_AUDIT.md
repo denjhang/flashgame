@@ -465,3 +465,8 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 - 抽 pushBounce 助手 (撞塔/knock 共用); knock 弹飞方向=新顶块x−被弹块x (确定性),
   wait=DELAY_FINAL_TUMBLE=250ms 起跳前冻结; 替换随机翻倒物理
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS
+## 第 53 轮（2026-09-30）— T28 HUD 位图化
+
+- 四件 HUD 换原版位图: tries 26帧(帧公式:143)/population 底图+圈位数字/combo 底图+fill+文字/
+  progress 5帧(帧公式:216)+blackBar+hudTop — 坐标/读图/公式全取证 (明细 PARITY 4.4)
+- 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS

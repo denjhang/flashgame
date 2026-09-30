@@ -37,6 +37,10 @@ const stage = document.getElementById('stage');
 const hud = {
   pop: document.getElementById('pop'),
   combo: document.getElementById('combo'), msg: document.getElementById('msg'),
+  triesImg: document.getElementById('triesImg'), popDigits: document.getElementById('popDigits'),
+  comboFill: document.getElementById('comboFill'), comboText: document.getElementById('comboText'),
+  progressImg: document.getElementById('progressImg'), barBlack: document.getElementById('barBlack'),
+  barTop: document.getElementById('barTop'),
   summary: document.getElementById('summary'),
   progress: document.getElementById('progress'), tries: document.getElementById('tries'),
   btnMusic: document.getElementById('btnMusic'), btnSound: document.getElementById('btnSound'),
@@ -632,19 +636,27 @@ const cable = new THREE.Line(
 craneGroup.add(cable);
 
 function addHud() {
-  // 人口: 5 位数字 (GameSprites.setDigits:124-136, populationSpr numDigs=5)
-  hud.pop.textContent = String(Math.floor(G.population)).padStart(5, '0');
-  // 命数 (tries_spr LWR_LFT 51,-55; GameModel.setTries:139)
-  hud.tries.textContent = '♥'.repeat(Math.max(0, G.lives)) || '—';
-  // 高度进度条: tower 模式 blackBar=(total-stacked)*total*5/total (GameModel.as:213-227); quick 只显示层数
+  // 人口: 5 位数字叠 population_spr 圈位 (setDigits:124-136; 读图圈槽 x25..95)
+  hud.popDigits.textContent = String(Math.floor(G.population)).padStart(5, '0');
+  // 命数位图帧: 3 + currColor*6 + (3-tries)*2 (GameModel.setTries:143, 26 帧)
+  hud.triesImg.src = `./assets/flash/fx/DefineSprite_358_tries_spr/${3 + G.currColor * 6 + (3 - Math.max(0, G.lives)) * 2}.png`;
+  // 高度进度: 帧=1+total/10 (GameModel.as:216); blackBar=(total-stacked)*5px, 底部锚 4px (:226-227)
   if (G.totalBlocks !== 999) {
-    hud.progress.querySelector('.fill').style.height = (100 * G.stacked / G.totalBlocks) + '%';
-    hud.progress.querySelector('.top').style.display = G.stacked >= G.totalBlocks - 1 ? 'block' : 'none'; // hudTop:217
+    hud.progress.style.display = 'block';
+    hud.progressImg.src = `./assets/flash/fx/DefineSprite_251_progress_spr/${1 + G.totalBlocks / 10}.png`;
+    const seg = G.totalBlocks * 5;
+    hud.barBlack.style.height = ((G.totalBlocks - G.stacked) * seg / G.totalBlocks) + 'px';
+    hud.barTop.style.display = G.stacked >= G.totalBlocks - 1 ? 'block' : 'none';   // hudTop:217
+    hud.barTop.style.bottom = (21 + seg) + 'px';                                    // hudTop._y=-seg-17
   } else hud.progress.style.display = 'none';
-  // 连击: "min(5,secs) x mult" (ComboTimer.setSecs:50-56)
+  // 连击: bitmap 275 + fill(条槽 x36..199) + "min(5,secs) x mult" (ComboTimer.setSecs:50-56)
   const secs = Math.max(0, Math.ceil(G.comboT / 1000));
-  hud.combo.style.display = G.comboMult > 0 && G.comboT > 0 ? 'block' : 'none';
-  if (G.comboMult > 0 && G.comboT > 0) hud.combo.textContent = Math.min(5, secs) + ' x' + G.comboMult;
+  const on = G.comboMult > 0 && G.comboT > 0;
+  hud.combo.style.display = on ? 'block' : 'none';
+  if (on) {
+    hud.comboText.textContent = Math.min(5, secs) + ' x' + G.comboMult;
+    hud.comboFill.style.width = Math.round(163 * Math.min(1, G.comboT / ((TIMER_MAX + 1) * 1000))) + 'px';
+  }
 }
 
 function startGame() {

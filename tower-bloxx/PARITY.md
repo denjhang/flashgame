@@ -2,8 +2,8 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T28.【资源】HUD 位图化**：读原版 HUD 切片（population_spr/tries_spr/combo_spr/progress_spr，
-> fx/ 下 303/358/275/251），替换 HUD 文本近似；坐标用 makeGameSprites/buildGameSprites 证据。
+> **T29.【资源】title/menu 与城市消息条位图核对**：462 popup_spr / 360 msg_spr / 444 reset 弹窗
+> 位图化核对（H5 现用 HTML 白面板），逐张读图后决定替换或记档。
 >
 > **待办池**：（空，做完再自查）
 >
@@ -192,6 +192,15 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 - smoke_test 新增断言(第18项): game.js 的 getElementById(...) 与 bindMenu b('m...') 引用的
   id 必须存在于 index.html（hsName 除外=动态 innerHTML）——断言首跑即抓出上述两项,
   防线生效。教训: Edit 工具超时可能假成功, 重补后必须 grep 验证
+
+
+### 4.4 HUD 位图化（第 53 轮, T28 ✅）
+- tries_spr(358) 26 帧位图: 帧=3+currColor*6+(3-tries)*2 (GameModel.as:143), 替换 ♥ 文本;
+  population_spr(303) 97x26 底图 + 数字叠圈位 (读图圈槽 x25..95, 5 圈距 15px);
+  combo_spr(275) 272x52 顶中 (UPR_CTR 0,50) + fill(读图条槽 x36..199)+文字盖内嵌样本;
+  progress_spr(251) 47x232 帧=1+total/10 (:216) + blackBar=(total-stacked)*5px 底锚 4px (:226-227)
+  + hudTop 旗 (bottom=21+seg)
+- 坐标全部来自 buildGameSprites:91-95 (LWR_LFT/UPR_CTR 锚点)
 
 ## 5. 视觉表现层——🟨 部分有 3D 资产但未接 [P1]
 
