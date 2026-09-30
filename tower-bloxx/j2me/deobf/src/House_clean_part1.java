@@ -202,3 +202,25 @@ public class HouseTowerGame {
     /** 原 a(Graphics, int, int, int, int): setClip 直通。 */
     public static void setClip(Graphics g, int x, int y, int w, int h)
 }
+
+// ---- JD+8 补读转正 (House 98/98 齐) ----
+
+    /** 原 h(): 读 quickModeRS — f.a("quickModeRS"), 字段序与 g() 写序严格对称
+     *  (e/f/bk/cg/aT..bw 42 标量 → bi/bj/cF/bh → bD bool → dD/bq →
+     *  az/aA/aw/cG/ax/aB/aC/aD/ay 数组 → aF byte[] → cH → bE[8][8] → cm[2][5] →
+     *  cn/co/bt/ba/bb/bc/ch/bA/bB/bz/dE/dI → 12 项尾表)。 (:619-828) */
+    protected final void loadQuickModeRS()
+
+    /** 原 a(int, int): 指针/主事件分派 — O!=0 退出期忽略; f==7 装载屏;
+     *  城市/快速首进: 天际线图像释放 (cy..cE=null), 分段装载门控 e(5)/e(10)/e(15),
+     *  替换确认 k.b(), 主 BGM 切 -2147483566(城市)/-2147483567(快速); f=aZ 落定。 (:1547-1722) */
+    public final void onScreenEvent(int deltaTime, int clock)
+
+    /** 原 a(String, String[], Image): 消息入队 — O() 清旧; m=折行 (宽 E-(bT+bS)<<1);
+     *  bW=行高+2, bV=(面板高)/bW 每页行数, bP=页数; stringArray 子选项 → bY (末行溢出加页);
+     *  image → ca/cb 底图 (超高加页); bX=cg 输入门。 (:4203-4228) */
+    public static void pushMessage(String text, String[] choices, Image image)
+
+    /** 原 b(int,int,int,int,int) 字段补全 (:3340-3364 全读) —
+     *  888 → bD?cA:cz (完成楼体/普通块), 999 → cB (屋顶), 其余 cy (标准块);
+     *  旋转: n5/360 绕 z 轴 + n6/360 绕 y 轴 — cy/cz/cA/cB = 四种块 MeshNode。 */

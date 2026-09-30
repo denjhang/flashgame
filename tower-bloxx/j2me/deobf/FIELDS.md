@@ -32,7 +32,7 @@
 | o.e | preloadPlayer | a(int,boolean) 赋值 |
 | o.f | soundEnabled (默认 true) | a(boolean) |
 | o.g | bgmActive | a(int,int) 置 true / c() 置 false |
-| o.h | suspended【待证: b() 中 !this.h 判定, 疑挂起标志】 | b() |
+| o.h | suspended (挂起抑制, b() 中 !h 判定) — 【JD+8 证实】 | o:58 |
 
 ## f.java → SettingsStore
 | f.f | languageIndex | d(int)/a() |
@@ -290,3 +290,11 @@
 | cl[5]/ck[5] | 横躺延迟/基准表 | d(int,int) |
 | E..F 表 (k.java 已记) | — | — |
 | n (暂停)/o(字体)/p,q,r,s,t | 静态杂项: 暂停/全局字体/音效回读标志/【待证】/【待证】 | c()/q() |
+
+## JD+8 收尾清待证
+| cy/cz/cA/cB (House) | 标准块/完美块/完成楼体/屋顶 MeshNode (四种块渲染节点) | b(5):3340-3364 (888→bD?cA:cz, 999→cB) |
+| m/bV/bW/bP/bX/bY/ca/cb (House) | 消息面板: 折行文本/每页行数/行高/页数/输入门/子选项/底图/底图高 | a(String,String[],Image):4203 |
+| f.c() | = f.d() flushSettings: toByteArray → setRecord/addRecord 记录 1 (:126-138) — 各处 f.c() 即"提交 RMS" | 【JD+8 证实】 |
+| House.N() | 【勘误: 死代码】静态块 :4376 裸调用, CRC 表构建后丢弃, 无消费点 | 静态块 |
+| l 类 (j.java:112) | 反编译输出缺失的 CommandListener (名字录入 Form) — j 的桥接访问器服务对象; 录入回读走 j.b() | 记档 |
+| j.t/j.u | Form 暂存 (消费者=缺失的 l 类) — 维持待证但消费者已定位 | 桥访问器 |

@@ -23,10 +23,10 @@
 | j.java | 584 | 23 (含 8 桥) | ✅ JD+3 | j_clean.java (MenuScriptInterpreter) |
 | p.java | 209 | 10 | ✅ JD+3 | p_clean.java (PhoneCanvas) |
 | h.java | 603 | 19 | ✅ JD+2 | h_clean.java (HallOfFameScreen) |
-| House.java | 4420 | 98 | ✅ JD+7 (96 实读+2 CFR 桥计数容差, 三分册) | House_clean_part1/2/3.java |
+| House.java | 4420 | 98 | ✅ JD+8 (98/98 全实读, 三分册+JD+8 补读) | House_clean_part1/2/3.java |
 | com/.../a.java | ~120 | 4 | ✅ JD+3 | nokia_lang_clean.java (NokiaLangPack) |
 
-**方法计数: 271 / ~340 (JD+7)。类: 17/18 — 全部类反混淆完成 ✅**
+**方法计数: 275 / ~340 (JD+8 补读 4)。类: 17/17 — 全项目反混淆完成 ✅**
 
 ## JD+1 (2026-10-01) 小类全量 67 方法
 - a→ScreenCallback: 空标记接口 (extends e)。
@@ -134,3 +134,13 @@
 - House 计数说明: 98 签名 - 96 实读建档 = 2 项为 CFR 桥方法/签名图计数容差 (f(int) super 转发等)。
 - 【全项目定案】17/18 类反混淆完成, 语义源码 + FIELDS.md 字段表 + PROGRESS.md 账本齐备。
   剩余: h.java 实现为 HoF 屏已并入 h_clean; 18 号位为保留。H5 表现层重做可全面依据 deobf 底本。
+
+## JD+8 (2026-10-01) 收尾审计 — 清待证/勘误, House 98/98 齐
+- 补读 4: h()=loadQuickModeRS 全字段序证实 (与 g() 严格对称); a(int,int)=指针/装载分派
+  (分段 e(5)/e(10)/e(15), BGM 切换); a(String,String[],Image)=消息入队 (折行/分页/子选项/底图);
+  b(5) 全读 → cy/cz/cA/cB 四种块 MeshNode 语义 (888=完成楼体 bD 分支, 999=屋顶)。
+- 清待证: o.h=suspended 证实; f.c()=flushSettings (d() :126-138); House.N()=死代码勘误
+  (静态块裸调用, 表丢弃); l 类=反编译缺失的 Form CommandListener (j 桥服务对象, 记档);
+  j.t/j.u 消费者定位至 l。
+- 全项目定案: 17/17 类 ✅, House 98/98 ✅, 语义源码+字段表+账本齐备。
+  后续 H5 表现层重做 (城市屏/盖楼 HUD/菜单) 以 deobf/ 为唯一依据。

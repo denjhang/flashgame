@@ -113,8 +113,8 @@
     /** 原 e(int,int): 键→码 — 53/8→0, 56/6→2, 50/1→1, 其余 -1 (菜单四向用)。 */
     private static int keyToCode(int keyCode, int gameAction)
 
-    /** 原 h(int)【部分读】: 雨滴溅射粒子 — cu[40]/cs[18]/cv[20] 三池 (y 初=be 屏高),
-     *  cq 累积 (cap 150) → cr+=n2>>1 生成配额; 内部循环未读完, 下轮补。 */
+    /** 原 h(int)【勘误 JD+7: 非"雨滴溅射"】环境天空粒子导演 (云/鸟/花瓣三池),
+     *  完整版见 House_clean_part3.java ambientSkyTick。 */
     private static void spawnRainSplashes(int deltaTime)
 
     // ---- 以下 5 方法在更早轮次已实读 (PARITY 轮取证), 本轮转正入册 ----
