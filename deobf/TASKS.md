@@ -17,7 +17,8 @@
 3. 对齐依据只认反编译产物：`deobf/scripts/`、`deobf/pcode*/`、FFDec SVG/矩阵、
    `deobf/data/*.json`、`swf_dump.txt`。改码前先穷举调用点取证，写码注明证据。
 4. 完成后：更新本文件清单（做完的移入「四、已完成」，自查出的新任务补入「三」）、
-   在 `deobf/PROGRESS.md` 记一轮简报（含"本轮仍未做"），
+   在 `deobf/TCS_LOG.md` 记一轮简报（含"本轮仍未做"；TCS 专属日志，勿写
+   共享的 deobf/PROGRESS.md——那是 tower-bloxx 任务的记录文件），
    `node --check` 三件套 + 冒烟全绿后才 `git commit + push`（前缀 TCS+N 递增）。
 5. 不碰 territory-defense 之外的任何项目目录；不做破坏性操作。
 
