@@ -258,7 +258,109 @@ const templates = [];   // 各楼块 mesh 模板 (从 GLB 取)
 let hookPlane = null;   // 原版吊钩贴图 sprite
 let ready = false;
 
+const G = {
+  blocks: [],           // 已落位 {mesh}
+  landingY: 0,          // 塔顶 (Tower.landingY, 向上为负 → 这里向上为正)
+  currCtr: 0,           // Tower.currCtr: 塔顶中心 x
+  blockDx: 0,
+  lives: NUM_TRIES,
+  population: 0,
+  stacked: 0,
+  falling: null,        // {mesh, vy, cy, bdx, vx}
+  hanging: null, hangingFor: -1,
+  craneDx: 0, towerBdx: 0, j2me: true, j2AP: 0,             // T48: J2ME 开关 + House.aP 相位累子
+  dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
+  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [], straighten: [],
+  sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
+  comboMult: 0, comboT: 0, comboBank: 0,
+  camY: 0,
+  over: false,
+  totalBlocks: TOTAL_BLOCKS, currColor: CURR_COLOR,
+  cityMode: CITY_MODE,
+  pendingCell: null, selectedType: -1, dozerMode: false,
+  sm_towerGridTypesAllowed: new Array(25).fill(0),
+  sm_cityLevel: 0, sm_unlockedTowerType: 0, sm_totalPopulation: 0,
+  cleanTower: false, trophyRoof: false,
+  sm_unlockedTrophyTowerType: -1,                // GameModel.as:33          // GameModel.updateCleanTower / Crane.setTarget
+  comboMax: 0,                                    // GameModel.setComboMax
+  records: Object.assign({ populationRecord: 0, blockRecord: 0, comboRecord: 0 },
+    JSON.parse(localStorage.getItem('twrblx_records') || '{}')), // 原版纪录仅会话内(GameModel.as:11-13), H5 持久化
+  save: null,
+};
+const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr._rotation)
+scene.add(towerGroup);
+const craneGroup = new THREE.Group();  // 吊钩/缆绳/下落块
+scene.add(craneGroup);
+// Crane.animate:86 lineStyle(3,0,50) → 黑色 3px 20% 透明; 缆线自固定枢轴 (320,-100) 斜拉至钩 (clear/moveTo)
+const cable = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, CABLE_TOP_Y - 1000, 0), new THREE.Vector3(0, 0, 0)]),
+  new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.2 })
+);
+craneGroup.add(cable);
+
+function j2SkyUpdate() { // a:2737: cp=高度段索引, bK/bL=bO[i], bO[i+1] 渐变
+  if (!G.skyCanvas) return;
+  const ctx = G.skyCanvas.getContext('2d');
+  const cp = Math.min(15, Math.floor(G.camY / 480));
+  const c1 = J2_SKY_CLAMP(cp), c2 = J2_SKY_CLAMP(cp + 1);
+  const g = ctx.createLinearGradient ? ctx.createLinearGradient(0, 0, 0, 480) : null;
+  if (g) {
+    g.addColorStop(0, '#' + c2.toString(16).padStart(6, '0'));
+    g.addColorStop(1, '#' + c1.toString(16).padStart(6, '0'));
+    ctx.fillStyle = g;
+  } else ctx.fillStyle = '#' + c1.toString(16).padStart(6, '0');
+  if (ctx.fillRect) ctx.fillRect(0, 0, 1, 480);
+  if (G.skyTex.needsUpdate) G.skyTex.needsUpdate = true;
+}
+function J2_SKY_CLAMP(i) { return [0xb2d6f2,0x9ac8ea,0x80bbe7,0x66afe4,0x518ee4,0x407abe,0x1c5b96,0x0c3f7c,0x13306a,0x34204c,0x372c51,0x2d4b4b,0x4a6742,0x674723,0x532733,0x802a2b,0x511a2f][Math.max(0, Math.min(16, i))]; }
+
+const FX_START=[0,0,0,2,3,2,3,3,4,5,6,6,6,7,8,8,9,9,10,10,11,12,12,13,14,15,17,18,21];
+const FX_END  =[1,1,1,3,4,4,4,5,5,6,7,7,7,999,9,10,999,999,11,999,12,13,14,999,15,16,18,19,999];
+const FX_PROB =[0,30,30,20,20,40,60,60,30,30,50,50,10,50,100,20,40,50,100,30,100,100,30,10,100,100,100,100,100];
+const FX_SPD  =[60,2,1,3,2,2,-2,3,-4,5,2,2,6,0,0,-2,0,0,0,0,0,0,3,-3,0,0,0,0,-3];
+const FX_OCC0 =[8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1]; // GameSprites.as:26
+const FX_MAX = 9;                 // Const.MAX_NUMBER_OF_EFFECTS
+const FX_SIZES = {};              // 载入后按纹理自然尺寸填
 new GLTFLoader().load('./assets/scene.glb', (gltf) => {
+  // 小人/火花纹理 (dude_spr 753 / dudette_spr 772 / star_spr 783)
+  // Person 帧动画全 56 帧: 走路循环 11-35 / 到达 36-56 / 56 淡出 (Person.as TOON_FRM_*)
+  G.texPeople = ['DefineSprite_753_dude_spr', 'DefineSprite_772_dudette_spr'].map(n => {
+    const arr = [];
+    for (let i = 1; i <= 56; i++) {
+      const t = new THREE.TextureLoader().load(`./assets/flash/${n}/${i}.png`);
+      t.colorSpace = THREE.SRGBColorSpace; arr.push(t);
+    }
+    return arr;
+  });
+  G.texStar = new THREE.TextureLoader().load('./assets/flash/DefineSprite_783_star_spr/1.png');
+  G.texStar.colorSpace = THREE.SRGBColorSpace;
+  // swoosh 烟雾轨迹 3 帧 (读图 46x66, makeFallingPerson:329 Flipbook 1→3/150ms)
+  G.texSwoosh = [1, 2, 3].map(i => {
+    const t = new THREE.TextureLoader().load(`./assets/flash/fx/DefineSprite_790_swoosh_spr/${i}.png`);
+    t.colorSpace = THREE.SRGBColorSpace; return t;
+  });
+  // 环境特效 28 帧 (ambient_spr chid734 帧→子剪辑 670..733, FFDec 逐帧导出)
+  G.txFX = [];
+  for (let i = 1; i <= 28; i++) {
+    const t = new THREE.TextureLoader().load(`./assets/flash/fx/fx${String(i).padStart(2, '0')}.png`);
+    t.colorSpace = THREE.SRGBColorSpace;
+    G.txFX.push(t);
+  }
+
+  initAmbientFX();
+  // 吊钩: 用原版 hook 贴图 (image_12) 做公告牌
+  const tex = new THREE.TextureLoader().load('./assets/image_12.png');
+  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter;
+  tex.repeat.set(0.55, 1); tex.offset.set(0.45, 0);   // 裁掉贴图左缘黑条, 只留吊钩
+  hookPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(48, 48),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide })
+  );
+  craneGroup.add(hookPlane);
+  hookPlane.position.set(0, 0, 5);
+
+
+// ---- Build City: CityMap/GameModel 对号 ----
   const root = gltf.scene;
   // GLB 里的节点名 n<gid>; 251..268 是楼块, 269 是吊车
   root.updateMatrixWorld(true);
@@ -296,41 +398,6 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
     scene.add(m);
     return m;
   });
-  // 小人/火花纹理 (dude_spr 753 / dudette_spr 772 / star_spr 783)
-  // Person 帧动画全 56 帧: 走路循环 11-35 / 到达 36-56 / 56 淡出 (Person.as TOON_FRM_*)
-  G.texPeople = ['DefineSprite_753_dude_spr', 'DefineSprite_772_dudette_spr'].map(n => {
-    const arr = [];
-    for (let i = 1; i <= 56; i++) {
-      const t = new THREE.TextureLoader().load(`./assets/flash/${n}/${i}.png`);
-      t.colorSpace = THREE.SRGBColorSpace; arr.push(t);
-    }
-    return arr;
-  });
-  G.texStar = new THREE.TextureLoader().load('./assets/flash/DefineSprite_783_star_spr/1.png');
-  G.texStar.colorSpace = THREE.SRGBColorSpace;
-  // swoosh 烟雾轨迹 3 帧 (读图 46x66, makeFallingPerson:329 Flipbook 1→3/150ms)
-  G.texSwoosh = [1, 2, 3].map(i => {
-    const t = new THREE.TextureLoader().load(`./assets/flash/fx/DefineSprite_790_swoosh_spr/${i}.png`);
-    t.colorSpace = THREE.SRGBColorSpace; return t;
-  });
-  // 环境特效 28 帧 (ambient_spr chid734 帧→子剪辑 670..733, FFDec 逐帧导出)
-  G.txFX = [];
-  for (let i = 1; i <= 28; i++) {
-    const t = new THREE.TextureLoader().load(`./assets/flash/fx/fx${String(i).padStart(2, '0')}.png`);
-    t.colorSpace = THREE.SRGBColorSpace;
-    G.txFX.push(t);
-  }
-  initAmbientFX();
-  // 吊钩: 用原版 hook 贴图 (image_12) 做公告牌
-  const tex = new THREE.TextureLoader().load('./assets/image_12.png');
-  tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter;
-  tex.repeat.set(0.55, 1); tex.offset.set(0.45, 0);   // 裁掉贴图左缘黑条, 只留吊钩
-  hookPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(48, 48),
-    new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide })
-  );
-  craneGroup.add(hookPlane);
-  hookPlane.position.set(0, 0, 5);
   ready = true;
   window.__ready = true;
   // GameState 状态机入口: 无 URL 模式 → STT_TITLE (sng_title); 有 → 直接进对应场景
@@ -348,13 +415,28 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   window.__state = () => ({ bt: G.blockTime, now: performance.now(), over: G.over,
     vis: craneGroup.visible, falling: !!G.falling, city: hud.city.style.display,
     lives: G.lives, stacked: G.stacked, pending: !!G.pendingCell });
+  // ---- J2ME 程序渐变天空 (House.a:2737, T48-5): bO 17 色带(:4367)按高度 cp 走带插值,
+  // bK/bL 相邻带色, bM=中点色, 地平线亮块 bN — 覆盖 bg 位图作为底层天空 ----
+  const J2_SKY = [0xb2d6f2,0x9ac8ea,0x80bbe7,0x66afe4,0x518ee4,0x407abe,0x1c5b96,0x0c3f7c,
+                  0x13306a,0x34204c,0x372c51,0x2d4b4b,0x4a6742,0x674723,0x532733,0x802a2b,0x511a2f];
+  G.skyCanvas = document.createElement('canvas');
+  G.skyCanvas.width = 1; G.skyCanvas.height = 480;
+  G.skyTex = new THREE.CanvasTexture(G.skyCanvas);
+  G.skyTex.colorSpace = THREE.SRGBColorSpace;
+  const skyMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(640, 480),
+    new THREE.MeshBasicMaterial({ map: G.skyTex, depthWrite: false, depthTest: false })
+  );
+  skyMesh.position.set(0, 0, -500); skyMesh.renderOrder = -10;
+  scene.add(skyMesh);
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
-
-// ---- Build City: CityMap/GameModel 对号 ----
 function getTowerColor(col, row) { // GameModel.as:48-52 (0=空, 1..4=色)
   const v = G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 0];
   return (v >= 0 && v < 5) ? v : 0;
 }
+
+
+
 function getTowerPop(col, row) { // GameModel.as:58-62
   const v = G.save.sm_towerGridData[(row * TOWER_GRID_TOWERS + col) * TOWER_GRID_PARAMS + 1];
   return v < 0 ? 0 : (v || 0);
@@ -584,6 +666,7 @@ function stopGameVisual() {
   if (G.hanging) { craneGroup.remove(G.hanging); G.hanging = null; G.hangingFor = -1; }
 }
 
+
 function needRoof(i) { // Crane.as:209: stacked>0 && stacked==totalBlocks-1
   return G.totalBlocks !== 999 && i > 0 && i === G.totalBlocks - 1;
 }
@@ -598,35 +681,7 @@ function blockTemplate(i) {
 }
 
 // ---- 游戏状态 ----
-const G = {
-  blocks: [],           // 已落位 {mesh}
-  landingY: 0,          // 塔顶 (Tower.landingY, 向上为负 → 这里向上为正)
-  currCtr: 0,           // Tower.currCtr: 塔顶中心 x
-  blockDx: 0,
-  lives: NUM_TRIES,
-  population: 0,
-  stacked: 0,
-  falling: null,        // {mesh, vy, cy, bdx, vx}
-  hanging: null, hangingFor: -1,
-  craneDx: 0, towerBdx: 0, j2me: true,                       // T48: J2ME 运动学开关(默认开)
-  dropY: 400,           // Crane.init: this.dropY=400, 每次落块后 340 (Crane.as:57,201)
-  people: [], sparks: [], fallingPeople: [], missFall: [], bounces: [], straighten: [],
-  sway: { recent: [0,0,0], idx: 0, adj: 0.5, timer: 0 },  // Tipper
-  comboMult: 0, comboT: 0, comboBank: 0,
-  camY: 0,
-  over: false,
-  totalBlocks: TOTAL_BLOCKS, currColor: CURR_COLOR,
-  cityMode: CITY_MODE,
-  pendingCell: null, selectedType: -1, dozerMode: false,
-  sm_towerGridTypesAllowed: new Array(25).fill(0),
-  sm_cityLevel: 0, sm_unlockedTowerType: 0, sm_totalPopulation: 0,
-  cleanTower: false, trophyRoof: false,
-  sm_unlockedTrophyTowerType: -1,                // GameModel.as:33          // GameModel.updateCleanTower / Crane.setTarget
-  comboMax: 0,                                    // GameModel.setComboMax
-  records: Object.assign({ populationRecord: 0, blockRecord: 0, comboRecord: 0 },
-    JSON.parse(localStorage.getItem('twrblx_records') || '{}')), // 原版纪录仅会话内(GameModel.as:11-13), H5 持久化
-  save: null,
-};
+
 
 restoreModel();
 // sm_unlockedTowerType 由城市人口推导 (Const.TOWER_UNLOCK_LIMITS; GameModel.updateCityLevelAndUnlockedTypes)
@@ -641,16 +696,7 @@ restoreModel();
   G.sm_totalPopulation = pop;
 }
 
-const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr._rotation)
-scene.add(towerGroup);
-const craneGroup = new THREE.Group();  // 吊钩/缆绳/下落块
-scene.add(craneGroup);
-// Crane.animate:86 lineStyle(3,0,50) → 黑色 3px 20% 透明; 缆线自固定枢轴 (320,-100) 斜拉至钩 (clear/moveTo)
-const cable = new THREE.Line(
-  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, CABLE_TOP_Y - 1000, 0), new THREE.Vector3(0, 0, 0)]),
-  new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.2 })
-);
-craneGroup.add(cable);
+
 
 function addHud() {
   // 人口: 5 位数字叠 population_spr 圈位 (setDigits:124-136; 读图圈槽 x25..95)
@@ -778,8 +824,10 @@ function showNameDialog() {
     showHighScores();                          // STT_NEW_HIGHSCORE → highScore.showPopup
   };
 }
+
 const toppled = [];
 const wonRef = { won: false }; // gameOver(won) → 结算 OK 回调用
+
 
 // ---- Crane: 摆钩 ----
 let t0 = performance.now();
@@ -814,7 +862,6 @@ function j2SwingParams(stacked, color, towerTypeCount) {
   const cO = -Math.min(128, stacked * 256 / 200);
   return { cQ, cR, cP, cO };                  // 全为定点值(除 cP)
 }
-G.j2AP = 0;                                     // House.aP 相位累子(定点)
 function j2Hook(dt) {                           // 对应 House.p(n2): 每帧推进
   const { cQ, cR, cP, cO } = j2SwingParams(G.stacked, G.currColor, 6);
   G.j2AP += dt * 256;                           // o(var0*256): 帧时长定点化
@@ -907,13 +954,6 @@ function blockLanded(offset, releaseBdx, fallMesh) {
 }
 
 // ---- 环境特效 (Const.as:176-181 三表 + GameSprites.updateEffects/generateEffect) ----
-const FX_START=[0,0,0,2,3,2,3,3,4,5,6,6,6,7,8,8,9,9,10,10,11,12,12,13,14,15,17,18,21];
-const FX_END  =[1,1,1,3,4,4,4,5,5,6,7,7,7,999,9,10,999,999,11,999,12,13,14,999,15,16,18,19,999];
-const FX_PROB =[0,30,30,20,20,40,60,60,30,30,50,50,10,50,100,20,40,50,100,30,100,100,30,10,100,100,100,100,100];
-const FX_SPD  =[60,2,1,3,2,2,-2,3,-4,5,2,2,6,0,0,-2,0,0,0,0,0,0,3,-3,0,0,0,0,-3];
-const FX_OCC0 =[8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1]; // GameSprites.as:26
-const FX_MAX = 9;                 // Const.MAX_NUMBER_OF_EFFECTS
-const FX_SIZES = {};              // 载入后按纹理自然尺寸填
 function initAmbientFX() {
   G.fxSlots = [];
   for (let i = 0; i < FX_MAX; i++)
@@ -1403,7 +1443,8 @@ function loop(now) {
       const camTargetY = Math.max(0, G.landingY - STAGE_H / 2 + 3 * BLOCK_H);
       G.camY += (camTargetY - G.camY) * Math.min(1, dt / DELAY_PAN_UP);
     }
-    camera.position.y = G.camY;
+    camera.position.y = G.camY;
+    if (G.j2me) j2SkyUpdate();   // T48-5: J2ME 程序天空
 
     // 挂钩待放积木 (Crane.updateBlock: targetSpr 随钩, _rotation = -(endx-320)/5 度, 挂点 hook.y+100)
     if (ready && !G.falling && !G.over && G.hangingFor !== G.stacked) {

@@ -124,7 +124,7 @@ try {
   await import('./game.js');
   check(true, 'game.js 模块加载无异常 (无 TDZ/引用错误)');
 } catch (e) {
-  check(false, 'game.js 模块加载: ' + e.message);
+  check(false, 'game.js 模块加载: ' + String(e.stack || e.message).split(String.fromCharCode(10)).slice(0, 3).join(' | '));
   process.exit(1);
 }
 
