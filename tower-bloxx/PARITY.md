@@ -1,9 +1,14 @@
 # Tower Bloxx H5 与原版全面对差清单（PARITY）
 
-> ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
+> ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项；任务一律以【函数】/【资源】为单位, 目标=一模一样）
 >
-> **T4.（取自待办池）城市塔原版图形替换 CSS 近似**：city_spr 已导出 (flash/city_spr_640.png)，
-> 把 5×5 网格/塔块/拆机热区的 CSS 近似换成原版切片，注意热区坐标实测校准可一并做。
+> **T4.【资源】city_spr_640.png 切片接入城市视图**：先自己读 h5/assets/flash/city_spr_640.png
+> 确认内容/尺寸/网格与塔块的切片坐标（不凭名字猜），再替换 renderCity 的 CSS 近似；顺带校准
+> dozer 格与塔块热区坐标（CityMap.as isClicked 证据）。
+> **T5.【函数】GameSprite/Person 逐函数普查**：GameSprites.as 与 Person.as 里尚未对号的函数
+> （逐个列名+行号对照 h5/game.js），缺的补、偏的修。
+> **T6.【资源】flash/ 下未接入切片盘点**：逐张读图（bg2/3/4、fx01-28、star、dude/dudette…），
+> 标出已接入/未接入/接错位置，未接入的写接入任务。
 >
 > **待办池**（T1-T3 做完后按序取）：城市塔原版图形替换 CSS 近似 / menu_spr 按钮热区实测校准 /
 > J2ME MIDI 曲库做可选 BGM / miss 时 snd_destroy 延迟播放语义。
