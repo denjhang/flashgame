@@ -28,6 +28,10 @@
 
 ## 三之一、已完成于本轮（滚动记录）
 
+- [x] TCS+47: interWave 318/317 口径定案——317 断言通过; 实战 318 = 对白波
+  +1 冻结标记（game.js INTERWAVE_TICKS+1, tick 不推进），非偏差。
+  冒烟文案加定案注记防误追
+
 - [x] TCS+46: 金钱面板 LOSSES 勘误（方向2, **行为修正**）——原版 1079
   actualiseInfo: infoMoneyAndScore.score.text = master_menuItems.score
   (丢塔数, 185帧2 iMission<45 时 score++, 卖出/被毁都算); H5 误接 G.losses

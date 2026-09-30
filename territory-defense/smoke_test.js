@@ -976,7 +976,8 @@ console.log("--- 波次路线 + 整波生成 ---");
   console.log("整波即时生成: 第1波单位数=%d (期望 %d)=%s", G.units.length, wv.length, nOk);
   console.log("出生点 route[0]=(%s,%s) y+=60j 全对=%s x 全对=%s (60px>车高42.2 初始不制动)", r0[0], r0[1], ysOk, xsOk);
   console.log("车队链表: 首车 devant=null, 后车依次互链=%s", chainOk);
-  console.log("波间节奏 INTERWAVE_TICKS=%d (期望 317 = declencheur 3000ms + haloNoir f1→f183 182帧@24fps)=%s",
+  console.log("波间节奏 INTERWAVE_TICKS=%d (期望 317 = declencheur 3000ms + haloNoir f1→f183 182帧@24fps)=%s" +
+    " —— 实战若见 318 = 对白波 +1 冻结标记 (game.js: INTERWAVE_TICKS+1), 非偏差 [TCS+47 定案]",
     INTERWAVE_TICKS, INTERWAVE_TICKS === 317);
   G.wave = sv.wave; G.waveActive = sv.wa; G.units.length = sv.n; G.interWave = sv.iw;
 }
