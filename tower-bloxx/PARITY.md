@@ -2,7 +2,7 @@
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **【主线】J2ME (House.java 99 方法 + r0 89 条目) 完全一致移植。进度: 方法 ~10/99, r0 89/89 已解包。**
+> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法已填 4+7=11/98 (清单见第14节), 资源已记档 3/89 (13.1)。**
 >
 > **T45.【资源】r0 素材鉴定与接入**：id00-80 拼图已读（滚轮/块面板/城市图标/软键/数值图标），
 > 对照 House.java 绘制调用（House.b(graphics,id,...)）确定每张的屏幕位置，替换 H5 对应 UI。
@@ -500,11 +500,11 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 16 | 1224 | w | () |  |
 | 17 | 1362 | x | () |  |
 | 18 | 1388 | y | () |  |
-| 19 | 1456 | d | (int n2) |  |
+| 19 | 1456 | d | (int n2) | 带3s超时横幅: I=1→3000ms→y()收起, R&&!S 触发MIDI | 与 H5 showCityStatus 同型 |
 | 20 | 1479 | a | (Graphics graphics) |  |
 | 21 | 1547 | a | (int var1_1, int var2_2) |  |
 | 22 | 1722 | a | (boolean bl) |  |
-| 23 | 1758 | e | (int n2) | 已读 |
+| 23 | 1758 | e | (int n2) | 资源预载检查: cc=id, GameMIDlet.u(), 返回 !n(失败标志) | H5 启动全量加载, 无需对应 |
 | 24 | 1764 | z | () | 已读 |
 | 25 | 1785 | o | (int n2) | 已读 |
 | 26 | 1790 | p | (int n2) |  |
@@ -517,9 +517,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 | 33 | 2159 | B | () |  |
 | 34 | 2260 | u | (int var0) | 已读 |
 | 35 | 2372 | v | (int n2) |  |
-| 36 | 2395 | a | (int n2, int n3, int n4, int n5, int n6) |  |
+| 36 | 2395 | a | (int n2, int n3, int n4, int n5, int n6) | lerp 关键帧插值: (d5-d4)*t/span+d4, u() 场景机用 | H5 setTimeout/线性tween 等价 |
 | 37 | 2402 | a | (int n2, int n3, int n4) |  |
-| 38 | 2406 | a | (int n2, int n3, boolean bl) |  |
+| 38 | 2406 | a | (int n2, int n3, boolean bl) | 场景过渡变暗: de 时 RGB 三通道缩放 | H5 无场景过渡动画, 记档 |
 | 39 | 2423 | C | () |  |
 | 40 | 2441 | D | () |  |
 | 41 | 2464 | a | (int n2, int n3, int n4, int n5, int n6, int n7, int n8) |  |
