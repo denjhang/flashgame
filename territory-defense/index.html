@@ -161,16 +161,28 @@
   /* 开机链 (TCS+74): ①preloader(barre 410x5 进度条+百分比) ②arcadebomb 演出
      (955 f1, 原版 2.5s/点击跳过) ③主菜单(frame_4: 标题光晕673+NEW GAME 656+
      CONTINUE 659+难度面板 dff 703f3 easy/normal) → 进入简报 */
-  #bootBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#000;
+  /* 原版加载屏 (主时间轴 f1-f4): 白底 + 黑三角logo(chid8 233x138) + 炸弹(6) +
+     11帧动画进度条(chid11 231x12) + percent 文本 (TCS+76 修正: 旧版误用黑底) */
+  #bootBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#fff;
              z-index:90; display:none; align-items:center; justify-content:center;
-             flex-direction:column; color:#fff; font-family:monospace; cursor:default; }
-  #bootBox .barWrap { width:410px; height:9px; border:1px solid #666; }
-  #bootBox #bootBar { height:100%; width:0%; background:#aaa;
-                      background:url(assets/boot/barre.png); background-size:100% 100%; }
+             flex-direction:column; color:#000; font-family:monospace; cursor:default; }
+  #bootBox #bootLogo { width:233px; margin-bottom:18px; }
+  #bootBox .barWrap { width:231px; height:12px; overflow:hidden; }
+  #bootBox #bootBar { height:12px; width:231px; }
   #bootPct { margin-top:8px; font-size:12px; }
-  #introBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#000;
-              z-index:89; display:none; cursor:pointer; }
-  #introBox img { display:block; width:800px; margin:0 auto; }
+  /* arcadebomb 开场演出 (主时间轴 f19-f200): 站标 logo → 5 帧转圈炸弹 →
+     GAMES / AND ANIMATION → EXPLOSIVE GAMES → 语音 (f286-459 流式) */
+  #introStage { position:absolute; left:0; top:0; width:100%; height:600px; background:#fff;
+                z-index:89; display:none; flex-direction:column; align-items:center;
+                font-family:monospace; cursor:pointer; }
+  #introStage img { position:absolute; visibility:hidden; }
+  #iv1 { left:50%; top:120px; transform:translateX(-50%); }
+  #iv2 { left:50%; top:280px; transform:translateX(-50%); }
+  #iv3 { left:50%; top:240px; transform:translateX(-50%); }
+  #iv4 { left:50%; top:300px; transform:translateX(-50%); }
+  #iv5 { left:50%; top:380px; transform:translateX(-50%); }
+  #iv6 { left:50%; top:200px; transform:translateX(-50%); }
+  #iv7 { left:50%; top:440px; transform:translateX(-50%); }
   #menuBox { position:absolute; left:0; top:0; width:100%; height:600px; background:#000;
              z-index:88; display:none; flex-direction:column; align-items:center;
              font-family:monospace; }
@@ -292,8 +304,11 @@
          其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
     <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
     <button id="saveBtn" title="保存进度">SAVE GAME</button>
-    <div id="bootBox"><div class="barWrap"><div id="bootBar"></div></div><div id="bootPct">0 %</div></div>
-    <div id="introBox"><img id="introImg" src="assets/boot/arcadebomb.png" alt=""></div>
+    <div id="bootBox">
+      <img id="bootLogo" src="assets/boot/logo.png" alt="">
+      <div class="barWrap"><img id="bootBar" src="assets/boot/load/1.png" alt=""></div>
+      <div id="bootPct">0 %</div>
+    </div>
     <div id="menuBox">
       <img id="menuTitle" src="assets/boot/title.png" alt="">
       <div id="menuBtns">
@@ -306,6 +321,15 @@
         <div id="skillEasy" title="Ideal for your first play"></div>
         <div id="skillNormal" title="Need some experience"></div>
       </div>
+    </div>
+    <div id="introStage">
+      <img id="iv1" src="assets/boot/intro/logo_big.png" alt="">
+      <img id="iv2" src="assets/boot/intro/bomb1.png" alt="">
+      <img id="iv3" src="assets/boot/intro/games.png" alt="">
+      <img id="iv4" src="assets/boot/intro/anim.png" alt="">
+      <img id="iv5" src="assets/boot/intro/expl_bomb.png" alt="">
+      <img id="iv6" src="assets/boot/intro/explosive.png" alt="">
+      <img id="iv7" src="assets/boot/intro/presented.png" alt="">
     </div>
     <div id="openCurtain"></div>
     <div id="fadeCurtain"></div>

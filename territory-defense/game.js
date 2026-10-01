@@ -2346,8 +2346,14 @@ function bootChain() {
   const bb = document.getElementById('bootBox'), bar = document.getElementById('bootBar'),
         pct = document.getElementById('bootPct');
   bb.style.display = 'flex';
+  // 原版加载条 = chid 11 帧 2..11 播完接帧 1 保持 (11 帧 231x12 动画)
+  const loadFrames = [];
+  for (let i = 1; i <= 10; i++) {
+    const im = new Image(); im.src = 'assets/boot/load/' + (i + 1) + '.png'; loadFrames.push(im);
+  }
+  const holdFrame = new Image(); holdFrame.src = 'assets/boot/load/1.png';
   // 真实预载: 关键 UI/剧情/图标素材
-  const urls = ['assets/boot/arcadebomb.png','assets/boot/title.png','assets/boot/btn_new.png',
+  const urls = ['assets/boot/title.png','assets/boot/btn_new.png',
     'assets/boot/btn_continue.png','assets/boot/skill.png','assets/ui/money_panel.png',
     'assets/ui/sidebar.png','assets/ui/help_board.png','assets/menu/m60.png','assets/menu/canon75.png',
     'assets/story/fond/G.png','assets/story/perso/MickFace.png','assets/briefing/start_mission.png'];
@@ -2355,23 +2361,55 @@ function bootChain() {
   const step = () => {
     done++;
     const p = Math.round(done / urls.length * 100);
-    bar.style.width = p + '%';
+    // 动画条: 按进度切 chid11 的帧 (2..11 为充能帧, 1 为空槽保持帧)
+    const fi = Math.max(0, Math.min(9, Math.round(p / 100 * 10) - 1));
+    bar.src = 'assets/boot/load/' + (fi + 1) + '.png';
     pct.textContent = p + ' %';
-    if (done >= urls.length) setTimeout(showIntro, 400);
+    if (done >= urls.length) { setTimeout(showIntroStage, 300); }
   };
   urls.forEach(u => { const im = new Image(); im.onload = im.onerror = step; im.src = u; });
 }
-function showIntro() {
+// arcadebomb 开场演出 (主时间轴 f19-f200, 帧序实证 TCS+76):
+//   f19 站标 logo(ch12) → f85 转圈炸弹(ch14 5帧) → f86 GAMES(ch19 上) /
+//   f87-88 AND ANIMATION(ch21/23/24 条) → f98 小炸弹(ch25/26) →
+//   f198 EXPLOSIVE GAMES(ch27/29/31) + f286-459 流式语音
+const INTRO_VOICE = new Audio('assets/boot/intro_voice.mp3');
+let introTimers = [];
+function showIntroStage() {
+  const st = document.getElementById('introStage');
+  if (!st || st.style.display === 'block') return;
   document.getElementById('bootBox').style.display = 'none';
-  const ib = document.getElementById('introBox');
-  ib.style.display = 'block';
-  ib.onclick = showMenu;                       // 原版点击可跳过演出
-  setTimeout(() => { if (ib.style.display === 'block') showMenu(); }, 2600);
+  st.style.display = 'block';
+  const show = (id, on) => { const el = document.getElementById(id); if (el) el.style.visibility = on ? 'visible' : 'hidden'; };
+  ['iv1','iv2','iv3','iv4','iv5','iv6','iv7'].forEach(i => show(i, false));
+  const T = (ms, fn) => introTimers.push(setTimeout(fn, ms));
+  const F = 1000 / 24;                       // 原版 24fps
+  // f19: 站标 (停留 66 帧 ≈ 2.75s)
+  T(0, () => show('iv1', true));
+  // f85: 转圈炸弹 5 帧 (每帧 ≈ 8 帧时间 ≈ 0.33s/帧)
+  const bombs = ['bomb1','bomb2','bomb3','bomb4','bomb5'];
+  T(66 * F, () => {
+    show('iv2', true);
+    bombs.forEach((b, k) => T(k * 8 * F, () => { document.getElementById('iv2').src = 'assets/boot/intro/' + b + '.png'; }));
+  });
+  // f86-88: GAMES / AND ANIMATION
+  T(86 * F, () => show('iv3', true));
+  T(88 * F, () => show('iv4', true));
+  // f198-200: EXPLOSIVE GAMES + 配图
+  T(198 * F, () => { show('iv5', true); show('iv6', true); });
+  T(200 * F, () => show('iv7', true));
+  // f286: 流式语音开始 (f286-459)
+  T(286 * F, () => { try { INTRO_VOICE.volume = 0.9; INTRO_VOICE.play(); } catch (e) {} });
+  // f~465 后进主菜单 (总 460 帧 ≈ 19.2s); 点击跳过
+  T(460 * F, () => showMenu());
+  st.onclick = () => showMenu();
 }
 function showMenu() {
-  const ib = document.getElementById('introBox');
-  if (ib.style.display !== 'block') return;
-  ib.style.display = 'none';
+  introTimers.forEach(clearTimeout); introTimers = [];
+  try { INTRO_VOICE.pause(); } catch (e) {}
+  const st = document.getElementById('introStage');
+  if (st) st.style.display = 'none';
+  document.getElementById('bootBox').style.display = 'none';
   document.getElementById('menuBox').style.display = 'flex';
   document.getElementById('skillPanel').style.display = 'none';
   document.getElementById('skillHot').style.display = 'none';
