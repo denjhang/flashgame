@@ -64,8 +64,11 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x9ec9e8);
 
 // 原版 m3g 相机是 parallel fovy45; 这里用等价正交取景, 1 世界单位 = 1 原版像素
-const camera = new THREE.OrthographicCamera(-STAGE_W/2, STAGE_W/2, STAGE_H/2, -STAGE_H/2, 1, 20000);
-camera.position.set(0, 0, 1000);
+// AL+1: 竖屏游戏区 (J2ME 240x320 x1.5 = 360x480 居中), 对号 n.a(0,E,F) 视口裁剪 + f(Graphics) 相机
+const VIEW = { x: 140, y: 0, w: 360, h: 480 };
+const TOWER_START_Y = VIEW.h/2;  // 缆线枢轴=游戏区顶 (J2ME (320,-100) 屏顶外)
+const camera = new THREE.OrthographicCamera(-VIEW.w/2, VIEW.w/2, VIEW.h/2, -VIEW.h/2, 1, 20000);
+camera.position.set(TOWER_START_X, 0, 1000);  // 游戏区中心 x=320
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.9));
 const sun = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -136,7 +139,7 @@ function showMenu() { // STT_MENU (makeMenuSprites:341-355)
 }
 function enterQuick() { // STT_QUICK (GameState.as:93-100): totalBlocks=999, currColor=3
   G.hs = { hiPop: 0, hiBlocks: 0 };            // highScore.startGame(QUICK) session 复位
-  G.cityMode = false; G.totalBlocks = 999; G.currColor = 3; G.pendingCell = null;
+  G.cityMode = false; G.totalBlocks = 999; G.currColor = 0; G.pendingCell = null;  // AL+1: 快速局=蓝住宅
   hud.menuScr.style.display = 'none';
   craneGroup.visible = true;
   startGame();
@@ -342,6 +345,7 @@ const G = {
     JSON.parse(localStorage.getItem('twrblx_records') || '{}')), // 原版纪录仅会话内(GameModel.as:11-13), H5 持久化
   save: null,
 };
+window.__DBG = () => ({ cam: camera.position.clone(), frustum: [camera.left,camera.right,camera.top,camera.bottom], towerKids: towerGroup.children.length, craneKids: craneGroup.children.length, hanging: !!G.hanging, stacked: G.stacked, falling: !!G.falling, over: G.over, blockTime: G.blockTime });
 const towerGroup = new THREE.Group();  // 摇晃作用于此 (Tipper: parentSpr._rotation)
 scene.add(towerGroup);
 const craneGroup = new THREE.Group();  // 吊钩/缆绳/下落块
@@ -459,6 +463,19 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
     scene.add(m);
     return m;
   });
+  // AL+2: 地面/地基 (House.paintScene3D `bs<=5 → cC` 常驻地面, m3g uid9=GLB n269, 5 子网格)
+  {
+    // GLTFLoader 把 5 子网格拆成 mesh269..mesh269_4
+    for (let gi = 0; gi < 5; gi++) {
+      const gTpl = templates.find(t => t.name === 'mesh269' + (gi ? '_' + gi : ''));
+      if (!gTpl) continue;
+      const gm = gTpl.clone();
+      gm.scale.setScalar(0.2);                       // 原始 2207x120x771 → 宽 441 (微超 360 视口, 同原版延续出屏)
+      gm.position.set(TOWER_START_X, 1.1, 0);        // bbox 顶 -5.43x0.2 → 顶面贴 y=0 (托住地基块)
+      towerGroup.add(gm);
+    }
+  }
+
   ready = true;
   window.__ready = true;
   // GameState 状态机入口: 无 URL 模式 → STT_TITLE (sng_title); 有 → 直接进对应场景
@@ -492,10 +509,10 @@ new GLTFLoader().load('./assets/scene.glb', (gltf) => {
   G.skyTex = new THREE.CanvasTexture(G.skyCanvas);
   G.skyTex.colorSpace = THREE.SRGBColorSpace;
   const skyMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(640, 480),
+    new THREE.PlaneGeometry(VIEW.w, VIEW.h),
     new THREE.MeshBasicMaterial({ map: G.skyTex, depthWrite: false, depthTest: false })
   );
-  skyMesh.position.set(0, 0, -500); skyMesh.renderOrder = -10;
+  skyMesh.position.set(TOWER_START_X, 0, -500); skyMesh.renderOrder = -10;
   scene.add(skyMesh);
 }, undefined, (e) => { window.__errs && window.__errs.push('GLB: ' + String(e)); });
 function getTowerColor(col, row) { // GameModel.as:48-52 (0=空, 1..4=色)
@@ -799,7 +816,7 @@ function blockTemplate(i) {
     return templates.find(t => t.name === (G.trophyRoof ? 'mesh254' : 'mesh253')) || templates[0];
   }
   // 楼层外观按 currColor 选款: block 款 263/264/265/252 ↔ currColor 0..3 (CityMap.as:160 currColor*4)
-  const want = ['mesh263','mesh264','mesh265','mesh252'][G.currColor % 4];
+  const want = ['mesh252','mesh263','mesh264','mesh265'][G.currColor % 4];  // AL+1: 0=蓝色住宅 (J2ME)
   return templates.find(t => t.name === want) || templates[0];
 }
 
@@ -968,7 +985,7 @@ function hookTh(now) {
   return (360 - (t / CRANE_DUR * 360 + CRANE_AOFFSET) % 360) * Math.PI / 180;
 }
 function hookX(now) {
-  return TOWER_START_X - STAGE_W/2 + CRANE_RADX * Math.cos(hookTh(now));
+  return TOWER_START_X + CRANE_RADX * Math.cos(hookTh(now));  // AL+1: 竖屏后塔心=320
 }
 function hookY(now) {
   return CRANE_HOOK_Y + CRANE_RADY + CRANE_RADY * Math.sin(hookTh(now));
@@ -994,7 +1011,7 @@ function j2Hook(dt) {                           // 对应 House.p(n2): 每帧推
   const cosT = Math.cos(2 * Math.PI * (200 * G.j2AP / cP % 360) / 360);
   const x = (cQ * sinT) / 32768;                // >>15
   const yOff = cO + (cR * cosT) / 32768;        // aL=aJ-cO-aH+n3, n3=-(cR*cos)>>15
-  return { x: TOWER_START_X - STAGE_W/2 + x, y: CRANE_HOOK_Y + 20 - yOff };
+  return { x: TOWER_START_X + x, y: CRANE_HOOK_Y + 20 - yOff };  // AL+1
 }
 
 // ---- Tower.blockLanded 对号 (Tower.as:107-186) ----
@@ -1483,6 +1500,10 @@ function toggleMidi() {
   }
 }
 G.midiOn = localStorage.getItem('twrblx_midi') === '1';
+{ // i.b(Graphics): 默认高亮第一项 (选中行黄条)
+  const rows = document.querySelectorAll('#menuList .mrow');
+  if (rows.length) rows[0].classList.add('sel');
+}
 { // 菜单音乐项中文态同步 (功能表=ZH[37])
   const el = document.getElementById('mMidi');
   if (el) { const sync = () => el.textContent = '音乐: ' + (G.midiOn ? '开' : '关'); sync(); el.addEventListener('click', () => setTimeout(sync, 0)); }
@@ -1510,7 +1531,7 @@ function loop(now) {
     craneGroup.position.y = G.camY + (G.j2me ? j2Hook(dt).y : hookY(now));
     // moveTo(320,-100): 缆线起点=固定枢轴 (TOWER_START_X, 顶), 钩偏摆时呈斜线 (Crane.animate:88-92)
     cable.geometry.setFromPoints([
-      new THREE.Vector3(TOWER_START_X - STAGE_W/2 - craneGroup.position.x, STAGE_H/2 - CRANE_HOOK_Y + 10, 0),
+      new THREE.Vector3(TOWER_START_X - craneGroup.position.x, TOWER_START_Y - CRANE_HOOK_Y + 10, 0),  // AL+1
       new THREE.Vector3(0, 0, 0)]);
 
     // 下落块
@@ -1648,6 +1669,12 @@ function loop(now) {
     }
     camera.position.y = G.camY;
     if (G.j2me) j2SkyUpdate();   // T48-5: J2ME 程序天空
+    // AL+1: 竖屏游戏区视口 (n.a(0,E,F) 对号)
+    if (renderer.setScissorTest) {  // exec_test stub 无视口 API
+      renderer.setScissorTest(true);
+      renderer.setViewport(VIEW.x, VIEW.y, VIEW.w, VIEW.h);
+      renderer.setScissor(VIEW.x, VIEW.y, VIEW.w, VIEW.h);
+    }
 
     // 挂钩待放积木 (Crane.updateBlock: targetSpr 随钩, _rotation = -(endx-320)/5 度, 挂点 hook.y+100)
     if (ready && !G.falling && !G.over && G.hangingFor !== G.stacked) {

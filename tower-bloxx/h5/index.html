@@ -7,28 +7,29 @@
   html,body{margin:0;height:100%;background:#20222e;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif;}
   body{margin:0;height:100vh;display:flex;justify-content:center;align-items:center;background:#202020;}
   /* FluidLayout 对号: Stage.scaleMode=noscale + align=C → 舞台恒居中 (FluidLayout.as:9-11,29-33) */
-  #stage{position:relative;width:640px;height:480px;box-shadow:0 0 40px #000;}
+  #stage{position:relative;width:640px;height:480px;box-shadow:0 0 40px #000;
+    background:linear-gradient(#1a2430,#101018);}  /* 两侧留边: 游戏区=居中360x480 (J2ME 240x320 x1.5) */
   .j2scr{position:absolute;left:140px;top:0;width:360px;height:480px;overflow:hidden;}  /* J2ME 240x320 ×1.5 */
   canvas{display:block;}
   #hud{position:absolute;inset:0;pointer-events:none;color:#fff;text-shadow:1px 1px 2px #000;}
   #pop{position:absolute;top:40px;right:52px;font-size:22px;letter-spacing:2px;}
-  #tries{position:absolute;bottom:55px;left:51px;font-size:0;}
+  #tries{position:absolute;left:191px;bottom:31px;font-size:0;}  /* j(): 机会竖条 左下 cn+cn/2+14 */
   #tries img{width:43px;height:52px;}
-  #pop{position:absolute;right:52px;bottom:40px;width:97px;height:26px;font-size:0;}
+  #pop{position:absolute;left:482px;bottom:34px;width:97px;height:26px;font-size:0;}  /* j(): 人口 右下 E-cn */
   #popDigits{position:absolute;left:20px;top:0;width:78px;height:26px;line-height:26px;text-align:center;font:bold 15px monospace;color:#fff;letter-spacing:1px;}
   #combo{position:absolute;top:50px;left:calc(50% - 136px);width:272px;height:52px;font-size:0;display:none;}
   #combo img{position:absolute;inset:0;width:272px;height:52px;}
   #comboFill{position:absolute;left:36px;top:18px;height:14px;width:0;background:#ffd24a;}
   #comboText{position:absolute;left:196px;top:12px;width:70px;height:18px;font:bold 16px monospace;color:#ffe27a;background:#181200;line-height:18px;text-align:center;}
-  #progress{position:absolute;bottom:31px;left:22px;width:47px;height:232px;font-size:0;}
+  #progress{display:none;}  /* Flash 黑进度柱退役 (AL+1) */
   #progress img{width:47px;height:232px;}
   #barBlack{position:absolute;left:17px;bottom:4px;width:12px;height:0;background:#000;}
   #barTop{position:absolute;left:8px;width:30px;height:14px;font-size:11px;color:#ffd700;display:none;}
-  #combo{position:absolute;top:50px;left:50%;transform:translateX(-50%);font-size:20px;color:#ffd700;display:none;}
+  #combo{position:absolute;top:31px;left:230px;width:180px;font-size:18px;color:#ffff00;display:none;text-align:center;}  /* j(): 组合计时器 顶中 co */
   #btns{position:absolute;inset:0;pointer-events:none;font-size:0;}
   #btns img{position:absolute;pointer-events:auto;cursor:pointer;}
   #btns span{display:block;margin:6px 0;padding:2px 6px;background:#00000066;border-radius:4px;cursor:pointer;font-size:15px;}
-  #msg{position:absolute;top:40%;width:100%;text-align:center;font-size:40px;font-weight:bold;display:none;
+  #msg{position:absolute;top:40%;left:140px;width:360px;text-align:center;font-size:32px;font-weight:bold;display:none;
   -webkit-text-stroke:2px #000;} /* msg_spr(362)+msg_stroke(360): 白字黑描边双层 (导出帧为黑底容器, 样式实证) */
   /* 结算/提示弹窗面板 (GameSprites.showSummary/showTip 共用 popupSpr 语义) */
   /* popup_spr(462)/confirmation_reset(444) 绿色面板, 原版 popupSpr CTR 0,40 → (320,280) (读图 433x219) */
@@ -71,9 +72,10 @@
   #titleScr{position:absolute;inset:0;display:none;cursor:pointer;background:#9acc2a;}
   #splashScr{z-index:20;position:absolute;inset:0;display:none;cursor:default;background:#fff;}
     #menuScr{position:absolute;inset:0;display:none;background:#9acc2a;}
-  .mitem{position:relative;margin:14px auto;width:240px;padding:10px 0;text-align:center;
-    font-size:20px;color:#123;cursor:pointer;background:#c6e37a;border:2px solid #456a1d;border-radius:8px;}
-  .mitem:hover{background:#d8f19a;}
+  /* i.b(Graphics): 文字行菜单 — 选中行黄条 0xFFDD46, 文字黑 0x010101 */
+  .mrow{position:relative;margin:0;padding:5px 0;text-align:center;font-size:19px;color:#010101;cursor:pointer;}
+  .mrow.sel{background:#ffdd46;}
+  .mrow:hover{background:#ffe98a;}
   #menuSub{position:absolute;inset:0;display:none;background:#000000d0;color:#fff;
     font-size:14px;padding:40px 24px;overflow:auto;}
 </style>
@@ -106,14 +108,19 @@
   <div id="titleScr"></div>
   <div id="menuScr">
     <!-- menu_btn_spr(552) 帧=BTN 常量(Const.as:6-16); 坐标=makeMenuSprites:342-350 中心点, 尺寸读图 299x67 -->
-    <div class="j2scr">
-      <div style="height:90px"></div>
-      <div class="mitem" id="mQuick">快速游戏</div>
-      <div class="mitem" id="mBuild">建造城市</div>
-      <div class="mitem" id="mHS">最高分</div>
-      <div class="mitem" id="mInstr">游戏规则说明</div>
-      <div class="mitem" id="mMidi">音乐: 关</div>
-      <div class="mitem" id="mReset">重新设定城市</div>
+    <div class="j2scr" id="menuArt">
+      <img src="./assets/j2me_cloud_s.png" style="position:absolute;left:15px;top:60px">
+      <img src="./assets/j2me_cloud_b.png" style="position:absolute;left:240px;top:90px">
+      <img src="./assets/j2me_balloon.png" style="position:absolute;left:50%;top:110px;transform:translateX(-50%);width:300px">
+      <div style="position:absolute;left:0;right:0;top:16px;text-align:center;font-size:26px;color:#123;font-weight:bold;letter-spacing:6px">都市摩天楼</div>
+      <div style="position:absolute;left:90px;top:255px;width:180px" id="menuList">
+        <div class="mrow" id="mQuick">快速游戏</div>
+        <div class="mrow" id="mBuild">建造城市</div>
+        <div class="mrow" id="mHS">最高分</div>
+        <div class="mrow" id="mInstr">游戏规则说明</div>
+        <div class="mrow" id="mMidi">音乐: 关</div>
+        <div class="mrow" id="mReset">重新设定城市</div>
+      </div>
     </div>
     <div id="menuSub"></div>
   </div>
