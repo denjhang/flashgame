@@ -323,14 +323,19 @@ function spawnPeople(n, floor) {
     if (S.people[s]) continue;
     const side = 1 - iR(2) * 2;
     S.people[s] = {
-      st: 1,                                               // 1 原地跳
-      x: S.aV + side * ((bd >> 1) + 256),
-      y: S.aW + (be >> 1) + iR(768),
-      t0: S.cg - iR(1000), floor, dir: -side, style: iR(2), rx: 0, ry: 0,
+      st: 1,                                               // 1 跳向楼层 (B() case1 抛物线弧)
+      x: S.aV + side * ((bd >> 1) + 256),                  // 出生 x = 塔 ± (bd/2+256) 屏缘外
+      y: S.aW + (be >> 1) + iR(768),                       // 出生 y = 相机+1280+rand 屏外上方
+      tX: S.bm,                                            // 跳弧终点 x = bm (c():2089)
+      floor, dir: -side, style: iR(2), rx: 0, ry: 0,
+      t0: S.cg - iR(1000),
     };
     left--;
   }
 }
+// 跳弧表 (y():1416-1423): bG 累加 5+i (x 向), bF 累加 5-i (y 向)
+const bG_ARC = [0, 5, 11, 18, 26, 35, 45, 0];
+const bF_ARC = [0, 5, 9, 12, 14, 15, 15, 0];
 // ---- t(int) 楼层惊慌 (:2099-2158) / B() tick (:2160) ----
 function panic(floor) {
   const off = Math.abs(S.aF[floor % 20]);
@@ -356,25 +361,38 @@ function peopleTick(dt) {
     const p = S.people[s];
     if (!p) continue;
     const n4 = S.cg - p.t0;
-    if (p.st === 1) {                                      // 原地跳 → 2000ms 后走
-      p.rx = p.x + Math.min(4, n4 / 500) * 5;              // 跳弧近似 (bF/bG 表)
-      p.ry = p.y;
-      if (n4 > 2000 && Math.abs(p.rx - S.bi[S.by]) < 128) { p.st = 2; p.t0 = S.cg; }
-    } else if (p.st === 2) {                               // 走向块缘 bi±64
-      const tx = S.bi[S.by] + p.dir * 64;
-      p.rx += p.dir * n4 / 12;
-      if (Math.abs(p.rx - tx) < 16) { p.st = 5; p.t0 = S.cg; }
-    } else if (p.st === 5) {                               // 站立 500ms → 释放
+    const fl = Math.max(0, Math.min(4, Math.min(4, S.bs - 1) - (S.bs - p.floor)));  // 目标层可见窗索引
+    if (p.st === 1) {                                      // B() case1: 抛物线跳向目标层 (:2170-2196)
+      const n6 = Math.min(5, Math.floor(n4 / 500)), n7 = n4 - n6 * 500;
+      const xT = p.tX, yT = (p.floor - 1) * 256 + 128;     // 终点: x=bm, y=层中心
+      p.rx = p.x - bG_ARC[n6] * (p.x - xT) / 45 - n7 * (bG_ARC[n6 + 1] - bG_ARC[n6]) * (p.x - xT) / 22500;
+      p.ry = p.y - bF_ARC[n6] * (p.y - yT) / 15 - n7 * (bF_ARC[n6 + 1] - bF_ARC[n6]) * (p.y - yT) / 7500;
+      const tgtX = S.bi[fl];
+      if (n4 >= 2000 || (Math.abs(p.rx - tgtX) < 128 && p.ry <= (p.floor - 1) * 256 + 128)) {
+        p.st = 2; p.t0 = S.cg;                             // case2 转换 (:2196-2205)
+        p.x = p.rx - tgtX; p.y = (p.floor - 1) * 256 + 128 - p.ry;   // 记录相对偏移 (bE[1]/[2])
+        p.dir = p.x < 0 ? -1 : 1;
+      }
+    } else if (p.st === 2) {                               // case2: 走向块缘 bi±64 (:2197-2212)
+      const flX = S.bi[fl];
+      p.rx = flX + p.x - p.dir * n4 / 12;
+      if (Math.abs(p.rx - flX) < 64) p.rx = flX + p.dir * 64;
+      p.ry = Math.min(S.bj[fl], S.bj[fl] - p.y + n4 / 12);
+      if (p.rx === flX + p.dir * 64 && p.ry === S.bj[fl]) {
+        p.x = p.dir * 64; p.st = 5; p.t0 = S.cg;
+      }
+    } else if (p.st === 5) {                               // case5: 站立 500ms → 释放
+      p.rx = S.bi[fl] + p.x; p.ry = S.bj[fl];
       if (n4 > 500) { S.people[s] = null; continue; }
-    } else if (p.st === 4) {                               // 掷飞 300ms → 坠
-      p.rx = p.x + p.dir * n4 / 3;
-      p.ry = p.y + n4 / 3;
+    } else if (p.st === 4) {                               // case4: 掷飞 300ms → 坠
+      p.rx = p.x - p.dir * (10 - p.force) * n4 / 15;
+      p.ry = p.y + p.dir * p.force * n4 / 15;
       if (n4 > 300) { p.st = 3; p.t0 = S.cg; p.x = p.rx; p.y = p.ry; }
-    } else if (p.st === 3) {                               // 坠落
+    } else if (p.st === 3) {                               // case3: 坠落
       p.rx = p.x - p.dir * n4 / 30;
-      p.ry = p.y + (10 - p.force) * n4 / 30;
+      p.ry = p.y - Math.abs(10 - p.force) * n4 / 30;
     }
-    if (p.st !== 0 && (p.ry < S.aW - be / 2 || Math.abs(p.rx) > bd / 2 + 256)) S.people[s] = null;
+    if (p.st !== 0 && (p.ry < S.aW - be / 2 || Math.abs(p.rx - S.aV) > bd / 2 + 256)) S.people[s] = null;
   }
 }
 
