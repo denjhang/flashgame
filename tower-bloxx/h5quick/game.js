@@ -120,7 +120,7 @@ function camTick() {
   if (S.aW < S.aX) { S.aW = Math.min(S.aX, S.aX + (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; horizonY = null; }
   else if (S.aW > S.aX) { S.aW = Math.max(S.aX, S.aX - (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; horizonY = null; }
   // (z():1779 aJ 仅在相机移动帧更新; aW==aX 时保持 — 与原文 block6 一致)
-  if (S.cg - S.cN < 800) S.aW += 32 - iR(64);              // 扣命后 800ms 抖动
+  if (S.cg - S.cN < 800) { S.aW += 32 - iR(64); horizonY = null; }  // 扣命后 800ms 抖动 (i() 地平线随动)
 }
 
 // ---- p(int) 摆钩 (:1791-1815) — 工单#3/#4 正解: x∝-cos, y∝-sin ----
@@ -481,7 +481,7 @@ function drawGround() {
     while ((n2 = n4 + n5) < E) { bg2d.drawImage(tex2d.id35, n2, horizonY); n4 = n2; n5 = AQ; }
   }
   if (horizonY + AO < F) {
-    bg2d.fillStyle = '#463274';                              // 4602900 = 0x463274 黄土路
+    bg2d.fillStyle = '#463c14';                              // 4602900 = 0x463c14 黄土路 (i():3459)
     bg2d.fillRect(0, horizonY + AO, E, 2);
     bg2d.fillStyle = '#1e190f';                              // 1972495 = 0x1e1e0f? 实为 0x1E190F 深土
     bg2d.fillRect(0, horizonY + AO + 2, E, F - 2 - horizonY - AO);
