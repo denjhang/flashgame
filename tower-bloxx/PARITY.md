@@ -1,22 +1,32 @@
-# Tower Bloxx H5 与原版全面对差清单（PARITY）
+# Tower Bloxx H5 对差清单（PARITY）
+
+> ## 🎯 项目目标（2026-10-02 用户定稿）
+> **专做 J2ME 版快速模式盖楼的 H5 忠实移植。** 唯一权威参照 = J2ME 版
+> （House.java 语义 + r0 资源 + scene.m3g 3D + MIDI + 中文语言包）。
+> Flash 网页版（AS2）仅为姊妹作参考：交叉验证数值、补充 2D 特效/小人素材。
+> City 建造模式为**非目标**（已实现部分冻结保留, 见第 3 节标注）。
 
 > ## ▶ 下一轮任务（活页区——每轮由此开始, 做完勾掉并写入下一项）
 >
-> **【主线】J2ME (House.java 98 方法 + r0 89 条目) 完全一致移植。进度: 方法 98/98 ✅; 资源 89/89 ✅; **T46 ✅ 89 号文件破译**(城市天际线: 171 建筑条+74 帧时长, bI(x,w)/bH(y,h) 结构, id87=伴随小表)。当前: T48 按差异表修 H5。下一阶段: T46(id87/88 解码)+T48(按差异表修 H5)。**
+> **【主线】J2ME 快速模式盖楼完全一致移植。进度: 方法 98/98 ✅; 资源 89/89 ✅; T45-T48 全部关闭 ✅**
+> （T48 六项: 摆钩定点正弦/塔摇摆 bw/撞塔多块连锁/程序渐变天空/中断续档/落地角标+惊慌人群 全落地）
 >
-> **T45.【资源】r0 素材鉴定与接入**：id00-80 拼图已读（滚轮/块面板/城市图标/软键/数值图标），
-> 对照 House.java 绘制调用（House.b(graphics,id,...)）确定每张的屏幕位置，替换 H5 对应 UI。
-> **T46.【函数】id87/88 bin 鉴定**：686B/1347B，疑关卡或字体数据，读 House 中消费点。
-> **T47.【函数】House.java 方法清单推进**：按 99 方法清单逐个过（判定/计分/城市/存档四块，
-> 已完成 ~10），每方法一行差异记录。
-> **T48.【修】差异表逐项修 H5（J2ME 语义优先）: 摆钩✅/摇摆✅/连锁✅/瞄准鸟✅/天空✅/中断续档✅(N94: g:443/h:618/i:828/j:1003 → twrblx_quickRS/cityRS, btnExit 写档+enterQuick/beginBuild 恢复+gameOver 清档)。惊慌人群✅(N+60: t:2098 panicPeople, bE[8][12] 定性=8槽惊慌人群非下落块)/落地角标✅(N+60: h:3390 landFxSpawn, r0id37 三帧星)。T48 全部关闭 ✅
->
-> **待办池**：l0-l6 语言包 ✅ N+63 启用 (nokia_v1011/lang.zh-CN 88 条全量接入, 界面全中文)。MIDI 短音效已关 (N+61)。待查: intro 弹窗实机自动关闭时序。
+> **待办池（快速模式口径）**：
+> 0. ✅ **h5quick 独立工程落地（2026-10-02）**：旧 h5 判定不可修复级偏差（TOWER_CORE §13 十二项），
+>    按用户指令另建 `h5quick/` 从零重写——纯 J2ME 血统（House.java 公式 + r0/M3G/MIDI 资产），
+>    §13 工单全部按原文修正。无头执行测试 9/9：静态盖楼 41 层、人口结算、3 命保持、
+>    摆幅 60 层线性递增实测吻合 (329.9/329.9)、摇摆相位 −cos 验证。**旧 h5/ 冻结不再投入。**
+> 1. intro 弹窗实机自动关闭时序待查（疑 titleMsgT, N+63 遗留）
+> 2. 吊车 3D 模型挂接（现为 hook 贴图公告牌）
+> 3. 音频双轨收敛：音效现为 Flash mp3、BGM 可选 MIDI——按"J2ME 唯一权威"应评估 MIDI 为主
+> 4. 语言包 l0-l6 其余语种（低优先, zh-CN 已全量）
 
-盘点源：`scripts/scripts/__Packages/bz/esg/game/*.as`（Const/GameState/GameModel/GameSprites/
-CityMap/Tower/Crane/Tipper/ComboTimer/Person/HighScore）、时间轴脚本（paperdefense_fla）、
-J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
+盘点源（按权威序）：**J2ME 版**——`j2me/deobf/src/*_clean.java`（House_clean_part1..3 反混淆底本）、
+`j2me/res/`（r0 解包/MIDI/语言包/89 号天际线）；Flash 版——`scripts/scripts/__Packages/bz/esg/game/*.as`
+（Const/GameState/GameModel/GameSprites/CityMap/Tower/Crane/Tipper/ComboTimer/Person/HighScore）、
+时间轴脚本（paperdefense_fla）。对照物：`h5/game.js` 当前实现。
 状态：✅ 已对号 / 🟨 部分 / ❌ 缺失。每项标注原版证据与优先级。
+**历史条目中"Flash 权威/Flash 取舍"类表述均为旧立场留存, 以本节目标为准（详见第 11 节更正）。**
 
 ## 1. 核心落块循环（quick game 内核）
 
@@ -102,6 +112,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   → 抽 pushBounce(mesh,offset,wait) 助手 (撞塔/knock 共用), bounces 更新支持 wait 冻结期
 
 ## 3. Build City 城市模式——✅ 闭环（底图/热区/塔格缩略图/滚轮动画全原版, 第29/34/33轮）
+
+> 【2026-10-02】**非目标冻结**：项目主线定为 J2ME 快速模式盖楼, 本节功能保留现状不再投入。
+> 本节对号证据以 Flash 版 CityMap.as 为主（J2ME 城市逻辑未深入）, 如日后重启需按 House.java 重对。
 
 - ✅ 5×5 网格（CITY_MAP_CELL=52px）+ 放置校验 isValid（CityMap.as:561-567）
 - ✅ 邻接解锁 allowed 表（CityMap.updateAllowedTowerTypes:569-632: 红1需蓝邻, 绿2需蓝+红, 黄3需蓝+红+绿）
@@ -304,7 +317,9 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   原版资产名 "snd_fanfare_med", ExportAssets 导出名为 snd_fanfare_mediocre, H5 用后者 1:1)
 - ✅ 考证不移植项: Crane.fakeDrop/fakePerfect (Crane.as:213-220) 为原版内部作弊死代码,
   无任何 UI 调用方, 与 sm_cheatsOn 一样属调试残留
-- 备注：J2ME 9 首 MIDI 为手机版曲目，与 Flash 版曲库不同源；Flash 版即权威，MIDI 不再转码
+- 备注：~~J2ME 9 首 MIDI 为手机版曲目，与 Flash 版曲库不同源；Flash 版即权威，MIDI 不再转码~~
+  【更正 2026-10-02】J2ME 为唯一权威后此结论作废；MIDI 已于第 42/96 轮全量接入
+  （BGM 81 + jingle 83/84/85, WebAudio 合成）, 音频双轨收敛记入活页区待办池第 3 项
 
 
 ### 6.1 音效时机普查（第 41 轮, T16 ✅）
@@ -321,7 +336,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
   VolumeControl 40; 歌曲经 r0 打包负数 id 解码 (g.a: (id&0x7FFF) 索引)
 - 接入: parseMidi(格式0 解析+tempo) + WebAudio triangle 合成 (gain 0.09≈40/100 音量,
   线性起音+指数衰减), 整曲 setTimeout 循环; 菜单 MUSIC 位 (552 帧12, Get More 空位) 开关,
-  localStorage 'twrblx_midi' 持久化, 默认关（可选 BGM, Flash mp3 歌曲仍是权威）
+  localStorage 'twrblx_midi' 持久化, 默认关（可选 BGM, ~~Flash mp3 歌曲仍是权威~~【更正 2026-10-02 见 §6 备注】）
 - [P0] 同轮修复: 菜单流 HTML 从未落地 (N14 只写了 game.js, index.html 缺
   titleScr/menuScr/menuSub/五个 mBtn)——真实浏览器 showMenu() 必 null 崩, exec_test 的
   getElementById stub 掩盖。已补齐: titleScr=467 位图(648x480 读图), menuScr=473 底图
@@ -427,7 +442,11 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 
 
 ### 11. J2ME 版差异盘点（第 46 轮, T21 ✅）——"哪边才是原版"判定表
-> 【更正】H5 玩法核心 = J2ME（用户指令, 第 76 轮）；Flash 仅为参考。原表 J2ME 列即移植目标语义, H5 现状待 T40-T43 重对齐。抽样
+> 【更正 2026-10-02 定稿】H5 玩法核心与权威参照 = **J2ME**（用户指令：第 76 轮定方向, 2026-10-02 定稿为项目目标——专做 J2ME 快速模式盖楼）；
+> Flash 仅为姊妹作参考。原表 J2ME 列即移植目标语义, T48 六项已全部落地对齐（摆钩/摇摆/连锁/天空/续档/角标）。
+> 表内"H5 取舍"列标注"Flash"的行（数值浮点/存档字段/音频 mp3/关卡/高分）为当时旧立场的现状描述——
+> 其中**音频 mp3→MIDI 收敛**已列入活页区待办池；数值/存档/高分因 J2ME 与 Flash 同源（y:2919 人口公式一致已证实）
+> 维持现实现, 不再返工。抽样
 > House.java(4420 行, 混淆) 关键段:
 | 维度 | J2ME (House.java) | Flash (bz/esg/game) | H5 取舍 |
 |---|---|---|---|
@@ -473,7 +492,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 > 待办池清零。剩余项全部为"永久记档"性质：
 > 1. 外链按钮 5 态（平台依赖）/暂停按钮（原版无实现）——有意不复刻
 > 2. NETWORK 高分源（服务端已死）/CITY 榜写入（原版城市模式亦不写）——语义等价
-> 3. J2ME 载体差异（七维判定表第 11 节）——以 Flash 为权威
+> 3. J2ME 载体差异（七维判定表第 11 节）——~~以 Flash 为权威~~【更正 2026-10-02】以 J2ME 为权威
 > 4. 高分三分页表格（H5 单屏三表已并列展示, 等价）
 > 后续轮次转为：回归维护（三件套全绿守护）+ 玩家实测反馈驱动的微修。
 
@@ -482,7 +501,7 @@ J2ME 版资源（scene.m3g/MIDI）。对照物：`h5/game.js` 当前实现。
 3. 视差背景+环境特效+小人/火花（第 5 节）
 4. 音频（第 6 节）
 5. 存档记录（第 7 节）
-6. Build City 城市模式（第 3 节，最大件）
+6. ~~Build City 城市模式（第 3 节，最大件）~~【2026-10-02 转非目标：已实现部分冻结保留, 不再投入】
 7. 菜单流（第 4 节菜单子项，依赖城市模式）
 
 

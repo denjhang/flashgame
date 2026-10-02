@@ -26,11 +26,15 @@ flashgame/
 │   ├── GAME_LOGIC.md    # 玩法逻辑清单
 │   ├── PROGRESS.md      # 资源还原看板
 │   └── data/            # 权威对号数据 JSON (武器/路点/炮塔帧/声音/精灵)
-├── tower-bloxx/         # 《都市摩天楼 Tower Bloxx》反编译 (AS2, bz.esg.game 包, 未混淆)
+├── tower-bloxx/         # 《都市摩天楼 Tower Bloxx》主线: J2ME 版快速模式盖楼 H5 忠实移植
+│   ├── h5quick/          #   ★ 主线: 快速模式独立忠实移植 (纯 J2ME 公式/资产, 2026-10-02)
+│   ├── h5/               #   旧版 (已冻结: 12 项公式偏差, 见 j2me/deobf/TOWER_CORE.md §13)
+│   └── j2me/            #   J2ME 逆向工程 (反混淆权威底本 deobf/ + 资源 res/ + jar/zip 原件)
 ├── paper-war/           # 《Paper Defense》反编译 (AS3, 276 类, 未混淆)
 ├── rise-of-the-tower/   # 《Rise of the Tower》反编译 (AS3, 已混淆 §_-xx§)
 ├── rise-of-the-colony/  # 《Rise of the Colony》反编译 (AS3, 328 类, 未混淆)
 ├── vk1939/              # 《VK 1939》审计工程 (见其 README)
+├── 游戏swf/             # 怀旧 Flash 游戏合集 (SWF 本体不入库; flash_loader.htm 与安卓播放器 APK 入库)
 ├── swf_dump.txt         # FFDec -dumpSWF 权威 dump (deobf 脚本引用, 保留根目录)
 └── .gitignore           # decompiled/ deobf输出 ffdec/ *.swf 等大体积产物
 ```

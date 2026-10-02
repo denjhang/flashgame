@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>都市摩天楼 快速游戏 — J2ME 忠实移植 (h5quick)</title>
+<style>
+  html,body{margin:0;height:100%;background:#111;display:flex;align-items:center;justify-content:center;
+    font-family:"Segoe UI",sans-serif;touch-action:none;user-select:none}
+  /* J2ME 原生分辨率 240x320 (E,F), 等比放大 2 倍 */
+  #stage{position:relative;width:480px;height:640px;transform-origin:center}
+  canvas{position:absolute;left:0;top:0;width:480px;height:640px;image-rendering:pixelated}
+  #msg{position:absolute;left:12px;right:12px;bottom:10%;display:none;background:#e8e0d8;border:3px solid #7a5555;
+    border-radius:6px;padding:8px 10px;color:#222;font-size:13px;line-height:1.5}
+  #msg .ok{display:block;margin:8px auto 0;padding:2px 14px;background:#4a7a2a;color:#fff;border-radius:4px;
+    border:none;font-size:14px;cursor:pointer}
+  #boot{position:absolute;inset:0;background:#fff;color:#333;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:18px}
+  #boot img{width:154px}
+  #boot .bar{width:240px;height:14px;background:#140b2c;padding:1px}
+  #boot .fill{width:0;height:12px;background:#f89100;transition:width 1.2s}
+</style>
+<script type="importmap">
+{"imports":{"three":"./js/three.module.js","three/addons/":"./js/"}}
+</script>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg2d" width="240" height="320"></canvas>
+  <canvas id="game" width="240" height="320"></canvas>
+  <canvas id="hud2d" width="240" height="320"></canvas>
+  <div id="msg"><span id="msgTxt"></span><button class="ok" id="msgOk">确定</button></div>
+  <div id="boot"><img src="./assets/id09.png" alt=""><div class="bar"><div class="fill" id="bootFill"></div></div></div>
+</div>
+<script type="module" src="./game.js"></script>
+</body>
+</html>

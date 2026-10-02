@@ -1,5 +1,8 @@
-// Tower Bloxx H5 — 玩法按 Flash 版 Const.as/Tower.as/Crane.as/Tipper.as 对号移植,
-// 3D 资产为原版 J2ME scene.m3g 直转 (GLB)。
+// Tower Bloxx H5 — J2ME 版快速模式盖楼忠实移植 (J2ME=唯一权威, 2026-10-02 定稿)。
+// 判定/计分/连击公式 J2ME 与 Flash 同源 (House.y:2919 ≡ GameModel.changePopulation 已证实);
+// J2ME 专属语义按 House.java 对号: 摆钩 j2Hook(p:1790)/塔摇摆(q:1816)/程序天空(a:2737)/
+// 撞塔连锁(d:3007)/中断续档(g:443,h:618)/落地角标(h:3390)。3D 资产=scene.m3g 直转 GLB。
+// Flash 版 (Const/Tower/Crane/Tipper.as) 为姊妹作参考, 同源公式的行号引注保留。
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -1399,7 +1402,7 @@ addEventListener('keydown', e => {
 // 音乐/音效开关 (GameState.toggleSongs/toggleSounds) — 音频系统落地后生效, 先存偏好
 G.musicOn = localStorage.getItem('twrblx_music') !== '0';
 G.soundOn = localStorage.getItem('twrblx_sound') !== '0';
-if (!G.musicOn) hud.btnMusic.style.opacity = 0.4;
+if (!G.musicOn) hud.btnMusic.style.opacity = 0.4;
 if (!G.midiOn) {} // MIDI 开关在菜单
 if (!G.soundOn) hud.btnSound.style.opacity = 0.4;
 function sndClick() { if (G.soundOn && SND.snd_click) { SND.snd_click.currentTime = 0; SND.snd_click.play().catch(() => {}); } }
@@ -1667,7 +1670,7 @@ function loop(now) {
       const camTargetY = Math.max(0, G.landingY - STAGE_H / 2 + 3 * BLOCK_H);
       G.camY += (camTargetY - G.camY) * Math.min(1, dt / DELAY_PAN_UP);
     }
-    camera.position.y = G.camY;
+    camera.position.y = G.camY;
     if (G.j2me) j2SkyUpdate();   // T48-5: J2ME 程序天空
     // AL+1: 竖屏游戏区视口 (n.a(0,E,F) 对号)
     if (renderer.setScissorTest) {  // exec_test stub 无视口 API

@@ -19,3 +19,8 @@ tower-bloxx/*-dec.swf
 tower-bloxx/j2me/jars/
 tower-bloxx/j2me/src/
 tower-bloxx/h5/node_modules/
+
+# J2ME 参考项目 (本地用, 不入库)
+j2me_ref/
+J2ME-Web-Core-main.zip
+freej2me-web-main.zip

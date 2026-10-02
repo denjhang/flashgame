@@ -1,7 +1,11 @@
 # Tower Bloxx H5 静态对标审计
 
-权威源：`scripts/scripts/__Packages/bz/esg/game/*.as`（Flash 版，符号未混淆）、
-`j2me/src/City_Bloxx_2008Nokiav1.0.12/*.java`（J2ME 版，交叉验证用）。
+> 【2026-10-02 目标定稿】项目主线 = **J2ME 版快速模式盖楼忠实移植**。
+> 权威源：`j2me/deobf/src/*_clean.java`（J2ME 反混淆底本）+ `j2me/res/`（r0/M3G/语言包）。
+> `scripts/scripts/__Packages/bz/esg/game/*.as`（Flash 版, 符号未混淆）与
+> `j2me/src/*.java`（J2ME 原始反编译）降为交叉验证参考。
+> 本文件为逐轮历史日志, 早轮次的"Flash 权威"结论已被后续轮次推翻处均有更正标注, 不改写原文。
+
 每 10 分钟一轮自动化检查（automation-0847c93e），小差异当场修，大差异记 herein。
 
 ## 第 1 轮（2026-09-29）
@@ -86,6 +90,8 @@ gameOver 时序（Tower.as:152 + Const.GAME_OVER_DELAY/DUR_PAN_DOWN）、全常�
 ### J2ME 交叉验证结论（本轮专项）
 
 尝试按任务要求用 `House.java`（Nokia v1.0.12, 4420 行）交叉验证 Flash 版数值。结论：**不采用**。
+> 【更正 2026-10-02】本结论已于第 79 轮起推翻——J2ME 反混淆工程（j2me/deobf/）完成后
+> House.java 成为唯一权威底本（98/98 方法建档）。原文留存如下, 仅作历史记录。
 该文件为定点数表驱动（如 cW 二维表 `{n3/3, n3/30, ..., 409, 1024, 32, 4, 5, 128, ...}`、
 魔数 1664=塔高上限），符号全部混淆，等价语义还原成本远超收益；且玩法数值已有未混淆的
 Flash 版（同一玩法姊妹作，Const.as 全量可读）作权威源。后续轮次不再尝试 House.java，
@@ -136,6 +142,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
   foundation/combo/stacked/destroy/fanfare_bad/good/click
 - 音乐/音效按钮开关真实生效（toggleSongs/toggleSounds 对号）
 - J2ME MIDI 评估：与 Flash 曲库不同源，Flash 版即权威，不转码
+  【更正 2026-10-02】MIDI 已于第 42/96 轮全量接入（BGM+jingle）, 此结论随"Flash 权威"立场一并作废
 - smoke_test 16/16
 
 ## 第 14 轮（2026-09-29）— PARITY 推进 #6：存档闭环
@@ -430,6 +437,7 @@ roof 人口分支（P2）/ HUD 增量文本（P3）/ MIDI（P3）/ dropY 动画�
 
 - 抽样 House.java 关键段(定点数/摆钩状态机/存档 RMS/MIDI/关卡阈值), 七维差异表落档 PARITY 11;
   全部为"实现载体"级差异, 非玩法冲突 → 巩固"Flash=玩法权威, J2ME=3D 资产来源"判定
+  【更正 2026-10-02】此判定已被用户指令推翻（第 76 轮起 J2ME=玩法权威, 2026-10-02 定稿）, 见 PARITY §11 更正
 - 全量回归: smoke 18 PASS / tower 7 PASS / city 10 PASS（零代码变更文档轮）
 ## 第 47 轮（2026-09-30）— T22 忠实度抽查回归（dropTarget/blockLanded/checkTipQueue）
 
