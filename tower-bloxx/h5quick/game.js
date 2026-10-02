@@ -80,6 +80,7 @@ function zFloor(d) {
   }
   S.aP = S.aP * S.cP / old;                                // 相位守恒 (z:2992)
   if (d !== 0 && S.bk !== 1 && S.bk !== 4) oCam(d * 256);   // 原版仅 z(±1); z(0) 初始化不动相机
+  horizonY = null;                                          // 相机变了重投影
 }
 // ---- A() 塔重建 (:1999-2072, 原文忠实): 层顶链式 +256, 层心=倾斜累计逐层传导 ----
 // 顶块 (f==bs-1, 非 bg-1) 落地后三段缓动: <100ms v1/8+aF/6+t·aF/600;
@@ -116,8 +117,8 @@ function rebuildFloors() {
 // ---- o(int) 相机目标 / z() 相机跟随 (:1786/:1765) ----
 function oCam(d) { S.aY = S.cg; S.aX = S.bs > 1 ? S.aX + d : 512; }
 function camTick() {
-  if (S.aW < S.aX) { S.aW = Math.min(S.aX, S.aX + (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; }
-  else if (S.aW > S.aX) { S.aW = Math.max(S.aX, S.aX - (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; }
+  if (S.aW < S.aX) { S.aW = Math.min(S.aX, S.aX + (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; horizonY = null; }
+  else if (S.aW > S.aX) { S.aW = Math.max(S.aX, S.aX - (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; horizonY = null; }
   // (z():1779 aJ 仅在相机移动帧更新; aW==aX 时保持 — 与原文 block6 一致)
   if (S.cg - S.cN < 800) S.aW += 32 - iR(64);              // 扣命后 800ms 抖动
 }
@@ -385,15 +386,18 @@ function A(n) {
   if (S.ba === 0 && !S.over) { S.bk = 2; gameOver(); }
 }
 
-// ---- q(int) 塔摇摆 (:1817-1841) — 工单#5: cS=-cos ----
+// ---- 塔摇摆 — Nokia q():1817 (仅 bk==2 摆) 与 DC v1.5.07 f(int):748 (常态持续正弦,
+// 倒塌才衰减) 二版本语义不同; 按用户实机体感 (建楼时楼轻微左右晃=游戏特色) 采用 DC 语义:
+// U=(U+dt)%3600, aH=c(U/10)=-cos, S=T·aH>>16 (衰减器), P=-(aH·T)/10000
 function sway(dt) {
-  if (S.bk === 2) S.bu = S.bu > 0 ? S.bu - 1 : S.bu + 1;
-  else if (S.bu < 0) S.bu++;
-  if (S.bk === 2 || S.bu !== 0) {
+  if (S.bk === 2) {
+    S.bu = S.bu > 0 ? S.bu - 1 : S.bu + 1;                 // 倒塌衰减
+  } else {
     S.bw = (S.bw + dt) % 3600;
-    S.cS = kD(S.bw / 10);                                  // k(bw/10) = -cos
-  } else S.cS = 0;
-  S.br = -(S.cS * S.bv) * 3.2768;                       // 原 (cS32768·bv)/10000, br=世界x偏移
+    S.cS = kD(S.bw / 10);                                  // -cos(U/10°)
+    S.bu = S.bv * S.cS;                                    // S=T·aH>>16 (浮点等价)
+  }
+  S.br = -(S.cS * S.bv) * 3.2768;                          // P=-(aH·T)/10000, br=世界x偏移
 }
 
 // ---- 渲染层 ----
@@ -451,6 +455,38 @@ function fxSpawn(slot) {                                    // x(int):2702
   }
   S.fx[slot].type = n3;
 }
+// i(Graphics):3424 工地中景: 地平线 n3=投影(0,-19,-80).y - ao + 9;
+// 左: ae(id33 工地全景 136x34) 从 E/2-ap/2 步进 -ar; 右: ag(id35 木板 33x34) 步进 +aq;
+// 中央 ah(id36 树 51x48); 底: 黄路 4602900 2px + 深土 1972495 到屏底 (ao=34,ap=136,aq=33,ar=33,as=51)
+const AO = 34, AP = 136, AQ = 33, AR = 33, AS = 51;
+let horizonY = null;
+function horizonScreenY() {                                 // i():3428-3434 — n3 = 投影屏y - ao + 9
+  const z = cI - (-80);                                     // 点 (0,-19,-80) 相机空间深度
+  const ndcY = (-19 - S.aW) / z / Math.tan(CAM_FOVY * Math.PI / 360);
+  return -0.5 * F * ndcY + (F >> 1) - AO + 9;
+}
+function drawGround() {
+  if (horizonY === null) horizonY = horizonScreenY();
+  if (horizonY < F) {
+    // 树 (中央): ah 锚 17=BOTTOM|HCENTER? 17=1|16=HCENTER|BOTTOM → drawImage(ah, E/2+ap/2, n3-as+9)
+    bg2d.drawImage(tex2d.id36, (E >> 1) + (AP >> 1), horizonY - AS + 9);
+  }
+  if (horizonY < F) {
+    // 左半: 从 E/2-ap/2 向左铺 ae (af=id34 绿门 tile 步进 -ar)
+    let n2 = (E >> 1) - (AP >> 1);
+    bg2d.drawImage(tex2d.id33, n2, horizonY);
+    while ((n2 -= AR) > -AR) bg2d.drawImage(tex2d.id34, n2, horizonY);
+    // 右半: 从 E/2+ap/2 向右铺 ag (id35)
+    let n4 = E >> 1, n5 = AP >> 1;
+    while ((n2 = n4 + n5) < E) { bg2d.drawImage(tex2d.id35, n2, horizonY); n4 = n2; n5 = AQ; }
+  }
+  if (horizonY + AO < F) {
+    bg2d.fillStyle = '#463274';                              // 4602900 = 0x463274 黄土路
+    bg2d.fillRect(0, horizonY + AO, E, 2);
+    bg2d.fillStyle = '#1e190f';                              // 1972495 = 0x1e1e0f? 实为 0x1E190F 深土
+    bg2d.fillRect(0, horizonY + AO + 2, E, F - 2 - horizonY - AO);
+  }
+}
 function drawFX() {
   for (const slot of S.fx) {
     if (slot.type === 0) continue;
@@ -465,6 +501,7 @@ function drawFX() {
     const w = img.naturalWidth / (f ? 2 : 1), h = img.naturalHeight;
     bg2d.drawImage(img, f ? w : 0, 0, w, h, px - w / 2, py - h / 2, w, h);
   }
+  drawGround();
 }
 const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1); renderer.setSize(E, F, false);
@@ -534,20 +571,21 @@ function sky() {
   // 远景楼群 (dG 12 楼, 随 aW 下沉: n8 = aU - 高 + 32·aW>>8)
   for (const b of S.dG) {
     if (b[4] === 0) continue;
-    const h = b[2];
-    let top = aU - h + n2s;
-    if (top > F + 32) { b[4] = 0; continue; }
-    const bh = Math.min(h, F - Math.max(0, top));
-    bg2d.fillStyle = col(dH2(b[5]));
-    bg2d.fillRect(b[0], Math.max(0, top), b[1], bh);
-    if (top >= 0) {                                        // bl=顶可见才画饰
-      if (b[6] === 1) {                                    // 天线 + 红灯闪
-        bg2d.fillStyle = col(dH2(b[5]));
-        bg2d.fillRect(b[0] + (b[1] >> 1), top - b[3], 3, b[3]);
-        if (Math.floor((S.cg + b[2]) / 200) % 2 === 0) { bg2d.fillStyle = '#f00'; bg2d.fillRect(b[0] + (b[1] >> 1), top - b[3], 3, 3); }
-      } else if (b[6] === 2) {                             // 宽顶箱
-        bg2d.fillRect(b[0] + b[1] / 10, top - 16, b[1] - b[1] / 5, 16);
-      }
+    const n7 = b[2];                                       // 楼高
+    let n8 = aU - n7 + n2s;                                // 楼顶屏y (可负)
+    let n9 = n8 + n7;                                      // 楼底屏y
+    let topVisible = true;
+    if (n8 < 0) { n8 = 0; topVisible = false; }
+    if (n8 + n9 > F) n9 = F - n8;
+    if (n8 > F + 32) { b[4] = 0; continue; }               // 沉出屏底永久移除
+    if (n8 < F) { bg2d.fillStyle = col(dH2(b[5])); bg2d.fillRect(b[0], n8, b[1], n9); }
+    if (!topVisible) continue;
+    if (b[6] === 1) {                                      // 天线+红灯
+      bg2d.fillStyle = col(dH2(b[5]));
+      bg2d.fillRect(b[0] + (b[1] >> 1), (aU - n7 + n2s) - b[3], 3, b[3]);
+      if (Math.floor((S.cg + n7) / 200) % 2 === 0) { bg2d.fillStyle = '#f00'; bg2d.fillRect(b[0] + (b[1] >> 1), (aU - n7 + n2s) - b[3], 3, 3); }
+    } else if (b[6] === 2) {                               // 宽顶箱
+      bg2d.fillRect(b[0] + b[1] / 10, (aU - n7 + n2s) - 16, b[1] - b[1] / 5, 16);
     }
   }
 }
@@ -555,7 +593,7 @@ const dH2 = c => c;                                        // dH 色已是 RGB
 // 3D 组
 const towerGroup = new THREE.Group(); scene.add(towerGroup);   // 摇摆作用于组 (近似 A() 逐层投影)
 const fxGroup = new THREE.Group(); scene.add(fxGroup);
-let templates = [], GROUND_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null;  // *_TPL = 子网格数组
+let templates = [], GROUND_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null, BG_TOWERS = [], bgMeshes = [];  // *_TPL = 子网格数组
 const tex2d = {};
 function loadTex(url) { const t = new THREE.TextureLoader().load(url); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t; }
 // 小人帧纹理 (id12/13: 10 帧 × 21x28)
@@ -584,7 +622,23 @@ new GLTFLoader().load('./assets/scene.glb', gltf => {
   // uid→GLB 节点: n(uid+250)。cy块=uid13→n263, cC地面=uid9→n259, cD吊臂=uid8→n258, cE缆=uid7→n257
   const T = name => templates.filter(t => t.name === name || t.name.startsWith(name + '_'));
   GROUND_TPL = T('mesh269'); CRANE_TPL = T('mesh260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
-  for (const id of [12, 13, 15, 16, 18, 19, 20, 37, 38, 39, 41, ...Array.from({ length: 27 }, (_, k) => 42 + k)]) {
+  // 预载表 {30..33} = 背景楼 (find(userID)): uid4(mesh253)@原点正后方, uid2(mesh251)@x1600,
+  // uid5(mesh254)@x3200, uid6(mesh255)@x4800 — m3g 节点平移即排布位
+  BG_TOWERS = [
+    { tpl: T('mesh253'), x: 0 },
+    { tpl: T('mesh251'), x: 1600 },
+    { tpl: T('mesh254'), x: 3200 },
+    { tpl: T('mesh255'), x: 4800 },
+  ];
+  for (const b of BG_TOWERS) {
+    if (!b.tpl.length) continue;
+    for (const tpl of b.tpl) {
+      const m = tpl.clone();
+      m.position.set(b.x, 0, -900);                          // 塔(z0)后方
+      scene.add(m); bgMeshes.push(m);
+    }
+  }
+  for (const id of [12, 13, 15, 16, 18, 19, 20, 33, 34, 35, 36, 37, 38, 39, 41, ...Array.from({ length: 27 }, (_, k) => 42 + k)]) {
     const im = new Image(); im.src = `./assets/id${id}.png`;
     tex2d['id' + id] = im;
   }
@@ -634,28 +688,32 @@ function drawHUD() {
     hud.drawImage(c, -10, -14 + 10);
     hud.restore();
   }
-  // 机会 (j:3467-3495 原式): 竖列 clip 11x72 @ (cn+cn/2+18, F-co-72); X=id19(110x12,帧11px)
+  // cn = E/20 = 12, co = F/15 = 21 (y():1424-1425)
   {
-    const clipX = 20 + 10 + 18, baseFrame = (BL - 1) * 2;    // cn=E/20=12 → cn+cn/2+14+4=34
-    hud.save(); hud.beginPath(); hud.rect(clipX, F - 21 - 72, 11, 72); hud.clip();
+    const CN = 12, CO = 21;
+    // 机会 (j:3467-3495 原式): setClip(cn+cn/2+14+4, F-co-72, 11, 72);
+    // drawImage(X, cn+cn/2+14-n6*11+4, F-co-n7*12) — 整图+clip 显单帧
+    const clipX = CN + (CN >> 1) + 14 + 4;                   // = 36
+    const baseFrame = (BL - 1) * 2;                          // bl=4 → 帧6 橙完整
+    hud.save(); hud.beginPath(); hud.rect(clipX, F - CO - 72, 11, 72); hud.clip();
     for (let n7 = 0; n7 <= 3; n7++) {
       let n6;
-      if (n7 <= S.ba) n6 = baseFrame;                        // 亮
-      else if (S.cg - S.bc < 100 && n7 <= S.ba + S.bb) n6 = baseFrame + 1;  // 刚扣白闪
-      else n6 = 8;                                           // 空
-      if (S.ba === 1 && Math.floor(S.cg / 500) % 2 === 0) n6 = 9;  // 只剩1命黄闪
-      hud.drawImage(tex2d.id19, clipX + 4 - n6 * 11 - 11, F - 21 - n7 * 12);
+      if (n7 <= S.ba) n6 = baseFrame;
+      else if (S.cg - S.bc < 100 && n7 <= S.ba + S.bb) n6 = baseFrame + 1;
+      else n6 = 8;
+      if (S.ba === 1 && Math.floor(S.cg / 500) % 2 === 0) n6 = 9;
+      hud.drawImage(tex2d.id19, CN + (CN >> 1) + 14 - n6 * 11 + 4, F - CO - n7 * 12);
     }
     hud.restore();
+    if (S.bs > 0) {
+      // 人口 (j:3497-3501): 大数字右缘 E-cn, y=F-co-2-12; V=id18 图标 (E-cn-28-3-11, F-co-2-19)
+      hud.drawImage(tex2d.id18, E - CN - 28 - 3 - 11, F - CO - 2 - 19);
+      bigNum(E - CN, F - CO - 2 - 12, S.bt, 5);
+    }
+    // 楼层 (快速分支 j:3558-3562): W=id20 (cn-9, F-co-50) + 小数字右缘 cn-9+23, y=F-co-50+37
+    hud.drawImage(tex2d.id20, CN - 9, F - CO - 50);
+    smallNum(CN - 9 + 23, F - CO - 50 + 37, S.bs, 3);
   }
-  if (S.bs > 0) {
-    // 人口: V=id18 图标 (E-cn-42, F-co-2-19) + 5 位大数字右缘 E-cn (j:3497)
-    hud.drawImage(tex2d.id18, E - 20 - 42, F - 21 - 2 - 19);
-    bigNum(E - 20, F - 21 - 14, S.bt, 5);
-  }
-  // 楼层 (快速分支 j:3558-3562): W=id20 图标 (cn-9, F-co-50) + 3 位小数字 (cn+14, F-co-50+37)
-  hud.drawImage(tex2d.id20, 20 - 9, F - 21 - 50);
-  smallNum(20 - 9 + 23, F - 21 - 50 + 37, S.bs, 3);
   // 连击计时条 (j:3533-3546)
   if (S.bA > 0) {
     hud.strokeStyle = 'rgb(107,26,0)'; hud.strokeRect((E >> 1) - (E >> 2) - 3, 20, (E >> 1) + 5, 11);
@@ -833,6 +891,9 @@ function loop(now) {
   drawHUD();
 }
 requestAnimationFrame(loop);
+// rAF 兜底: IAB 面板/后台标签会冻结 requestAnimationFrame — setInterval 驱动同一 loop,
+// 两驱动并行时 dt 取真实差值, 步进幂等 (loop 首行 rAF 自排队不受影响)
+setInterval(() => loop(performance.now()), 25);
 
 function bootDone() {
   if (booted) return;

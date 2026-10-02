@@ -156,7 +156,7 @@ if (S.bs >= 5) {
   const expect = 213 + S.bs * (384 - 213) / 60;
   ok(Math.abs(S.cQ - Math.min(384, expect)) < 5, '摆幅按 60 层线性递增 cQ=' + S.cQ.toFixed(1) + ' 期望≈' + Math.min(384, expect).toFixed(1));
 }
-// 摇摆相位: cS 应为 -cos(bw/10) (即 bw=0 时 cS=-1)
-S.bw = 0; S.bu = 1; S.bk = 2; step(2);
-ok(S.cS < -0.99, '摇摆相位 cS=-cos (工单#5) cS=' + S.cS.toFixed(3));
+// 摇摆相位 (DC 语义): bk!=2 常态持续摆, bw=0 时 cS=-cos(0)=-1
+S.bw = 0; S.bk = 0; step(1);
+ok(S.cS < -0.99, '摇摆相位 cS=-cos 常态持续 (DC f:int) cS=' + S.cS.toFixed(3));
 console.log('--- 完成: bs=' + S.bs + ' bt=' + S.bt + ' ba=' + S.ba + ' cg=' + S.cg);
