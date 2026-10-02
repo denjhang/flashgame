@@ -6,6 +6,7 @@
 // ============================================================================
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { LibMidi, createUnlockingAudioContext } from './js/midi/libmidi.js';   // 工单#10: MIDI 直接抄 j2me web (freej2me-web libmidi)
 
 // ---- 常量与表 (static :4326-4418 / y():1389 / K()) ----
 const E = 240, F = 320;                    // 屏宽高 (E,F)
@@ -78,7 +79,7 @@ function zFloor(d) {
     S.cO = -Math.min(256, 128 + (S.bs - 100) * 256 / 300);
   }
   S.aP = S.aP * S.cP / old;                                // 相位守恒 (z:2992)
-  if (S.bk !== 1 && S.bk !== 4) oCam(d * 256);
+  if (d !== 0 && S.bk !== 1 && S.bk !== 4) oCam(d * 256);   // 原版仅 z(±1); z(0) 初始化不动相机
 }
 // ---- A() 塔重建 (:1999-2072, 原文忠实): 层顶链式 +256, 层心=倾斜累计逐层传导 ----
 // 顶块 (f==bs-1, 非 bg-1) 落地后三段缓动: <100ms v1/8+aF/6+t·aF/600;
@@ -407,41 +408,60 @@ const FX_PROB  = [0,30,30,20,20,40,60,60,30,30,50,50,10,50,100,20,40,50,100,30,1
 const FX_SPD   = [60,2,1,3,2,2,-2,3,-4,5,2,2,6,0,0,-2,0,0,0,0,0,0,3,-3,0,0,0,0,-3];
 const FX_DCT = [42,43,44,45,46,47,48,49,50,51,52,53,-1,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68];
 const FX_MAX = 9;                                          // dB[9] 槽位
-S.fx = Array.from({ length: FX_MAX }, () => ({ type: 0, x: 0, y: 0, next: performance.now() + iR(2000) }));
-function fxTick(now) {
-  const tier = S.bs / 10;                                  // 高度带 = 层数/10
-  for (const slot of S.fx) {
-    if (slot.type !== 0) {
-      slot.x += FX_SPD[slot.type] * 0.9 * 0.025;           // 每 tick(25ms) 推进
-      if (Math.abs(slot.x) > bd / 2 + 400) { slot.type = 0; slot.next = now + 1000 + iR(2500); }
-    } else if (now >= slot.next) {
-      let pick = 0;
-      for (let i = 1; i <= 28; i++) {
-        if (tier >= FX_START[i] && tier < FX_END[i] && iR(100) < FX_PROB[i]) { pick = i; break; }
-      }
-      if (pick === 0) { slot.next = now + 1000 + iR(2500); continue; }
-      slot.type = pick;
-      const spd = FX_SPD[pick];
-      if (spd === 0 || iR(2) === 0) slot.x = -bd / 2 + iR(bd);
-      else slot.x = spd > 0 ? -bd / 2 - 150 : bd / 2 + 150;
-      slot.y = 0.75 * S.aW + (iR(2560) - 1280);            // 世界 y 参照 3aW/4 (e():3799)
+S.fx = Array.from({ length: FX_MAX }, () => ({ type: 0, x: 0, y: 0, next: 1000 + iR(2500) }));
+// ---- 环境层 E():2625 + x():2702 原式 ----
+// dB[9]=[型,x,y,下次]; dy 配额表(:4035); dz=8·max(图宽,高)(类型5/11减半); cp=2·aW/3/cd
+const FX_DY = [0,8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1];
+const FX_DZ = new Array(29).fill(1);                        // 装载后按图尺寸填 (:1319-1333)
+function fxTick() {                                         // 每 25ms tick 一次 (E() 无 dt 缩放)
+  const bdX = bd, dzY = be;
+  for (let i = 0; i < 9; i++) {
+    const s = S.fx[i];
+    if (s.type !== 0) {
+      s.x += FX_SPD[s.type];                                 // 每 tick 恒速 (dA[3][型])
+      const m = FX_DZ[s.type - 1];
+      if (s.x <= bdX + m && s.x >= -bdX - m && 0.75 * S.aW - s.y <= dzY + m) continue;
+      s.type = 0; s.next = S.cg + iR(2000);
+      if (FX_DY[s.type || 0] >= 0 && FX_DY[s.type] !== undefined) {} // (type 已清, 配额回收见下)
+      continue;
     }
+    if (s.next >= S.cg) continue;
+    fxSpawn(i);
   }
+}
+function fxSpawn(slot) {                                    // x(int):2702
+  const cp = Math.floor(2 * S.aW / 3 / cd);
+  let n3 = 0;
+  for (let i2 = 0; i2 <= 28; i2++) {
+    if (cp >= FX_START[i2] && cp < FX_END[i2] && (FX_DY[i2] > 0 || FX_DY[i2] === -1)
+        && iR(100) < FX_PROB[i2]) { n3 = i2; break; }
+  }
+  if (n3 === 0) { S.fx[slot].type = 0; S.fx[slot].next = S.cg + 1000 + iR(2500); return; }
+  FX_DY[n3]--;
+  const spd = FX_SPD[n3], m = FX_DZ[n3 - 1];
+  if (spd === 0 || iR(2) === 0) {                           // 悬停型: 全域随机
+    S.fx[slot].x = iR(bd);
+    S.fx[slot].y = 0.75 * S.aW + m + iR(512);
+  } else if (spd > 0) {                                     // 从左入, 下半带
+    S.fx[slot].x = -m;
+    S.fx[slot].y = 0.75 * S.aW - (be >> 1) - 512 + iR(1024);
+  } else {                                                  // 从右入
+    S.fx[slot].x = bd + m;
+    S.fx[slot].y = 0.75 * S.aW - (be >> 1) - 512 + iR(1024);
+  }
+  S.fx[slot].type = n3;
 }
 function drawFX() {
   for (const slot of S.fx) {
     if (slot.type === 0) continue;
-    // e():3799 投影: x=aT+32(x-aV)>>8, y=aU-32(y-3aW/4)>>8
     const px = aT + (32 * (slot.x - S.aV) >> 8);
     const py = aU - (32 * (slot.y - 0.75 * S.aW) >> 8);
-    if (px < -60 || px > E + 60 || py < -60 || py > F + 60) continue;
-    if (FX_DCT[slot.type - 1] === -1) {                    // 型 13 = 远处飞机单点
-      bg2d.fillStyle = '#fff'; bg2d.fillRect(px, py, 2, 2); continue;
-    }
+    if (px < -80 || px > E + 80 || py < -80 || py > F + 80) continue;
+    if (FX_DCT[slot.type - 1] === -1) { bg2d.fillStyle = '#fff'; bg2d.fillRect(px, py, 2, 2); continue; }
     const img = tex2d['id' + FX_DCT[slot.type - 1]];
     if (!img || !img.complete) continue;
     let f = 0;
-    if (slot.type === 6 || slot.type === 12) f = Math.floor(performance.now() / 400) % 2;
+    if (slot.type === 6 || slot.type === 12) f = Math.floor(S.cg / 400) % 2;
     const w = img.naturalWidth / (f ? 2 : 1), h = img.naturalHeight;
     bg2d.drawImage(img, f ? w : 0, 0, w, h, px - w / 2, py - h / 2, w, h);
   }
@@ -474,27 +494,68 @@ function project(x, y, z = 0) {
   const v = new THREE.Vector3(x, y, z).project(camera);
   return { x: (v.x + 1) / 2 * E, y: (1 - v.y) / 2 * F, behind: v.z > 1 };
 }
-// 天空: 程序 17 色带画在 2D 层 (J2ME i(Graphics):4054 — 3D 不清色, 天空是 2D 底)
-function sky() {
-  const l = 32 * S.aW >> 8;                                // l=32·aW>>8 (l():4054)
-  const pos = (2 * l / 3 % cd) / cd;
-  const t = pos * 17;
-  const i0 = Math.max(0, Math.min(15, Math.floor(t))), mix = t - i0;
-  const col = c => [(c >> 16) & 255, (c >> 8) & 255, c & 255];
-  const c1 = col(bO[i0]), c2 = col(bO[Math.min(16, i0 + 1)]);
-  const g = bg2d.createLinearGradient(0, 0, 0, F);
-  g.addColorStop(0, `rgb(${c2.map((v, k) => Math.round(v + (c1[k] - v) * (1 - mix))).join(',')})`);
-  g.addColorStop(1, `rgb(${c1.join(',')})`);
-  bg2d.fillStyle = g; bg2d.fillRect(0, 0, E, F);
+// 天空+远景楼群 (a(Graphics,int,boolean,boolean):4054 + L():4044 原式)
+// cp=2·aW/3/cd 高度带; n3=带起点像素; bK=带下色 bL=上色 bM=中缝混色; dG[12]=楼群矩形
+const dH = [7317456, 6070481, 5216461];
+S.dG = Array.from({ length: 12 }, () => [0, 0, 0, 0, 1, 0, 0]);
+function initSkyline() {                                   // L():4040-4050
+  for (let i = 0; i < 12; i++) {
+    const w = 8 + iR(8);
+    S.dG[i] = [i * (E / 12) - iR(w), w, 640 + iR(256), 16 + iR(16), 1, dH[iR(3)], iR(3)];
+  }
 }
+function sky() {
+  const n3 = 32 * (2 * S.aW / 3 % cd) >> 8;                // 带起点像素 (地平线)
+  const cp = Math.floor(2 * S.aW / 3 / cd);
+  const bi = Math.min(cp, Math.max(9, 9 + (cp - 9) % 8));       // bK 带下色索引
+  const bi2 = Math.min(cp + 1, Math.max(9, 9 + (cp + 1 - 9) % 8));  // bL 带上色
+  const bK = bO[bi], bL = bO[bi2];
+  const mix = (c1, c2) => {
+    const r = (((c1 >> 16) & 255) + ((c2 >> 16) & 255)) >> 1;
+    const g = (((c1 >> 8) & 255) + ((c2 >> 8) & 255)) >> 1;
+    const b = ((c1 & 255) + (c2 & 255)) >> 1;
+    return (r << 16) | (g << 8) | b;
+  };
+  const bM = mix(bK, bL);
+  const col = c => '#' + c.toString(16).padStart(6, '0');
+  if (n3 < F) { bg2d.fillStyle = col(bK); bg2d.fillRect(0, n3, E, F - n3); }
+  if (n3 > 0) { bg2d.fillStyle = col(bL); bg2d.fillRect(0, 0, E, n3); }
+  // 中缝 bM 7px 阶梯 (bN 随机地平线 x)
+  const n2s = 32 * S.aW >> 8;
+  if (S.bN === undefined) S.bN = (E >> 2) + iR(E >> 1);
+  bg2d.fillStyle = col(bM);
+  bg2d.fillRect(0, n3 - 7, S.bN, 7);
+  bg2d.fillRect(S.bN, n3 - 1, E - S.bN, 7);
+  bg2d.fillRect(S.bN - 24, n3 - 2, 48, 3);
+  bg2d.fillRect(S.bN - 18, n3 - 3, 36, 5);
+  bg2d.fillRect(S.bN - 16, n3 - 5, 32, 9);
+  bg2d.fillRect(S.bN - 15, n3 - 6, 30, 11);
+  bg2d.fillRect(S.bN - 13, n3 - 7, 26, 13);
+  // 远景楼群 (dG 12 楼, 随 aW 下沉: n8 = aU - 高 + 32·aW>>8)
+  for (const b of S.dG) {
+    if (b[4] === 0) continue;
+    const h = b[2];
+    let top = aU - h + n2s;
+    if (top > F + 32) { b[4] = 0; continue; }
+    const bh = Math.min(h, F - Math.max(0, top));
+    bg2d.fillStyle = col(dH2(b[5]));
+    bg2d.fillRect(b[0], Math.max(0, top), b[1], bh);
+    if (top >= 0) {                                        // bl=顶可见才画饰
+      if (b[6] === 1) {                                    // 天线 + 红灯闪
+        bg2d.fillStyle = col(dH2(b[5]));
+        bg2d.fillRect(b[0] + (b[1] >> 1), top - b[3], 3, b[3]);
+        if (Math.floor((S.cg + b[2]) / 200) % 2 === 0) { bg2d.fillStyle = '#f00'; bg2d.fillRect(b[0] + (b[1] >> 1), top - b[3], 3, 3); }
+      } else if (b[6] === 2) {                             // 宽顶箱
+        bg2d.fillRect(b[0] + b[1] / 10, top - 16, b[1] - b[1] / 5, 16);
+      }
+    }
+  }
+}
+const dH2 = c => c;                                        // dH 色已是 RGB
 // 3D 组
 const towerGroup = new THREE.Group(); scene.add(towerGroup);   // 摇摆作用于组 (近似 A() 逐层投影)
 const fxGroup = new THREE.Group(); scene.add(fxGroup);
-let templates = [], GROUND_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null;
-const cable = new THREE.Line(
-  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
-  new THREE.LineBasicMaterial({ color: 0x333333 }));
-scene.add(cable);
+let templates = [], GROUND_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null;  // *_TPL = 子网格数组
 const tex2d = {};
 function loadTex(url) { const t = new THREE.TextureLoader().load(url); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t; }
 // 小人帧纹理 (id12/13: 10 帧 × 21x28)
@@ -521,9 +582,9 @@ new GLTFLoader().load('./assets/scene.glb', gltf => {
     }
   });
   // uid→GLB 节点: n(uid+250)。cy块=uid13→n263, cC地面=uid9→n259, cD吊臂=uid8→n258, cE缆=uid7→n257
-  const T = name => templates.find(t => t.name === name || t.name === name + '_1');
-  GROUND_TPL = T('mesh259'); CRANE_TPL = T('mesh258'); CABLE_TPL = T('mesh257'); BLOCK_TPL = T('mesh263');
-  for (const id of [12, 13, 15, 16, 20, 37, 38, 39, 41, ...Array.from({ length: 27 }, (_, k) => 42 + k)]) {
+  const T = name => templates.filter(t => t.name === name || t.name.startsWith(name + '_'));
+  GROUND_TPL = T('mesh269'); CRANE_TPL = T('mesh260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  for (const id of [12, 13, 15, 16, 18, 19, 20, 37, 38, 39, 41, ...Array.from({ length: 27 }, (_, k) => 42 + k)]) {
     const im = new Image(); im.src = `./assets/id${id}.png`;
     tex2d['id' + id] = im;
   }
@@ -537,17 +598,23 @@ new GLTFLoader().load('./assets/scene.glb', gltf => {
 }, undefined, e => console.error('GLB', e));
 
 // ---- HUD 位图绘制 (j(Graphics):3467) ----
-function bigNum(x, y, val, minD) {                          // a(g,5): id16 每 7px 一位
-  const s = String(Math.max(0, Math.floor(val))).padStart(minD, '0');
-  hud.drawImage(tex2d.id16, E - 20 - 8 - 3 - 11, y);        // 底图区 (近似 V)
-  for (let i = 0; i < s.length; i++)
-    hud.drawImage(tex2d.id16, s.charCodeAt(i) - 48, 0, 7, 9, x + i * 7, y, 7, 9);
+// a(Graphics,5):3585 — n3=右缘x; 逐位: setClip(x-6,y,7,高) + drawImage(Z, x-6-d*7, y);
+// 步进6px(重叠1), 位数<minD 补零, bl=true 时末位画槽10('+'偏移70)。Z=id16(98x12) Y=id15(98x9)
+function drawDigits(sheet, fw, fh, val, rightX, y, minD, plus) {
+  let x = rightX - 6;
+  let v = Math.max(0, Math.floor(val));
+  for (let i = 0; v > 0 || i < minD; i++) {
+    hud.save(); hud.beginPath(); hud.rect(x, y, fw, fh); hud.clip();
+    const d = v % 10; v = (v - d) / 10;
+    hud.drawImage(sheet, x - d * 7, y);
+    hud.restore();
+    x -= 6;
+  }
+  if (plus) { hud.save(); hud.beginPath(); hud.rect(x, y, fw, fh); hud.clip();
+    hud.drawImage(sheet, x - 70, y); hud.restore(); }
 }
-function smallNum(x, y, val, minD) {                        // b(g,5): id15
-  const s = String(Math.max(0, Math.floor(val))).padStart(minD, '0');
-  for (let i = 0; i < s.length; i++)
-    hud.drawImage(tex2d.id15, s.charCodeAt(i) - 48, 0, 7, 7, x + i * 7, y, 7, 7);
-}
+function bigNum(rightX, y, val, minD) { drawDigits(tex2d.id16, 7, 12, val, rightX, y, minD, false); }
+function smallNum(rightX, y, val, minD) { drawDigits(tex2d.id15, 7, 9, val, rightX, y, minD, false); }
 function drawHUD() {
   hud.clearRect(0, 0, E, F);
   // 惊慌人群 (k(Graphics):3624) — 3D→2D 投影, 两帧小人镜像
@@ -567,19 +634,28 @@ function drawHUD() {
     hud.drawImage(c, -10, -14 + 10);
     hud.restore();
   }
-  // 机会: ba 亮格竖排 (X 图集帧逻辑近似; dc r0 无宽条, 用 id20 缩格)
-  for (let i = 0; i < 4; i++) {
-    if (i >= 3) break;
-    const lit = i < S.ba;
-    const blink = S.ba === 1 && Math.floor(S.cg / 500) % 2 === 0;
-    hud.globalAlpha = lit ? (blink ? 0.35 : 1) : 0.18;
-    hud.drawImage(tex2d.id20, 24, F - 21 - 32 - i * 26, 12, 24);
+  // 机会 (j:3467-3495 原式): 竖列 clip 11x72 @ (cn+cn/2+18, F-co-72); X=id19(110x12,帧11px)
+  {
+    const clipX = 20 + 10 + 18, baseFrame = (BL - 1) * 2;    // cn=E/20=12 → cn+cn/2+14+4=34
+    hud.save(); hud.beginPath(); hud.rect(clipX, F - 21 - 72, 11, 72); hud.clip();
+    for (let n7 = 0; n7 <= 3; n7++) {
+      let n6;
+      if (n7 <= S.ba) n6 = baseFrame;                        // 亮
+      else if (S.cg - S.bc < 100 && n7 <= S.ba + S.bb) n6 = baseFrame + 1;  // 刚扣白闪
+      else n6 = 8;                                           // 空
+      if (S.ba === 1 && Math.floor(S.cg / 500) % 2 === 0) n6 = 9;  // 只剩1命黄闪
+      hud.drawImage(tex2d.id19, clipX + 4 - n6 * 11 - 11, F - 21 - n7 * 12);
+    }
+    hud.restore();
   }
-  hud.globalAlpha = 1;
   if (S.bs > 0) {
-    bigNum(E - 20 - 3 - 11 - 4, F - 21, S.bt, 5);           // 人口 5 位 (j:3497)
-    smallNum(24 + 14, F - 50, S.bs, 3);                     // 楼层 3 位 (j:3560 快速分支)
+    // 人口: V=id18 图标 (E-cn-42, F-co-2-19) + 5 位大数字右缘 E-cn (j:3497)
+    hud.drawImage(tex2d.id18, E - 20 - 42, F - 21 - 2 - 19);
+    bigNum(E - 20, F - 21 - 14, S.bt, 5);
   }
+  // 楼层 (快速分支 j:3558-3562): W=id20 图标 (cn-9, F-co-50) + 3 位小数字 (cn+14, F-co-50+37)
+  hud.drawImage(tex2d.id20, 20 - 9, F - 21 - 50);
+  smallNum(20 - 9 + 23, F - 21 - 50 + 37, S.bs, 3);
   // 连击计时条 (j:3533-3546)
   if (S.bA > 0) {
     hud.strokeStyle = 'rgb(107,26,0)'; hud.strokeRect((E >> 1) - (E >> 2) - 3, 20, (E >> 1) + 5, 11);
@@ -614,42 +690,41 @@ function drawHUD() {
 // ---- 3D 场景刷新 (f(Graphics):3287 忠实) ----
 // b(5参):3340 — 网格原始坐标直传平移, rotZ=n5度/rotY=n6度; 888=随机翻滚,999=屋顶
 const liveBlocks = [];
-function render3D() {
-  camera.position.set(S.aV, S.aW, cI);                      // f(): n.a(aV,aW,cI, 0,0,-1, 0,1,0)
-  camera.rotation.set(0, 0, 0);                             // 默认朝 -z, up +y
-  for (let i = 0; i < liveBlocks.length; i++) scene.remove(liveBlocks[i]);
-  liveBlocks.length = 0;
-  const put = (tpl, x, y, z, rotZ, rotY) => {               // b(): d.c/translate/rotate z,y
-    if (!tpl) return;
+function put(tplArr, x, y, z, rotZ, rotY) {                 // b(5参):3340 — 平移直传+rotZ/rotY
+  if (!tplArr || !tplArr.length) return;
+  for (const tpl of tplArr) {
     const m = tpl.clone();
     m.position.set(x, y, z);
     m.rotation.set(0, (rotY || 0) * Math.PI / 180, (rotZ || 0) * Math.PI / 180);
     scene.add(m); liveBlocks.push(m);
-  };
-  if (S.bs <= 5) put(GROUND_TPL, 0, 0, 0, 0, 0);            // cC 地基 (identity)
-  if (S.bk === 0) {                                         // cD 吊臂 (bk==0 恒画)
+  }
+}
+function render3D() {
+  camera.position.set(S.aV, S.aW, cI);                      // f(): n.a(aV,aW,cI, 0,0,-1, 0,1,0)
+  camera.rotation.set(0, 0, 0);
+  for (let i = 0; i < liveBlocks.length; i++) scene.remove(liveBlocks[i]);
+  liveBlocks.length = 0;
+  if (S.bs <= 5) put(GROUND_TPL, 0, 0, 0, 0, 0);            // cC 地基工地 (identity, bs<=5)
+  if (S.bk === 0) {                                         // cD: 滑轮+单缆+吊具 — 放置后钩子仍在缆端
     put(CRANE_TPL, S.aK, S.aL, 0, S.aM * 2 / 3, 0);
-  } else if (S.bk === 1 || S.aw[0] === 3) {                 // cE 收缆态
+  } else if (S.bk === 1 || S.aw[0] === 3) {                 // cE 双缆 (仅城市收尾态, 快速局不出现)
     put(CABLE_TPL, S.aK, S.aL, 0, 0, 0);
   }
-  for (let i = 0; i < 5; i++) {                             // 落块/挂块槽 b(az,aA,0,ax,cG)
+  for (let i = 0; i < 5; i++) {
     if (S.aw[i] === 4 || S.aw[i] === 0) continue;
     put(BLOCK_TPL, S.az[i], S.aA[i], 0,
         S.ax[i] === 888 ? Math.random() * 360 : S.ax[i], S.cG[i]);
   }
-  for (let i = 0; i < Math.min(S.bs, 5); i++) {             // 塔层 b(bi,bj,cF,-bh,0)
+  for (let i = 0; i < Math.min(S.bs, 5); i++) {
     put(BLOCK_TPL, S.bi[i], S.bj[i], 0, S.cF[i], -S.bh[i]);
   }
   renderer.render(scene, camera);
 }
-function blockTpl(floor) {
-  return BLOCK_TPL || templates[0];
-}
 
-// ---- 音频: J2ME MIDI (81 BGM / 84 败 / 85 胜) + c.a(800) 提示音 ----
-let actx = null, midiNotes = null, midiTimer = 0;
-function audioCtx() { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); return actx; }
-function beep() {                                          // c.a(800): 扣命/地基短音
+// ---- 音频: LibMidi (抄 freej2me-web web/libmidi — wasm 合成, 非自写振荡器) ----
+// x 播放器 = BGM 循环 (r0[81]); b.a 负 id = jingle 单发 (83 放置/84 败/85 胜)
+let bgmPlayer = null, jinglePlayer = null;
+function beep() {                                           // c.a(800): 扣命/地基提示短音
   try {
     const c = audioCtx(), o = c.createOscillator(), g = c.createGain();
     o.type = 'square'; o.frequency.value = 220;
@@ -658,53 +733,29 @@ function beep() {                                          // c.a(800): 扣命/�
     o.connect(g).connect(c.destination); o.start(); o.stop(c.currentTime + 0.13);
   } catch (e) {}
 }
-function parseMidi(buf) {
-  const dv = new DataView(buf); let p = 0;
-  if (dv.getUint32(0) !== 0x4d546864) return null;
-  const div = dv.getUint16(12); p = 14;
-  const notes = []; let secPerTick = 500000 / 1000 / div;
-  for (let t = 0; t < dv.getUint16(10); t++) {
-    if (dv.getUint32(p) !== 0x4d54726b) return null;
-    p += 8; const end = p + dv.getUint32(p - 4); let tick = 0;
-    const rv = () => { let v = 0; for (;;) { const b = dv.getUint8(p++); v = (v << 7) | (b & 0x7f); if (!(b & 0x80)) return v; } };
-    while (p < end) {
-      tick += rv(); const st = dv.getUint8(p++);
-      if (st === 0xff) { const ty = dv.getUint8(p++), l = rv();
-        if (ty === 0x51 && l === 3) secPerTick = ((dv.getUint8(p) << 16) | (dv.getUint8(p + 1) << 8) | dv.getUint8(p + 2)) / 1e6 / div;
-        p += l;
-      } else if (st === 0xf0 || st === 0xf7) p += rv();
-      else { const hi = st & 0xf0, n = dv.getUint8(p++), v = dv.getUint8(p++);
-        if (hi === 0x90 && v > 0) notes.push({ t: tick * secPerTick, n, d: 0 });
-        else if (hi === 0x80 || (hi === 0x90 && v === 0)) {
-          for (let i = notes.length - 1; i >= 0; i--) if (notes[i].n === n && !notes[i].d) { notes[i].d = tick * secPerTick - notes[i].t; break; }
-        } }
-    }
-    p = end;
-  }
-  const good = notes.filter(x => x.d > 0);
-  return { notes: good, total: Math.max(1, ...good.map(x => x.t + x.d)) };
+async function midiPlayerOnce() {
+  const p = new LibMidi(createUnlockingAudioContext());
+  await p.init();
+  return p;
 }
-function playMidi(id) {
-  if (!midiNotes) return;
-  const c = audioCtx(); c.resume && c.resume();
-  const t0 = c.currentTime + 0.1;
-  for (const x of midiNotes) {
-    const o = c.createOscillator(), g = c.createGain();
-    o.type = 'triangle'; o.frequency.value = 440 * Math.pow(2, (x.n - 69) / 12);
-    g.gain.setValueAtTime(0.0001, t0 + x.t);
-    g.gain.linearRampToValueAtTime(0.09, t0 + x.t + 0.02);  // VolumeControl 40
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + x.t + x.d);
-    o.connect(g).connect(c.destination); o.start(t0 + x.t); o.stop(t0 + x.t + x.d + 0.05);
-  }
+async function startBgm() {                                 // b():308 x.a(-2147483568,-1) 循环
+  try {
+    bgmPlayer = bgmPlayer || await midiPlayerOnce();
+    const r = await fetch('./assets/midi/81.mid');
+    if (!r.ok) return;
+    await bgmPlayer.midiPlayer.setSequence(await r.arrayBuffer());
+    bgmPlayer.midiPlayer.loop(-1);
+    bgmPlayer.midiPlayer.play();
+  } catch (e) {}
 }
-function startBgm() {
-  fetch('./assets/midi/81.mid').then(r => r.arrayBuffer()).then(b => {
-    const p = parseMidi(b); if (!p) return;
-    midiNotes = p.notes;
-    playMidi();
-    clearInterval(midiTimer);
-    midiTimer = setInterval(() => playMidi(), p.total * 1000);  // x.a(-1) 循环
-  }).catch(() => {});
+async function playMidiJingle(id) {                         // :1602-1692 负 id jingle
+  try {
+    jinglePlayer = jinglePlayer || await midiPlayerOnce();
+    const r = await fetch('./assets/midi/' + id + '.mid');
+    if (!r.ok) return;
+    await jinglePlayer.midiPlayer.setSequence(await r.arrayBuffer());
+    jinglePlayer.midiPlayer.play();
+  } catch (e) {}
 }
 
 // ---- 存档 quickModeRS (g():443/h():618 字段子集) ----
@@ -735,7 +786,7 @@ const msgOk = document.getElementById('msgOk');
 function showMsg(html) { msgTxt.innerHTML = html; msgBox.style.display = 'block'; }
 function gameOver() {
   S.over = true;
-  playMidi(84);
+  playMidiJingle(84);
   const rec = [];
   if (S.bt > S.cj[3]) { S.cj[3] = S.bt; rec.push('人口'); }
   if (S.bs > S.cj[4]) { S.cj[4] = S.bs; rec.push('高度'); }
@@ -777,7 +828,7 @@ function loop(now) {
       if (S.bs > 0 && S.bs % 10 === 0) saveRS._dirty = true;
     }
   }
-  if (booted) { fxTick(now); sky(); drawFX(); }
+  if (booted) { fxTick(); sky(); drawFX(); }
   render3D();
   drawHUD();
 }
@@ -788,7 +839,16 @@ function bootDone() {
   booted = true; bootAt = performance.now();
   document.getElementById('bootFill').style.width = '100%';
   setTimeout(() => document.getElementById('boot').style.display = 'none', 1400);
-  if (!loadRS()) { S.aw[0] = 6; S.aH = 0; }                // h() 无条件恢复 / 全新局提钩 (aH 0→1664, ~2.5s)
+  initSkyline();                                           // L() 远景楼群
+  for (let t = 1; t <= 28; t++) {                          // dz = 8·max(图宽,高), 型6/11 减半 (:1319-1333)
+    const img = tex2d['id' + FX_DCT[t - 1]];
+    FX_DZ[t - 1] = (!img || FX_DCT[t - 1] === -1) ? 1 : 8 * Math.max(img.naturalWidth, img.naturalHeight) * (t === 6 || t === 12 ? 0.5 : 1);
+  }
+  { // 开局运镜 (K():3982-3993): 相机从吊钩基线 2432 缓降 2500ms 至地基 512
+    S.aW = 2432; S.aX = 512; S.aY = S.cg + 3000; S.aH = 1664;
+    S.aw[0] = 1; S.aL = aJ - S.aH; S.aA[0] = S.aL;
+    if (loadRS()) { S.aW = S.aX; S.aY = S.cg; }            // 有续档则不做运镜
+  }
   zFloor(0);                                               // 参数初始化
   startBgm();
 }
