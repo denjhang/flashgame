@@ -1,0 +1,7522 @@
+[
+ {
+  "file": "DefineButton2_653/BUTTONCONDACTION on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineButton2_979/BUTTONCONDACTION on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1000/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1000/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1025/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1026/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1026/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1026/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1026/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_1/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_1/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_1/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_3/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_3/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_3/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_5/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_5/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_5/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_7/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_7/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_7/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_1/PlaceObject2_1026_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_1/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_1/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_1/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_3/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_3/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_3/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_5/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_5/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_5/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_7/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_7/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_7/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_2/PlaceObject2_1026_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_1/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_1/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_1/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_3/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_3/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_3/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_5/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_5/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_5/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_7/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_7/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_7/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1027/frame_3/PlaceObject2_1026_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_103/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_103/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_103/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1040/frame_1/PlaceObject2_1037_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1046/frame_1/PlaceObject2_1045_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1053/frame_1/PlaceObject2_1050_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1058/frame_1/PlaceObject2_1055_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1058/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1063/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1063/frame_1/PlaceObject2_1060_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1063/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1068/frame_1/PlaceObject2_1065_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1068/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1073/frame_1/PlaceObject2_1070_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1073/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1040_4/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1040_4/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1040_4/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1046_11/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1046_11/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1046_11/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1053_13/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1053_13/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1053_13/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1058_20/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1058_20/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1058_20/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1063_26/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1063_26/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1063_26/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1068_32/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1068_32/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1068_32/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1073_38/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1073_38/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1074/frame_1/PlaceObject2_1073_38/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1000_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1000_1/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1000_1/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1000_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1074_30/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_77/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_77/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_77/CLIPACTIONRECORD on(rollOut)_2.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_77/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_77/CLIPACTIONRECORD on(rollOver)_2.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_77/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_81/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_81/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_81/CLIPACTIONRECORD on(rollOut)_2.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_81/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_81/CLIPACTIONRECORD on(rollOver)_2.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_1078_81/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_766_26/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_766_26/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1079/frame_1/PlaceObject2_766_26/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_108/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_108/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_108/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1085/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_1/PlaceObject2_1090_9/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_1/PlaceObject2_1090_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_1/PlaceObject2_686_3/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_2/PlaceObject2_1090_6/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_2/PlaceObject2_1090_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_2/PlaceObject2_161_67/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1103/frame_2/PlaceObject2_161_85/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1123/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1123/frame_1/PlaceObject2_1122_15/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1123/frame_1/PlaceObject2_836_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1125/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1125/frame_1/PlaceObject2_836_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1125/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1125/frame_336/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1125/frame_44/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1131/frame_1/PlaceObject2_836_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1132/frame_30/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1141/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1141/frame_13/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1141/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1141/frame_26/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1150/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1150/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_11/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_11/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_11/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_11/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_14/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_14/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_14/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_14/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_5/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_5/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_5/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_8/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_8/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_8/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1145_8/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_19/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_19/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_21/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_21/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_23/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_23/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_25/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_25/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_27/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_27/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_29/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_29/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_31/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_31/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_33/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_33/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_35/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_35/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_37/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_1150_37/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1151/frame_1/PlaceObject2_686_2/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1154/frame_1/PlaceObject2_686_3/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1158/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1158/frame_1/PlaceObject2_1155_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1158/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1158/frame_2/DoAction_2.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1158/frame_80/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1161/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1161/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1166/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1166/frame_43/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_1176/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_122/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_122/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_122/frame_2/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_122/frame_6/PlaceObject2_6_19/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_125/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_125/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_125/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_17/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_2/PlaceObject2_6_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_25/PlaceObject2_6_33/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_32/PlaceObject2_6_17/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_38/PlaceObject2_6_41/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_128/frame_8/PlaceObject2_6_25/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_14/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_153/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_153/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_153/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_153/frame_2/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_161/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_161/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_161/frame_2/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_161/frame_7/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_164/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_164/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_164/frame_2/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_164/frame_6/PlaceObject2_6_19/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_167/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_167/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_167/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_13/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_13/PlaceObject2_115_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_13/PlaceObject2_115_4/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_14/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_15/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_15/PlaceObject2_103_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_16/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_16/PlaceObject2_98_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_17/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_17/PlaceObject2_103_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_18/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_18/PlaceObject2_108_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_19/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_19/PlaceObject2_108_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_19/PlaceObject2_108_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_20/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_20/PlaceObject2_121_4/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_21/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_22/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_22/PlaceObject2_153_30/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_22/PlaceObject2_153_34/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_23/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_23/PlaceObject2_153_30/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_23/PlaceObject2_153_34/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_24/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_24/PlaceObject2_161_15/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_24/PlaceObject2_161_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_25/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_25/PlaceObject3_121_24/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_26/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_26/PlaceObject2_167_10/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_26/PlaceObject2_167_17/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_26/PlaceObject2_167_24/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_26/PlaceObject2_167_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_3/PlaceObject2_98_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_4/PlaceObject2_103_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_5/PlaceObject2_108_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_6/PlaceObject2_108_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_6/PlaceObject2_108_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_7/PlaceObject2_115_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_8/PlaceObject2_121_2/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_173/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_174/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_174/frame_1/PlaceObject2_173_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_174/frame_33/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_174/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_178_etat/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_178_etat/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_183/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_184/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_184/frame_1/PlaceObject3_183_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_184/frame_1/PlaceObject3_183_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_1/PlaceObject2_178_etat_26/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_1/PlaceObject2_184_31/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_1/PlaceObject2_86_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_1/PlaceObject2_86_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_1/PlaceObject2_86_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_10/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_12/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_2/DoAction_2.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_2/PlaceObject2_6_31/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_39/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_4/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_4/PlaceObject2_6_33/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_6/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_7/PlaceObject2_6_35/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_185_structure/frame_8/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_232/frame_24/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_234/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_275/frame_21/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_278/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_279_explosion/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_279_explosion/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_279_explosion/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_279_explosion/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_281/frame_1/PlaceObject3_78_2/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_300/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_301/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_301/frame_16/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_301/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_301/frame_2/PlaceObject2_300_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_301/frame_2/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_302/frame_14/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_303/frame_1/PlaceObject2_302_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_303/frame_14/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_304/frame_29/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_306/frame_1/PlaceObject3_78_2/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_307/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_307/frame_15/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_307/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_307/frame_2/PlaceObject2_300_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_307/frame_2/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_309/frame_1/PlaceObject3_78_2/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_36/frame_31/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_360/frame_26/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_361/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_361/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_361/frame_2/PlaceObject2_360_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_361/frame_2/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_361/frame_28/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_364/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_364/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_365/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_368/frame_1/PlaceObject3_78_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_37/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_37/frame_1/PlaceObject2_28_21/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_37/frame_1/PlaceObject2_28_21/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_37/frame_182/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_37/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_389/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_390/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_390/frame_1/PlaceObject2_368_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_390/frame_13/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_390/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_391/frame_29/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_1/PlaceObject2_79_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_2/PlaceObject2_275_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_2/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_2/PlaceObject3_234_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_2/PlaceObject3_234_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_392/frame_22/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_393/frame_1/PlaceObject2_302_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_393/frame_15/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_1/PlaceObject2_79_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_2/PlaceObject2_275_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_2/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_2/PlaceObject3_234_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_2/PlaceObject3_234_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_394/frame_22/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_1/PlaceObject2_79_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_2/PlaceObject2_275_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_2/PlaceObject3_183_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_2/PlaceObject3_183_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_2/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_27/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_232_11/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_232_15/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_232_17/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_232_19/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_232_23/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_300_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_300_21/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject2_300_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject3_234_25/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject3_234_27/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject3_234_29/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_395/frame_8/PlaceObject3_234_31/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_1/PlaceObject2_79_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject2_275_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject2_275_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject3_234_11/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject3_234_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject3_234_15/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject3_234_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject3_234_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_2/PlaceObject3_234_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_396/frame_22/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_399/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_399/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_399/frame_25/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_399/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_40/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_40/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_40/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_40/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject2_301_5/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject2_301_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject2_304_25/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_234_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_234_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_234_27/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_234_27/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_1/PlaceObject3_303_23/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_183_49/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_183_49/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_183_51/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_183_51/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_393_39/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_395_7/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject2_395_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_10/PlaceObject3_234_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject2_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject2_234_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject2_392_41/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject2_392_41/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject2_393_39/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject3_234_49/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject3_234_49/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject3_234_51/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_11/PlaceObject3_234_51/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_12/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_12/PlaceObject2_396_7/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_12/PlaceObject2_396_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_13/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_13/PlaceObject2_399_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_234_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_234_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_234_27/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_234_27/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_234_3/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_304_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_307_15/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_2/PlaceObject2_307_15/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_234_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_234_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_234_27/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_234_27/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_234_3/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_304_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_361_5/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_3/PlaceObject2_361_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/PlaceObject2_365_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/PlaceObject2_391_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/PlaceObject3_78_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_4/PlaceObject3_78_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_5/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_5/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_5/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_5/PlaceObject2_78_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_5/PlaceObject2_78_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_6/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_6/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_6/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_7/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_7/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_7/PlaceObject2_390_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject2_392_5/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject2_392_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_234_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_234_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_234_41/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_234_41/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_234_43/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_234_43/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_8/PlaceObject3_393_39/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject2_393_39/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject2_394_41/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject2_394_41/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject3_183_49/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject3_183_49/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject3_183_51/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_400_obus/frame_9/PlaceObject3_183_51/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_11/PlaceObject3_121_2/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_11/PlaceObject3_121_4/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_12/PlaceObject3_121_6/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_426/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_427/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_1/PlaceObject2_178_etat_22/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_1/PlaceObject2_426_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_1/PlaceObject2_426_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_1/PlaceObject2_426_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_1/PlaceObject2_427_20/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_10/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_12/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_2/DoAction_2.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_2/PlaceObject2_426_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_2/PlaceObject2_426_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_2/PlaceObject2_6_27/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_39/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_4/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_4/PlaceObject2_6_29/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_6/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_7/PlaceObject2_6_31/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_428_unit/frame_8/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_48/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_48/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_48/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_48/frame_3/PlaceObject2_6_5/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_48/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_483/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_49/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_49/frame_15/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_49/frame_16/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_49/frame_17/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_49/frame_32/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_492/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_495/frame_1/PlaceObject2_492_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_495/frame_50/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_496/frame_1/PlaceObject2_495_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_496/frame_1/PlaceObject2_495_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_496/frame_1/PlaceObject2_495_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_496/frame_15/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_497_facette/frame_1/PlaceObject2_496_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_497_facette/frame_1/PlaceObject2_496_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_499/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_506/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_506/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_498_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_506_6/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_506_6/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_506_6/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_509_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_516_17/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_519/frame_1/PlaceObject2_516_17/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_520_ppfle/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_520_ppfle/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_520_ppfle/frame_2/PlaceObject2_499_22/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_520_ppfle/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_520_ppfle/frame_3/PlaceObject2_519_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_52_pointUnitRadar/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_52_pointUnitRadar/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_564_etincelle/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_564_etincelle/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_568_spcmc/frame_1/PlaceObject2_498_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_636/frame_34/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_637_flame/frame_34/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_638/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_639_soufleCr/frame_13/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_656/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_656/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_659/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_659/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_664/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_664/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_667/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_667/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_691/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_691/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_697/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_697/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_700/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_700/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_2/PlaceObject2_686_12/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_2/PlaceObject2_691_15/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_2/PlaceObject2_691_15/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_2/PlaceObject2_691_15/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/PlaceObject2_697_4/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/PlaceObject2_697_4/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/PlaceObject2_697_4/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/PlaceObject2_700_7/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/PlaceObject2_700_7/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_703/frame_3/PlaceObject2_700_7/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_737/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_737/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_737/frame_2/PlaceObject2_686_3/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_738/frame_1/PlaceObject2_686_2/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_742/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_686_13/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_742_4/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_742_4/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_742_4/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_742_7/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_742_7/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_748/frame_2/PlaceObject2_742_7/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_759/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_759/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_762/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_762/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_762/frame_35/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_777/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_78/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_786/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_786/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_786/frame_2/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_786/frame_6/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_79/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_79/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_79/frame_2/PlaceObject3_78_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_79/frame_2/PlaceObject3_78_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_793/frame_1/PlaceObject2_786_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_793/frame_1/PlaceObject2_786_11/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_793/frame_1/PlaceObject2_786_21/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_793/frame_1/PlaceObject2_786_31/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_80/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_80/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_80/frame_2/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_810/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_811/frame_1/PlaceObject2_810_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_818/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_818/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_819/frame_1/PlaceObject2_814_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_819/frame_1/PlaceObject2_814_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_819/frame_1/PlaceObject2_818_4/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_822/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_822/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_822/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_83/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_83/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_83/frame_25/PlaceObject2_6_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_766_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_768_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_773_189/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_773_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_785_17/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_785_17/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_793_23/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_793_23/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_117/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_119/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_121/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_123/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_125/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_127/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_129/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_131/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_133/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_135/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_137/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_139/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_141/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_153/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_155/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_157/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_159/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_161/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_163/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_165/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_167/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_169/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_171/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_173/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_181/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_183/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_185/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_232/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_811_234/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_822_224/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_822_224/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_822_226/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_822_226/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject2_833_236/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_111/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_113/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_115/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_143/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_145/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_147/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_149/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_151/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_175/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_177/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_834/frame_1/PlaceObject3_811_179/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_1/PlaceObject3_54_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_86/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_13/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_14/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_15/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_16/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_870/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_92/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_92/frame_10/PlaceObject2_6_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_92/frame_14/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_92/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_92/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_92/frame_6/PlaceObject2_6_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_10/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_11/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_12/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_13/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_14/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_3/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_4/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_41/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_6/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_7/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_8/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_948/frame_9/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_949/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_949/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_951/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_115/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_132/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_149/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_166/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_183/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_30/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_47/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_64/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_81/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_953/frame_98/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_955/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_955/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_955/frame_30/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_97/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_97/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_971/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_971/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_976/frame_1/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_976/frame_2/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_10/PlaceObject2_6_7/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_10/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_12/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_14/PlaceObject2_6_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_14/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_16/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_18/PlaceObject2_6_11/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_18/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_2/PlaceObject2_6_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_2/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_20/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_22/PlaceObject2_6_13/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_22/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_4/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_6/PlaceObject2_6_5/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_6/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_98/frame_8/PlaceObject2_97_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_836_1/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_951_4/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_971_18/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_971_18/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_971_18/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_971_18/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_976_48/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_976_48/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_976_48/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_980/frame_1/PlaceObject2_976_48/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_3/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_3/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_3/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_6/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_6/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_6/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "DefineSprite_989/frame_1/PlaceObject2_988_6/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_2_4/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_2_4/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_49_30/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_49_32/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_49_34/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_49_36/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_1/PlaceObject2_6_6/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_2/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_656_9/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_656_9/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_656_9/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_656_9/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_659_12/CLIPACTIONRECORD on(press).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_659_12/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_659_12/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_664_16/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_664_16/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_664_16/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_664_16/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_667_19/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_667_19/CLIPACTIONRECORD on(rollOut).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_667_19/CLIPACTIONRECORD on(rollOver).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_759_107/CLIPACTIONRECORD on(release).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject2_762_113/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_644_2/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_644_2/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_670_22/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_670_22/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_673_24/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_673_24/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_676_26/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_676_26/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_679_28/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_679_28/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_682_30/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_4/PlaceObject3_682_30/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_5/DoAction.as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/DoAction.as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_1103_434/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_1106_548/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_1176_624/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_1/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_1/CLIPACTIONRECORD onClipEvent(keyDown).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_1/CLIPACTIONRECORD onClipEvent(keyUp).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_1/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_321/CLIPACTIONRECORD onClipEvent(enterFrame).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_321/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_327/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_329/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_333/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_335/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_339/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_430/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_6_564/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_766_240/CLIPACTIONRECORD on(press).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_766_240/CLIPACTIONRECORD on(rollOut).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_766_240/CLIPACTIONRECORD on(rollOver).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_834_3/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "linearized",
+  "handlers": 1,
+  "linearized": 1,
+  "work_stmts": 1,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject2_980_242/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ },
+ {
+  "file": "frame_6/PlaceObject3_1154_608/CLIPACTIONRECORD onClipEvent(load).as",
+  "status": "clean",
+  "handlers": 1,
+  "linearized": 0,
+  "work_stmts": 0,
+  "reason": ""
+ }
+]

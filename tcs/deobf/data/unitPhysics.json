@@ -1,0 +1,33 @@
+{
+ "_comment": "单位物理参数(DefineSprite_428_unit): 疑似 [质量?, 尺寸?, 装甲?, 血量?, 得分?] 待语义确认",
+ "fields_guess": [
+  "mass",
+  "size",
+  "armor",
+  "life",
+  "score"
+ ],
+ "data": {
+  "unitDerriere": [
+   3,
+   1.8,
+   5,
+   400,
+   500
+  ],
+  "null": [
+   1,
+   0.3,
+   0.8,
+   1800,
+   1000
+  ],
+  "unitDevant": [
+   0.5,
+   0.2,
+   0.2,
+   20000,
+   0
+  ]
+ }
+}

@@ -1,0 +1,324 @@
+{
+ "_note": "路点=carte(chid834)内部坐标; carte 主时间轴矩阵与背景位图764矩阵用于坐标系换算",
+ "carteTransform": {
+  "sx": null,
+  "sy": null,
+  "tx": 0.0,
+  "ty": 119.95
+ },
+ "background764": {},
+ "waypoints": {
+  "begin": {
+   "chid": 773,
+   "depth": 71,
+   "x": 126.4,
+   "y": 579.7,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e1": {
+   "chid": 773,
+   "depth": 193,
+   "x": -182.6,
+   "y": -1110.5,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e2": {
+   "chid": 773,
+   "depth": 195,
+   "x": 117.3,
+   "y": -1114.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e3": {
+   "chid": 773,
+   "depth": 197,
+   "x": 268.8,
+   "y": -1112.4,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e4": {
+   "chid": 773,
+   "depth": 201,
+   "x": 339.6,
+   "y": -927.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e5": {
+   "chid": 773,
+   "depth": 199,
+   "x": 375.1,
+   "y": -856.8,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e6": {
+   "chid": 773,
+   "depth": 203,
+   "x": 467.1,
+   "y": -983.9,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e7": {
+   "chid": 773,
+   "depth": 205,
+   "x": 421.8,
+   "y": -1037.3,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "e8": {
+   "chid": 773,
+   "depth": 207,
+   "x": -237.4,
+   "y": -1114.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "g1": {
+   "chid": 773,
+   "depth": 213,
+   "x": -198.0,
+   "y": -527.8,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "g2": {
+   "chid": 773,
+   "depth": 209,
+   "x": 7.7,
+   "y": -543.8,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "g3": {
+   "chid": 773,
+   "depth": 211,
+   "x": 370.8,
+   "y": -568.1,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "h1": {
+   "chid": 773,
+   "depth": 230,
+   "x": 228.8,
+   "y": 288.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "h2": {
+   "chid": 773,
+   "depth": 228,
+   "x": 1543.7,
+   "y": 199.3,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "h3": {
+   "chid": 773,
+   "depth": 187,
+   "x": 1719.1,
+   "y": -660.8,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "h4": {
+   "chid": 773,
+   "depth": 189,
+   "x": 1795.2,
+   "y": -1114.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "h5": {
+   "chid": 773,
+   "depth": 191,
+   "x": 207.0,
+   "y": -1169.3,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r1": {
+   "chid": 773,
+   "depth": 95,
+   "x": 861.1,
+   "y": -579.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r2": {
+   "chid": 773,
+   "depth": 97,
+   "x": 1081.0,
+   "y": -699.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r3": {
+   "chid": 773,
+   "depth": 11,
+   "x": 1429.5,
+   "y": -636.5,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r4": {
+   "chid": 773,
+   "depth": 99,
+   "x": 1629.8,
+   "y": -745.2,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r5": {
+   "chid": 773,
+   "depth": 9,
+   "x": 1605.5,
+   "y": -1295.5,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r6": {
+   "chid": 773,
+   "depth": 101,
+   "x": 1405.2,
+   "y": -1385.4,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r7": {
+   "chid": 773,
+   "depth": 103,
+   "x": 903.2,
+   "y": -1401.4,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r8": {
+   "chid": 773,
+   "depth": 105,
+   "x": 495.1,
+   "y": -1385.4,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r9": {
+   "chid": 773,
+   "depth": 107,
+   "x": 172.9,
+   "y": -1377.1,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "r10": {
+   "chid": 773,
+   "depth": 109,
+   "x": 93.0,
+   "y": -1562.8,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t1": {
+   "chid": 773,
+   "depth": 73,
+   "x": 228.8,
+   "y": 380.7,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t2": {
+   "chid": 773,
+   "depth": 75,
+   "x": 446.1,
+   "y": 188.1,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t3": {
+   "chid": 773,
+   "depth": 77,
+   "x": 599.1,
+   "y": 87.0,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t4": {
+   "chid": 773,
+   "depth": 79,
+   "x": 1105.2,
+   "y": 97.0,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t5": {
+   "chid": 773,
+   "depth": 81,
+   "x": 1581.2,
+   "y": 175.0,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t6": {
+   "chid": 773,
+   "depth": 83,
+   "x": 1808.5,
+   "y": 62.6,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t7": {
+   "chid": 773,
+   "depth": 85,
+   "x": 1899.4,
+   "y": -149.1,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t8": {
+   "chid": 773,
+   "depth": 87,
+   "x": 1743.4,
+   "y": -352.9,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t9": {
+   "chid": 773,
+   "depth": 89,
+   "x": 1519.3,
+   "y": -328.6,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t10": {
+   "chid": 773,
+   "depth": 91,
+   "x": 1319.3,
+   "y": -171.1,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t11": {
+   "chid": 773,
+   "depth": 93,
+   "x": 1129.5,
+   "y": -195.3,
+   "scaleX": null,
+   "scaleY": null
+  },
+  "t12": {
+   "chid": 773,
+   "depth": 7,
+   "x": 977.2,
+   "y": -403.1,
+   "scaleX": null,
+   "scaleY": null
+  }
+ }
+}

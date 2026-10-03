@@ -1,0 +1,23 @@
+{
+  "_comment": "声音系统完整映射 (来源: deobf/scripts/frame_6/PlaceObject2_6_430 反混淆源码 + swf_dump.txt ExportAssets)",
+  "volumes": {"sounds": 50, "music": 100},
+  "soundFx": {
+    "_触发事件": "名称即用途; 文件在 decompiled/sounds/<chid>_<name>.mp3",
+    "0": "boutonScroll 按钮滚动", "1": "creationUnite 建造炮塔", "2": "selectionUnite 选中",
+    "3": "cannot 无法操作", "4-9": "explosion1-6 单位爆炸(死亡随机)", "10": "explosionLarge",
+    "11": "explosionCrotale", "12": "explosionMlrs", "13-16": "ricochet1-4 跳弹",
+    "17": "Su37 空袭呼啸", "18-21": "uniteMoveLight1-4 轻型单位", "22-24": "uniteMoveHeavy1-3 重型",
+    "25": "uniteMoveTigre 直升机", "26": "m60 机枪", "27": "gatling", "28": "c75mm",
+    "29": "c105mm1", "30": "c105mm2", "31": "crotale", "32": "c125mm", "33": "mlrs",
+    "34": "pluton", "35": "metal1", "36": "metal2"
+  },
+  "bgm": {
+    "_note": "musics[0-2] attachSound: actOfInstinct / hellMarch / justDoItUp (顺序循环播放, onSoundComplete 自动下一首)。无 ExportAssets 标记 → 文件为无导出名的 1081/1082/1083/1084/1107/1124/1157.mp3 之一 (1157 最大 92KB 最可能是主 BGM hellMarch)。yamatoBattle=true 时切换 Yamato 战斗音乐",
+    "candidates": ["1081", "1082", "1083", "1084", "1107", "1124", "1157"]
+  },
+  "ambient": {
+    "_note": "BSounds[0..17]=b00..b17 鸟叫等环境音, playBirds 每 10 秒随机播一次",
+    "files": "decompiled/sounds/429_b01.mp3 .. 445_b17.mp3 (chid 429-445)"
+  },
+  "exports": "见 deobf/data/exports.txt (88 条完整 chid→导出名)"
+}

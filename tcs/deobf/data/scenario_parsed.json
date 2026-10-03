@@ -1,0 +1,2080 @@
+{
+ "fr": [
+  [],
+  [
+   [
+    "Xv",
+    "C’est donc maintenant un communiqué officiel de Pékin qui ordonne le retrait immédiat de toutes les troupes et industries américaines et européennes du territoire chinois. La situation diplomatique ne cesse de s’empirer depuis le profond désaccord entre les superpuissances concernant l’implantation d’industries pétrolières en Irak."
+   ],
+   [
+    "Ev",
+    "Le président chinois, Hu Jintao, accuse ouvertement le traité des américains et des européens de ce qu’il appelle un complot visant à freiner massivement la progression économique de la Chine. Les civils européens et américains ont déjà commencé à être rapatriés vers leur pays d’origine. Quand aux troupes militaires de l’OTAN, il ne s’agit plus que d’une question de temps. "
+   ],
+   [
+    "Cv",
+    "La nouvelle présidente des Etats-Unis, madame Hillary Clinton, souhaite résoudre diplomatiquement et au plus vite cette tension et organisera dés la semaine prochaine des réunions avec les chefs d’Etats européens. Une rencontre avec le nouveau premier ministre Japonais, Yasuo Fukuda, est également annoncée."
+   ],
+   [
+    "Yv",
+    "Le monde entier craignait déjà une vexation chinoise lorsque le président français Nicolas Sarkozy avait conclu avec les Etats-Unis un traité de commercialisation euro-américaine exclusive en Irak, écartant ainsi les industriels asiatiques. Il semble apparemment que la réaction ne se soit pas fait attendre. "
+   ],
+   [
+    "Lv",
+    "*Mandchourie, nord-est de la chine. Base américaine \\\"blue star\\\"*"
+   ],
+   [
+    "SAlexEttonement",
+    "C’est la pire chose qu’il pouvait arriver\\n\\n... ... hum ? Que faites vous commandant ? "
+   ],
+   [
+    "DMickNeutre1",
+    "Ce que je fais ? Vous l’avez vu comme moi, nous devons évacuer la base au plus vite, l’ordre à été donné il y a peu ! "
+   ],
+   [
+    "SAlexStoppant",
+    "C’est hors de question, nous ne pouvons pas nous permettre de laisser ce campement aux chinois"
+   ],
+   [
+    "DMickAutoritaire",
+    "Ce campement se trouve sur leur territoire, gouverneur. Et jusqu’à nouvel ordre c’est moi qui donne les ordres ici, vous n’êtes que mon \\\"invité\\\". "
+   ],
+   [
+    "SAlexNeutre1",
+    "Monsieur Brenson, soyez raisonnable, vous savez très bien que ce poste de gouverneur n’est qu’une façade à mes activités plus ... secrètes, ... je détiens de nombreuses informations, Washington n’a encore donné aucunes directives, mais je peux vous affirmer que nous devons tenir cette base. "
+   ],
+   [
+    "DMickNeutre2",
+    "... Et que voulez vous dire exactement ? Quel genre d’informations détenez-vous ? "
+   ],
+   [
+    "SAlexSecret",
+    "Il est un peu tôt pour en parler, peut être que cela ne sera pas utile. Mais je vous en conjure, laissez moi un peu de temps, ne rendez pas cette base aux chinois. "
+   ],
+   [
+    "GElisaEtonne",
+    "*entrant* Michael ?\\nOh , monsieur Grey, vous êtes là aussi"
+   ],
+   [
+    "DMickNeutre1",
+    "Ah, Elisabeth .... tu as l’air anxieuse"
+   ],
+   [
+    "GElisaNeutre",
+    "L’ordre d’évacuation, je me demande si ça ne va pas empirer ... "
+   ],
+   [
+    "DMickNarquois",
+    "Ne t’inquiètes pas, il ne peut rien t’arriver"
+   ],
+   [
+    "GElisaAnxieuse",
+    "Justement, les pilotes d’hélicoptères te demandent s’ils peuvent déjà faire tourner les moteurs ? "
+   ],
+   [
+    "DMickHesitant",
+    "hum ... c\\'est-à-dire que ... "
+   ],
+   [
+    "SAlexConvainquant",
+    "Nous ne partons pas"
+   ],
+   [
+    "GElisaEtonne",
+    "Pardon ? "
+   ],
+   [
+    "DMickNeutre2",
+    "Nous allons rester un peu, en espérant qu’aucuns véhicules ne viennent nous imposer de nous retirer"
+   ],
+   [
+    "GElisaIndignee",
+    "Mais ? C\\'est stupide ! ... et si c’est le cas ?"
+   ],
+   [
+    "SAlexNeutre1",
+    "Nous résisterons.. "
+   ],
+   [
+    "DMickAutoritaire",
+    "Alexander, calmez vous je vous prie, votre ardeur au combat ne me dise rien qui vaille. Nous essayerons de discuter avant tout."
+   ],
+   [
+    "SAlexNeutre2",
+    "Vous n’obtiendrez rien en négociant, l’ordre est clair, nous devons nous retirer et nous allons refuser d’obéir à Pékin."
+   ],
+   [
+    "GElisaIndignee",
+    "Mais c’est de la folie !!! Qu’est ce que vous essayez de provoquer ??! "
+   ],
+   [
+    "SAlexStoppant",
+    "Je ne peux pas me permettre d’en dire trop ... "
+   ],
+   [
+    "GElisaSupplie",
+    "Michael, c’est toi le commandant de cette base, ce n’est pas à lui de décider ! "
+   ],
+   [
+    "DMickHesitant",
+    "hum, patience petite soeur, nous allons juste rester un peu et voir comment évolue les choses"
+   ],
+   [
+    "SAlexNeutre1",
+    "Ah Andrew, vous êtes là .. "
+   ],
+   [
+    "RAndrewRapport",
+    "Oui gouverneur !\\nMon commandant, des véhicules chinois s’apprêtent déjà à forcer les portes du campement, nous avons tenté de discuter mais ils refusent que nous restions ici, nous devons évacuer d’urgence. "
+   ],
+   [
+    "GMickAutoritaire",
+    "Nous n’allons pas le faire ... ... nous allons freiner ces quelques véhicules. Le nouveau capitaine est bien arrivé ? "
+   ],
+   [
+    "RAndrewExplicatif",
+    "Oui mon commandant ! Je le fais venir ! Mais il faut savoir que le poste radio principal a déjà été mit sous contrôle chinois, j’ai tenté de créer une station d’émission ici pour rester en contact avec la base sud. "
+   ],
+   [
+    "GMickNeutre1",
+    "Parfait Andrew, expliquez au nouveau capitaine ses ordres, il doit tenir le campement. Si un seul véhicules arrive à nous atteindre au nord, nous sommes perdus. "
+   ],
+   [
+    "RAndrewRapport",
+    "Bien mon commandant. ! "
+   ],
+   [
+    "RAndrewFace",
+    "Ah, capitaine, ... je sais que vous venez juste d’arriver, mais je vais rapidement vous briefer. Vous aurez une centrale de commande qui vous donnera une vue aérienne sur la base. Vous pouvez déplacer la carte avec la souris ou les flèches directionnelles.\\nLa base ne peut pas être franchie, sinon la mission sera un échec. Vous avez un système de création de tourelles à votre droite pour empêcher les véhicules d’atteindre leur cible. Observez bien l\\'herbe, elle est plus claire à certains endroits, c\\'est sur ces zones que vous pouvez construire les tourelles.\\nEnfin, n’oubliez pas que vous pouvez annuler avec la touche ESPACE.\\n\\nJe continuerai à vous briefer durant les premiers moments !\\n\\nBonne chance capitaine ! "
+   ]
+  ],
+  [
+   [
+    "RAndrewFace",
+    "Vous trouverez dans le menu une section d’aide. Elle vous indique les touches de raccourcis et des informations sur l’ennemi.\\nNotamment, vous y comprendrez comment augmenter ou réduire le zoom de votre système de vision aérienne en pressant la touche \\\"G\\\".\\nPar ailleurs, sachez qu’avec la touche \\\"S\\\", vous pouvez vendre à 75% du prix la tourelle sélectionnée. Attention que son prix de revente sera évidemment affaibli si la tourelle a perdu des points de vie. "
+   ]
+  ],
+  [
+   [
+    "RMickFace",
+    "Capitaine, ravi de vous voir ... faites attention, les véhicules chinois arrivent parfois de la route ouest, et pas seulement du sud. A partir de ce point leur distance pour atteindre notre campement au nord est moins élevée, prenez en note ! "
+   ]
+  ],
+  [
+   [
+    "GMickNeutre1",
+    "Que sommes nous en train de faire ... "
+   ],
+   [
+    "RAndrewRapport",
+    "mon commandant, les pilotes des hélicoptères réitèrent leurs demandes d’évacuation, les moteurs sont chauds, ... et eux aussi ! "
+   ],
+   [
+    "GMickNeutre2",
+    "... Dites leur que nous décollons dans 3 heures"
+   ],
+   [
+    "DAlexAffole",
+    "Michael, je vous en conjure .. ! Nous ne pouvons pas abandonner ce campement ! "
+   ],
+   [
+    "GMickEnnerve",
+    "J’ai donné l’ordre de faire abattre des unités chinoises gouverneur, ces hommes n’avaient rien fait de mal, comprenez vous seulement ce que cela signifie ? Il est HORS DE QUESTION d’aller plus loin ! Nous évacuons  ! "
+   ],
+   [
+    "DAlexEttonement",
+    ".. vous ne me laissez pas le choix ... "
+   ],
+   [
+    "GMickHesitant",
+    "je vous demande pardon gouverneur ? "
+   ],
+   [
+    "DAlexSecret",
+    "Je vais tout vous confier, et arrêtez de m’appeler gouverneur, vous savez que ce titre n’est qu’une façade à mes activités ... ... "
+   ],
+   [
+    "GMickNeutre1",
+    "je vous écoute, ... gouverneur .. "
+   ],
+   [
+    "DAlexConvainquant",
+    "hum ... ... la vérité est que Pékin veut récupérer cette zone pour une raison très simple, cette base n’a été conçue il y a quelques années que pour prendre secrètement le contrôle des 64 missiles nucléaires chinois, ... évidemment moi et mes hommes avons verrouillé les lancements par de nouveaux codes de sécurité que moi seul connaît ... ... mais rien ne nous garantit que leurs ingénieurs n’arriveront pas à briser ces codes"
+   ],
+   [
+    "GMickHesitant",
+    "... ? "
+   ],
+   [
+    "RAndrewEttone",
+    "64 missiles nucléaires ? Ouhaww, la vache !\\n\\n ... euh pardon mon commandant"
+   ],
+   [
+    "DAlexStoppant",
+    "Notre malheur est que la chine disposait d’une petite quantité d’arme nucléaire, ils ne l’ont jamais cachés, mais elles ne devaient servir qu’à leur auto-défense.\\nLe site de mandchourie est malheureusement tout autre, il s’agit de 64 missiles balistiques \\\"GUANG RONG\\\" très longue portée pouvant atteindre aisément tout point du globe, il s’agit là d’une capacité de frappe que peu de pays possèdent, nous ne pouvons pas nous permettre vu les tensions actuelles de la leur laisser. "
+   ],
+   [
+    "GMickNeutre2",
+    "\\\"GUANG RONG\\\", ça signifie \\\"Gloire\\\" en chinois si je ne me trompe pas ... quel fou pourrait prétendre que disposer de l’arme nucléaire est une gloire ... ? "
+   ],
+   [
+    "DAlexEttonement",
+    "Quoi qu’il en soit vous comprenez mon scepticisme quand à rendre cette base aux chinois"
+   ],
+   [
+    "SElisaVexe",
+    "Cette base est tout de même à eux gouverneur ! On n’a pas le droit sous prétexte qu’on juge ça dangereux de s’approprier ce territoire ! "
+   ],
+   [
+    "GMickHesitant",
+    "Elisabeth, je t’en prie, ... la situation est plus compliquée que ça ... d’autant que rester risque de provoquer un conflit plus important ... "
+   ],
+   [
+    "DAlexAffole",
+    "Le conflit est déjà latent, je doute de toutes façons que la Chine s’en arrête là"
+   ],
+   [
+    "GMickNeutre1",
+    "Et si elle s’en arrêtait là justement ? Notre acte ne poserait-il pas plus de problèmes qu’il n’en résoudrait ? "
+   ],
+   [
+    "DAlexNeutre2",
+    "Vous êtes le commandant, maintenant vous en savez autant que moi, ... je ne peux pas décider pour vous"
+   ],
+   [
+    "SElisaSupplie",
+    "Michael ... on va créer plus d’ennuis encore ... "
+   ],
+   [
+    "GMickAutoritaire",
+    "Andrew, ordonnez ... "
+   ],
+   [
+    "RAndrewEttone",
+    "Oui mon commandant ? "
+   ],
+   [
+    "GMickAutoritaire",
+    "Ordonnez aux pilotes d’hélicoptères d’éteindre les moteurs et de retourner vers les tourelles défensives, nous allons tenir le camp avant de recevoir les ordres directes de Washington"
+   ],
+   [
+    "RAndrewRapport",
+    "Bien mon commandant ! "
+   ],
+   [
+    "RAndrewFace",
+    "Ah capitaine, j’ai une mauvaise nouvelle pour vous, des unités chinoises armées s’approchent du campement. Sachez que vous pouvez réparer vos tourelles, il vous en coûtera 2 dollars par point de vie, ce prix est parfois moins intéressant que de racheter une tourelle neuve, mais sachez qu’à chaque fois que vous perdez une tourelle, votre score général en est grandement affecté, à vous de voir quel parcourt vous préférez prendre.\\n\\nBonne chance capitaine ! "
+   ]
+  ],
+  [
+   [
+    "DAndrewFace",
+    "Capitaine, la touche ‘R’ vous permet de réparer la tourelle sélectionnée. Vous pouvez par ailleurs imposer une réparation automatique à une tourelle en activant son mode \\\"auto repair\\\" à ON. Prenez garde néanmoins au prix que cela peut vous coûter. A chaque fois qu’une tourelle effectuera elle-même une réparation, un champ magnétique bleu apparaîtra autour d\\'elle. "
+   ]
+  ],
+  [
+   [
+    "SAlexFace",
+    "Essayez de minimiser vos pertes. La vie de chacun de nos soldats a son importance. Votre score est bien là : les pertes que vous aurez subi .."
+   ]
+  ],
+  [
+   [
+    "SMickFace",
+    "Les chinois ont reçus des véhicules blindés légers.\\nFace à l’augmentation du conflit, nous avons ajouté des canons de 75 mm. Ils sont rapides bien que léger. Faites en bon usage. "
+   ]
+  ],
+  [
+   [
+    "GAndrewRaleur",
+    "D’autres unités arrivent, ... Il semble que ce soit les dernières, du moins pour le moment .. "
+   ]
+  ],
+  [
+   [
+    "Yv",
+    "La déclaration de guerre chinoise a provoqué une vive frayeur à la communauté internationale. Les Etats-Unis d’Amérique et l’Europe sont ciblés par le grand géant suite à un refus d’évacuer une base militaire dans la province de Mandchourie. L’axe allié s’est automatiquement formé entre les Etats-Unis et l’Europe, soutenu par le Japon et l’Australie. "
+   ],
+   [
+    "Bv",
+    "Face à l’arrogance de l’impérialisme américain qui s’est refusé de quitter le territoire chinois, la corée du nord et l’Iran ont rejoint Pékin dans un axe baptisé \\\"le nouveau monde libre\\\". L’Iran s’était déjà faite remarquée lors de sa tentative d’accession à la technologie nucléaire, et se dit outré par le comportement occidental qui \\\" interdit aux autres pays de posséder ce qu’elle possède déjà \\\". "
+   ],
+   [
+    "Xv",
+    "Bien qu’aucuns combats ne soit encore déclarés hormis dans la maintenant très célèbre Mandchourie, il semble malheureusement que cette guerre ait tout pour être qualifiée de \\\"troisième guerre mondiale \\\". Nous ne pouvons qu’espérer que le conflit trouve une solution pacifique très rapidement. "
+   ],
+   [
+    "SAlexConvainquant",
+    "Et ce qui devait arriver arriva ... "
+   ],
+   [
+    "DElisaColere",
+    "Ah bon ?? Parce que vous allez nous faire croire que l’on ne pouvait pas éviter ça ?? On avait qu’à évacuer, au lieux de créer tout ce merdier !! "
+   ],
+   [
+    "RAndrewRaleur",
+    "Sans vouloir la ramener, il y a quand même 64 missiles intercontinentaux qui traînent dans le coin, moi je dis ça, je dis rien"
+   ],
+   [
+    "GMickNeutre1",
+    "Andrew, on se passera de vos commentaires, merci"
+   ],
+   [
+    "RAndrewExplicatif",
+    "Pardon commandant ... ... hum, à ce sujet, mon unité d’information a reçu un message radio des troupes chinoises, ils nous demandent de nous retirer une dernière fois ... franchement, je leur réponds quoi ? "
+   ],
+   [
+    "SAlexEttonement",
+    "A votre avis ? "
+   ],
+   [
+    "DElisaIndignee",
+    "On se barre, voila ce qu’on leur dit !! J’ai le sentiment d’être un envahisseur ici ! "
+   ],
+   [
+    "GMickAutoritaire",
+    "elle n’a pas tort ... "
+   ],
+   [
+    "SAlexAffole",
+    "Vous ne comptez pas sérieusement vous retirer maintenant ? "
+   ],
+   [
+    "RAndrewEttone",
+    "Euh mon commandant, désolé de vous interrompre, mais l\\'envoyé de Washington vient d’arriver derrière les troupes ennemies, nos chasseurs lui ont fait une couverture aérienne, ah d’ailleurs il ... ah non, c’est \\\"elle\\\" ... elle arrive"
+   ],
+   [
+    "DSarahNeutreSouriante",
+    "*entrant* Michael Brenson j’imagine ? Ravie de vous rencontrer, je suis la conseillère de Madame Clinton"
+   ],
+   [
+    "SAlexNeutre1",
+    "La conseillère ? Si jeune ? "
+   ],
+   [
+    "DSarahNeutre",
+    "Que voulez vous, j’ai très vite réussi dans la vie ! \\nJe suis là pour vous donner quelques directives, Washington n’osait pas trop se déclarer officiellement mais maintenant que vous avez pris la décision de rester, il faut avouer que ça nous arrange. "
+   ],
+   [
+    "GMickNeutre2",
+    "Donc nous restons ... "
+   ],
+   [
+    "DSarahEmbarasse",
+    "C\\'est moche mais ... oui nous restons. On ne peut pas se permettre de laisser les missiles aux chinois. "
+   ],
+   [
+    "GElisaColere",
+    "Pourquoi pas ?? Ce sont les leurs ! Est-ce que nous on nous a interdit d’avoir nos missiles ? "
+   ],
+   [
+    "DSarahSurprise",
+    "Et vous êtes .. ? "
+   ],
+   [
+    "GElisaVexe",
+    "Elisabeth Brenson, la soeur du commandant ! "
+   ],
+   [
+    "DSarahNeutre",
+    "Elle est mignonne ... chérie, tu apprendras que la politique c’est un petit peu plus compliquée que ça. Tiens au juste, j\\'ai vu un tas de fleurs plantées en survolant le camp, c\\'est de vous? "
+   ],
+   [
+    "GElisaEtonne",
+    "euh ... oui"
+   ],
+   [
+    "DSarahPepsodent",
+    "C\\'est magnifique !! "
+   ],
+   [
+    "RAndrewRaleur",
+    "Euh mesdames, sans vouloir vous froisser, on a un écho sur le radar, apparemment ils n’ont pas attendu notre réponse"
+   ]
+  ],
+  [
+   [
+    "DElisaSupplie",
+    "Michael, tu peux tout arrêter, on est en train de tuer des gens parce qu’on a pas envie de leur rendre leur territoire ! "
+   ],
+   [
+    "GMickNeutre1",
+    "petite soeur, si on ne fait pas ça, il y a peut être plus de gens qui mourront "
+   ],
+   [
+    "DElisaAnxieuse",
+    "ou peut être pas justement ! Je te rappelle que les seules à avoir utilisé l’arme nucléaire jusqu’à présent c’est nous ! "
+   ],
+   [
+    "SSarahEmbarasse",
+    "Elisabeth, je sais que ce n’est pas facile à admettre, mais l’engrenage a été mit en route, on ne peut plus reculer. La Chine n’aurait de plus jamais permis des négociations sur le désamorçage de ces armes, ce qui aurait créé une peur et donc une instabilité dans le monde entier ... "
+   ]
+  ],
+  [
+   [
+    "RMickFace",
+    "Capitaine, les chinois ont fait appel à un char de combat un peu plus lourd. Pour y répondre nous vous proposons de débloquer le canon de 105 mm. "
+   ]
+  ],
+  [
+   [
+    "SSarahNeutre",
+    "La vague d’assaut ne s’arrête pas ... ils sont déterminés ... ... quoi de plus normal dans le fond *soupire*"
+   ]
+  ],
+  [
+   [
+    "GElisaIndignee",
+    "Evidemment qu’ils sont déterminés, ils ne font que se défendre suite à notre agressions, ... vous êtes en train de faire la plus grande connerie du 21° siècles ... ... "
+   ]
+  ],
+  [
+   [
+    "SAlexSecret",
+    "et qu’en pensez vous ? "
+   ],
+   [
+    "DSarahNeutre",
+    "J’avoue que je ne sais plus .... "
+   ],
+   [
+    "RMickFace",
+    "Ah capitaine, je tenais à vous féliciter pour le travail accompli. N’oubliez pas que vous pouvez sauvegarder votre parcourt en cas de besoin. "
+   ]
+  ],
+  [
+   [
+    "Xv",
+    "C’est une grande première depuis quelques semaines, d’autres conflits ont éclatés autour de l’Iran et même dans le nord de l’Irak, où des hélicoptères Iraniens ont attaqués des positions américaines.\\nLe président du Venezuela, Hugo Chavez, à rejoint l’axe du \\\"nouveau monde libre\\\" après une intense réunion avec Mahmoud Ahmadinejad. Pékin se déclare satisfait de ce qu’il appelle une prise de conscience des peuples \\\"sensées\\\". "
+   ],
+   [
+    "RSarahEmbarasse",
+    "Ca s’annonce assez mal, on risque fort de voir des conflits émerger au Mexique où en Amérique du sud, il y a énormément de présences américaines dans ces pays ... Israël et la Russie nous annonce officiellement leur soutien, Vladimir Poutine a critiqué ouvertement la politique chinoise, et Nicolas Sarkozy affirme toujours que leur comportement est inacceptable"
+   ],
+   [
+    "DElisaVexe",
+    "Plein de bonnes choses pour renouer le dialogues donc ... c’est très intelligent ! "
+   ],
+   [
+    "RSarahNeutre",
+    "Hum, je suis obligé de le reconnaître, ils n’arrangent pas les choses, ... Angela Merkens est la seule à souhaiter encore un retour à la diplomatie, elle a même invité des parlementaires chinois à en discuter à Berlin"
+   ],
+   [
+    "GMickNeutre1",
+    "Et qu’en a-t-il été ? "
+   ],
+   [
+    "RSarahSurprise",
+    "En fait ... Ils ont refusés l\\'invitation"
+   ],
+   [
+    "DAndrewRapport",
+    "Hum, de nouvelles unités se sont rassemblés au sud du campement"
+   ],
+   [
+    "GMickNeutre2",
+    "C’est reparti.. "
+   ]
+  ],
+  [
+   [
+    "DMickFace",
+    "Nous vous proposons le nouveau canon de 105 mm double. Vous en aurez besoin pour faire face aux nouveaux tanks lourds chinois, ... prenez garde, ils sont puissant et résistant. "
+   ]
+  ],
+  [
+   [
+    "GSarahSurprise",
+    "C\\'est étrange, d\\'après le journal télévisé, Shen Ming commence à prendre de plus en plus d\\'importance dans la politique internationale Chinoise"
+   ],
+   [
+    "SMickHesitant",
+    "Shen Ming? "
+   ],
+   [
+    "DElisaNeutre",
+    "Le neveu du président Jintao .. "
+   ],
+   [
+    "Mv",
+    "Il a repris le commandement des forces armées début 2008 sous l\\'approbation du parti communiste chinois. Il a fait ses études à l\\'université de Pékin, C\\'est un homme déterminé mais doux à la fois"
+   ],
+   [
+    "SMickNeutre1",
+    "... doux? Euh , tu veux dire ... "
+   ],
+   [
+    "GSarahPepsodent",
+    "Dit donc ma chère, vous m\\'avez l\\'air bien intéressée par la vie de ce Shen Ming ! "
+   ],
+   [
+    "DElisaEtonne",
+    "Oh hey ça va, vous me posez la question ..."
+   ],
+   [
+    "SAlexNeutre1",
+    "Son bras droit est néanmoins moins \\\"doux\\\". Le fameux général Zhou Fu Lin, ... "
+   ],
+   [
+    "Hv",
+    "Un homme froid et carré, on raconte qu\\'il a fait exécuter environ 100 prisonniers qui avaient refusés une sanction jugée \\\"injuste\\\".\\nLors du siège de Corée fin 2007, il a réussi à remporter 17 victoires en moins de trois mois. Ses hommes lui vouent une admiration immense et redoublent d\\'efforts sur les terrains de bataille. "
+   ],
+   [
+    "RAndrewEttone",
+    "Euh, c\\'est le mec qui dirige les troupes sur nous? "
+   ],
+   [
+    "SAlexStoppant",
+    "Non, pas pour le moment, il semble qu\\'il soit resté à Pékin .. "
+   ],
+   [
+    "RAndrewRaleur",
+    "En attendant j\\'ai de nouvelles troupes sur mon écho radar ...  jamais tranquille ici"
+   ],
+   [
+    "SMickNarquois",
+    "Andrew vous êtes un râleur ! "
+   ],
+   [
+    "RAndrewExplicatif",
+    "J\\'étais ingénieur en communication moi, pas opérateur radar sur le front ! "
+   ],
+   [
+    "SMickNarquois",
+    "C\\'est toujours mieux qu\\'informaticien Andrew, vous devriez être fier ! "
+   ]
+  ],
+  [
+   [
+    "RAlexFace",
+    "Capitaine, Vous allez avoir le choix de débloquer une arme, ou bien d\\'augmenter votre taux d\\'intérêt. Un meilleur taux vous rapportera plus d\\'argent, mais sachez que des hélicoptères Iraniens sont venus prêter main forte aux forces chinoises. Les pilotes iraniens sont parmi les plus braves et les plus doués au monde Capitaine, je vous recommande personnellement de débloquer l\\'arme. "
+   ],
+   [
+    "RAlexFace",
+    "Il s\\'agit du missile crotale, capable de frapper au sol comme dans les airs. Seul les mitrailleuses et les missiles crotales peuvent abattre les cibles aériennes, tenez en compte lors de votre choix.\\nEnfin, notez que le missile crotale est deux fois plus puissant lorsqu\\'il s\\'agit d\\'une cible aérienne .. "
+   ]
+  ],
+  [
+   [
+    "QZhuRapport",
+    "Le courage de nos soldats fait honneur à notre puissante nation, mais nous avons besoin de plus ! L\\'ennemi américain résiste bien, ... Mais maintenant que nos hommes connaissent tous l\\'enjeu de la prestigieuse province de Mandchourie, ils se battent avec plus d\\'ardeur. C\\'est notre gloire que nous avons à récupérer, votre gloire à vous, la notre, et celle de notre pays. "
+   ],
+   [
+    "PShenNeutre",
+    "... ... tu fais un bon travail, général Lin, je ne regrette pas de t\\'avoir confié ce front ... "
+   ]
+  ],
+  [
+   [
+    "DSarahNeutreSouriante",
+    "Capitaine, j\\'ai une bonne nouvelle ! Un nouveau choix de déblocage va être fait, l\\'Allemagne à envoyé des Howitzer de 125mm.\\nEuh, par contre vous ne pourrez les débloquer que si vous aviez déjà débloqué l\\'arme précédente, ça c\\'est le côté moche de la nouvelle .. *gênée*"
+   ]
+  ],
+  [
+   [
+    "PShenSurpris",
+    "Je suis surpris d\\'une telle résistance. Seul monsieur Grey Alexander devait être au courant de l\\'importance de ce site, ... il aurait parlé?\\n... mon bon Lin, nous allons devoir redoubler d\\'effort, mais demandez bien à vos hommes de ne jamais attaquer directement le quartier général de leur campement"
+   ],
+   [
+    "QZhuSalut",
+    "Oui monsieur, je sais parfaitement que nous ne devons sous aucun prétexte ouvrir le feu sur le quartier général ! "
+   ]
+  ],
+  [
+   [
+    "GSarahEmbarasse",
+    "Elisabeth devient taciturne au fur et à mesure que les jours passent. Votre soeur m\\'inquiète Michael, .. "
+   ],
+   [
+    "DMickNarquois",
+    "Laissez, ce n\\'est rien, ça lui arrive parfois, .. nous sommes ici entre la vie et la mort, quoi de plus normal. C\\'est surtout votre vivacité à vous qui m\\'impressionne Sarah, je dois avouer que vous êtes épatante "
+   ],
+   [
+    "GSarahSurprise",
+    "oh vraiment? ... hum .. vous allez me faire rougir"
+   ]
+  ],
+  [
+   [
+    "SSarahEmbarasse",
+    "L\\'inde prétend qu\\'elle n\\'est pas intéressée par ce conflit, sa guerre contre le Pakistan lui a déjà causé de nombreux ennuis"
+   ],
+   [
+    "DAlexStoppant",
+    "Et c\\'est tant mieux, ce géant ne nous aurait peut être pas rejoint. "
+   ],
+   [
+    "SSarahPepsodent",
+    "De toutes façons la guerre se trame surtout ici, si les caméras pouvaient venir elles ne s\\'en priveraient pas. ... C\\'est dommage, j\\'ai un beau profil droit. "
+   ],
+   [
+    "DAlexEttonement",
+    "Vous rendez vous comptes Sarah que cette base de Mandchourie est sans doute l\\'un des points les plus importants du monde? Et nous en sommes les principaux acteurs ! "
+   ],
+   [
+    "SSarahNeutre",
+    "Ca a l\\'air de vous faire plaisir , .. Alexander, vous êtes un homme inquiétant"
+   ]
+  ],
+  [
+   [
+    "GAndrewRaleur",
+    "Et encore une vague de tanks lances missiles, ça n\\'arrête pas, on va tous y passer, ma mère avait raison, j\\'aurai du être informaticien .. "
+   ]
+  ],
+  [
+   [
+    "GMickFace",
+    "Capitaine, soyez attentif, on nous apprend que deux navires nord-coréens sont venus prêter main forte aux troupes ennemies. Ils arriveront sous peu par la baie au nord ouest. La France et l\\'Angleterre vous envoies un subside financier pour y faire face .... bonne chance ... "
+   ]
+  ],
+  [
+   [
+    "SAlexAffole",
+    "Je vous dis que ça n\\'aurait pas du se passer comme cela ! "
+   ],
+   [
+    "DSarahEmbarasse",
+    "Alexander, ne vous énervez pas, l\\'important est que nous ayons réussi à les stopper"
+   ],
+   [
+    "SAlexConvainquant",
+    "Les navires connaissaient nos fréquences radios et on pu détruire nos postes de gardes avancées, vous trouvez qu\\'on devrait s\\'en réjouir? Comment pouvaient-ils connaître nos fréquences radios?! "
+   ],
+   [
+    "GMickNeutre1",
+    "... un traître? ... Andrew? "
+   ],
+   [
+    "RAndrewEttone",
+    "Moi? Mais pas du tout voyons, quelle idée !! "
+   ],
+   [
+    "GMickNarquois",
+    "Mais non Andrew, pas vous, mais un de vos hommes chargé des communications, après tout ils sont mieux placés pour les fréquences radios ... ça ne vous dit rien? "
+   ],
+   [
+    "RAndrewExplicatif",
+    "Pas plus que ça ... tout mes hommes ont fait les mêmes classes que moi, on se connaît bien, je ne vois pas qui aurait pu transmettre cette information ...  ... peut-être que personne n\\'a rien transmis après tout? "
+   ],
+   [
+    "SAlexNeutre1",
+    "Ils ont juste eu une chance incroyable de tomber au bon moment sur les bonnes fréquences ... ...  s\\'il vous plait Andrew, restons sérieux, il y a forcément quelqu\\'un qui a communiqué ces informations"
+   ],
+   [
+    "DSarahNeutre",
+    "*tout bas* Euh ... Michael, ... il faudrait que je vous parle seule à seul quand vous aurez un moment"
+   ],
+   [
+    "GMickNeutre2",
+    "Il n\\'y a aucun problème Sarah, nous pouvons même en parler maintenant si vous le voulez"
+   ],
+   [
+    "DSarahSurprise",
+    "*toujours discrètement* Euh , .. mais ... en privé je veux dire"
+   ],
+   [
+    "SAlexNeutre2",
+    "Mauvaise nouvelle, je viens d\\'avoir un informateur au téléphone, .. Zhu Fu Lin et le neveu du président sont au sud du campement, ils ont fait le déplacement en personne pour motiver les troupes"
+   ],
+   [
+    "RAndrewRaleur",
+    "Quoi? L\\'autre malade est là? "
+   ],
+   [
+    "DMickNeutre1",
+    "Vous voulez dire qu\\'ils se trouvent juste à quelques centaines de mètre au sud du campement? "
+   ],
+   [
+    "SAlexEttonement",
+    "J\\'en ai peur ... ... "
+   ],
+   [
+    "DSarahSurprise",
+    "Euh, messieurs, .. qu\\'est ce que c\\'est que cette musique? "
+   ]
+  ],
+  [
+   [
+    "GMickAutoritaire",
+    "ah au juste, il faut que je renseigne notre capitaine, les radars sont arrivés, ils lui permettent d\\'utiliser les missiles MLRS et Pluton. "
+   ],
+   [
+    "DAndrewRapport",
+    "Ah c\\'est vrai, j\\'ai oublié de le prévenir, .. en fait les missiles MLRS et Pluton se basent sur la portée du radar pour tirer.\\nDe plus, le choix du déblocage d\\'une arme va également lui être proposé .. .. il va être content le Capitaine"
+   ]
+  ],
+  [
+   [
+    "RAndrewRaleur",
+    "Je ne parviens pas à arrêter cette fichue musique ! "
+   ],
+   [
+    "GSarahNeutreSouriante",
+    "C\\'est pourtant une belle chanson d\\'amour ... hum .. ... votre soeur est partie se réfugier dans sa chambre, que c\\'est curieux ... dites moi Michael, votre soeur a fait ses études de Droit à l\\'université de Pékin non? "
+   ],
+   [
+    "DMickHesitant",
+    "Euh, .. oui oui, c\\'est juste, elle a eu terminé il y a quelques années ... pourquoi? "
+   ],
+   [
+    "GSarahNeutre",
+    "... hum, non rien "
+   ]
+  ],
+  [
+   [
+    "PShenNeutre",
+    "Bientôt tout sera terminé ... ... la patience, il me suffit juste d\\'un peu de patience ... "
+   ]
+  ],
+  [
+   [
+    "GSarahPepsodent",
+    "Ah Elisabeth, vous revoilà ... mais où étiez vous donc passée? Vous aimez cette musique je suppose? *grand sourire*"
+   ],
+   [
+    "DElisaAnxieuse",
+    "..."
+   ],
+   [
+    "SAlexStoppant",
+    "Michael !! Prévenez votre capitaine, les tanks lourds chinois sont prêt plus tôt que prévu, leurs laboratoires ont réussi à terminer le projet \\\"Mammouth\\\" apparemment, ces tanks sont tout simplement monstrueux .. "
+   ]
+  ],
+  [
+   [
+    "RAndrewExplicatif",
+    "Oui !! J\\'ai enfin réussi à stopper cette foutue musique ! Elle passait par le canal audio qui ressortait sur tout les spots de la base .. nos soldats n\\'ont pas du comprendre. Ah au juste, Israel nous envoie sa nouvelle technologie laser à débloquer, ils appellent ça le MTHEL "
+   ],
+   [
+    "SAlexNeutre1",
+    "Un laser? "
+   ],
+   [
+    "RAndrewExplicatif",
+    "Oui, .. un peu comme dans Star Wars"
+   ],
+   [
+    "SAlexConvainquant",
+    "Merveilleux. De mon côté je viens d\\'avoir au téléphone le colonel des forces aériennes russe, il nous envoie un renfort. "
+   ],
+   [
+    "Av",
+    "Elle s\\'appelle Elena \\\"Angel\\\" Pokvoskaya, elle est capitaine et pilote sur Su37 \\\"terminator\\\". Nous pouvons lui demander un bombardement ciblé toute les minutes, il suffit de lui indiquer la zone à bombarder. Bien entendu ses bombes n\\'atteignent que les cibles ennemies. "
+   ],
+   [
+    "RAndrewEttone",
+    "mignonne la chasseuse .. ! "
+   ],
+   [
+    "GSarahSurprise",
+    "*tout bas* Ah Michael, j\\'ai fait une découverte incroyable ... j\\'ai lu le journal intime de votre soeur"
+   ],
+   [
+    "DMickNeutre1",
+    "Pardon? Ca vous prend souvent de fouiller dans les affaires des autres?! "
+   ],
+   [
+    "GSarahNeutreSouriante",
+    "Euh ... Oui, une vilaine habitude que j\\'ai prise depuis mon enfance, ...\\n...mais parfois ça sert  ! Devinez quoi, votre soeur, lorsqu\\'elle a fait ses études à Pékin .. "
+   ],
+   [
+    "DMickNeutre2",
+    "Oui quoi ..? "
+   ],
+   [
+    "GSarahSurprise",
+    "Devinez qui était dans le même auditoire qu\\'elle? Shen Ming , le neveu du président ! "
+   ],
+   [
+    "DMickNeutre1",
+    "Vous plaisantez? "
+   ],
+   [
+    "GSarahNeutre",
+    "Justement non, c\\'est moi qui suis surprise que vous n\\'en sachiez rien , ils sont sortis ensemble !! Et le pire, c\\'est qu\\'il n\\'est écrit nulle part que leur relation s\\'est terminée ! "
+   ],
+   [
+    "DMickHesitant",
+    "Euh .. mais .. c\\'est ... impossible ..? "
+   ],
+   [
+    "GSarahEmbarasse",
+    "Michael, Elisabeth est opposée à ce que nous restions depuis le début, il y a eu les fréquences radios envoyés aux navires coréens, puis cette musique alors que Shen Ming se trouve juste au sud du campement, ... vous devez être réaliste, votre soeur est avec le neveu du président du pays que nous combattons, et qui plus est ce neveu est en train de prendre de plus en plus de pouvoir ... il va falloir que vous me donniez des détails Michael ! "
+   ]
+  ],
+  [
+   [
+    "DMickNeutre1",
+    "*discutant longuement* Ca remontre à quelques années seulement, à l\\'époque la Chine n\\'avait aucun problèmes avec les Etats-Unis, et la libre circulation des visiteurs étaient beaucoup plus simple, notamment faire ses études ici était encore aisé.\\n\\nComme j\\'ai été muté dans ce campement sans histoire, j\\'ai proposé à Elisabeth de venir faire ses études à Pékin, nous n\\'avions de toutes façons plus de famille ailleurs"
+   ],
+   [
+    "SSarahSurprise",
+    "Hum d\\'après son journal c\\'est en deuxième année qu\\'elle rencontre Shen Ming ... apparemment ça a été le coup de foudre"
+   ],
+   [
+    "DMickHesitant",
+    "Elle ne m\\'en a jamais parlé, mais c\\'est vrai aussi que Pékin n\\'est pas tout prêt, elle vivait sa vie sans que je ne le sache ... "
+   ],
+   [
+    "SSarahEmbarasse",
+    "L\\'ennui voyez vous, c\\'est que passer une jolie musique c\\'est une chose, mais donner des fréquences radars, c\\'est plus embêtant, si Alexander apprend ça il n\\'hésitera pas à sévir, que ce soit votre soeur ou non"
+   ],
+   [
+    "DMickNeutre1",
+    "Justement, je vous serai reconnaissant de ... enfin, ... vous voyez"
+   ],
+   [
+    "SSarahNeutre",
+    "Comptez sur moi Michael, mais on va devoir agir à deux alors, parce que votre petite soeur est une vraie tête de mule, et j\\'ai peur qu\\'elle fasse plus de bêtise, ... hum, d\\'ailleurs la voila, faisons mine de rien"
+   ]
+  ],
+  [
+   [
+    "QZhuSalut",
+    "Une fois le campement reprit, vous pensez vraiment pouvoir réactiver les missiles? "
+   ],
+   [
+    "PShenNeutre",
+    "Ca ne devrait pas poser de problèmes, mais nous ne sommes pas encore prêt de le récupérer, la résistance est organisée. "
+   ],
+   [
+    "QZhuPoing",
+    "Et cet histoire d\\'amiral Japonais? J\\'avoue ne pas avoir bien saisi comment un japonais pourrait nous aider ...? "
+   ],
+   [
+    "PShenExplicatif",
+    "Oublie les rancoeurs et le passé, Lin, ... Cet amiral fait partie des nombreux officiers dans le monde qui commencent à rejoindre secrètement notre cause, la vision d\\'un monde plus juste ne laisse pas indifférente toutes les personnes de nationalités \\\"ennemies\\\", ... cet homme est honorable, ... et il devrait arriver dans peu de temps"
+   ],
+   [
+    "QZhuRapport",
+    ".. admettons, mais comment pourrait il nous aider? "
+   ],
+   [
+    "PShenSurpris",
+    "Depuis que le gouvernement japonais a modifié sa constitution, lui laissant enfin l\\'occasion de posséder une armée, une cellule secrète à planifié de remettre sur pied le célèbre projet Yamato ... "
+   ],
+   [
+    "QZhuPoing",
+    "Un cuirassé? Ils vont faire venir un cuirassé ici? "
+   ],
+   [
+    "PShenNeutre",
+    "... si l\\'amiral Tanaka y arrive tout du moins, ... "
+   ]
+  ],
+  [
+   [
+    "SAndrewFace",
+    "Capitaine ! Capitaine ! Vous n\\'allez pas être content, mais des camions équipée de batterie MLRS sont sur le point d\\'arriver. Essayez de détruire les camions radars qui les accompagnent, si ces radars sont détruits, les MLRS ne pourront pas tirer sur nous ! ... Bon je sais, c\\'est plus facile à dire qu\\'à faire, ça c\\'est toujours comme ça ...mais au moins je l\\'ai dit, il ne vous reste plus qu\\'à le faire ! "
+   ]
+  ],
+  [
+   [
+    "PShenSurpris",
+    "Dites moi général Lin, vous êtes certain que vous avez pris les dispositions pour ne pas la blesser? "
+   ],
+   [
+    "QZhuSalut",
+    "Absolument, mes hommes ont ordres de ne tirer que sur les structures défensives. De plus, tout civils quittant la base est mit sous arrêt mais avec tout le doigté qu\\'il se doit. "
+   ],
+   [
+    "PShenNeutre",
+    "... bien ... "
+   ]
+  ],
+  [
+   [
+    "DAlexEttonement",
+    "Votre nouveau capitaine fait un travail de résistance exceptionnelle Michael ... il m\\'impressionne"
+   ],
+   [
+    "SMickNeutre2",
+    "J\\'en conviens, mais je dois hélas lui annoncer qu\\'une colonne d\\'artillerie arrive via le pont ouest ... ça ne va pas lui plaire"
+   ]
+  ],
+  [
+   [
+    "RSarahNeutreSouriante",
+    "Ah capitaine vous êtes là, je vous cherchais ! Vous avez le choix de débloquer une nouvelle arme ! SI vous aviez choisi le parcourt complet jusqu\\'ici, alors il s\\'agit du missile Pluton, c\\'est une missile balistique qui peut tirer n\\'importe où avec une puissance de frappe et un impact considérable, ... hum, c\\'est français il parait, j\\'espère que ça fonctionne ... ! "
+   ]
+  ],
+  [
+   [
+    "GSarahNeutre",
+    "Vous n\\'avez pas peur de mourir Michael ..? "
+   ],
+   [
+    "DMickNeutre2",
+    "Je suis militaire .. "
+   ],
+   [
+    "GSarahEmbarasse",
+    "Moi j\\'ai peur .. "
+   ],
+   [
+    "DMickNeutre1",
+    "... vous savez, les unités chinoises n\\'ont pas encore forcés la zone de défense, si nous voyons qu\\'ils y parviennent, il sera toujours temps d\\'évacuer ... mais nous laisserons alors les missiles aux chinois"
+   ],
+   [
+    "RElisaVexe",
+    "Et alors, ce sont les leurs non ... ? "
+   ],
+   [
+    "GSarahNeutre",
+    "euh ... Elisabeth, s\\'il vous plait"
+   ],
+   [
+    "SAlexSecret",
+    "hum ..? "
+   ],
+   [
+    "DMickNarquois",
+    "Non rien Alexander, lisez votre journal .. "
+   ]
+  ],
+  [
+   [
+    "SAlexFace",
+    "Capitaine, nous savons que la situation n\\'est pas facile, vous avez de fait droit à un nouveau déblocage en bonus. Si vous avez déjà débloqué toutes les armes, alors il est temps de penser à augmenter votre taux d\\'intérêt. "
+   ]
+  ],
+  [
+   [
+    "DSarahNeutre",
+    "Votre soeur regarde souvent par la fenêtre, en direction du sud .. je trouve ça mignon dans le fond"
+   ],
+   [
+    "GMickNeutre1",
+    "Il y a beaucoup de choses que vous trouvez \\\"mignon\\\" dans cette histoire chaotique? "
+   ],
+   [
+    "DSarahPepsodent",
+    "... hum, vous par exemple ...\\n\\n... non ne râlez pas, je plaisante ! "
+   ]
+  ],
+  [
+   [
+    "SAlexAffole",
+    "Je nous vois mal résister très longtemps, leurs troupes sont acharnées, ... Zhou Fu Lin, ... je l\\'ai rencontré une fois, il ne lâchera pas, qu\\'importe ses pertes .... Andrew, ce fameux cryptage dont vous m\\'avez parlé ... vous les avez appliqué à tout les codes de lancement? "
+   ],
+   [
+    "DAndrewRapport",
+    "Tout est dans mon boîtier Gouverneur ! "
+   ]
+  ],
+  [
+   [
+    "QZhuPoing",
+    "Les américains sont braves, ils se défendent avec une ardeur impressionnante ... quand est –il de votre renfort monsieur? "
+   ],
+   [
+    "PShenNeutre",
+    "J\\'ai entendu dire que Tanaka avait quitté le port avec son équipage, .. les autres officiers Japonais pensent qu\\'il s\\'agit d\\'un simple exercice .. il arrivera bientôt"
+   ]
+  ],
+  [
+   [
+    "DMickAutoritaire",
+    "Sarah, vous m\\'avez fait réfléchir, ... "
+   ],
+   [
+    "GSarahSurprise",
+    "Euh, vous voulez dire, ... quand on discutait l\\'autre jour de vous et moi? *rougit*"
+   ],
+   [
+    "DMickNeutre1",
+    "Pardon? Non pas du tout, je veux dire que vous aviez raison concernant notre retraite, il vaut mieux l\\'assurer, j\\'ai ordonné aux hélicoptères de se tenir prêt à évacuer à tout moment. "
+   ],
+   [
+    "GSarahEmbarasse",
+    "Oh, pardon ... enfin, nous ne mourrons pas ici, c\\'est plutôt une bonne nouvelle ... "
+   ],
+   [
+    "DMickNarquois",
+    "Que comptez vous faire ensuite? Retourner à Washington j\\'imagine? "
+   ],
+   [
+    "GSarahNeutre",
+    "Ca ne m\\'intéresse pas, je ne me pose pas de question, ... pour le moment ma place est ici avec vous "
+   ],
+   [
+    "DMickHesitant",
+    "Oh ... euh ... trop aimable ...\\n\\nEt vous Alexander, vous n\\'y voyez pas d\\'objection? "
+   ],
+   [
+    "SAlexNeutre1",
+    "Avons-nous le choix? De toutes façons ils n\\'ont pas les codes, ... Andrew a ajouté une double couche de cryptage, ça me rassure un peu plus qu\\'auparavant, d\\'après lui c\\'est inviolable. "
+   ],
+   [
+    "RAndrewExplicatif",
+    "Je fais un peu d\\'informatique à mes heures perdues, c\\'est pour ça ....\\nAh euh au passage, je ne sais pas ce qu\\'il se passe mais la prochaine vague d\\'assaut n\\'est pas armée, ce sont des jeeps et des camions, tout simplement"
+   ]
+  ],
+  [
+   [
+    "RAndrewEttone",
+    "ALERTE !! Il y a un monstre énorme sur mon écho radar, j\\'ai jamais vu ça de ma vie ! "
+   ],
+   [
+    "GMickEnnerve",
+    "D\\'où se dirige il? "
+   ],
+   [
+    "RAndrewRaleur",
+    "euh ... c\\'est sur l\\'eau en fait, pas sur la terre, ... la dernière fois que j\\'ai vu un truc comme ça c\\'était dans Godzilla, et ça vous voyez, ça me rassure pas ! "
+   ],
+   [
+    "DSarahEmbarasse",
+    "Michael, dites aux hélicos de faire tourner les moteurs, je vous en prie"
+   ],
+   [
+    "GMickAutoritaire",
+    "Entendu, c\\'est plus sure .. "
+   ],
+   [
+    "DSarahSurprise",
+    ".. au juste, où est votre soeur? "
+   ]
+  ]
+ ],
+ "en": [
+  [],
+  [
+   [
+    "Xv",
+    "Here it is, an official statement from Beijing which commands all American and European forces and industries to pull out from Chinese territory. The diplomatic situation keeps deteriorating since the deep disagreement between the superpowers concerning setting-up of oil-industries in Iraq."
+   ],
+   [
+    "Ev",
+    "Chinese president, Hu Jintao, accuses openly the American-European treaty of what he calls a conspiracy aiming at stopping massively the economic growth of China. European and American civilians have already started to be repatriated to their home countries. As for NATO military forces, it is just a matter of time."
+   ],
+   [
+    "Cv",
+    "The new US president, Mrs Hillary Clinton, wishes to solve this tension at a diplomatic ground and as soon as possible, and will organize meetings with Heads of European States starting beginning of next week. A meeting with the new Japanese Prime Minister, Yasuo Fukuda, was also announced."
+   ],
+   [
+    "Yv",
+    "The entire world had already feared Chinese anger when French president Nicolas Sarkozy concluded with the USA a treaty of exclusive Euro-American commercialization in Iraq pulling away Asian industrialists. It seems that the reaction will not take long."
+   ],
+   [
+    "Lv",
+    "*Manchuria, north-east of China. American base “blue star”*"
+   ],
+   [
+    "SAlexEttonement",
+    "This is the worst thing that could have ever happened.\\n\\n... ... hum? What are you going to do commander?"
+   ],
+   [
+    "DMickNeutre1",
+    "What am I going to do? You’ve heard just like me, we have to evacuate the base as fast as possible, the order has been given!"
+   ],
+   [
+    "SAlexStoppant",
+    "It’s out of question, we cannot leave this camp to Chinese."
+   ],
+   [
+    "DMickAutoritaire",
+    "This camp is situated on their territory, governor. Until further notice, I am giving orders, you are but my “guest”."
+   ],
+   [
+    "SAlexNeutre1",
+    "Mr Brenson, be reasonable, you know very well that this position of governor is but a cover of my more… secret activities, I am in possession of a lot of information, Washington has not given any directives so far but I can assure you that we have to keep this base."
+   ],
+   [
+    "DMickNeutre2",
+    "… What do you mean exactly? What kind of information do you have ?"
+   ],
+   [
+    "SAlexSecret",
+    "It’s too early to talk about this, maybe this will not be useful. But I swear, give me some time, do not give this base back to Chinese."
+   ],
+   [
+    "GElisaEtonne",
+    "*coming in* Michael? \\nOh, Mr Grey, you are here too."
+   ],
+   [
+    "DMickNeutre1",
+    "Ah, Elisabeth, you look anxious."
+   ],
+   [
+    "GElisaNeutre",
+    "Evacuation order, I wonder if this will get worse... "
+   ],
+   [
+    "DMickNarquois",
+    "Don’t worry, nothing can happen to you"
+   ],
+   [
+    "GElisaAnxieuse",
+    "Exactly, the helicopter pilots ask you if they can turn on the engines? "
+   ],
+   [
+    "DMickHesitant",
+    "hum … it means that…"
+   ],
+   [
+    "SAlexConvainquant",
+    "We don’t leave."
+   ],
+   [
+    "GElisaEtonne",
+    "What?"
+   ],
+   [
+    "DMickNeutre2",
+    "We will stay a little bit hoping that no vehicles will come and force us to leave"
+   ],
+   [
+    "GElisaIndignee",
+    "But this is stupid! And what if it’s the case?"
+   ],
+   [
+    "SAlexNeutre1",
+    "We will resist…"
+   ],
+   [
+    "DMickAutoritaire",
+    "Alexander, calm down please, your eagerness for fight says nothing to me that would be worthwhile. We will first try to discuss. "
+   ],
+   [
+    "SAlexNeutre2",
+    "You will get nothing if you negotiate, the order is clear, we have to pull back and we will refuse to obey Beijing."
+   ],
+   [
+    "GElisaIndignee",
+    "This is crazy!!! What are you trying to provoke?"
+   ],
+   [
+    "SAlexStoppant",
+    "I cannot say too much..."
+   ],
+   [
+    "GElisaSupplie",
+    "Michael, you are the commander of this base, he cannot decide!"
+   ],
+   [
+    "DMickHesitant",
+    "hum, patience sister, we will just stay for a little bit and see how things evolve"
+   ],
+   [
+    "SAlexNeutre1",
+    "Ah, Andrew you are here"
+   ],
+   [
+    "RAndrewRapport",
+    "Yes, governor! \\nCommander, Chinese vehicles are ready to force the camp, we tried to discuss but they refuse that we stay here, we have to leave urgently."
+   ],
+   [
+    "GMickAutoritaire",
+    "We will not do this… we will stop these vehicles. Has the new captain arrived? "
+   ],
+   [
+    "RAndrewExplicatif",
+    "Yes, commander! I will get him in! You should know that the main radio post is already under Chinese control, I tried to create a transmission station here to keep in touch with the base south."
+   ],
+   [
+    "GMickNeutre1",
+    "Well done Andrew, explain orders to the new captain, he has to keep the camp. If only one vehicle reaches us in the north, we are lost. "
+   ],
+   [
+    "RAndrewRapport",
+    "Yes, commander!"
+   ],
+   [
+    "RAndrewFace",
+    "*face* Ah, captain… I know that you have just arrived but I will brief you quickly. You will have the central command that will give you a view of the base from the air. You can move the map with the mouse or with directional arrows. \\nThe base cannot be taken, otherwise the mission will be a defeat. On your right you have a system of creating turrets to prevent vehicles from reaching their target. Observe the grass, it’s lighter in certain places, in those zones you can create turrets. \\nWell, don’t forget that you can delete with the space button. \\n\\nI will continue to brief you during the first moments ! \\n\\nGood luck, captain!"
+   ]
+  ],
+  [
+   [
+    "RAndrewFace",
+    "You will find a help section in the menu. It will indicate you the shortcuts’ keys and information about the enemy.\\nNotably, you will understand how to increase or reduce zoom of your system of air vision by pressing the G key.\\nOtherwise, with the S key you can sell a selected turret for 3/4 of the price. Be careful, its resale price will be reduced if the turret looses any life points."
+   ]
+  ],
+  [
+   [
+    "RMickFace",
+    "Capitain, glad to see you… be careful, Chinese vehicles come sometimes from the western road and not only from south. Starting from this point, their distance is lower to reach our camp from north, take note of this!"
+   ]
+  ],
+  [
+   [
+    "GMickNeutre1",
+    "What are we doing..."
+   ],
+   [
+    "RAndrewRapport",
+    "Commander, helicopter pilots repeat their evacuation request, engines are hot, ...and so they are also!"
+   ],
+   [
+    "GMickNeutre2",
+    "... Tell them we take off in 3 hours"
+   ],
+   [
+    "DAlexAffole",
+    "Michael, I beg you.. ! We cannot leave this camp!"
+   ],
+   [
+    "GMickEnnerve",
+    "I gave the order to destroy Chinese units governor, these men hadn’t done anything wrong, do you understand what this means? It is OUT OF QUESTION to go any further!  We evacuate!"
+   ],
+   [
+    "DAlexEttonement",
+    "..you don’t give me the choice.."
+   ],
+   [
+    "GMickHesitant",
+    "I beg your pardon governor ?"
+   ],
+   [
+    "DAlexSecret",
+    "I will tell you everything, and stop calling me governor, you know that this title is but a cover of my activities"
+   ],
+   [
+    "GMickNeutre1",
+    "I’m listening to you, ...governor..."
+   ],
+   [
+    "DAlexConvainquant",
+    "hum ... ... the truth is that Beijing wants to get back this zone for a very simple reason, this base was set up a few years ago to secretly take over control of 64 Chinese nuclear missiles, obviously my men and I locked the launching with new secret codes that only I know… but nothing guarantees that their engineers will not break those codes."
+   ],
+   [
+    "GMickHesitant",
+    "... ? "
+   ],
+   [
+    "RAndrewEttone",
+    "64 nuclear missiles ? Woow!\\n\\n... euh I’m sorry commander"
+   ],
+   [
+    "DAlexStoppant",
+    "Our trouble is that China had a small number of nuclear arms, they’ve never denied it, but they were supposed to improve their self-defence.\\nManchuria site is unfortunately something completely different, it is the matter of 64 long-distance ballistic missiles \\\"GUANG RONG\\\" which can easily reach any place of the globe, it has a strike capacity that not many countries have, we cannot leave it to them taking into consideration the current tensions."
+   ],
+   [
+    "GMickNeutre2",
+    "\\\"GUANG RONG\\\", this means \\\" Glory \\\" in Chinese if I’m not mistaken... what a fool could pretend that disposing a nuclear weapon is a glory …?"
+   ],
+   [
+    "DAlexEttonement",
+    "Be that as it may, now you can understand my scepticism about giving this base back to Chinese"
+   ],
+   [
+    "SElisaVexe",
+    "Nonetheless, this base belongs to them governor! We have no right to take this territory for us on the pretext of judging this dangerous!"
+   ],
+   [
+    "GMickHesitant",
+    "Elisabeth, please..., the situation is more complicated than that... especially that staying here risks to provoke a more important conflict…."
+   ],
+   [
+    "DAlexAffole",
+    "the conflict is already latent, I doubt China stops there anyway."
+   ],
+   [
+    "GMickNeutre1",
+    "What if they stopped there ? Our act wouldn’t cause any more problems that it would resolve, would it?"
+   ],
+   [
+    "DAlexNeutre2",
+    "You are the commander, now, I cannot decide for you."
+   ],
+   [
+    "SElisaSupplie",
+    "Michael ... we will cause more problems again..."
+   ],
+   [
+    "GMickAutoritaire",
+    "Andrew, give the order to..."
+   ],
+   [
+    "RAndrewEttone",
+    "Yes, commander ?"
+   ],
+   [
+    "GMickAutoritaire",
+    "Give the order to turn off the engines and to go back to the defensive turrets, we will keep the camp until we receive direct orders from Washington"
+   ],
+   [
+    "RAndrewRapport",
+    "Alright commander !"
+   ],
+   [
+    "RAndrewFace",
+    "Ah, captain, I have bad news for you, armed Chinese units are getting closer to the camp. You should know that you can repair the turrets, it will cost you 2 dollars for each life point. This price is sometimes less interesting than buying a new turret but you should know that every time you lose a turret your general score is considerably affected, you have to decide which option to choose.\\n\\nGood luck captain!"
+   ]
+  ],
+  [
+   [
+    "DAndrewFace",
+    "Captain, the \\\"R \\\" key allows you to repair a selected turret. In addition, you can impose an automatic repair of a turret by activating an “auto-repair” mode. Watch out the price it might cost you. Every time a turret is auto-repaired, a blue magnetic field appears around it."
+   ]
+  ],
+  [
+   [
+    "SAlexFace",
+    "Try to minimize your losses. The life of each of our soldiers is important. Your score is there: the loss you have suffered .."
+   ]
+  ],
+  [
+   [
+    "SMickFace",
+    "Chinese received light armoured vehicles. Being confronted to an increasing conflict, we added 75-milimeter cannons. They are both fast and light. Make good use of them."
+   ]
+  ],
+  [
+   [
+    "GAndrewRaleur",
+    "Other units are arriving... It seems that these are the last ones, at least for the moment.."
+   ]
+  ],
+  [
+   [
+    "Yv",
+    "Chinese declaration of war provoked a frisky fear in the international community. The United States of America and Europe are targeted by the giant following a refusal to evacuate a military base from the Manchuria Province. The allied axis has automatically been created between the United States and Europe, supported by Japan and Australia."
+   ],
+   [
+    "Bv",
+    "Being confronted to the arrogance of the American imperialism which refused to leave the Chinese territory, North Korea and Iran joined Beijing in an axis named “new free world”. Iran has already been noticed while its attempt to access the nuclear technology and it declares being offended by the Western behaviour which “forbids other countries to possess what they already possess”."
+   ],
+   [
+    "Xv",
+    "Even if no combats have yet been declared in, since now well-known Manchuria, it seems that this war has everything to be qualified as the “Third World War”. We can only hope that the conflict will find a peaceful solution as soon as possible."
+   ],
+   [
+    "SAlexConvainquant",
+    "What had to happen, happened...."
+   ],
+   [
+    "DElisaColere",
+    "Oh, really, ? Because you will make us believe that we could not avoid this ? We could have evacuated instead of making all this shit !!"
+   ],
+   [
+    "RAndrewRaleur",
+    "I don’t want to show off, there are still 64 intercontinental missiles which lay around, but it’s up to you…"
+   ],
+   [
+    "GMickNeutre1",
+    "Andrew, we can do without your comments, thanks"
+   ],
+   [
+    "RAndrewExplicatif",
+    "I’m sorry commander, ... hum concerning this subject, my information unit received a radio massage from Chinese forces, they are asking us to leave for the last time…. Honestly, What do I answer them?"
+   ],
+   [
+    "SAlexEttonement",
+    "What do you think ?"
+   ],
+   [
+    "DElisaIndignee",
+    "We run off, that’s what we answer them !! I have an impression of being an invader here!"
+   ],
+   [
+    "GMickAutoritaire",
+    "She’s not wrong..."
+   ],
+   [
+    "SAlexAffole",
+    "You are not really thinking about leaving now?"
+   ],
+   [
+    "RAndrewEttone",
+    "Euh, commander, I’m sorry to interrupt you but the envoy from Washington has just arrived behind the enemy forces, our fighters covered him from the air, oh and by the way he, ah no, it’s she… she arrives."
+   ],
+   [
+    "DSarahNeutreSouriante",
+    "*coming in* Michael Breson I imagine ? Nice to meet you, I am Mrs Clinton’s counsellor."
+   ],
+   [
+    "SAlexNeutre1",
+    "Counsellor ? That young ?"
+   ],
+   [
+    "DSarahNeutre",
+    "What do you mean? I succeeded quickly in my life!\\nI’m here to give you some directives, Washington didn’t want to declare officially but now as you decided to stay, we have to confess that this is convenient for us."
+   ],
+   [
+    "GMickNeutre2",
+    "So we’re staying"
+   ],
+   [
+    "DSarahEmbarasse",
+    "That’s bad.. but we are staying. We cannot allow ourselves to leave the missiles to Chinese"
+   ],
+   [
+    "GElisaColere",
+    "Why not ? They belong to them ! Did anyone forbid us to have ours ?"
+   ],
+   [
+    "DSarahSurprise",
+    "And you are ... ?"
+   ],
+   [
+    "GElisaVexe",
+    "Elisabeth Brenson, the commander’s sister"
+   ],
+   [
+    "DSarahNeutre",
+    "She’s cute... darling, you will learn that politics is a bit more complicated than this. By the way, I saw flowers planted in the camp when I was flying over it. Were they planted by you?"
+   ],
+   [
+    "GElisaEtonne",
+    "euh ... yes"
+   ],
+   [
+    "DSarahPepsodent",
+    "Wonderful !"
+   ],
+   [
+    "RAndrewRaleur",
+    "Euh, ladies, I don’t want be unpleasant but we have an echo signal on the radar, apparently they didn’t wait for our reply."
+   ]
+  ],
+  [
+   [
+    "DElisaSupplie",
+    "Michael, you can stop everything, we are killing people because we don’t want to give them back their territory."
+   ],
+   [
+    "GMickNeutre1",
+    "My little sister, if we don’t do this, more people could die."
+   ],
+   [
+    "DElisaAnxieuse",
+    "Or could not ! I remind you that till now we have been the only ones who used a nuclear weapon"
+   ],
+   [
+    "SSarahEmbarasse",
+    "Elisabeth, I know that it’s not easy to admit but gears are turned on, we cannot go backwards anymore. China would have never allowed any negotiations of defusing its arms, this would have created fear and instability in the whole world…  "
+   ]
+  ],
+  [
+   [
+    "RMickFace",
+    "Captain, Chinese chose a heavier combat vehicle. To respond to this, we suggest to unlock the 105-milimeter cannon."
+   ]
+  ],
+  [
+   [
+    "SSarahNeutre",
+    "The wave of assault doesn’t stop ... they are determined ... what could be more normal? *sigh*"
+   ]
+  ],
+  [
+   [
+    "GElisaIndignee",
+    "They are evidently determined, they do but defend themselves against our aggression, you are doing the most stupid thing ever in the 21st century…."
+   ]
+  ],
+  [
+   [
+    "SAlexSecret",
+    "what do you think about it ?"
+   ],
+   [
+    "DSarahNeutre",
+    "Well, I have to say that I don’t know anymore… "
+   ],
+   [
+    "RMickFace",
+    "Ah, Captain, I wanted to congratulate you on your accomplished task. Don’t forget that you can save your round if needed."
+   ]
+  ],
+  [
+   [
+    "Xv",
+    "This is the biggest news since a few weeks, other conflicts broke out around Iran and even in the Northern Iraq where Iranian helicopters attacked American positions. Columbian president, Hugo Chavez, joint the axis of “new free world” after an intense meeting with Mahmoud Ahmadinedjad. Beijing declared being satisfied by what it calls an assumption of consciousness of “sensible” nations."
+   ],
+   [
+    "RSarahEmbarasse",
+    "This looks bad, we risk to see new conflicts emerging in Mexico or in South America, there is a lot of American influence there… Israel and Russia officially declared their support, Vladimir Putin criticised Chinese politics openly and Nicolas Sarkozy still affirms that Chinese behaviour is unacceptable"
+   ],
+   [
+    "DElisaVexe",
+    "Many good things to renew the dialogue... so this is very smart!"
+   ],
+   [
+    "RSarahNeutre",
+    "Hum, I must admit, they don’t arrange things… Angela Merkens is the only one who wants to return to diplomacy, she even invited members of Chinese Parliament to Berlin for discussions."
+   ],
+   [
+    "GMickNeutre1",
+    "What did they come up with ?"
+   ],
+   [
+    "RSarahSurprise",
+    "Actually, they refused the invitation"
+   ],
+   [
+    "DAndrewRapport",
+    "Hum, new units have rallied in the southern part of the camp"
+   ],
+   [
+    "GMickNeutre2",
+    "Here we go again .."
+   ]
+  ],
+  [
+   [
+    "DMickFace",
+    "We suggest you a new double 105-milimeter cannon. You will need it to fight new heavy Chinese tanks... watch out they are powerful and resistant."
+   ]
+  ],
+  [
+   [
+    "GSarahSurprise",
+    "It’s weird, according to the TV news, Shen Ming is getting more and more importance in Chinese international policy."
+   ],
+   [
+    "SMickHesitant",
+    "Shen Ming? "
+   ],
+   [
+    "DElisaNeutre",
+    "President Jintao’s nephew..."
+   ],
+   [
+    "Mv",
+    "He took over the command of armed forces at the beginning of 2008 under approval of Chinese Communist Party. He studied at the University of Beijing. He’s a determined man but gentle in the same time."
+   ],
+   [
+    "SMickNeutre1",
+    "... gentle ? euh, you mean..."
+   ],
+   [
+    "GSarahPepsodent",
+    "So tell me my dear, you seem to be very interested by the life of this Shen Ming !"
+   ],
+   [
+    "DElisaEtonne",
+    "Oh easy, you have asked a question..."
+   ],
+   [
+    "SAlexNeutre1",
+    "His right-hand man is less \\\" gentle \\\". The famous general Zhou Fu Lin, …"
+   ],
+   [
+    "Hv",
+    "An insensitive and strict man, he is said to have executed 100 prisoners who had refused punishment judged to be “unfair”.\\nDuring the siege of Korea at the end of 2007, he achieved to win 17 victories in less than three months. His men devote an immense admiration towards him and redouble their efforts on the battlefield."
+   ],
+   [
+    "RAndrewEttone",
+    "Euh, is this the one who commands the forces upon us ?"
+   ],
+   [
+    "SAlexStoppant",
+    "No, not now, it seems that he stayed in Beijing."
+   ],
+   [
+    "RAndrewRaleur",
+    "Meanwhile, I have new forces on my echo radar… it’s never calm here"
+   ],
+   [
+    "SMickNarquois",
+    "Andrew you are a moaner!"
+   ],
+   [
+    "RAndrewExplicatif",
+    "I used to be a communication engineer, not a radar-operator on the front line!"
+   ],
+   [
+    "SMickNarquois",
+    "This is better than being a computer scientist Andrew, you should be proud !"
+   ]
+  ],
+  [
+   [
+    "RAlexFace",
+    "Captain, you will have the choice to unlock a weapon or to increase your interest rate. A higher interest rate will bring you more money, but you should know that Iranian helicopters came to Chinese forces’ assistance. Iranian pilots are among the bravest and the most talented in the world! Captain, I recommend you to unlock the weapon."
+   ],
+   [
+    "RAlexFace",
+    "It is a \\\"crotale\\\" missile, capable to hit on the ground as well as in the air. Only machine guns can destroy air targets, take this into consideration while making your choice. Finally, note that a \\\"crotale\\\" missile is four times more powerful when it concerns an air target …"
+   ]
+  ],
+  [
+   [
+    "QZhuRapport",
+    "the courage of our men do honour to our powerful nation, but we need more! American enemy resists… but as our men know well now the whole issue of the prestigious Manchuria province, they fight with more fervour. We have to get our glory back, yours, ours and the one of our country."
+   ],
+   [
+    "PShenNeutre",
+    "… you doing an excellent job general Lin, I don’t regret to have given it to you.."
+   ]
+  ],
+  [
+   [
+    "DSarahNeutreSouriante",
+    "Captain, I have good news ! A new choice of unlocking will be made, Germany has sent 125-milimeter Howitzers.\\nHum, however, you can unlock them only if you have already unlocked the previous weapon, this is the bad side of news… *embarrassed*"
+   ]
+  ],
+  [
+   [
+    "PShenSurpris",
+    "I’m surprised by such a resistance. Only Mr Grey Alexander must have been aware of the importance of this place… Would he have told anything?\\n… my good Lin, we will have to redouble efforts but ask your men not to open the fire directly on their headquarters."
+   ],
+   [
+    "QZhuSalut",
+    "Yes sir, I know perfectly well that we cannot open the fire over the headquarters on no condition! "
+   ]
+  ],
+  [
+   [
+    "GSarahEmbarasse",
+    "Elisabeth is becoming more and more silent as days go by. I’m worried about your sister Michael, … "
+   ],
+   [
+    "DMickNarquois",
+    "Just leave her, it’s nothing, it sometimes happens to her, … we are here between life and death, what could be more normal. I’m impressed by your energy Sarah, I have to say that you are impressive."
+   ],
+   [
+    "GSarahSurprise",
+    "oh, really ? Hum… you’ll make me blush"
+   ]
+  ],
+  [
+   [
+    "SSarahEmbarasse",
+    "India pretends not to be interested by this conflict, its war against Pakistan caused it a lot of problems"
+   ],
+   [
+    "DAlexStoppant",
+    "Good for us, this giant would not have joint us."
+   ],
+   [
+    "SSarahPepsodent",
+    "Anyway, the war is going on here, if TV cameras could come, they would do it … It’s a shame because, I have a nice right profile."
+   ],
+   [
+    "DAlexEttonement",
+    "Can you imagine Sarah, that this base of Manchuria is, no doubt, one of the most important places in the world? And we are its main actors!"
+   ],
+   [
+    "SSarahNeutre",
+    "It seems to make you happy, ... Alexander, you are a worrisome man"
+   ]
+  ],
+  [
+   [
+    "GAndrewRaleur",
+    "And another wave of tanks that launche missiles, it doesn’t stop, we will all pass through this, my mum was right, I should have become a computer scientist ..."
+   ]
+  ],
+  [
+   [
+    "GMickFace",
+    "Captain, be careful, we have been told that two North-Korean ships came to enemy’s forces assistance. They will arrive soon in the south-east bay. France and the United Kingdom are sending you a financial subsidy for the confrontation… Good luck…"
+   ]
+  ],
+  [
+   [
+    "SAlexAffole",
+    "I’m telling you that it should not have been like that!"
+   ],
+   [
+    "DSarahEmbarasse",
+    "Alexander, don’t’ be upset, the most important is to stop them "
+   ],
+   [
+    "SAlexConvainquant",
+    "The ships know our radio frequencies and could destroy our advanced security positions, you think we should be happy? How did they manage to know them? "
+   ],
+   [
+    "GMickNeutre1",
+    "... a traitor ? ... Andrew ?"
+   ],
+   [
+    "RAndrewEttone",
+    "Me ? Not at all, what an idea !"
+   ],
+   [
+    "GMickNarquois",
+    "No, Andrew, not you, but one of your men in charge of communication, after all, they know the radio frequencies, … this doesn’t say anything to you?"
+   ],
+   [
+    "RAndrewExplicatif",
+    "Not really, all my men did the same classes as I did, we know each other well, I can’t see who could hand over this information… maybe no one handed over anything?"
+   ],
+   [
+    "SAlexNeutre1",
+    "They were simply lucky to get on the good frequencies in a right moment..., Andrew, please, be serious, someone must have told them."
+   ],
+   [
+    "DSarahNeutre",
+    "*quietly* Hum, Michael, I have to talk to you for a while."
+   ],
+   [
+    "GMickNeutre2",
+    "No problem Sarah, we can even talk now if you want"
+   ],
+   [
+    "DSarahSurprise",
+    "*discreetly* hum, but I mean in private..."
+   ],
+   [
+    "SAlexNeutre2",
+    "Bad news, I’ve just had an informer on the phone,…. Zhu Fu Lin and the president’s nephew are in the south of the camp, they came personally to encourage their forces"
+   ],
+   [
+    "RAndrewRaleur",
+    "What ? That crazy guy is here ?"
+   ],
+   [
+    "DMickNeutre1",
+    "you mean they are just a few hundreds of meters south from the camp ?"
+   ],
+   [
+    "SAlexEttonement",
+    "I’m afraid so..."
+   ],
+   [
+    "DSarahSurprise",
+    "Hum, gentlemen, what’s this music?"
+   ]
+  ],
+  [
+   [
+    "GMickAutoritaire",
+    "Oh, I have to inform our captain, the radars have arrived, they will allow him to use MLRS and Pluton missiles."
+   ],
+   [
+    "DAndrewRapport",
+    "Oh, yes, that’s true, I forgot to inform him, actually the MLRS and Pluton missiles are based on a range of the radar conceived for shooting.\\nIn addition, the choice of unlocking a weapon will also be proposed, he will be satisfied, the Captain. "
+   ]
+  ],
+  [
+   [
+    "RAndrewRaleur",
+    "I can’t stop this music !"
+   ],
+   [
+    "GSarahNeutreSouriante",
+    "It’s a beautiful love song though… hum… your sister has gone to her bedroom to hide, how curious this is… tell me Michael, your sister did her law studies at the University of Beijing, didn’t she?"
+   ],
+   [
+    "DMickHesitant",
+    "Euh, … yes, yes, that’s right, she finished several years ago…. Why?"
+   ],
+   [
+    "GSarahNeutre",
+    "… hum, no nothing "
+   ]
+  ],
+  [
+   [
+    "PShenNeutre",
+    "It’ll be over soon... patience, I just need some little patience…"
+   ]
+  ],
+  [
+   [
+    "GSarahPepsodent",
+    "Oh, Elisabeth, there you are... where have you been ? You have to like this music, I suppose? *smiling*"
+   ],
+   [
+    "DElisaAnxieuse",
+    "..."
+   ],
+   [
+    "SAlexStoppant",
+    "Michael!! Warn your captain, Chinese heavy tanks are ready earlier than supposed, apparently their laboratories succeeded to end their “Mammouth” project, those tanks are monstrous …"
+   ]
+  ],
+  [
+   [
+    "RAndrewExplicatif",
+    "Yes !! I’ve finally stopped this stupid music! It was played on the radio canal which was located on all the spots of the base… our soldiers must have not understood. Oh, by the way, Israel is sending us its new laser technology to unlock, they call it MTHEL. "
+   ],
+   [
+    "SAlexNeutre1",
+    "A laser?"
+   ],
+   [
+    "RAndrewExplicatif",
+    "Yes, a bit like in Star Wars"
+   ],
+   [
+    "SAlexConvainquant",
+    "Marvellous. On my side, I’ve just had Russian colonel of air forces on the phone, they will send us some reinforcement."
+   ],
+   [
+    "Av",
+    "Her name is Elena “Angel” Pokrovskaya, she’s captain and pilot of Su37 “terminator”. We can ask her aerial targeted bombardments every minute, we only have to indicate the bombardment zone. Of course those bombs hit only enemy targets."
+   ],
+   [
+    "RAndrewEttone",
+    "Cute fighter!"
+   ],
+   [
+    "GSarahSurprise",
+    "*in a low voice* Oh Michael, I’ve just discovered something unbelievable… I read your sister’s diary…"
+   ],
+   [
+    "DMickNeutre1",
+    "Pardon me ? It often happens to you to search in people’s belongings?!"
+   ],
+   [
+    "GSarahNeutreSouriante",
+    "Eh... Yes a bad habit that I’ve had since my childhood...\\n... but sometimes it’s very useful ! Guess what, while studying in Beijing, your sister…"
+   ],
+   [
+    "DMickNeutre2",
+    "Yes what?"
+   ],
+   [
+    "GSarahSurprise",
+    "Guess who was in the same lecture hall, Shen Ming, president’s nephew!"
+   ],
+   [
+    "DMickNeutre1",
+    "Are you kidding ?"
+   ],
+   [
+    "GSarahNeutre",
+    "No, I’m not. I’m very surprised that you didn’t now anything, they went out together! And the worst is that it’s not written anywhere that they broke up!"
+   ],
+   [
+    "DMickHesitant",
+    "Eh, but... it’s impossible.. ?"
+   ],
+   [
+    "GSarahEmbarasse",
+    "Michael, since the very beginning Elisabeth is against that we stay, radio frequencies have been sent to Korean ships, then this music while Shen Ming is just in the south of the camp, … you have to be realistic, your sister is with the president’s nephew, the president of the country we’re fighting against and in addition the nephew is taking more and more power… you will have to give me details Michael !"
+   ]
+  ],
+  [
+   [
+    "DMickNeutre1",
+    "*discussing for a long time* It was several years ago, at that period China didn’t have any problems with the United States and a free movement of visitors was much more easier especially studying here was quite easy.\\n\\nAs I was transferred to this base, I suggested Elisabeth to come and study in Beijing, anyway we didn’t have any family elsewhere."
+   ],
+   [
+    "SSarahSurprise",
+    "According to her diary, she met Shen Ming when she was in her second year… apparently it was love at first sight"
+   ],
+   [
+    "DMickHesitant",
+    "She never told me about that but it’s true that Beijing is not very close, she was living her life without telling me anything.."
+   ],
+   [
+    "SSarahEmbarasse",
+    "The problem is, you see, that playing nice music is one thing and giving radar frequencies is another, it’s much more annoying, if Alexander learns that he won’t hesitate to take strong measures against her whether she’s your sister or not."
+   ],
+   [
+    "DMickNeutre1",
+    "Exactly, I would be very grateful if… well… you know…"
+   ],
+   [
+    "SSarahNeutre",
+    "You can count on me Michael but you and me, we will have to act together because your little sister is as stubborn as a mule and I’m afraid she’s going to do more silly things, hum, by the way there she is, let’s stay all casually. "
+   ]
+  ],
+  [
+   [
+    "QZhuSalut",
+    "Once the camp is recaptured, do you really think you will be able to reactivate the missiles?"
+   ],
+   [
+    "PShenNeutre",
+    "It shouldn’t make any problems but we are not ready yet to recapture the camp, the resistance is well organized."
+   ],
+   [
+    "QZhuPoing",
+    "And that story with the Japanese admiral? I have to say that I was wondering how Japanese could help us…?"
+   ],
+   [
+    "PShenExplicatif",
+    "Forget the resentment and the past, Lin, .. this admiral is a part of many officers in the world that began to join us secretly, the vision of a fairer world doesn’t leave people of “enemy nationalities” unmoved, … this man is honorable and he should arrive soon"
+   ],
+   [
+    "QZhuRapport",
+    "Let’s suppose that he is but how could he help us ?"
+   ],
+   [
+    "PShenSurpris",
+    "Since the Japanese government modified their constitution finally leaving an opportunity of possessing an army, a secret cell planned to set up the famous Yamato project…  "
+   ],
+   [
+    "QZhuPoing",
+    "A battleship ? They will bring a battleship here ?"
+   ],
+   [
+    "PShenNeutre",
+    ".. if admiral Tanaka manages to do it at least, … "
+   ]
+  ],
+  [
+   [
+    "SAndrewFace",
+    "Captain ! Captain ! You won’t be satisfied but trucks equipped with MLRS battery will soon arrive. Try to destroy the radar-trucks which accompany them, if they are destroyed, MLRS will not be able to shoot at us! Ok, I know, it’s easier to say than to do, it’s always like that… but at least, I said it, you only have to do it! "
+   ]
+  ],
+  [
+   [
+    "PShenSurpris",
+    "Tell me, general Lin, are you sure you took good measures that won’t hurt her ? "
+   ],
+   [
+    "QZhuSalut",
+    "Absolutely, my men have the orders to shoot only at defensive structures. Moreover, any civilian leaving the base is arrested with tact."
+   ],
+   [
+    "PShenNeutre",
+    "... good ... "
+   ]
+  ],
+  [
+   [
+    "DAlexEttonement",
+    "Your new captain is doing an excellent job Michael… I’m impressed."
+   ],
+   [
+    "SMickNeutre2",
+    "I agree but I have to tell him unfortunately that a new column of artillery arrives via western bridge… he won’t like this"
+   ]
+  ],
+  [
+   [
+    "RSarahNeutreSouriante",
+    "Oh, captain there you are, I’ve been looking for you ! You have a choice to unlock the new weapon ! If you choose a complete round until now, so it concerns Pluton missile, it’s a ballistic missile which can be launched wherever with a considerable striking power and impact, … it seems that it’s French, I hope it works!"
+   ]
+  ],
+  [
+   [
+    "GSarahNeutre",
+    "Are you afraid of dying Michael?"
+   ],
+   [
+    "DMickNeutre2",
+    "I’m military .."
+   ],
+   [
+    "GSarahEmbarasse",
+    "I am afraid…"
+   ],
+   [
+    "DMickNeutre1",
+    "you know, Chinese units have not reached yet the defence zone, when we see that they do it, we will still have time to evacuate… but then we will leave the missiles to Chinese…"
+   ],
+   [
+    "RElisaVexe",
+    "And so what? They are theirs"
+   ],
+   [
+    "GSarahNeutre",
+    "hum, .. Elisabeth, please.."
+   ],
+   [
+    "SAlexSecret",
+    "hum ..? "
+   ],
+   [
+    "DMickNarquois",
+    "No nothing Alexander, read you newspaper."
+   ]
+  ],
+  [
+   [
+    "SAlexFace",
+    "Captain, we know that the situation is not easy , so you have the right to unlock a weapon again as a bonus. If you have already unlocked all the weapons, it’s time to think about increasing you interest rate."
+   ]
+  ],
+  [
+   [
+    "DSarahNeutre",
+    "Your sister often looks by the window, in south direction... It’s cute in effect."
+   ],
+   [
+    "GMickNeutre1",
+    "There are many “cute” things for you in this chaotic story?"
+   ],
+   [
+    "DSarahPepsodent",
+    "well, you for example..\\n\\n.. oh don’t be mad, I’m kidding…"
+   ]
+  ],
+  [
+   [
+    "SAlexAffole",
+    "I don’t think we’ll resist any long, their forces are fierce… Zhou Fu Lin, I’ve met him once, he will not abandon, whatever his losses are… Andrew, the famous encoding you told me about… you had applied it to all launching codes?"
+   ],
+   [
+    "DAndrewRapport",
+    "everything’s in my box, Governor!"
+   ]
+  ],
+  [
+   [
+    "QZhuPoing",
+    "American are brave, they defend themselves with an impressive ardour... what’s going on with your reinforcement sir?"
+   ],
+   [
+    "PShenNeutre",
+    "I heard that Tanaka had left the port with his equipment, … other Japanese officers think that it’s just a simple exercise.. he will be arriving soon . "
+   ]
+  ],
+  [
+   [
+    "DMickAutoritaire",
+    "Sarah, you made me wonder…"
+   ],
+   [
+    "GSarahSurprise",
+    "Uh, what do you mean ? last time we discussed you and me? *blushing*"
+   ],
+   [
+    "DMickNeutre1",
+    "Pardon me ? No, not at all, I mean you were right about our pull-back, it’s better to insure it, I gave helicopter pilots the order to be ready to evacuate at any time. "
+   ],
+   [
+    "GSarahEmbarasse",
+    "Oh, sorry.. anyway..., we won’t die here, it’s rather good news...."
+   ],
+   [
+    "DMickNarquois",
+    "What do you want to do after ? Return to Washington, I imagine?"
+   ],
+   [
+    "GSarahNeutre",
+    "I’m not interested, I’m not even thinking about that… for the moment my place is here with you."
+   ],
+   [
+    "DMickHesitant",
+    "Oh, uh... that’s sweet...\\n\\n.. And you Alexander, do you agree?"
+   ],
+   [
+    "SAlexNeutre1",
+    "Do we have any choice ? Anyway, they don’t have the codes… Andrew added a double cover of cipher, I’m reassured a bit more than before, according to him it’s inviolable"
+   ],
+   [
+    "RAndrewExplicatif",
+    "I do some computer science in my spare time, that’s why… \\nOh by the way, I don’t know what’s going on but the next assault wave is not armed, those are simply jeeps and trucks."
+   ]
+  ],
+  [
+   [
+    "RAndrewEttone",
+    "Alert !! There is a huge monster on my echo radar, I’ve never seen this in my entire life !"
+   ],
+   [
+    "GMickEnnerve",
+    "Where does it come from ? "
+   ],
+   [
+    "RAndrewRaleur",
+    "euh... actually it’s on the water, not on the ground, ... last time I saw something like this was in Godzilla, and you see, this does not reassure me!"
+   ],
+   [
+    "DSarahEmbarasse",
+    "Michael, tell the helicopters to turn their engines on, I beg you"
+   ],
+   [
+    "GMickAutoritaire",
+    "done, this is better..."
+   ],
+   [
+    "DSarahSurprise",
+    "... Where is your sister right now ?"
+   ]
+  ]
+ ]
+}

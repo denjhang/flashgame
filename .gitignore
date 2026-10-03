@@ -5,12 +5,25 @@ deobf/*
 !deobf/*.py
 !deobf/*.md
 !deobf/*.json
+tcs/decompiled/
+tcs/deobf/*
+!tcs/deobf/data/
+!tcs/deobf/*.py
+!tcs/deobf/*.md
+!tcs/deobf/*.json
 ffdec/
+tcs/ffdec/
 ffdec.zip
+tcs/ffdec.zip
 *.swf
 *.log
 __pycache__/
 # 各游戏反编译导出 (按游戏归档, 不入库)
+games/paper-war/export_scripts/
+games/rise-of-the-tower/scripts/
+games/rise-of-the-colony/scripts/
+games/游戏swf/*.swf
+games/游戏swf/*.apk
 paper-war/export_scripts/
 rise-of-the-tower/scripts/
 rise-of-the-colony/scripts/
@@ -20,7 +33,9 @@ tower-bloxx/j2me/jars/
 tower-bloxx/j2me/src/
 tower-bloxx/h5/node_modules/
 
-# J2ME 参考项目 (本地用, 不入库)
+# J2ME/Flash 参考项目 (本地用, 不入库)
 j2me_ref/
+flash/
 J2ME-Web-Core-main.zip
 freej2me-web-main.zip
+_archive/

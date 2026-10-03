@@ -1,0 +1,186 @@
+{
+ "units": {
+  "camion1": {
+   "shape": 403,
+   "bitmaps": [
+    "402"
+   ],
+   "w": null,
+   "h": null
+  },
+  "camion2": {
+   "shape": 405,
+   "bitmaps": [
+    "404"
+   ],
+   "w": null,
+   "h": null
+  },
+  "camion3": {
+   "shape": 407,
+   "bitmaps": [
+    "406"
+   ],
+   "w": null,
+   "h": null
+  },
+  "jeep": {
+   "shape": 408,
+   "bitmaps": [],
+   "w": null,
+   "h": null
+  },
+  "jeep2": {
+   "shape": 410,
+   "bitmaps": [
+    "409"
+   ],
+   "w": null,
+   "h": null
+  },
+  "bradley": {
+   "shape": 412,
+   "bitmaps": [
+    "411"
+   ],
+   "w": null,
+   "h": null
+  },
+  "amx10": {
+   "shape": 414,
+   "bitmaps": [
+    "413"
+   ],
+   "w": null,
+   "h": null
+  },
+  "abrams": {
+   "shape": 416,
+   "bitmaps": [
+    "415"
+   ],
+   "w": null,
+   "h": null
+  },
+  "t90": {
+   "shape": 418,
+   "bitmaps": [
+    "417"
+   ],
+   "w": null,
+   "h": null
+  },
+  "camionBlinde": {
+   "shape": 420,
+   "bitmaps": [
+    "419"
+   ],
+   "w": null,
+   "h": null
+  },
+  "tigre": {
+   "shape": 421,
+   "bitmaps": [],
+   "w": null,
+   "h": null
+  },
+  "navire": {
+   "shape": 423,
+   "bitmaps": [
+    "422"
+   ],
+   "w": null,
+   "h": null
+  },
+  "Yamato": {
+   "shape": 425,
+   "bitmaps": [
+    "424"
+   ],
+   "w": null,
+   "h": null
+  }
+ },
+ "turrets": {
+  "gatling": [
+   {
+    "shape": 56,
+    "bitmaps": []
+   }
+  ],
+  "canon75": [
+   {
+    "shape": 57,
+    "bitmaps": []
+   }
+  ],
+  "canon105": [
+   {
+    "shape": 58,
+    "bitmaps": []
+   }
+  ],
+  "canon105D": [
+   {
+    "shape": 59,
+    "bitmaps": []
+   }
+  ],
+  "radar": [
+   {
+    "shape": 61,
+    "bitmaps": [
+     "60"
+    ]
+   }
+  ],
+  "crotale": [
+   {
+    "shape": 62,
+    "bitmaps": []
+   }
+  ],
+  "canon125": [
+   {
+    "shape": 64,
+    "missing": true
+   },
+   {
+    "shape": 65,
+    "bitmaps": []
+   }
+  ],
+  "MLRS": [
+   {
+    "shape": 67,
+    "bitmaps": [
+     "66"
+    ]
+   }
+  ],
+  "pluton": [
+   {
+    "shape": 69,
+    "bitmaps": [
+     "68"
+    ]
+   },
+   {
+    "shape": 80,
+    "missing": true
+   }
+  ],
+  "MTHEL": [
+   {
+    "shape": 83,
+    "missing": true
+   },
+   {
+    "shape": 85,
+    "bitmaps": [
+     "84"
+    ]
+   }
+  ]
+ }
+}

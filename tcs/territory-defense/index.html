@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>领土防御 Territory Defense</title>
+<style>
+  html, body { height:100%; }
+  body { background:#000; margin:0; display:flex; align-items:center; justify-content:center;
+         font-family:monospace; user-select:none; overflow:hidden; }
+
+  /* 缩放容器: 舞台(地图+侧栏) + 底部 HUD; 宽高与 transform 由 fitStage() 动态设置 */
+  #fit { position:relative; transform-origin:center center; flex:none; }
+
+  /* 舞台: 地图区 (宽度动态, 由 fitStage 设 canvas.width) + 右侧栏 165 */
+  /* 底色 = 原版 SWF 舞台背景色 #441100 (canvas 未覆盖处与原版一致) */
+  #stage { position:relative; background:#441100; overflow:hidden; }
+  #cv { position:absolute; left:0; top:0; cursor:crosshair; }
+  /* 原版右侧栏 = DefineSprite_1079 底板直出 (170x602, FFDec 字节级)。
+     子区坐标 = 1079 PNG 像素测量 (x-85 归零): 小地图 (2,11)163x150,
+     标题条 y175(h23, 已烤入), 槽位 2x2 @ (9,201)(86,201)(9,265)(86,265) 75x62,
+     INFO 条 y332 (INFO 标签/◀▶ 已烤入), 信息框 (1,360)166x136, 底栏 y543..601。
+     动态控件绝对定位覆盖其上; 1026 按钮态 = cxform 变体: lock 乘 0x68(≈0.41) */
+  #side { position:absolute; right:0; top:0; width:170px; height:600px;
+          background:url('assets/ui/sidebar.png') no-repeat; display:block; overflow:visible; }
+  #minimapBox { position:absolute; left:2px; top:11px; width:163px; height:150px; }
+  #minimap { display:block; cursor:pointer; width:163px; height:150px; }
+  /* 标题条/INFO 标签已烤入底图 → 文本透明, 元素仅占位/供 JS 写页码 */
+  .panelTitle { background:transparent; color:transparent; text-align:center; font-weight:bold;
+                font-size:11px; padding:3px 0; letter-spacing:1px; }
+  #shopTitle { position:absolute; left:0; top:175px; width:170px; height:23px; line-height:23px; padding:0; }
+  #shop { position:absolute; left:9px; top:201px; width:152px; display:grid;
+          grid-template-columns:75px 75px; gap:2px; padding:0; background:transparent; }
+  .sel { cursor:pointer; position:relative; width:75px; height:62px; background:#000; }
+  .sel img { width:75px; height:62px; display:block; }
+  .sel:hover { filter:brightness(1.25) saturate(1.15); }
+  .sel.on { outline:2px solid #e80; outline-offset:-2px; }
+  .sel.lock { filter:brightness(0.41); }
+  .sel.lock:hover { filter:brightness(0.41); cursor:not-allowed; }
+  .sel .price { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center;
+             justify-content:center; background:rgba(0,0,0,.55); color:#fc6; font-size:10px; }
+  /* INFO 条 y332 h27: 标签已烤入; ◀▶ 原版 1078 位置 = 底图 (65,335)(116,335) 45x23 */
+  .panelHead { position:absolute; left:0; top:332px; width:166px; height:27px; }
+  .panelHead .panelTitle { position:absolute; left:4px; top:3px; width:58px; height:23px; padding:0; line-height:20px; }
+  .panelHead .arrow { position:absolute; top:3px; background:transparent; color:transparent; width:45px;
+                      height:23px; cursor:pointer; padding:0; border:none; user-select:none; }
+  .panelHead .arrow:active { background:rgba(255,255,255,.15); }
+  #pageL { left:65px; }
+  #pageR { left:116px; }
+  /* 页码点 (3 页, H5 附加; 原版无, 置于 INFO 条下方不遮挡) */
+  #pageDots { position:absolute; left:0; top:359px; width:166px; display:flex; gap:3px;
+              justify-content:center; padding:0; background:transparent; }
+  #pageDots i { width:5px; height:4px; border-radius:0; background:#666; display:block; }
+  #pageDots i.on { background:#e80; }
+  #infoBox { position:absolute; left:1px; top:363px; width:166px; height:132px;
+             background:transparent; color:#ccccdd; font-size:10.5px; line-height:1.35;
+             padding:2px 4px; overflow:hidden; box-sizing:border-box; }
+  #infoBox b { color:#e8e8ff; }
+  /* 金钱面板 = DefineSprite_1142 直出 (158x55, 原版舞台右下 (639,542));
+     EditText 烤入值已按底色清洗, 保留 LOSSES 矢量字; 三个动态文本按原位排布 */
+  #lossBox { position:absolute; left:6px; top:544px; width:158px; height:55px;
+             background:url('assets/ui/money_panel.png') no-repeat;
+             padding:0; font-size:10px; box-sizing:border-box; }
+  #lossBox .losses { position:absolute; left:56px; top:3px; right:4px; text-align:right;
+                     color:#ccccdd; font-size:10px; }
+  #lossBox .cash { position:absolute; left:8px; top:22px; color:#fff; font-weight:bold; font-size:14px; }
+  #lossBox .interest { position:absolute; right:6px; top:42px; color:#8a8f8a; font-size:10px; }
+  /* intresthint (1141): "+N" 上浮 ~31帧@24fps ≈ 1.3s 后回落为 interest 文本 */
+  #lossBox .floatHint { animation:hintFloat 1.3s ease-out; }
+  /* 原版 1141 三段变体 (1138/1139/1140) 同位不同色 → 颜色三相位 */
+  @keyframes hintColor { 0% { color:#ffd; } 40% { color:#fff; } 80% { color:#fc6; } 100% { color:#fc6; } }
+  #lossBox .floatHint { animation:hintFloat 1.3s ease-out, hintColor 1.3s linear; }
+  @keyframes hintFloat { from { transform:translateY(10px); opacity:.2; } 30% { opacity:1; } to { transform:translateY(-8px); opacity:0; } }
+  /* 原版开关按钮本体 (#4, N+73): 1058/1063/1068/1073 直出 247x23 → 缩放 166x23,
+     竖排 23px 行距 (= informations 内 menuZoom/menuHealth/menuArea 行距) */
+  .artBtn { position:absolute; left:2px; width:166px; height:23px; border:none; padding:0;
+            background-repeat:no-repeat; background-size:166px 23px; background-color:transparent;
+            cursor:pointer; }
+  .artBtn:hover { filter:brightness(1.35); }
+  .artBtn.on { outline:1px solid #e80; outline-offset:-1px; }
+  #tZoom   { top:496px; background-image:url('assets/ui/btn_zoom.png'); }
+  #tHp     { top:519px; background-image:url('assets/ui/btn_health.png'); }
+  #tArea   { top:542px; background-image:url('assets/ui/btn_area.png'); }
+  #tScroll { top:565px; background-image:url('assets/ui/btn_scroll.png'); }
+  /* 音乐面板开关: 小 ♪ 置于标题条右端 (原版无此钮, 面板由 UI 容器显隐) */
+  #mOpen { position:absolute; left:140px; top:176px; width:16px; height:20px; padding:0;
+           background:transparent; border:none; color:#ddd; font-size:12px; cursor:pointer; }
+  #mOpen:hover { color:#ff8; }
+  /* 帮助钮 (原版 helpB 1046 "?" 按钮图) + helpBoard 1103 弹出板 (463x283, 舞台中央) */
+  #hOpen { position:absolute; left:152px; top:176px; width:16px; height:20px; padding:0;
+           border:none; background:transparent; cursor:pointer; }
+  #hOpen img { width:16px; height:17px; display:block; }
+  #helpBoard { position:absolute; left:50%; top:300px; transform:translate(-50%,-50%);
+               display:none; z-index:55; cursor:pointer; }
+  #helpBoard.show { display:block; }
+  #helpImg { display:block; }
+  /* 1103 双页签热区 (原版底栏两梯形): 左=键位 f1, 右=敌方单位价目 f2 */
+  #tabKeys, #tabUnits { position:absolute; bottom:28px; height:22px; width:150px; cursor:pointer; }
+  #tabKeys { left:20px; }
+  #tabUnits { left:225px; }
+  #helpClose { color:#89a; font-size:10px; text-align:center; padding:2px 0; background:rgba(8,10,14,.8); }
+  #hbBtns { display:flex; gap:6px; padding:3px 6px; background:#151515; }
+  #hbBtns button { position:relative; background:transparent; border:none; padding:2px 3px; cursor:pointer; }
+  #hbBtns button:hover { filter:brightness(1.4); }
+  #hQualTxt, #hStoryTxt { position:absolute; left:56px; top:5px; color:#ccc; font-size:9px; font-family:monospace; }
+  /* 音乐/开关面板 — 原版 DefineSprite_1151 全景图 (178x203) + 原位热区。
+     权威 = FFDec SVG: 1145 歌曲按钮 109.65x21.05 @ (6.85, 7.05/34.65/61.7),
+     pauser @ (7.15, 91.5), 关闭钮 686 @ (144.8, 3.05) 26.75x26.75 */
+  #musicBox { position:absolute; left:0; top:0; width:0; height:0; background:transparent; }
+  /* 1151 面板为弹出层 (原版盖在地图上): 向左弹出侧栏 */
+  #musicPanel { position:absolute; right:172px; top:0; width:178px; height:203px;
+                font-family:monospace; display:none; }
+  #musicPanel.show { display:block; }
+  #musicPanelImg { position:absolute; left:0; top:0; }
+  .mpBtn { position:absolute; cursor:pointer; font-size:11px; line-height:21px; padding-left:5px;
+           white-space:nowrap; overflow:hidden; background:#030303; color:#8a8a8a; }
+  .mpBtn:hover { color:#fff; }
+  .mpBtn.pauser { background:#616161; color:#ddd; }
+  .mpBtn.close { background:transparent; }
+  /* 波间二选一面板 (原版 sprite 989 debloquerArme, 舞台居中 _x=400 _y=300) */
+  #unlockPanel { position:absolute; left:400px; top:300px; transform:translate(-50%,-50%);
+                 width:300px; background:#3a3a3a; border:3px solid #888;
+                 box-shadow:0 0 0 3px #111, 0 6px 22px rgba(0,0,0,.7);
+                 display:none; z-index:50; padding:10px; }
+  #unlockPanel.show { display:block; }
+  #upInfo { background:#101010; color:#cfc; font-size:12px; line-height:1.5;
+            padding:8px; margin-bottom:8px; white-space:pre-line; text-align:center;
+            border:1px solid #555; }
+  #unlockPanel .btns { display:flex; flex-direction:column; gap:6px; }
+  #unlockPanel button { background:#5a5a3a; color:#ffe; border:2px solid #999;
+                        font-family:monospace; font-size:12px; padding:7px; cursor:pointer; }
+  #unlockPanel button:hover:not(:disabled) { border-color:#e80; background:#6a6a4a; }
+  /* 原版 953 出兵条 (1106/1176): 125x35 黑条, 舞台 y=400 水平居中; 两种状态都可点击
+     (1106 on press 开波 / 1176 on press 跳过倒计时开波) */
+  #briefBar { position:absolute; left:50%; top:400px; transform:translateX(-50%);
+              display:none; z-index:28; cursor:pointer; }
+  #briefBar img { display:block; width:125px; height:35px; image-rendering:auto; }
+  /* 原版 instructions 屏 SAVE GAME 按钮 (976) → saveData("cookie") */
+  #saveBtn { position:absolute; left:50%; top:400px; transform:translateX(-160px);
+             display:none; z-index:28; background:rgba(20,20,20,.9); color:#ccc;
+             border:1px solid #666; font-family:monospace; font-size:11px;
+             padding:9px 12px; cursor:pointer; }
+  #saveBtn:hover { color:#ff8; border-color:#e80; }
+  #loadBtn { position:absolute; left:50%; top:440px; transform:translateX(-50%); display:none;
+             z-index:29; background:rgba(20,20,20,.95); color:#ffd; border:2px solid #e80;
+             font-family:monospace; font-size:13px; padding:8px 16px; cursor:pointer; }
+  #loadBtn:hover { background:#3a2a10; }
+  /* conseilIntroHelp (1154): 第1关简报时显示于舞台 (480,200) 居中, 点击关闭 */
+  #introHelp { position:absolute; left:480px; top:200px; transform:translate(-50%,-50%);
+               display:none; z-index:30; cursor:pointer; }
+  #introHelp.show { display:block; }
+  #introHelpImg { display:block; max-width:90%; }
+  /* protecthint (1166): 原版屏位 (641.9,1.95), 指基地所在北缘 */
+  #protectHint { position:absolute; left:642px; top:2px; display:none; z-index:30; pointer-events:none; }
+  #protectHint.show { display:block; }
+  /* victims 黑幕 (762): dpt113 位于地图之上/菜单之下, 开波时 35帧@24fps ≈1.5s 淡出 */
+  #fadeCurtain { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
+                 background:#000; z-index:20; pointer-events:none; opacity:0; }
+  #fadeCurtain.on { display:block; animation:curtainOut 1.5s ease-out forwards; }
+  @keyframes curtainOut { from { opacity:1; } to { opacity:0; } }
+  /* 开场黑幕 (955 haloNoirOuverture): 每关 980.refresh() → gotoAndPlay("play"),
+     f2..f5 黑 → f6 透明 ≈ 5帧@24fps ≈ 0.21s 淡出; dpt14 在对白UI之下 (956 黑矩形) */
+  #openCurtain { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
+                 background:#000; z-index:28; pointer-events:none; }
+  #openCurtain.on { display:block; animation:curtainOpenOut .21s linear forwards; }
+  @keyframes curtainOpenOut { from { opacity:1; } to { opacity:0; } }
+  /* 剧情对白 (980): 原版演出 = 870 房间布景(首字母选框, 794x314 内容) + 948 立绘 +
+     底部文本; 870/948 为 FFDec 字节级导出 */
+  #dlgBox { position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
+            width:600px; max-width:94%; display:none; z-index:29; cursor:pointer;
+            border:2px solid #5a6a7a; border-radius:6px; overflow:hidden;
+            background:#111; box-shadow:0 4px 18px rgba(0,0,0,.6); }
+  #dlgFond { display:block; width:100%; }
+  /* 人物固定在场景左侧 (951 矩阵 persoMouvant @-407), 'R' 前缀镜像 = 原版 inverse。
+     950 persoMouvant 时间线逐帧解码: X ±5px / Y ±13px 微漂移, 82帧@24fps=3.4s 循环
+     (呼吸式待机摆动, 非滑入) → H5 以无限 sway 动画复刻 */
+  #dlgActor { position:absolute; left:5%; bottom:96px; height:72%;
+              animation:dlgSwayData 3.6s ease-in-out infinite; }
+  /* 950 时间线 76 帧位移表逐帧采样 (TCS+20): X ±1.5px / Y ±10px, 86帧@24fps=3.6s */
+  @keyframes dlgSwayData { 0% { transform:translate(0.7px,-9.6px); } 10% { transform:translate(0.6px,-7.2px); } 20% { transform:translate(0.4px,0.9px); } 30% { transform:translate(0.1px,8.6px); } 40% { transform:translate(-0.1px,6.2px); } 50% { transform:translate(-0.7px,0.4px); } 60% { transform:translate(-0.7px,-0.5px); } 70% { transform:translate(-0.3px,-0.5px); } 80% { transform:translate(0.1px,-0.5px); } 90% { transform:translate(0.2px,-2.4px); } 100% { transform:translate(0.5px,-7.2px); } }
+  @keyframes dlgSwayDataM { 0% { transform:scaleX(-1) translate(0.7px,-9.6px); } 10% { transform:scaleX(-1) translate(0.6px,-7.2px); } 20% { transform:scaleX(-1) translate(0.4px,0.9px); } 30% { transform:scaleX(-1) translate(0.1px,8.6px); } 40% { transform:scaleX(-1) translate(-0.1px,6.2px); } 50% { transform:scaleX(-1) translate(-0.7px,0.4px); } 60% { transform:scaleX(-1) translate(-0.7px,-0.5px); } 70% { transform:scaleX(-1) translate(-0.3px,-0.5px); } 80% { transform:scaleX(-1) translate(0.1px,-0.5px); } 90% { transform:scaleX(-1) translate(0.2px,-2.4px); } 100% { transform:scaleX(-1) translate(0.5px,-7.2px); } }
+  #dlgPanel { position:relative; background:rgba(8,10,14,.88); padding:6px 12px 5px; }
+  #dlgWho { color:#ffd; font-weight:bold; font-size:14px; margin-bottom:3px; }
+  /* 原版字号: EditText 1156 (实例 dialogue) FontHeight=280twips=14px, 白色,
+     左对齐, Leading=40twips=2px → 行距 ≈ 14px 默认单倍 + 2px ≈ line-height 1.3 */
+  #dlgTxt { color:#e8e8e8; font-size:14px; line-height:1.3; white-space:pre-wrap;
+            max-height:110px; overflow-y:auto; }
+  #dlgNext { color:#89a; font-size:10px; text-align:right; margin-top:3px; }
+  /* 终局演出: 全屏遮罩, 800x600 原版帧图居中 */
+  #cineBox { position:absolute; left:0; top:0; width:100%; height:600px; display:none;
+             z-index:60; flex-direction:column; align-items:center; justify-content:center;
+             background:#000; cursor:default; }
+  #cineImg { max-width:100%; max-height:570px; }
+  #cineTxt { color:#ffd; font-size:13px; margin-top:6px; min-height:16px; text-align:center;
+             padding:0 10px; }
+  #unlockPanel button:disabled { opacity:.35; cursor:not-allowed; }
+  #unlockPanel button.int { background:#3a4a5a; }
+  #unlockPanel button.int:hover:not(:disabled) { background:#4a5a6a; }
+  /* 底部 HUD: 宽度跟随舞台 (由 fitStage 设为 W+165) */
+  #hud { position:absolute; left:0; top:600px; width:100%; color:#cfc; font-size:12px;
+         padding:2px 6px; box-sizing:border-box; background:#000; }
+  #hud .hint { color:#9aa; font-size:11px; }
+</style>
+</head>
+<body>
+<div id="fit">
+  <div id="stage">
+    <canvas id="cv" width="635" height="600"></canvas>
+    <div id="side">
+      <div id="minimapBox"><canvas id="minimap" width="161" height="150"></canvas></div>
+      <div class="panelTitle" id="shopTitle">UNIT / BUILD MENU</div>
+      <div id="shop"></div>
+      <div id="pageDots"><i></i><i></i><i></i></div>
+      <div class="panelHead">
+        <div class="arrow" id="pageL" title="上一页">◀</div>
+        <div class="panelTitle">INFO</div>
+        <div class="arrow" id="pageR" title="下一页">▶</div>
+      </div>
+      <div id="infoBox">点选炮塔查看属性</div>
+      <!-- 原版开关按钮本体 (1058 change zoom / 1063 health on/off / 1068 build areas /
+           1073 mouse scroll, 247x23 直出缩放 166x23, 竖排 = informations 行距 23) -->
+      <button class="artBtn" id="tZoom" title="全图 G"></button>
+      <button class="artBtn" id="tHp" title="血条 H"></button>
+      <button class="artBtn" id="tArea" title="建区 C"></button>
+      <button class="artBtn" id="tScroll" title="滚屏 M"></button>
+      <button id="mOpen" title="音乐面板">♪</button>
+      <button id="hOpen" title="帮助 (按键说明)"><img src="assets/ui/btn_help.png" alt="?"></button>
+      <div id="musicBox">
+        <div id="musicPanel">
+          <img id="musicPanelImg" src="assets/ui/music_panel.png" width="178" height="203" alt="">
+          <div class="mpBtn" id="m0" style="left:7px;top:7px;width:105px;height:21px"></div>
+          <div class="mpBtn" id="m1" style="left:7px;top:35px;width:105px;height:21px"></div>
+          <div class="mpBtn" id="m2" style="left:7px;top:62px;width:105px;height:21px"></div>
+          <div class="mpBtn pauser" id="mPlay" style="left:7px;top:92px;width:105px;height:21px"></div>
+          <div class="mpBtn close" id="mMute" style="left:145px;top:3px;width:27px;height:27px" title="关闭"></div>
+      <!-- 原版音量条 (1150 x10, levels 15/35/50/80/100, rollOver 设级 + selectionUnite) -->
+      <img class="vseg" id="vs1" data-g="s" data-l="15" src="assets/ui/slider/seg1.png" style="left:14.02px;top:190.09px;width:9.23px;height:9.17px">
+      <img class="vseg" id="vs2" data-g="s" data-l="35" src="assets/ui/slider/seg1.png" style="left:23.32px;top:184.46px;width:9.23px;height:14.93px">
+      <img class="vseg" id="vs3" data-g="s" data-l="50" src="assets/ui/slider/seg1.png" style="left:32.67px;top:179.34px;width:9.23px;height:20.17px">
+      <img class="vseg" id="vs4" data-g="s" data-l="80" src="assets/ui/slider/seg1.png" style="left:41.92px;top:173.20px;width:9.23px;height:26.45px">
+      <img class="vseg" id="vs5" data-g="s" data-l="100" src="assets/ui/slider/seg1.png" style="left:51.32px;top:169.87px;width:9.23px;height:29.86px">
+      <img class="vseg" id="vm1" data-g="m" data-l="15" src="assets/ui/slider/seg1.png" style="left:106.12px;top:190.09px;width:9.23px;height:9.17px">
+      <img class="vseg" id="vm2" data-g="m" data-l="35" src="assets/ui/slider/seg1.png" style="left:115.42px;top:184.46px;width:9.23px;height:14.93px">
+      <img class="vseg" id="vm3" data-g="m" data-l="50" src="assets/ui/slider/seg1.png" style="left:124.72px;top:179.34px;width:9.23px;height:20.17px">
+      <img class="vseg" id="vm4" data-g="m" data-l="80" src="assets/ui/slider/seg1.png" style="left:133.97px;top:173.20px;width:9.23px;height:26.45px">
+      <img class="vseg" id="vm5" data-g="m" data-l="100" src="assets/ui/slider/seg1.png" style="left:143.37px;top:169.87px;width:9.23px;height:29.86px">
+        </div>
+      </div>
+      <div id="lossBox">
+        <span class="losses" id="hLoss">LOSSES 0</span>
+        <span class="cash" id="hCash"></span>
+        <span class="interest" id="hInt2"></span>
+      </div>
+    </div>
+    <div id="unlockPanel">
+      <div id="upInfo"></div>
+      <div class="btns">
+        <button id="upUnlock">解锁下一件武器</button>
+        <button id="upInterest" class="int">提高利率</button>
+      </div>
+    </div>
+    <!-- 原版 953 出兵条: 简报波 = chid1106 "start mission" 按钮 (on press → startMission);
+         其余波 = chid1176 "start in 8..1" 倒计时 (953 f47..f166 每 17帧@24fps 跳一格) -->
+    <div id="briefBar"><img id="briefImg" alt="" width="125" height="35"></div>
+    <button id="saveBtn" title="保存进度">SAVE GAME</button>
+    <div id="openCurtain"></div>
+    <div id="fadeCurtain"></div>
+    <!-- 原版 836 全屏点击吞噬层 (chid835 形状, 对白/终局期间空按压防误触地图) -->
+    <div id="dlgCatch"></div>
+    <!-- 原版 conseilIntroHelp (chid1154, 291x179): newEvents mR==1 时置 (480,200), 点X关 -->
+    <div id="introHelp">
+      <img id="introHelpImg" src="assets/ui/conseil_intro_help.png" width="291" height="179" alt="">
+    </div>
+    <!-- 原版 protecthint (chid1166, 108x25 "protect this area"): m1 显示于舞台 (642,2) -->
+    <div id="protectHint">
+      <img src="assets/ui/protect_hint.png" width="108" height="25" alt="">
+    </div>
+    <button id="loadBtn" title="读取存档继续">▶ CONTINUE</button>
+    <!-- 原版 helpBoard (DefineSprite_1103, 463x283): helpB(1046) on(press) 置 (400,300) -->
+    <div id="helpBoard">
+      <img id="helpImg" src="assets/ui/help_board.png" width="463" height="283" alt="">
+      <!-- 原版 1103 双页: f1 键位 / f2 敌方单位价目; 页签热区在底栏 -->
+      <div id="tabKeys"></div>
+      <div id="tabUnits"></div>
+      <!-- 原版 qualityB(1040 changeQuality) / storyB(1053 模式切换), 值文本动态 -->
+      <div id="hbBtns">
+        <button id="hQual"><img src="assets/ui/btn_quality.png" width="107" height="12" alt=""><span id="hQualTxt">good</span></button>
+        <button id="hStory"><img src="assets/ui/btn_story.png" width="92" height="12" alt=""><span id="hStoryTxt">story</span></button>
+      </div>
+      <div id="helpClose">× 点击关闭</div>
+    </div>
+    <!-- 剧情对白 (980_242 nextDialogue): 原版演出 = imgScenario.fond(870 房间布景,
+         首字母选框) + personnage(948 立绘, 去前缀标签) + 文本; 点击/空格推进 -->
+    <div id="dlgBox">
+      <img id="dlgFond" alt="">
+      <img id="dlgActor" alt="">
+      <div id="dlgPanel">
+        <div id="dlgWho"></div>
+        <div id="dlgTxt"></div>
+        <div id="dlgNext">▼ 点击继续</div>
+      </div>
+    </div>
+    <!-- 终局演出 (1132 perdu 败局动画 / 1158 对白 + 1125 end 胜局动画) -->
+    <div id="cineBox">
+      <img id="cineImg" alt="" width="800" height="600">
+      <div id="cineTxt"></div>
+    </div>
+  </div>
+  <div id="hud">
+    金钱 <b id="hEuros"></b> | 波次 <b id="hWave"></b>/44 | 分数 <b id="hScore"></b> (丢塔数) |
+    <span class="hint">方向键/鼠标边缘滚动 · 小地图点击跳转 · 空格取消 · 点塔选中 → S卖/R修/T自动修理/U对空 · ◀▶ 翻页</span>
+  </div>
+</div>
+<script src="data.js?v=1790600072"></script>
+<script src="game.js?v=1790600072"></script>
+</body>
+</html>

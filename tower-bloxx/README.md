@@ -47,6 +47,7 @@
 - `j2me/*.zip` — 原始下载包
 - `j2me/src/` — CFR 0.152 反编译 .java（未入库）
 - `j2me/deobf/` — 反混淆工程（权威底本，见其 PROGRESS.md）
+- `j2me/EMULATOR_NOTES.md` — 网页模拟器使用笔记（freej2me-web 本地化部署, 对比验收用, 已验证丝滑可玩）
 - `j2me/res/` — 按魔数鉴别重命名的资源（scene.m3g / MIDI / font.bin / 语言包 / r0 解包 / 89 号天际线）
 - `j2me/m3g_scene/` — scene.m3g 解析产物（Image2D 导出 + m3g.json）
 - `scripts/` — Flash 版 FFDec 导出 AS（246 个文件，未入库，参考）

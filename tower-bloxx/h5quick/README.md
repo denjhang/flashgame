@@ -37,6 +37,13 @@
 
 ## 渲染管线（2026-10-02 重写, 按反混淆原文）
 
+**three.js 与手算的分工边界**（同构原版"JSR-184 只管画, 语义在 House.java"）：
+three 只当渲染后端（renderer/相机矩阵/GLB 加载/draw call，同构 JSR-184 的角色），
+一切"为什么会动"的语义手算对号——fovY/aspect 由 n.java setFov 公式手算（非 three 默认值）、
+相机距离 cI 照抄 y():1436 迭代收敛、摆钩/抛物线/塔歪/旋转全为 House.java 公式纯数字输出、
+材质强制 MeshBasicMaterial（原版每帧 resetLights 无灯）、HUD 小人等 3D→2D 投影手写
+project()。three 的默认值（fov/aspect/光照）一个都不能信。
+
 - **相机**：`setPerspective(55·1.2333, 0.825, 10, 10000)`（n.java setFov/setupViewport 原式，
   fovY=67.8°、aspect=0.825——非屏比 0.75）；相机位 `(塔x, aW, cI)` 朝 −z
 - **cI 迭代**：y():1436 原式——投影世界点 (0,−384,128) 至屏心下 ≤48px，cI≈2128

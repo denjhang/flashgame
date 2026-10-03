@@ -521,7 +521,7 @@ function drawFX() {
   }
   drawGround();
 }
-const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: false, alpha: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1); renderer.setSize(E, F, false);
 renderer.setClearColor(0x000000, 0);                       // J2ME 只清深度, 天空由 2D 层透出 (n.init)
 const scene = new THREE.Scene();
@@ -725,7 +725,10 @@ function drawHUD() {
     hud.restore();
     if (S.bs > 0) {
       // 人口 (j:3497-3501): 大数字右缘 E-cn, y=F-co-2-12; V=id18 图标 (E-cn-28-3-11, F-co-2-19)
+      // 原式先 setClip 11×19 再画 V — id18 全图 14×35, 下段彩条(调色/多帧区)不可见
+      hud.save(); hud.beginPath(); hud.rect(E - CN - 28 - 3 - 11, F - CO - 2 - 19, 11, 19); hud.clip();
       hud.drawImage(tex2d.id18, E - CN - 28 - 3 - 11, F - CO - 2 - 19);
+      hud.restore();
       bigNum(E - CN, F - CO - 2 - 12, S.bt, 5);
     }
     // 楼层 (快速分支 j:3558-3562): W=id20 (cn-9, F-co-50) + 小数字右缘 cn-9+23, y=F-co-50+37
@@ -875,14 +878,27 @@ function gameOver() {
 msgOk.onclick = () => { location.reload(); };
 
 // ---- 输入 (b(int,int):3651 + J():3716): FIRE=落块 ----
-addEventListener('pointerup', () => drop());
+// 重新开始: 先置标志再清档 — 否则 reload 触发 beforeunload→saveRS() 把当前局存回去
+let restarting = false;
+function restartGame() {
+  if (restarting) return;
+  restarting = true;
+  clearRS();
+  location.reload();
+}
+document.getElementById('restart').addEventListener('pointerup', e => {
+  e.stopPropagation();
+  restartGame();
+});
+addEventListener('pointerup', () => drop());               // 全局落块 (b:3651) — v4 误删致鼠标失效
 addEventListener('keydown', e => {
+  if (e.code === 'KeyR') { restartGame(); return; }
   if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'Enter') { e.preventDefault(); drop(); }
 });
-addEventListener('beforeunload', saveRS);
+addEventListener('beforeunload', () => { if (!restarting) saveRS(); });
 
 // ---- 主循环 (:1697-1719): 25ms 门控, 序=z,u,E,p,s,q,A,B,连击 ----
-let last = performance.now(), booted = false, bootAt = 0;
+let last = performance.now(), booted = false, bootAt = 0, lastRender = 0;
 function loop(now) {
   requestAnimationFrame(loop);
   const dt = now - last; last = now;
@@ -904,9 +920,14 @@ function loop(now) {
       if (S.bs > 0 && S.bs % 10 === 0) saveRS._dirty = true;
     }
   }
-  if (booted) { fxTick(); sky(); drawFX(); }
-  render3D();
-  drawHUD();
+  // 渲染门控: rAF(≈60fps) + setInterval(40fps) 双驱动会叠加到≈100次/秒,
+  // sky/render3D/drawHUD 每次都是全画布重绘 — 限制到 ≥24ms 一次 (≈40fps, 对齐 J2ME tick)
+  if (booted && now - lastRender >= 24) {
+    lastRender = now;
+    fxTick(); sky(); drawFX();
+    render3D();
+    drawHUD();
+  }
 }
 requestAnimationFrame(loop);
 // rAF 兜底: IAB 面板/后台标签会冻结 requestAnimationFrame — setInterval 驱动同一 loop,
