@@ -92,11 +92,10 @@ project()。three 的默认值（fov/aspect/光照）一个都不能信。
 > 用户以 8211 模拟器（City Bloxx v1.0.12 a3）丝滑实机截图为权威基准
 > （`../j2me/ref_citybloxx1012a3_initial*.png`），对比发现 h5quick 地面缺失黄土与水泥台。
 
-- **uid 对号勘误（重大）**：`cC = n.a(9)`（House:1274）是 bs≤5 时**手动渲染的附加灰板**
-  （cC.c()+a() 于 f():3313，无贴图，2208 宽 z 跨 -87~684）；带贴图的**工地全景（黄土地+
-  水泥台+碎石）是 uid20 → mesh262**（3 子网格全贴图），属 World 保留模式 **n.a(graphics)
-  每帧渲染**，节点平移 [-400,0,0]。旧实现 GROUND_TPL 误用 mesh269 当工地 → 灰板盖台。
-  修复：SITE_TPL(mesh262) 常驻 + GROUND_TPL(mesh269) 按 bs≤5 叠加，忠实原版两网格分工。
+- **uid 对号勘误（重大）**：`cC = n.a(9)`（House:1274）是 bs≤5 时**手动渲染的网格**
+  （cC.c()+a() 于 f():3313，2208 宽 z 跨 -87~684，含黄土/水泥台/碎石）；
+  旧实现 GROUND_TPL 误当"附加灰板"。〔第五轮补注：mesh262=uid20 是城市建筑模型，
+  黄土/水泥台实际就在 mesh269 内〕
 - **转换器通道序 bug（重大）**（tools/m3g_to_glb.py:108）：M3G 规范 Material.diffuse 序列化
   为 **RGBA 4 字节**；旧码按变量名 `[a,r,g,b]=diffuse` 错位解包 → factor=[g,b,255,a]/255
   （土棕 91,68,28 被渲成灰蓝半透明）。修复为 RGBA 直传。
@@ -106,6 +105,23 @@ project()。three 的默认值（fov/aspect/光照）一个都不能信。
   MANIFEST DChoc-Rain-Probability: 20，低空 0≤aW≤3840 触发，**尚未实现**，参照图中的
   深色斑点即其泥点粒子）；最终以 GLB 材质因子 vs m3g diffuse 对照+转换器复现锁定。
 - scene.glb 加 `?v=2` 缓存参数；game.js 版本 v6。
+
+## 2026-10-04 第五轮修正（3D 层彩色杂物 — d.java 原文定案）
+
+> 用户指出地面出现不合理蓝色盒子/红蓝屋顶。**先读源码后动手**（铁律见根 AGENTS.md）。
+
+- **World 渲染定性（d.java 全文 + n.java:59）**：`n.a(graphics)` 仅 bindTarget+clear+resetLights，
+  **World 从不整体渲染**；一切网格经 `d` 类逐个 `d.a()=Graphics3D.render(mesh, transform)`
+  （d.java:24）。快速模式 3D 层渲染列表只有三样：**cC(bs≤5)、cD 吊臂、块（cy 族）**。
+- **删除 BG_TOWERS**（mesh251/253/254/255 = uid30..33）：实为**翻滚块模型族**（29+bl，
+  k.java:1481 级数表 cy=9+bl/cB=19+bl/cz=29+bl/cA=39+bl），旧注释误称"背景楼"常驻摆放
+  → 地面红/蓝盒子群。快速模式背景楼 = 2D dG 程序矩形（a(Graphics,4):4054），3D 层无任何背景物。
+- **删除 mesh262 摆放**（第四轮引入的 SITE_TPL）：uid20 = **cB 族 1 级城市建筑模型**
+  （子网格贴图=门/玻璃窗），不在快速模式渲染列表 → "地基左侧蓝盒子"。第四轮"mesh262=
+  工地全景"结论**作废**；黄土/水泥台/碎石实际都在 **mesh269（cC）**内——RGBA 材质修复后
+  其无贴图子网格渲出土棕渐变 + 台状结构，与权威截图吻合。
+- 验证：地基左侧地面区像素采样 0 蓝色像素，主色 #5b441c/#1e190f/#dd9606 与参照一致。
+- game.js 版本 v8。
 
 ## 已知留白（记档，非错误）
 

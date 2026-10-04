@@ -652,22 +652,9 @@ new GLTFLoader().load('./assets/scene.glb?v=2', gltf => {
   // uid 对号勘误 (2026-10-04): cC=n.a(9)=mesh269 是 bs≤5 附加灰色平面(无贴图, 原版 cC.c()+a() 手动渲染);
   // 带贴图的工地全景(黄土地+水泥台) = uid20 → mesh262, 属 World 保留模式每帧必渲染 (n.a(graphics)),
   // 节点平移 [-400,0,0]。此前 GROUND_TPL 误用 mesh269 当工地 → 灰色平面盖住水泥台。
-  // 预载表 {30..33} = 背景楼 (find(userID)): uid4(mesh253)@原点正后方, uid2(mesh251)@x1600,
-  // uid5(mesh254)@x3200, uid6(mesh255)@x4800 — m3g 节点平移即排布位
-  BG_TOWERS = [
-    { tpl: T('mesh253'), x: 0 },
-    { tpl: T('mesh251'), x: 1600 },
-    { tpl: T('mesh254'), x: 3200 },
-    { tpl: T('mesh255'), x: 4800 },
-  ];
-  for (const b of BG_TOWERS) {
-    if (!b.tpl.length) continue;
-    for (const tpl of b.tpl) {
-      const m = tpl.clone();
-      m.position.set(b.x, 0, -900);                          // 塔(z0)后方
-      scene.add(m); bgMeshes.push(m);
-    }
-  }
+  // 勘误 (2026-10-04): 下列四个 mesh 实为块模型翻滚族 uid30..33 (29+bl, k.java:1481 级数表),
+  // 并非"背景楼" — 曾误作 3D 背景常驻摆放, 即地面红/蓝盒子来源。快速模式背景楼 = 2D dG 程序矩形
+  // (a(Graphics,4):4054), 3D 层无任何彩色背景物。删除 BG_TOWERS 摆放。
   for (const id of [12, 13, 15, 16, 18, 19, 20, 33, 34, 35, 36, 37, 38, 39, 41, ...Array.from({ length: 27 }, (_, k) => 42 + k)]) {
     const im = new Image(); im.src = `./assets/id${id}.png`;
     tex2d['id' + id] = im;
@@ -795,7 +782,9 @@ function render3D() {
   camera.rotation.set(0, 0, 0);
   for (let i = 0; i < liveBlocks.length; i++) scene.remove(liveBlocks[i]);
   liveBlocks.length = 0;
-  put(SITE_TPL, -400, 0, 0, 0, 0);                          // uid20 工地全景 (World 每帧渲染, 节点平移 -400)
+  // 勘误 (2026-10-04, d.java+3316 原文): n.a(graphics) 仅 bindTarget+clear, World 不整体渲染;
+  // 一切网格经 d 类逐个 render (d.a()=Graphics3D.render)。快速模式 3D 层仅: cC(bs≤5)/cD吊臂/块。
+  // mesh262(uid20) 是城市建筑模型(cB族), 不得渲染 — 即"地基左侧蓝盒子"来源, 删除摆放。
   if (S.bs <= 5) put(GROUND_TPL, 0, 0, 0, 0, 0);            // cC 附加灰平面 (identity, bs<=5, 原版 cC.c()+a())
   if (S.bk === 0) {                                         // cD: 滑轮+单缆+吊具 — 放置后钩子仍在缆端
     put(CRANE_TPL, S.aK, S.aL, 0, S.aM * 2 / 3, 0);
