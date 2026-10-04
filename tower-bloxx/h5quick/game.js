@@ -634,7 +634,14 @@ new GLTFLoader().load('./assets/scene.glb?v=2', gltf => {
   root.traverse(n => {
     if (n.isMesh && !templates.find(t => t.name === n.name)) {
       n.material.side = THREE.DoubleSide;                  // MeshNode.normalizeAppearance 近似
-      if (n.material.map) { n.material.map.colorSpace = THREE.SRGBColorSpace; n.material = new THREE.MeshBasicMaterial({ map: n.material.map, side: THREE.DoubleSide }); }
+      if (n.material.map) { n.material.map.colorSpace = THREE.SRGBColorSpace;
+        // m3g 原文 Texture2D filtering [208,210] = NEAREST/无mipmap — GLB sampler 默认 LINEAR
+        // 会在 16x16 小贴图边缘混色 → 吊钩白边。强制最近邻。
+        n.material.map.magFilter = THREE.NearestFilter; n.material.map.minFilter = THREE.NearestFilter;
+        n.material.map.generateMipmaps = false;
+        // m3g CompositingMode blending 64 = ALPHA_BLEND (吊钩等小贴图带 alpha) —
+        // 不开 transparent 时贴图透明区按 RGB(白)不透明渲染 → 钩子白矩形
+        n.material = new THREE.MeshBasicMaterial({ map: n.material.map, side: THREE.DoubleSide, transparent: true, alphaTest: 0.5 }); }
       else {
         // 无贴图材质: 用 GLB baseColorFactor (转换器自 m3g diffuse RGBA 直传, 2026-10-04 修复)
         // 原曾硬编码 0xcccccc → uid9 土板/灰板全成浅灰
@@ -648,7 +655,9 @@ new GLTFLoader().load('./assets/scene.glb?v=2', gltf => {
   });
   // uid→GLB 节点: n(uid+250)。cy块=uid13→n263, cC地面=uid9→n259, cD吊臂=uid8→n258, cE缆=uid7→n257
   const T = name => templates.filter(t => t.name === name || t.name.startsWith(name + '_'));
-  GROUND_TPL = T('mesh269'); SITE_TPL = T('mesh262'); CRANE_TPL = T('mesh260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  GROUND_TPL = T('mesh269'); SITE_TPL = T('mesh262'); CRANE_TPL = T('n260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  // 勘误: uid8 吊车在 GLB 里对象名是节点名 n260 (GLTFLoader 单 primitive 用节点名),
+  // 旧 T('mesh260') 匹配空 → 吊车从未渲染 (开局无悬臂/钢丝/吊钩)。
   // uid 对号勘误 (2026-10-04): cC=n.a(9)=mesh269 是 bs≤5 附加灰色平面(无贴图, 原版 cC.c()+a() 手动渲染);
   // 带贴图的工地全景(黄土地+水泥台) = uid20 → mesh262, 属 World 保留模式每帧必渲染 (n.a(graphics)),
   // 节点平移 [-400,0,0]。此前 GROUND_TPL 误用 mesh269 当工地 → 灰色平面盖住水泥台。

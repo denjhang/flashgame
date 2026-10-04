@@ -123,6 +123,18 @@ project()。three 的默认值（fov/aspect/光照）一个都不能信。
 - 验证：地基左侧地面区像素采样 0 蓝色像素，主色 #5b441c/#1e190f/#dd9606 与参照一致。
 - game.js 版本 v8。
 
+## 2026-10-04 第六轮修正（吊车不可见 + 吊钩白矩形）
+
+- **吊车从未渲染（对象名错配）**：uid8 吊车在 GLB 里对象名是**节点名 `n260`**（GLTFLoader 对单
+  primitive 节点用节点名），旧 `T('mesh260')` 匹配空数组 → put() 静默跳过 → 开局运镜无悬臂/
+  钢丝/吊钩。修复 `CRANE_TPL = T('n260')`。cD 语义（8 顶点: 滑轮吊具+单缆上探 1246）不变。
+- **吊钩白矩形（两刀）**：① m3g 原文 Texture2D `filtering:[208,210]`=NEAREST/无mipmap，GLB
+  sampler 默认 LINEAR → 16×16 小贴图边缘混色（白边），强制 NearestFilter；② m3g CompositingMode
+  `blending:64`=ALPHA_BLEND，材质未开透明 → 贴图透明区按 RGB(白)不透明渲染（整块白矩形），
+  补 `transparent:true + alphaTest:0.5`。两属性均已在 GLB 材质处理处统一设置。
+- 双缆 cE（mesh261）确认仅在 bk==1/aw==3 城市收尾态渲染，快速局 bk==0 恒走 cD 单缆 ✓
+- 验证：钩子区纯白像素采样 0。game.js 版本 v11。
+
 ## 已知留白（记档，非错误）
 
 - 天气系统（雨/雪粒子 + 四态导演，u():2260）未实现——高度带 10240+ 才触发，属深楼内容
