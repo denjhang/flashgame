@@ -87,6 +87,26 @@ project()。three 的默认值（fov/aspect/光照）一个都不能信。
   id60 流星、id64 土星、id66 海王星、id67 水星、id68 鲸鱼——"越高越离奇"高度带已按
   dA 表 (cp=2aW/3/cd) 调度
 
+## 2026-10-04 第四轮修正（黄土地/水泥台 — 权威截图驱动）
+
+> 用户以 8211 模拟器（City Bloxx v1.0.12 a3）丝滑实机截图为权威基准
+> （`../j2me/ref_citybloxx1012a3_initial*.png`），对比发现 h5quick 地面缺失黄土与水泥台。
+
+- **uid 对号勘误（重大）**：`cC = n.a(9)`（House:1274）是 bs≤5 时**手动渲染的附加灰板**
+  （cC.c()+a() 于 f():3313，无贴图，2208 宽 z 跨 -87~684）；带贴图的**工地全景（黄土地+
+  水泥台+碎石）是 uid20 → mesh262**（3 子网格全贴图），属 World 保留模式 **n.a(graphics)
+  每帧渲染**，节点平移 [-400,0,0]。旧实现 GROUND_TPL 误用 mesh269 当工地 → 灰板盖台。
+  修复：SITE_TPL(mesh262) 常驻 + GROUND_TPL(mesh269) 按 bs≤5 叠加，忠实原版两网格分工。
+- **转换器通道序 bug（重大）**（tools/m3g_to_glb.py:108）：M3G 规范 Material.diffuse 序列化
+  为 **RGBA 4 字节**；旧码按变量名 `[a,r,g,b]=diffuse` 错位解包 → factor=[g,b,255,a]/255
+  （土棕 91,68,28 被渲成灰蓝半透明）。修复为 RGBA 直传。
+- **game.js 材质覆盖 bug**：GLTFLoader 后无贴图材质一律硬编码 0xcccccc 浅灰 → GLB 正确
+  diffuse 全被丢弃。改为读 baseColorFactor（convertSRGBToLinear 后上色）。
+- **勘误过程记档**：曾怀疑浏览器缓存/查天气粒子（b(graphics,bool) DChoc 雨泥点系统,
+  MANIFEST DChoc-Rain-Probability: 20，低空 0≤aW≤3840 触发，**尚未实现**，参照图中的
+  深色斑点即其泥点粒子）；最终以 GLB 材质因子 vs m3g diffuse 对照+转换器复现锁定。
+- scene.glb 加 `?v=2` 缓存参数；game.js 版本 v6。
+
 ## 已知留白（记档，非错误）
 
 - 天气系统（雨/雪粒子 + 四态导演，u():2260）未实现——高度带 10240+ 才触发，属深楼内容

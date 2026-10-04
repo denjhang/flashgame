@@ -103,8 +103,11 @@ def main(src, dst):
         m = {'name': f'ap{ap_gid}', 'doubleSided': True, 'pbrMetallicRoughness': {'metallicFactor': 0.0, 'roughnessFactor': 1.0}}
         mat = ap.get('material')
         if mat and o.get(mat, {}).get('diffuse'):
-            a, r_, g, b = o[mat]['diffuse']
-            m['pbrMetallicRoughness']['baseColorFactor'] = [r_/255, g/255, b/255, a/255]
+            # M3G 规范: Material 序列化 diffuse 为 RGBA 4字节 — 直接 RGBA→glTF 因子
+            # 2026-10-04 勘误: 旧码按 [a,r,g,b] 变量名解 [r,g,b,a] 数组, 实算出 [g,b,255,a]/255
+            # → mesh269 土板 (91,68,28) 被渲成灰蓝 [0.267,0.11,1.0,0.357]
+            d = o[mat]['diffuse']
+            m['pbrMetallicRoughness']['baseColorFactor'] = [d[0]/255, d[1]/255, d[2]/255, d[3]/255]
         if ap.get('textures'):
             m['pbrMetallicRoughness']['baseColorTexture'] = {'index': add_texture(ap['textures'][0])}
         mi = len(mat_list); mat_list.append(m)

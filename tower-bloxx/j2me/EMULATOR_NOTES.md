@@ -80,6 +80,12 @@ jar 存放处：`j2me_ref/freej2me-web-main/web/jar/`（均已 manifest 验真�
 
 
 
+## 对照验收成果（h5quick ↔ 8211 权威画面）
+
+- ✅ 黄土地/水泥台修复（2026-10-04）：uid 对号勘误（cC=mesh269 灰板 vs uid20=mesh262 带贴图工地）
+  + 转换器 RGBA 通道序 bug + game.js 材质覆盖 bug，详见 h5quick/README.md 第四轮修正。
+  权威画面 = 本目录 `ref_citybloxx1012a3_initial*.png`。
+
 ## 对照验收要点（用户指出的 h5quick 三大疑点）
 
 - 吊车悬臂/缆绳样式

@@ -543,7 +543,9 @@ let cI = 0;
   }
   window.__cI = cI;
   window.__dbg3d = () => ({ tpl: templates.length, names: templates.map(t=>t.name).join(','),
-    ground: !!GROUND_TPL, block: !!BLOCK_TPL, crane: !!CRANE_TPL, live: liveBlocks.length });
+    ground: !!GROUND_TPL, block: !!BLOCK_TPL, crane: !!CRANE_TPL, live: liveBlocks.length,
+    liveBox: liveBlocks.map(m => ({ n: m.name, p: m.position.x.toFixed(0) + ',' + m.position.y.toFixed(0),
+      box: (b => b.isEmpty() ? 'empty' : [b.min.x, b.min.y, b.min.z, b.max.x, b.max.y, b.max.z].map(v => v.toFixed(0)).join('~'))(new THREE.Box3().setFromObject(m)) })) });
 }
 function project(x, y, z = 0) {
   const v = new THREE.Vector3(x, y, z).project(camera);
@@ -611,7 +613,7 @@ const dH2 = c => c;                                        // dH 色已是 RGB
 // 3D 组
 const towerGroup = new THREE.Group(); scene.add(towerGroup);   // 摇摆作用于组 (近似 A() 逐层投影)
 const fxGroup = new THREE.Group(); scene.add(fxGroup);
-let templates = [], GROUND_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null, BG_TOWERS = [], bgMeshes = [];  // *_TPL = 子网格数组
+let templates = [], GROUND_TPL = null, SITE_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null, BG_TOWERS = [], bgMeshes = [];  // *_TPL = 子网格数组
 const tex2d = {};
 function loadTex(url) { const t = new THREE.TextureLoader().load(url); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t; }
 // 小人帧纹理 (id12/13: 10 帧 × 21x28)
@@ -627,19 +629,29 @@ function peopleFrames(id) {
 }
 let dudeFrames = [], dudetteFrames = [];
 
-new GLTFLoader().load('./assets/scene.glb', gltf => {
+new GLTFLoader().load('./assets/scene.glb?v=2', gltf => {
   const root = gltf.scene; root.updateMatrixWorld(true);
   root.traverse(n => {
     if (n.isMesh && !templates.find(t => t.name === n.name)) {
       n.material.side = THREE.DoubleSide;                  // MeshNode.normalizeAppearance 近似
       if (n.material.map) { n.material.map.colorSpace = THREE.SRGBColorSpace; n.material = new THREE.MeshBasicMaterial({ map: n.material.map, side: THREE.DoubleSide }); }
-      else n.material = new THREE.MeshBasicMaterial({ color: 0xcccccc, side: THREE.DoubleSide });  // g3d.resetLights 后无灯光 → 无光照着色
+      else {
+        // 无贴图材质: 用 GLB baseColorFactor (转换器自 m3g diffuse RGBA 直传, 2026-10-04 修复)
+        // 原曾硬编码 0xcccccc → uid9 土板/灰板全成浅灰
+        const f = n.material.userData?.baseColorFactor || (n.material.color ? [n.material.color.r, n.material.color.g, n.material.color.b, 1] : [0.8, 0.8, 0.8, 1]);
+        const c = new THREE.Color(f[0], f[1], f[2]);
+        c.convertSRGBToLinear();
+        n.material = new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide, transparent: f[3] < 1, opacity: f[3] });
+      }
       templates.push(n);
     }
   });
   // uid→GLB 节点: n(uid+250)。cy块=uid13→n263, cC地面=uid9→n259, cD吊臂=uid8→n258, cE缆=uid7→n257
   const T = name => templates.filter(t => t.name === name || t.name.startsWith(name + '_'));
-  GROUND_TPL = T('mesh269'); CRANE_TPL = T('mesh260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  GROUND_TPL = T('mesh269'); SITE_TPL = T('mesh262'); CRANE_TPL = T('mesh260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  // uid 对号勘误 (2026-10-04): cC=n.a(9)=mesh269 是 bs≤5 附加灰色平面(无贴图, 原版 cC.c()+a() 手动渲染);
+  // 带贴图的工地全景(黄土地+水泥台) = uid20 → mesh262, 属 World 保留模式每帧必渲染 (n.a(graphics)),
+  // 节点平移 [-400,0,0]。此前 GROUND_TPL 误用 mesh269 当工地 → 灰色平面盖住水泥台。
   // 预载表 {30..33} = 背景楼 (find(userID)): uid4(mesh253)@原点正后方, uid2(mesh251)@x1600,
   // uid5(mesh254)@x3200, uid6(mesh255)@x4800 — m3g 节点平移即排布位
   BG_TOWERS = [
@@ -783,7 +795,8 @@ function render3D() {
   camera.rotation.set(0, 0, 0);
   for (let i = 0; i < liveBlocks.length; i++) scene.remove(liveBlocks[i]);
   liveBlocks.length = 0;
-  if (S.bs <= 5) put(GROUND_TPL, 0, 0, 0, 0, 0);            // cC 地基工地 (identity, bs<=5)
+  put(SITE_TPL, -400, 0, 0, 0, 0);                          // uid20 工地全景 (World 每帧渲染, 节点平移 -400)
+  if (S.bs <= 5) put(GROUND_TPL, 0, 0, 0, 0, 0);            // cC 附加灰平面 (identity, bs<=5, 原版 cC.c()+a())
   if (S.bk === 0) {                                         // cD: 滑轮+单缆+吊具 — 放置后钩子仍在缆端
     put(CRANE_TPL, S.aK, S.aL, 0, S.aM * 2 / 3, 0);
   } else if (S.bk === 1 || S.aw[0] === 3) {                 // cE 双缆 (仅城市收尾态, 快速局不出现)
