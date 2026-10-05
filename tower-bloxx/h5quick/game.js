@@ -802,28 +802,38 @@ function drawHUD() {
     hud.drawImage(tex2d.id20, CN - 9, F - CO - 50);
     smallNum(CN - 9 + 23, F - CO - 50 + 37, S.bs, 3);
   }
-  // 连击计时条 (j:3533-3546)
+  // 连击 HUD (j:3533-3567) — 全部在 bA>0 门内 (:3534 break block22), 无连击=无任何星框/发光
   if (S.bA > 0) {
-    hud.strokeStyle = 'rgb(107,26,0)'; hud.strokeRect((E >> 1) - (E >> 2) - 3, 20, (E >> 1) + 5, 11);
-    hud.fillStyle = 'rgb(252,255,0)';
-    if (S.bA > 5850) hud.fillStyle = '#fff';
-    hud.fillRect((E >> 1) - (E >> 2), 22, Math.max(0, S.bA * (E >> 1) / 6000), 7);
-    const f = Math.floor(S.cg / 80) % 4;
-    hud.drawImage(tex2d.id38, f * 22, 0, 22, 22, (E >> 1) - (E >> 2) - 11 - 22, 12, 22, 22);
+    // 计时条: 外框深红 (E/2-E/4-3, co-1, E/2+5, 9), 内框黄 (h=7), 进度填充 y=co+2 h=4
+    // 长度=bA·(E/2)/6000; 刚完美 150ms 内 (bA>5850) 填白 (:3535-3542)
+    hud.strokeStyle = 'rgb(107,26,0)'; hud.lineWidth = 1;
+    hud.strokeRect((E >> 1) - (E >> 2) - 3, 20.5, (E >> 1) + 5, 9);
+    hud.strokeStyle = 'rgb(252,255,0)';
+    hud.strokeRect((E >> 1) - (E >> 2) - 3, 20.5, (E >> 1) + 5, 7);
+    hud.fillStyle = S.bA > 5850 ? '#fff' : 'rgb(252,255,0)';
+    hud.fillRect((E >> 1) - (E >> 2), 23, Math.max(0, S.bA * (E >> 1) / 6000), 4);
+    // 条左图标 al=id38 22px 4 帧 cg/80%4, anchor 20=LEFT|TOP → 顶左=(E/2-E/4-11, co-7) (:3543)
+    hud.drawImage(tex2d.id38, (Math.floor(S.cg / 80) % 4) * 22, 0, 22, 22,
+      (E >> 1) - (E >> 2) - 11, 14, 22, 22);
+    // 悬挂/落块高亮框 (j:3545-3550): am id39 三帧 — 同在 bA>0 门内
+    if (S.aw[0] === 1 || S.aw[0] === 2) {
+      const pos = project(S.az[0], S.aA[0]);
+      hud.drawImage(tex2d.id39, (Math.floor(S.cg / 100) % 3) * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
+    }
+    // 连击层星框 (j:3551-3557): 最近 bz 层各 44px 火花, 帧相位逐层错开 (cg/100+n7)%3
+    for (let n7 = S.by; n7 > Math.max(0, S.by - S.bz); n7--) {
+      const pos = project(S.bi[n7], S.bj[n7]);
+      hud.drawImage(tex2d.id39, ((Math.floor(S.cg / 100) + n7) % 3) * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
+    }
+    // 倍数 "x{bz}" (j:3558-3581): x 字形=id16 第13格 (偏移-91), 数字右缘=+15+7·n7, y=co-2
+    if (S.bz > 1) {
+      const n7 = S.bz > 9 ? 2 : 1;
+      hud.save(); hud.beginPath(); hud.rect((E >> 1) + (E >> 2) + 5, 19, 7, 12); hud.clip();
+      hud.drawImage(tex2d.id16, (E >> 1) + (E >> 2) + 5 - 13 * 7, 19);
+      hud.restore();
+      bigNum((E >> 1) + (E >> 2) + 10 + 2 + n7 * 7, 19, S.bz, n7);
+    }
   }
-  // 悬挂/落块高亮框 (j:3547): am id39 三帧
-  if (S.aw[0] === 1 || S.aw[0] === 2) {
-    const pos = project(S.az[0], S.aA[0]);
-    const f = Math.floor(S.cg / 100) % 3;
-    hud.drawImage(tex2d.id39, f * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
-  }
-  // 连击层星框 (j:3554)
-  for (let n7 = S.by; n7 > Math.max(0, S.by - S.bz); n7--) {
-    const pos = project(S.bi[n7], S.bj[n7]);
-    const f = (Math.floor(S.cg / 100) + n7) % 3;
-    hud.drawImage(tex2d.id39, f * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
-  }
-  if (S.bz > 1) bigNum((E >> 1) + (E >> 2) + 8, 12, S.bz, 1);
   // 落地角标 (h(Graphics):3391): id37 三帧, ch 后 600ms
   if (S.cg - S.ch < 600 && S.ch > 0) {
     const n2 = S.cg - S.ch;
