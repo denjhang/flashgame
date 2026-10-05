@@ -332,8 +332,10 @@ function spawnPeople(n, floor) {
       y: S.aW + (be >> 1) + iR(768),                       // 出生 y = 相机+1280+rand 屏外上方
       tX: S.bm,                                            // 跳弧终点 x = bm (c():2089)
       floor, dir: -side, style: iR(2), rx: 0, ry: 0,
-      t0: S.cg - iR(1000),
+      t0: S.cg - iR(1000),                                // 出生时间回拨 (:2090-2092) → 出生即在弧线中段
     };
+    // rx/ry 初始化为出生点, 防止渲染先于 tick 时画在世界原点(屏左上) (:2253 前无条件渲染)
+    S.people[s].rx = S.people[s].x; S.people[s].ry = S.people[s].y;
     left--;
   }
 }
@@ -355,8 +357,8 @@ function panic(floor) {
   for (let s = 0; s < 8 && n6 > 0; s++) {                  // 空槽 → 掷飞态 4
     if (S.people[s]) continue;
     const f = Math.min(4, S.bs - 1) - (S.bs - floor);
-    S.people[s] = { st: 4, x: S.bi[f], y: S.bj[f], t0: S.cg, floor,
-      dir: iR(2) === 0 ? -1 : 1, style: iR(2), force: iR(4), rx: 0, ry: 0 };
+    S.people[s] = { st: 4, x: S.bi[f], y: S.bj[f], t0: S.cg, floor, rx: S.bi[f], ry: S.bj[f],
+      dir: iR(2) === 0 ? -1 : 1, style: iR(2), force: iR(4) };
     n6--;
   }
 }
@@ -410,18 +412,18 @@ function A(n) {
   if (S.ba === 0 && !S.over) { S.bk = 2; gameOver(); }
 }
 
-// ---- 塔摇摆 — Nokia q():1817 (仅 bk==2 摆) 与 DC v1.5.07 f(int):748 (常态持续正弦,
-// 倒塌才衰减) 二版本语义不同; 按用户实机体感 (建楼时楼轻微左右晃=游戏特色) 采用 DC 语义:
-// U=(U+dt)%3600, aH=c(U/10)=-cos, S=T·aH>>16 (衰减器), P=-(aH·T)/10000
-function sway(dt) {
-  if (S.bk === 2) {
-    S.bu = S.bu > 0 ? S.bu - 1 : S.bu + 1;                 // 倒塌衰减
-  } else {
-    S.bw = (S.bw + dt) % 3600;
-    S.cS = kD(S.bw / 10);                                  // -cos(U/10°)
-    S.bu = S.bv * S.cS;                                    // S=T·aH>>16 (浮点等价)
-  }
-  S.br = -(S.cS * S.bv) * 3.2768;                          // P=-(aH·T)/10000, br=世界x偏移
+// ---- 塔摇摆 q(int):1817-1841 原文忠实转写 ----
+// :1823 cS 每 tick 强制清 0; :1824-1837 相位推进分支 (:1833-1835) 不可达 — bu 在全工程
+// 无非 0 赋值 (仅存档 IO :487/:662/:872/:1048), bu>=0 → break block3 直接短路;
+// :1839 br=-(cS·bv)/10000 恒 0。Nokia v1.0.12 塔身无周期摆动, 视觉"微晃"来自:
+// 落点误差静态累计 aF (A():2067) + 落块后 800ms 一次坐稳缓动 (dE/cT, :2037-2047) + 
+// 落块随机 ±n3/4 恒定倾角 (:2883-2886)。DC v1.5.07 的常态正弦是别家语义, 已弃用。
+// bu 衰减方向按 :1825-1830: bk==2 且 bu>0 → bu-1; 否则 bu<0 → bu+1 (读档脏值归零)。
+function sway() {
+  S.cS = 0;
+  if (S.bk === 2) { if (S.bu > 0) S.bu--; }
+  else if (S.bu < 0) S.bu++;
+  S.br = 0;
 }
 
 // ---- 渲染层 ----
@@ -1010,7 +1012,7 @@ function loop(now) {
       // (提钩停摆→块消失)。运镜特有语义只在 z(): bk==4 不更新 aJ (break block5)。
       swing(cM);                                           // p()
       blocks(cM);                                          // s()
-      sway(cM);                                            // q()
+      sway();                                              // q()
       rebuildFloors();                                    // A() (:1710 每 tick)
       peopleTick(cM);                                      // B()
       if (S.bA > 0) {                                      // 连击计时 (:1712-1718)

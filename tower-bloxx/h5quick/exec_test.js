@@ -69,7 +69,7 @@ globalThis.self = globalThis;
 globalThis.createImageBitmap = (buf) => Promise.resolve({ width: 64, height: 64, close() {} });
 globalThis.Request = class { constructor(url) { this.url = String(url); } };
 globalThis.fetch = (reqOrUrl) => {
-  const url = typeof reqOrUrl === 'string' ? reqOrUrl : reqOrUrl.url;
+  const url = (typeof reqOrUrl === 'string' ? reqOrUrl : reqOrUrl.url).split('?')[0];
   const p = path.join(ROOT, String(url).replace(/^\.?\//, ''));
   const ok = fs.existsSync(p);
   return Promise.resolve({
@@ -156,7 +156,15 @@ if (S.bs >= 5) {
   const expect = 213 + S.bs * (384 - 213) / 60;
   ok(Math.abs(S.cQ - Math.min(384, expect)) < 5, '摆幅按 60 层线性递增 cQ=' + S.cQ.toFixed(1) + ' 期望≈' + Math.min(384, expect).toFixed(1));
 }
-// 摇摆相位 (DC 语义): bk!=2 常态持续摆, bw=0 时 cS=-cos(0)=-1
-S.bw = 0; S.bk = 0; step(1);
-ok(S.cS < -0.99, '摇摆相位 cS=-cos 常态持续 (DC f:int) cS=' + S.cS.toFixed(3));
+// 摇摆语义 (Nokia q():1817): 相位分支不可达, cS 恒 0, br 恒 0, 塔身无周期摆动
+S.bw = 18000; S.bk = 0; S.cS = 1; step(1);
+ok(S.cS === 0 && S.br === 0, 'Nokia 摇摆: cS 清 0/br 恒 0 (无周期摆) cS=' + S.cS + ' br=' + S.br);
+// 小人生命周期: 无人永久滞留 case1 (悬空 bug 的回归断言 — 转爬 |rx-bi|<128 在 cS=0 下必满足)
+let stuck = 0;
+for (let i = 0; i < 400; i++) {
+  step(1);
+  for (const p of S.people) if (p && p.st === 1 && S.cg - p.t0 > 6000) stuck++;
+}
+ok(stuck === 0, '无 case1 悬空滞留小人 (stuck=' + stuck + ')');
+ok(S.people.every(p => !p || (p.rx !== 0 || p.ry !== 0) || p.x === 0), '小人出生即有坐标 (无原点闪帧)');
 console.log('--- 完成: bs=' + S.bs + ' bt=' + S.bt + ' ba=' + S.ba + ' cg=' + S.cg);
