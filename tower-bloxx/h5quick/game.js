@@ -179,7 +179,7 @@ function blocks(dt) {
       continue;
     }
     if (st !== 2 && st !== 5) continue;
-    anyFalling = anyFalling || st === 2;
+    anyFalling = anyFalling || st === 2 || st === 5 || st === 7;   // s(): bl2=true 于 st2/5/7 三分支 (:1901/:1972)
     const t = S.cg - S.aE - S.cl[i];
     // x 500ms 收敛 ax→ay (s:1906-1913)
     if (S.ax[i] < S.ay[i] && S.ax[i] !== 999)
@@ -439,7 +439,7 @@ const FX_MAX = 9;                                          // dB[9] 槽位
 S.fx = Array.from({ length: FX_MAX }, () => ({ type: 0, x: 0, y: 0, next: 1000 + iR(2500) }));
 // ---- 环境层 E():2625 + x():2702 原式 ----
 // dB[9]=[型,x,y,下次]; dy 配额表(:4035); dz=8·max(图宽,高)(类型5/11减半); cp=2·aW/3/cd
-const FX_DY = [0,8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1];
+const FX_DY = [8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1];  // dy 原文29项(:4035) 0基索引 (勘误: 曾多前导0)
 const FX_DZ = new Array(29).fill(1);                        // 装载后按图尺寸填 (:1319-1333)
 function fxTick() {                                         // 每 25ms tick 一次 (E() 无 dt 缩放)
   const bdX = bd, dzY = be;
@@ -449,8 +449,9 @@ function fxTick() {                                         // 每 25ms tick 一
       s.x += FX_SPD[s.type];                                 // 每 tick 恒速 (dA[3][型])
       const m = FX_DZ[s.type - 1];
       if (s.x <= bdX + m && s.x >= -bdX - m && 0.75 * S.aW - s.y <= dzY + m) continue;
+      const deadT = s.type;                                  // E():2634-2639: 先记旧型再清, 配额返还
       s.type = 0; s.next = S.cg + iR(2000);
-      if (FX_DY[s.type || 0] >= 0 && FX_DY[s.type] !== undefined) {} // (type 已清, 配额回收见下)
+      if (FX_DY[deadT - 1] > 0) FX_DY[deadT - 1]++;
       continue;
     }
     if (s.next >= S.cg) continue;
@@ -462,10 +463,10 @@ function fxSpawn(slot) {                                    // x(int):2702
   let n3 = 0;
   for (let i2 = 0; i2 <= 28; i2++) {
     if (cp >= FX_START[i2] && cp < FX_END[i2] && (FX_DY[i2] > 0 || FX_DY[i2] === -1)
-        && iR(100) < FX_PROB[i2]) { n3 = i2; break; }
+        && iR(100) < FX_PROB[i2]) { n3 = i2 + 1; break; }    // n3=型(1基)
   }
   if (n3 === 0) { S.fx[slot].type = 0; S.fx[slot].next = S.cg + 1000 + iR(2500); return; }
-  FX_DY[n3]--;
+  FX_DY[n3 - 1]--;                                          // dy 0基
   const spd = FX_SPD[n3], m = FX_DZ[n3 - 1];
   if (spd === 0 || iR(2) === 0) {                           // 悬停型: 全域随机
     S.fx[slot].x = iR(bd);
@@ -511,13 +512,44 @@ function drawGround() {
     bg2d.fillRect(0, horizonY + AO + 2, E, F - 2 - horizonY - AO);
   }
 }
+// ---- 城市剪影层 (r0#89, w():1225-1251 + a(Graphics,n3):4103-4119) — "背景高楼"本体 ----
+let SKY89 = null;
+function loadSky89() {
+  fetch('./assets/city_skyline.bin').then(r => r.arrayBuffer()).then(b => {
+    const v = new DataView(b); let p = 0;
+    const rCnt = v.getUint8(p++), sCnt = v.getUint8(p++);
+    const cols = [];
+    for (let i = 0; i < sCnt; i++) { cols.push(v.getUint32(p, false) & 0xFFFFFF); p += 4; }
+    const rects = [];
+    for (let i = 0; i < rCnt; i++) {
+      const x176 = v.getUint8(p++), w176 = v.getUint8(p++);
+      const n5 = v.getUint16(p, false); p += 2;
+      const n6 = v.getUint16(p, false); p += 2;
+      rects.push({ x176, w176, yTop: 2 * n5, h: 2 * n6, col: v.getUint8(p++) });
+    }
+    SKY89 = { cols, rects };
+  }).catch(() => {});
+}
+loadSky89();
+function drawSky89(hznY) {                                  // a():4103-4119: top = aU - yTop - h + n3
+  if (!SKY89) return;
+  for (const R of SKY89.rects) {
+    const x = E * R.x176 / 176;
+    const w = Math.max(1, E * (R.x176 + R.w176) / 176 - x); // w():1244-1246
+    const top = aU - R.yTop - R.h + hznY;
+    if (top + R.h < 0) break;                               // 基线降序, 出顶即止
+    if (top > F) continue;
+    bg2d.fillStyle = '#' + SKY89.cols[R.col].toString(16).padStart(6, '0');
+    bg2d.fillRect(x, top, w, R.h);
+  }
+}
 function drawFX() {
   for (const slot of S.fx) {
     if (slot.type === 0) continue;
-    const px = aT + (32 * (slot.x - S.aV) >> 8);
-    const py = aU - (32 * (slot.y - 0.75 * S.aW) >> 8);
+    const px = (aT + 32 * (slot.x - S.aV)) >> 8;               // 字节码裁定: 移位作用于整个和 (e():2711)
+    const py = (aU - 32 * (slot.y - 0.75 * S.aW)) >> 8;      // e():2712
     if (px < -80 || px > E + 80 || py < -80 || py > F + 80) continue;
-    if (FX_DCT[slot.type - 1] === -1) { bg2d.fillStyle = '#fff'; bg2d.fillRect(px, py, 2, 2); continue; }
+    if (FX_DCT[slot.type - 1] === -1) { bg2d.fillStyle = '#fff'; bg2d.fillRect(px, py, 1, 1); continue; }   // e():2714 drawLine=1px
     const img = tex2d['id' + FX_DCT[slot.type - 1]];
     if (!img || !img.complete) continue;
     let f = 0;
@@ -621,11 +653,12 @@ function sky() {
     if (b[6] === 1) {                                      // 天线+红灯
       bg2d.fillStyle = col(dH2(b[5]));
       bg2d.fillRect(b[0] + (b[1] >> 1), (aU - n7 + n2s) - b[3], 3, b[3]);
-      if (Math.floor((S.cg + n7) / 200) % 2 === 0) { bg2d.fillStyle = '#f00'; bg2d.fillRect(b[0] + (b[1] >> 1), (aU - n7 + n2s) - b[3], 3, 3); }
+      if (Math.floor((S.cg + n7) / 200) % 2 !== 0) { bg2d.fillStyle = '#f00'; bg2d.fillRect(b[0] + (b[1] >> 1), (aU - n7 + n2s) - b[3], 3, 3); }   // l():4088 相位!=0
     } else if (b[6] === 2) {                               // 宽顶箱
       bg2d.fillRect(b[0] + b[1] / 10, (aU - n7 + n2s) - 16, b[1] - b[1] / 5, 16);
     }
   }
+  drawSky89(horizonY === null ? horizonScreenY() : horizonY);   // 锚=i() 的 3D 投影地平线(:3428), 非色带边界 (勘误)
 }
 const dH2 = c => c;                                        // dH 色已是 RGB
 // 3D 组
@@ -748,10 +781,10 @@ function drawHUD() {
     hud.save(); hud.beginPath(); hud.rect(clipX, F - CO - 72, 11, 72); hud.clip();
     for (let n7 = 0; n7 <= 3; n7++) {
       let n6;
-      if (n7 <= S.ba) n6 = baseFrame;
+      if (n7 <= S.ba)                                        // 剩余命: ba==1 时 500ms 相位闪帧9 (仅此一格)
+        n6 = S.ba === 1 && Math.floor(S.cg / 500) % 2 === 0 ? 9 : baseFrame;
       else if (S.cg - S.bc < 100 && n7 <= S.ba + S.bb) n6 = baseFrame + 1;
       else n6 = 8;
-      if (S.ba === 1 && Math.floor(S.cg / 500) % 2 === 0) n6 = 9;
       hud.drawImage(tex2d.id19, CN + (CN >> 1) + 14 - n6 * 11 + 4, F - CO - n7 * 12);
     }
     hud.restore();
@@ -835,8 +868,15 @@ function render3D() {
         S.ax[i] === 888 ? Math.random() * 360 : S.ax[i], S.cG[i]);
   }
   for (let i = 0; i < Math.min(S.bs, 5); i++) {
-    // 第1层保留 cB 特殊贴图 (用户实机对号: 第1层与2+层贴图不同, 落地不换装)
-    put(i === 0 ? CB_TPL : BLOCK_TPL, S.bi[i], S.bj[i], 0, S.cF[i], -S.bh[i]);
+    // 第1层(绝对层号0)保留 cB 特殊贴图 (用户实机对号); bi[] 是可见窗口压缩索引
+    // (rebuildFloors 从 bx=max(0,bs-5) 起写), bs>5 时渲染槽0=第bs-5层 — 判据须用绝对层号
+    put(S.bs - Math.min(S.bs, 5) + i === 0 ? CB_TPL : BLOCK_TPL, S.bi[i], S.bj[i], 0, S.cF[i], -S.bh[i]);
+  }
+  // 底块消失探针: 记录相机移动期的渲染窗口与视锥底
+  if (S.aW !== S.aX) {
+    window.__camLog = (window.__camLog || []).slice(-40);
+    window.__camLog.push({ t: Math.round(S.cg), bs: S.bs, aW: Math.round(S.aW), aX: S.aX,
+      n: Math.min(S.bs, 5), botY: Math.round(S.bj[0] - 128), viewBot: Math.round(S.aW - 1280) });
   }
   renderer.render(scene, camera);
 }
@@ -1007,7 +1047,12 @@ function bootDone() {
   { // 开局运镜 (K():3982-3993): 相机从吊钩基线 2432 缓降 2500ms 至地基 512
     S.aW = 2432; S.aX = 512; S.aY = S.cg + 3000; S.aH = 1664;
     S.aw[0] = 1; S.aL = aJ - S.aH; S.aA[0] = S.aL;
-    if (loadRS()) { S.aW = S.aX; S.aY = S.cg; }            // 有续档则不做运镜
+    if (loadRS()) {                                        // 有续档: 无运镜, 直接正常游戏态
+      S.aW = S.aX; S.aY = S.cg;
+      S.bk = 0;                                            // 原文读档(:3119 h()+D())不写 bk 且无 K() 运镜
+      aJ = S.aW + 1792 + 128;                              // 吊钩基线随相机 (z():1779); 漏此行则
+                                                           // aJ 恒 2432 → 挂块/单缆悬半空错位
+    }
   }
   zFloor(0);                                               // 参数初始化
   startBgm();
