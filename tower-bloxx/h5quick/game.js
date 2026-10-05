@@ -557,10 +557,15 @@ function drawFX() {
     if (FX_DCT[slot.type - 1] === -1) { bg2d.fillStyle = '#fff'; bg2d.fillRect(px, py, 1, 1); continue; }   // e():2714 drawLine=1px
     const img = tex2d['id' + FX_DCT[slot.type - 1]];
     if (!img || !img.complete) continue;
-    let f = 0;
-    if (slot.type === 6 || slot.type === 12) f = Math.floor(S.cg / 400) % 2;
-    const w = img.naturalWidth / (f ? 2 : 1), h = img.naturalHeight;
-    bg2d.drawImage(img, f ? w : 0, 0, w, h, px - w / 2, py - h / 2, w, h);
+    // e() 三种绘制: 型6/12 横向双帧 (帧宽=宽>>1, cg/400%2 选帧, :2718-2724);
+    // 型28 纵向双帧 (帧高=高>>1, :2726-2731); 其余单帧居中 (anchor 3)
+    let w = img.naturalWidth, h = img.naturalHeight, sx = 0, sy = 0;
+    if (slot.type === 6 || slot.type === 12) {
+      w >>= 1; sx = (Math.floor(S.cg / 400) % 2) * w;
+    } else if (slot.type === 28) {
+      h >>= 1; sy = (Math.floor(S.cg / 400) % 2) * h;
+    }
+    bg2d.drawImage(img, sx, sy, w, h, px - (w >> 1), py - (h >> 1), w, h);
   }
   drawGround();
   drawWeather(bg2d, false);                                // b(g,false) :3262 — 背景天气画在 3D 之后(其下)
