@@ -166,5 +166,6 @@ for (let i = 0; i < 400; i++) {
   for (const p of S.people) if (p && p.st === 1 && S.cg - p.t0 > 6000) stuck++;
 }
 ok(stuck === 0, '无 case1 悬空滞留小人 (stuck=' + stuck + ')');
+ok(S.bC >= 2, '连击可增长 bz 0→1→++ (:2848-2854), 最高纪录 bC=' + S.bC);
 ok(S.people.every(p => !p || (p.rx !== 0 || p.ry !== 0) || p.x === 0), '小人出生即有坐标 (无原点闪帧)');
 console.log('--- 完成: bs=' + S.bs + ' bt=' + S.bt + ' ba=' + S.ba + ' cg=' + S.cg);

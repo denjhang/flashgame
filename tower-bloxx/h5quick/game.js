@@ -259,11 +259,12 @@ function land() {
     S.cH[0] = (1 - iR(2) * 2) * 60; S.aE = S.cg; S.aC[0] = 50;
     return false;
   }
-  // 落住 (:2846-2901)
+  // 落住 (:2846-2858): bz==0 → bB=0 后 break block25 落到 :2854 ++bz (bz 0→1);
+  // bz!=0 且 bA>0 → ++bz; bz!=0 且 bA<=0 → break block26 保持不变 (不重置, 断链只藏不清)
   S.aw[0] = 4; S.dE = S.cg;
-  if (S.bz === 0) S.bB = 0;
-  else if (S.bA > 0) { S.bz++; if (S.bz > 1) S.bC = Math.max(S.bC, S.bz); }
-  else { S.bz = 1; if (S.bz > 1) S.bC = Math.max(S.bC, S.bz); }
+  if (S.bz === 0) { S.bB = 0; S.bz = 1; }
+  else if (S.bA > 0) S.bz++;
+  if (S.bz > 1) S.bC = Math.max(S.bC, S.bz);
   S.bm += n3;
   if (n2 < 25) {                                           // 完美 (:2860-2875)
     S.aF[S.bs % 20] = 0;
@@ -804,14 +805,16 @@ function drawHUD() {
   }
   // 连击 HUD (j:3533-3567) — 全部在 bA>0 门内 (:3534 break block22), 无连击=无任何星框/发光
   if (S.bA > 0) {
-    // 计时条: 外框深红 (E/2-E/4-3, co-1, E/2+5, 9), 内框黄 (h=7), 进度填充 y=co+2 h=4
-    // 长度=bA·(E/2)/6000; 刚完美 150ms 内 (bA>5850) 填白 (:3535-3542)
+    // 计时条 (j:3536-3542 原式): 外框深红 (X0-3, co-1, E/2+5, 9) / 内框黄内缩1px (X0-2, co, E/2+3, 7)
+    // / 填充 (X0, co+2, bA·E/2/6000, 4); 刚完美 150ms 内 (bA>5850) 填白。MIDP drawRect 线在
+    // 界内 → canvas 用 +0.5 半像素 + w/h-1 等效
+    const X0 = (E >> 1) - (E >> 2);
     hud.strokeStyle = 'rgb(107,26,0)'; hud.lineWidth = 1;
-    hud.strokeRect((E >> 1) - (E >> 2) - 3, 20.5, (E >> 1) + 5, 9);
+    hud.strokeRect(X0 - 3 + 0.5, 20.5, (E >> 1) + 5 - 1, 9 - 1);
     hud.strokeStyle = 'rgb(252,255,0)';
-    hud.strokeRect((E >> 1) - (E >> 2) - 3, 20.5, (E >> 1) + 5, 7);
+    hud.strokeRect(X0 - 2 + 0.5, 21.5, (E >> 1) + 3 - 1, 7 - 1);
     hud.fillStyle = S.bA > 5850 ? '#fff' : 'rgb(252,255,0)';
-    hud.fillRect((E >> 1) - (E >> 2), 23, Math.max(0, S.bA * (E >> 1) / 6000), 4);
+    hud.fillRect(X0, 23, Math.max(0, S.bA * (E >> 1) / 6000), 4);
     // 条左图标 al=id38 22px 4 帧 cg/80%4, anchor 20=LEFT|TOP → 顶左=(E/2-E/4-11, co-7) (:3543)
     hud.drawImage(tex2d.id38, (Math.floor(S.cg / 80) % 4) * 22, 0, 22, 22,
       (E >> 1) - (E >> 2) - 11, 14, 22, 22);
@@ -825,13 +828,15 @@ function drawHUD() {
       const pos = project(S.bi[n7], S.bj[n7]);
       hud.drawImage(tex2d.id39, ((Math.floor(S.cg / 100) + n7) % 3) * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
     }
-    // 倍数 "x{bz}" (j:3558-3581): x 字形=id16 第13格 (偏移-91), 数字右缘=+15+7·n7, y=co-2
+    // 倍数 "x{bz}" (j:3558-3581 原式): x 字形 clip=+5,co 7×12 / 图 y=co-2 (字形低数字 2px);
+    // 数字首位 x = (E/2+E/4)+12+7·n7 再减 6 (绘制器 :3586 n6=n3-6 起步), y=co-2
     if (S.bz > 1) {
       const n7 = S.bz > 9 ? 2 : 1;
-      hud.save(); hud.beginPath(); hud.rect((E >> 1) + (E >> 2) + 5, 19, 7, 12); hud.clip();
-      hud.drawImage(tex2d.id16, (E >> 1) + (E >> 2) + 5 - 13 * 7, 19);
+      const Xd = (E >> 1) + (E >> 2) + 5;
+      hud.save(); hud.beginPath(); hud.rect(Xd, 21, 7, 12); hud.clip();
+      hud.drawImage(tex2d.id16, Xd - 13 * 7, 19);
       hud.restore();
-      bigNum((E >> 1) + (E >> 2) + 10 + 2 + n7 * 7, 19, S.bz, n7);
+      bigNum(Xd + 7 + 2 + n7 * 7 - 6, 19, S.bz, n7);
     }
   }
   // 落地角标 (h(Graphics):3391): id37 三帧, ch 后 600ms
