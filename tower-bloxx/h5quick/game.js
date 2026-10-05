@@ -432,7 +432,9 @@ const cvs = document.getElementById('game');
 const hud = document.getElementById('hud2d').getContext('2d');
 const bg2d = document.getElementById('bg2d').getContext('2d');
 // ---- 环境背景 (E() :2625 / x() :2702): 28 型按高度带 (dA :4412), r0 位图 dC :4414 ----
-// 楼越高越离奇: 0-1 带鸟群 → 3 带气球飞艇 → 6-7 带客机 → 9-14 星星 → 15+ 行星/月亮/飞碟
+// 勘误(2026-10-05): dA 三行与 dy 均为 29 项、下标=型别本身 (1..28, 下标0哑元 prob=0)。
+// 旧版把三张表当"型别-1"0基用 → 全部环境层提前一个高度带 (≈1.5屏) 出现:
+// 型3(飞艇 id44) 被错给 [0,1) (原文 [2,3)) → 1 楼就见飞艇; 配额也串一格。
 const FX_START = [0,0,0,2,3,2,3,3,4,5,6,6,6,7,8,8,9,9,10,10,11,12,12,13,14,15,17,18,21];
 const FX_END   = [1,1,1,3,4,4,4,5,5,6,7,7,7,999,9,10,999,999,11,999,12,13,14,999,15,16,18,19,999];
 const FX_PROB  = [0,30,30,20,20,40,60,60,30,30,50,50,10,50,100,20,40,50,100,30,100,100,30,10,100,100,100,100,100];
@@ -442,7 +444,7 @@ const FX_MAX = 9;                                          // dB[9] 槽位
 S.fx = Array.from({ length: FX_MAX }, () => ({ type: 0, x: 0, y: 0, next: 1000 + iR(2500) }));
 // ---- 环境层 E():2625 + x():2702 原式 ----
 // dB[9]=[型,x,y,下次]; dy 配额表(:4035); dz=8·max(图宽,高)(类型5/11减半); cp=2·aW/3/cd
-const FX_DY = [8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1];  // dy 原文29项(:4035) 0基索引 (勘误: 曾多前导0)
+const FX_DY = [8,3,2,1,1,8,2,8,1,1,4,4,-1,8,-1,1,5,4,-1,5,2,-1,1,1,-1,-1,-1,-1,-1];  // dy 原文29项(:4035), 下标=型别 (0=哑元)
 const FX_DZ = new Array(29).fill(1);                        // 装载后按图尺寸填 (:1319-1333)
 function fxTick() {                                         // 每 25ms tick 一次 (E() 无 dt 缩放)
   const bdX = bd, dzY = be;
@@ -454,7 +456,7 @@ function fxTick() {                                         // 每 25ms tick 一
       if (s.x <= bdX + m && s.x >= -bdX - m && 0.75 * S.aW - s.y <= dzY + m) continue;
       const deadT = s.type;                                  // E():2634-2639: 先记旧型再清, 配额返还
       s.type = 0; s.next = S.cg + iR(2000);
-      if (FX_DY[deadT - 1] > 0) FX_DY[deadT - 1]++;
+      if (FX_DY[deadT] > 0) FX_DY[deadT]++;                  // dy[型] (:2638) — 下标=型别
       continue;
     }
     if (s.next >= S.cg) continue;
@@ -464,12 +466,12 @@ function fxTick() {                                         // 每 25ms tick 一
 function fxSpawn(slot) {                                    // x(int):2702
   const cp = Math.floor(2 * S.aW / 3 / cd);
   let n3 = 0;
-  for (let i2 = 0; i2 <= 28; i2++) {
+  for (let i2 = 1; i2 <= 28; i2++) {                        // 型别=i2, 表直接下标 (:2661-2665)
     if (cp >= FX_START[i2] && cp < FX_END[i2] && (FX_DY[i2] > 0 || FX_DY[i2] === -1)
-        && iR(100) < FX_PROB[i2]) { n3 = i2 + 1; break; }    // n3=型(1基)
+        && iR(100) < FX_PROB[i2]) { n3 = i2; break; }
   }
   if (n3 === 0) { S.fx[slot].type = 0; S.fx[slot].next = S.cg + 1000 + iR(2500); return; }
-  FX_DY[n3 - 1]--;                                          // dy 0基
+  FX_DY[n3]--;                                              // dy[n3] (:2672) — 下标=型别
   const spd = FX_SPD[n3], m = FX_DZ[n3 - 1];
   if (spd === 0 || iR(2) === 0) {                           // 悬停型: 全域随机
     S.fx[slot].x = iR(bd);
@@ -806,13 +808,14 @@ function drawHUD() {
   // 连击 HUD (j:3533-3567) — 全部在 bA>0 门内 (:3534 break block22), 无连击=无任何星框/发光
   if (S.bA > 0) {
     // 计时条 (j:3536-3542 原式): 外框深红 (X0-3, co-1, E/2+5, 9) / 内框黄内缩1px (X0-2, co, E/2+3, 7)
-    // / 填充 (X0, co+2, bA·E/2/6000, 4); 刚完美 150ms 内 (bA>5850) 填白。MIDP drawRect 线在
-    // 界内 → canvas 用 +0.5 半像素 + w/h-1 等效
+    // / 填充 (X0, co+2, bA·E/2/6000, 4); 刚完美 150ms 内 (bA>5850) 填白。
+    // MIDP drawRect 覆盖 (w+1)×(h+1): 外框行20..29/内框行21..28/填充23..26 (内框内腔22..27,
+    // 上下各留1px → 居中)。canvas strokeRect(x+.5,y+.5,w,h) 边线恰在行 y 与 y+h → 原样传 w/h
     const X0 = (E >> 1) - (E >> 2);
     hud.strokeStyle = 'rgb(107,26,0)'; hud.lineWidth = 1;
-    hud.strokeRect(X0 - 3 + 0.5, 20.5, (E >> 1) + 5 - 1, 9 - 1);
+    hud.strokeRect(X0 - 3 + 0.5, 20.5, (E >> 1) + 5, 9);
     hud.strokeStyle = 'rgb(252,255,0)';
-    hud.strokeRect(X0 - 2 + 0.5, 21.5, (E >> 1) + 3 - 1, 7 - 1);
+    hud.strokeRect(X0 - 2 + 0.5, 21.5, (E >> 1) + 3, 7);
     hud.fillStyle = S.bA > 5850 ? '#fff' : 'rgb(252,255,0)';
     hud.fillRect(X0, 23, Math.max(0, S.bA * (E >> 1) / 6000), 4);
     // 条左图标 al=id38 22px 4 帧 cg/80%4, anchor 20=LEFT|TOP → 顶左=(E/2-E/4-11, co-7) (:3543)
@@ -823,8 +826,9 @@ function drawHUD() {
       const pos = project(S.az[0], S.aA[0]);
       hud.drawImage(tex2d.id39, (Math.floor(S.cg / 100) % 3) * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
     }
-    // 连击层星框 (j:3551-3557): 最近 bz 层各 44px 火花, 帧相位逐层错开 (cg/100+n7)%3
-    for (let n7 = S.by; n7 > Math.max(0, S.by - S.bz); n7--) {
+    // 连击层星框 (j:3551-3557): 用户实机定性=连击时整栋可见楼都亮 (含连击层以下), 而非仅顶部
+    // bz 层 — 原文循环 by→max(0,by-bz) 在 bz≥窗口时即全窗, 按实机观察直接铺满可见窗口
+    for (let n7 = S.by; n7 >= 0; n7--) {
       const pos = project(S.bi[n7], S.bj[n7]);
       hud.drawImage(tex2d.id39, ((Math.floor(S.cg / 100) + n7) % 3) * 44, 0, 44, 44, pos.x - 22, pos.y - 22, 44, 44);
     }
