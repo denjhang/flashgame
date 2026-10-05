@@ -93,8 +93,9 @@ function rebuildFloors() {
   let idx = 0;
   for (let f = bx; f < S.bs; f++) {
     const aFf = S.aF[f % 20];
-    // 摇摆方向修正 (cS 规一化 ±1, 常数 29491200/32768=900, 58982400/32768=1800)
-    const var9 = -S.dF * aFf * S.cS / 900;
+    // 摇摆方向修正 (字节码 60-137 四分支): aFf 与 cS 同号 → /(58982400/32768)=1800 (减半),
+    // 异号 → /(29491200/32768)=900
+    const var9 = -(S.dF * aFf * S.cS) / (aFf * S.cS > 0 ? 1800 : 900);
     if (f === S.bs - 1 && f !== BG - 1) {
       const t = S.cg - S.dE;
       let v2;
@@ -104,8 +105,12 @@ function rebuildFloors() {
       else v2 = v1;
       v1 = v2;
     }
-    const v3 = S.cS > 0 ? v1 / 2 : -((v1 += var9)) / 2;
-    S.bh[idx] = v1;                                        // 渲染偏移 (首层 −999/倒塌 −888 特殊标记省略)
+    v1 += var9;                                            // 字节码 269-273: 无条件累加 (两半周期都弯)
+    const v3 = S.cS > 0 ? v1 / 2 : -v1 / 2;                // 274: ±(v1+var9)/2
+    // 哨兵 (字节码 292-307): 绝对层0 → bh=-999 (cB 基座, 渲染 rot=0 永不摆);
+    // bk==2 结算展示的顶块 → -888 翻滚网格 (城市模式 bq 路径, 快速局不触发)
+    if (f === 0) S.bh[idx] = -999;
+    else S.bh[idx] = v1;
     var2 += aFf + 2 * v1;
     S.bi[idx] = var2;                                      // 层中心 x
     S.bj[idx] = v4 + v3 + 256;                             // 层顶 y 链式
@@ -1052,9 +1057,11 @@ function render3D() {
         S.ax[i] === 888 ? Math.random() * 360 : S.ax[i], S.cG[i]);
   }
   for (let i = 0; i < Math.min(S.bs, 5); i++) {
-    // 第1层(绝对层号0)保留 cB 特殊贴图 (用户实机对号); bi[] 是可见窗口压缩索引
-    // (rebuildFloors 从 bx=max(0,bs-5) 起写), bs>5 时渲染槽0=第bs-5层 — 判据须用绝对层号
-    put(S.bs - Math.min(S.bs, 5) + i === 0 ? CB_TPL : BLOCK_TPL, S.bi[i], S.bj[i], 0, S.cF[i], -S.bh[i]);
+    // b(bi,bj,cF,-bh,0):3335 — cF 是 z 深度平移 (postTranslate 第三参, 落块横偏/4),
+    // 旋转 = Rz(-bh°) 面内侧倾 + Ry 0。bh==-999 哨兵 → cB 基座网格且 rot=0 (永不摆)。
+    // bi[] 是可见窗口压缩索引 (rebuildFloors 从 bx=max(0,bs-5) 起写)。
+    if (S.bh[i] === -999) put(CB_TPL, S.bi[i], S.bj[i], S.cF[i], 0, 0);
+    else put(BLOCK_TPL, S.bi[i], S.bj[i], S.cF[i], -S.bh[i], 0);
   }
   // 底块消失探针: 记录相机移动期的渲染窗口与视锥底
   if (S.aW !== S.aX) {
