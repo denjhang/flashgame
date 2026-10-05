@@ -44,7 +44,7 @@ const S = {
   bw: 0, bu: 0, bv: 0, br: 0, cS: 0,                       // 塔摇摆
   bt: 0, bB: 0, bz: 0, bA: 0, bC: 0,                       // 人口/银行/连击
   ba: 3, bb: 0, bc: 0, cN: -9999,                          // 机会
-  bk: 0, dD: 0, aE: 0, dE: 0, ch: -9999, cK: false,        // 阶段/游标/时刻
+  bk: 4, dD: 0, aE: 0, dE: 0, ch: -9999, cK: false,        // 阶段: 4=开局运镜期(K:4021), 首落成→0 (:1952)
   over: false, people: [],                                 // 惊慌人群 8 槽
   cj: [0,0,0,0,0,0],                                       // 纪录 [3]人口 [4]高度 [5]组合
 };
@@ -117,8 +117,11 @@ function rebuildFloors() {
 // ---- o(int) 相机目标 / z() 相机跟随 (:1786/:1765) ----
 function oCam(d) { S.aY = S.cg; S.aX = S.bs > 1 ? S.aX + d : 512; }
 function camTick() {
-  if (S.aW < S.aX) { S.aW = Math.min(S.aX, S.aX + (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; horizonY = null; }
-  else if (S.aW > S.aX) { S.aW = Math.max(S.aX, S.aX - (S.cg - S.aY - 500) * 256 / 500); aJ = S.aW + 1792 + 128; horizonY = null; }
+  if (S.aW < S.aX) { S.aW = Math.min(S.aX, S.aX + (S.cg - S.aY - 500) * 256 / 500); horizonY = null; }
+  else if (S.aW > S.aX) { S.aW = Math.max(S.aX, S.aX - (S.cg - S.aY - 500) * 256 / 500); horizonY = null; }
+  // z():1779 aJ=aW+1920 仅游戏内相机移动帧更新 — 运镜期(bk==4)主tick不跑z(),
+  // aJ 恒为 K():3983 的 2432 (世界坐标不动): 相机下移, 臂/钢丝/盒子原地滚出画面 (用户设定)
+  if (S.bk !== 4 && S.aW !== S.aX) aJ = S.aW + 1792 + 128;
   // (z():1779 aJ 仅在相机移动帧更新; aW==aX 时保持 — 与原文 block6 一致)
   if (S.cg - S.cN < 800) { S.aW += 32 - iR(64); horizonY = null; }  // 扣命后 800ms 抖动 (i() 地平线随动)
 }
@@ -228,6 +231,7 @@ function hitFloor() {
 function land() {
   const n4 = hitFloor();
   if (n4 === -1) return false;                             // 未命中 → 继续坠
+  if (S.bk === 4) S.bk = 0;                               // G() 命中: 开局态→正常 (:1952-53)
   S.aE = S.cg;
   const n3 = S.az[0] - S.bi[n4];
   const n2 = Math.abs(n3);
@@ -368,7 +372,9 @@ function peopleTick(dt) {
       p.rx = p.x - bG_ARC[n6] * (p.x - xT) / 45 - n7 * (bG_ARC[n6 + 1] - bG_ARC[n6]) * (p.x - xT) / 22500;
       p.ry = p.y - bF_ARC[n6] * (p.y - yT) / 15 - n7 * (bF_ARC[n6 + 1] - bF_ARC[n6]) * (p.y - yT) / 7500;
       const tgtX = S.bi[fl];
-      if (n4 >= 2000 || (Math.abs(p.rx - tgtX) < 128 && p.ry <= (p.floor - 1) * 256 + 128)) {
+      // :2192 原文是 AND: 转爬需 n4≥2000 且 |Δx|<128 且 y≤层心 三者同时成立
+      // (旧写法 || 把超时当独立条件 → 2000ms 未到块也强制空中转爬)
+      if (n4 >= 2000 && Math.abs(p.rx - tgtX) < 128 && p.ry <= (p.floor - 1) * 256 + 128) {
         p.st = 2; p.t0 = S.cg;                             // case2 转换 (:2196-2205)
         p.x = p.rx - tgtX; p.y = (p.floor - 1) * 256 + 128 - p.ry;   // 记录相对偏移 (bE[1]/[2])
         p.dir = p.x < 0 ? -1 : 1;
@@ -520,6 +526,18 @@ function drawFX() {
     bg2d.drawImage(img, f ? w : 0, 0, w, h, px - w / 2, py - h / 2, w, h);
   }
   drawGround();
+  // 2D 起重机悬臂+黑钢丝 (f():3296-3310): 仅 bk==1/aw==3/(bk==4&&aw!=2) —
+  // 即开局运镜期(bk=4)可见, 开局后条件永假 → 悬臂永在画面外 (用户设定确认)
+  if (S.bk === 1 || S.aw[0] === 3 || (S.bk === 4 && S.aw[0] !== 2)) {
+    const n2 = (E >> 1) + ((0 - S.aV) >> 3);           // aT=E/2, aI=0 (K:3982); 32*x>>8 = x/8
+    const n3 = (F >> 1) - ((aJ - S.aW) >> 3);          // aU=F/2
+    const p = project(S.aK, S.aL + 528);
+    if (tex2d.id41 && tex2d.id41.complete)              // ak=g.c(41) 151x31, 锚40=RIGHT|BOTTOM
+      bg2d.drawImage(tex2d.id41, n2 + 4 - 151, n3 - 31);
+    bg2d.strokeStyle = '#000'; bg2d.lineWidth = 1;
+    bg2d.beginPath(); bg2d.moveTo(n2, n3); bg2d.lineTo(p.x, p.y);
+    bg2d.moveTo(n2 + 1, n3); bg2d.lineTo(p.x + 1, p.y); bg2d.stroke();
+  }
 }
 const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: false, alpha: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1); renderer.setSize(E, F, false);
@@ -613,7 +631,7 @@ const dH2 = c => c;                                        // dH 色已是 RGB
 // 3D 组
 const towerGroup = new THREE.Group(); scene.add(towerGroup);   // 摇摆作用于组 (近似 A() 逐层投影)
 const fxGroup = new THREE.Group(); scene.add(fxGroup);
-let templates = [], GROUND_TPL = null, SITE_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null, BG_TOWERS = [], bgMeshes = [];  // *_TPL = 子网格数组
+let templates = [], GROUND_TPL = null, CB_TPL = null, CRANE_TPL = null, CABLE_TPL = null, BLOCK_TPL = null, BG_TOWERS = [], bgMeshes = [];  // *_TPL = 子网格数组
 const tex2d = {};
 function loadTex(url) { const t = new THREE.TextureLoader().load(url); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; return t; }
 // 小人帧纹理 (id12/13: 10 帧 × 21x28)
@@ -655,7 +673,9 @@ new GLTFLoader().load('./assets/scene.glb?v=2', gltf => {
   });
   // uid→GLB 节点: n(uid+250)。cy块=uid13→n263, cC地面=uid9→n259, cD吊臂=uid8→n258, cE缆=uid7→n257
   const T = name => templates.filter(t => t.name === name || t.name.startsWith(name + '_'));
-  GROUND_TPL = T('mesh269'); SITE_TPL = T('mesh262'); CRANE_TPL = T('n260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  GROUND_TPL = T('mesh269'); CB_TPL = T('mesh268'); CRANE_TPL = T('n260'); CABLE_TPL = T('mesh261'); BLOCK_TPL = T('mesh265');
+  // 勘误 (2026-10-05): 快速模式 bl=4 (:3115) → cB=uid23=mesh268 (84v 标准块);
+  // mesh262=uid20 是城市 bl=1 蓝房子 (用户指正: 蓝色属城市模式, 与快速无关)
   // 勘误: uid8 吊车在 GLB 里对象名是节点名 n260 (GLTFLoader 单 primitive 用节点名),
   // 旧 T('mesh260') 匹配空 → 吊车从未渲染 (开局无悬臂/钢丝/吊钩)。
   // uid 对号勘误 (2026-10-04): cC=n.a(9)=mesh269 是 bs≤5 附加灰色平面(无贴图, 原版 cC.c()+a() 手动渲染);
@@ -702,7 +722,11 @@ function drawHUD() {
     if (!p) continue;
     const n4 = S.cg - p.t0;
     let frame = 0;
-    if (p.st === 1) frame = 1 + Math.floor(Math.max(0, n4 - 1200) / 280) % 8;
+    if (p.st === 1) {                                      // B():2182-2186 — 折返: 1,2,3,4,5,4,3,2
+      frame = 1 + Math.floor(Math.max(0, n4 - 1200) / 280) % 8;
+      if (frame > 5) frame = 5 - (frame - 5);               // 缺此折返会闪帧6-8 (半空变姿态)
+    }
+    else if (p.st === 2) frame = 6 + Math.floor(S.cg / 200) % 2;   // B() case2: 横向滑落/爬窗两帧交替
     else if (p.st === 5) frame = 6 + Math.floor(S.cg / 200) % 2;
     else if (p.st === 3 || p.st === 4) frame = 1 + Math.floor(n4 / 280) % 8;
     const pos = project(p.rx, p.ry, 0);
@@ -795,18 +819,24 @@ function render3D() {
   // 一切网格经 d 类逐个 render (d.a()=Graphics3D.render)。快速模式 3D 层仅: cC(bs≤5)/cD吊臂/块。
   // mesh262(uid20) 是城市建筑模型(cB族), 不得渲染 — 即"地基左侧蓝盒子"来源, 删除摆放。
   if (S.bs <= 5) put(GROUND_TPL, 0, 0, 0, 0, 0);            // cC 附加灰平面 (identity, bs<=5, 原版 cC.c()+a())
-  if (S.bk === 0) {                                         // cD: 滑轮+单缆+吊具 — 放置后钩子仍在缆端
-    put(CRANE_TPL, S.aK, S.aL, 0, S.aM * 2 / 3, 0);
-  } else if (S.bk === 1 || S.aw[0] === 3) {                 // cE 双缆 (仅城市收尾态, 快速局不出现)
-    put(CABLE_TPL, S.aK, S.aL, 0, 0, 0);
-  }
+  // f():3317-3329 原文 (uid8 真实几何=8顶点: 128x198 吊具面板+28x1030 单缆上探1246,
+  // 此前"退化点阵"系 dump 脚本 off-by-one 读错对象的伪数据):
+  //   cD=uid8/n260 单缆+吊钩: bk==0 正式游戏常显 (第2层起单根缆绳晃动, 首落成即出现)
+  //   cE=uid7/mesh261 双缆: bk==1||aw==3||(bk==4&&aw!=2) — 运镜期扯着首块 (与 2D 悬臂同条件)
+  if (S.bk === 0) put(CRANE_TPL, S.aK, S.aL, 0, S.aM * 2 / 3, 0);   // cD, 旋 aM/540*360
+  if (S.bk === 1 || S.aw[0] === 3 || (S.bk === 4 && S.aw[0] !== 2)) put(CABLE_TPL, S.aK, S.aL, 0, 0, 0);
+  // a(graphics):3265-3270 哨兵覆盖: bk==1→ax=888(翻滚), bk==4→ax=999(锁零旋转)
+  // b():3348-3351 解码: 888→cz/cA 随机翻滚; 999→cB 网格+旋转0 (双缆期首块: 只平移不旋转)
+  if (S.aw[0] !== 0) S.ax[0] = S.bk === 1 ? 888 : S.bk === 4 ? 999 : S.ax[0];
   for (let i = 0; i < 5; i++) {
     if (S.aw[i] === 4 || S.aw[i] === 0) continue;
-    put(BLOCK_TPL, S.az[i], S.aA[i], 0,
+    if (S.ax[i] === 999) put(CB_TPL, S.az[i], S.aA[i], 0, 0, S.cG[i]);     // cB=uid23 快速首块模型, 零旋转
+    else put(BLOCK_TPL, S.az[i], S.aA[i], 0,
         S.ax[i] === 888 ? Math.random() * 360 : S.ax[i], S.cG[i]);
   }
   for (let i = 0; i < Math.min(S.bs, 5); i++) {
-    put(BLOCK_TPL, S.bi[i], S.bj[i], 0, S.cF[i], -S.bh[i]);
+    // 第1层保留 cB 特殊贴图 (用户实机对号: 第1层与2+层贴图不同, 落地不换装)
+    put(i === 0 ? CB_TPL : BLOCK_TPL, S.bi[i], S.bj[i], 0, S.cF[i], -S.bh[i]);
   }
   renderer.render(scene, camera);
 }
@@ -814,7 +844,10 @@ function render3D() {
 // ---- 音频: LibMidi (抄 freej2me-web web/libmidi — wasm 合成, 非自写振荡器) ----
 // x 播放器 = BGM 循环 (r0[81]); b.a 负 id = jingle 单发 (83 放置/84 败/85 胜)
 let bgmPlayer = null, jinglePlayer = null;
+let audioOn = (() => { try { return localStorage.getItem('twrblx_sound') !== '0'; } catch (e) { return true; } })();
+try { document.getElementById('sound').textContent = audioOn ? '声音:开' : '声音:关'; } catch (e) {}   // 声音总开关 (UI 按钮, localStorage 持久化)
 function beep() {                                           // c.a(800): 扣命/地基提示短音
+  if (!audioOn) return;
   try {
     const c = audioCtx(), o = c.createOscillator(), g = c.createGain();
     o.type = 'square'; o.frequency.value = 220;
@@ -829,6 +862,7 @@ async function midiPlayerOnce() {
   return p;
 }
 async function startBgm() {                                 // b():308 x.a(-2147483568,-1) 循环
+  if (!audioOn) return;
   try {
     bgmPlayer = bgmPlayer || await midiPlayerOnce();
     const r = await fetch('./assets/midi/81.mid');
@@ -839,6 +873,7 @@ async function startBgm() {                                 // b():308 x.a(-2147
   } catch (e) {}
 }
 async function playMidiJingle(id) {                         // :1602-1692 负 id jingle
+  if (!audioOn) return;
   try {
     jinglePlayer = jinglePlayer || await midiPlayerOnce();
     const r = await fetch('./assets/midi/' + id + '.mid');
@@ -897,6 +932,17 @@ function restartGame() {
   clearRS();
   location.reload();
 }
+// 声音开关: 关=停 BGM/jingle/beep 全静音; 开=恢复 BGM。stopPropagation 防落块
+document.getElementById('sound').addEventListener('pointerup', e => {
+  e.stopPropagation();
+  audioOn = !audioOn;
+  document.getElementById('sound').textContent = audioOn ? '声音:开' : '声音:关';
+  try { localStorage.setItem('twrblx_sound', audioOn ? '1' : '0'); } catch (err) {}
+  if (!audioOn) {
+    try { bgmPlayer && bgmPlayer.midiPlayer.stop(); } catch (err) {}
+    try { jinglePlayer && jinglePlayer.midiPlayer.stop(); } catch (err) {}
+  } else startBgm();
+});
 document.getElementById('restart').addEventListener('pointerup', e => {
   e.stopPropagation();
   restartGame();
@@ -919,6 +965,9 @@ function loop(now) {
     const cM = S.cM; S.cM = 0; S.cg += cM;
     if (!S.over) {
       camTick();                                           // z()
+      // tick 门控勘误 (2026-10-05): 原文 :1700-1702 仅 f∈{4,5,6,8} 菜单态跳过, 运镜期 f=7
+      // tick 照跑 (块随摆小幅动)。此前误用 aW!=aX 当运镜 → 盖楼后相机上升期也被冻结
+      // (提钩停摆→块消失)。运镜特有语义只在 z(): bk==4 不更新 aJ (break block5)。
       swing(cM);                                           // p()
       blocks(cM);                                          // s()
       sway(cM);                                            // q()

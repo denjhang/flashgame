@@ -15,6 +15,8 @@
     border:none;font-size:14px;cursor:pointer}
   #restart{position:absolute;right:6px;top:6px;padding:3px 10px;background:#7a5555;color:#fff;border:2px solid #e8e0d8;
     border-radius:4px;font-size:12px;cursor:pointer;z-index:5}
+  #sound{position:absolute;left:6px;top:6px;padding:3px 10px;background:#4a5a7a;color:#fff;border:2px solid #e8e0d8;
+    border-radius:4px;font-size:12px;cursor:pointer;z-index:5}
   #boot{position:absolute;inset:0;background:#fff;color:#333;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:18px}
   #boot img{width:154px}
@@ -32,8 +34,9 @@
   <canvas id="hud2d" width="240" height="320"></canvas>
   <div id="msg"><span id="msgTxt"></span><button class="ok" id="msgOk">确定</button></div>
   <button id="restart">重新开始</button>
+  <button id="sound">声音:开</button>
   <div id="boot"><img src="./assets/id09.png" alt=""><div class="bar"><div class="fill" id="bootFill"></div></div></div>
 </div>
-<script type="module" src="./game.js?v=11"></script>
+<script type="module" src="./game.js?v=26"></script>
 </body>
 </html>
