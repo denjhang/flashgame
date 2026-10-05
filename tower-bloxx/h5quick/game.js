@@ -563,6 +563,7 @@ function drawFX() {
     bg2d.drawImage(img, f ? w : 0, 0, w, h, px - w / 2, py - h / 2, w, h);
   }
   drawGround();
+  drawWeather(bg2d, false);                                // b(g,false) :3262 — 背景天气画在 3D 之后(其下)
   // 2D 起重机悬臂+黑钢丝 (f():3296-3310): 仅 bk==1/aw==3/(bk==4&&aw!=2) —
   // 即开局运镜期(bk=4)可见, 开局后条件永假 → 悬臂永在画面外 (用户设定确认)
   if (S.bk === 1 || S.aw[0] === 3 || (S.bk === 4 && S.aw[0] !== 2)) {
@@ -574,6 +575,154 @@ function drawFX() {
     bg2d.strokeStyle = '#000'; bg2d.lineWidth = 1;
     bg2d.beginPath(); bg2d.moveTo(n2, n3); bg2d.lineTo(p.x, p.y);
     bg2d.moveTo(n2 + 1, n3); bg2d.lineTo(p.x + 1, p.y); bg2d.stroke();
+  }
+}
+
+// ---- 天气系统 u()/v()/w()/D()/C()/b(Graphics,boolean) (:2260-2623) ----
+// 快速模式全量参与 (tick :1705 无 bk/bl 门)。JAD(a3): DChoc-Rain-Probability=20, Snow=30,
+// Rain-Duration=60s, Snow-Duration=50s → cU=204, cV=307 (1024 刻度)。
+// 雨: 低空带 aW∈[0,3840] 触发 (概率 20%), 天空暗到 409/1024, 带闪电 (dq=2 期 1%/tick);
+// 雪: 高空带 aW∈[10240,12800] (30%), 暗到 819/1024, 粒子正弦飘摆。各闩锁一场 (da/db)。
+// 状态机 dq: 0空闲→1变暗(ds)→2持续(dt, 强度512→1024→512)→3恢复(du)→0。
+// 粒子 dd[300] 持久 (x/y 1024 制): 前景层 210 (b(g,true), 画在 3D 之上)、背景层 90。
+const WT = {
+  cU: 204, cV: 307, cX: false, cY: false, da: false, db: false,
+  dq: 0, dw: 2, de: false, dv: 0, dr: 0, ds: 0, dt: 0, du: 0, dh: 0, di: 0, dj: 0,
+  dg: 1024, dk: 0, dl: 0, dm: 0, dn: 0, dO: 100,
+  dc: [new Array(7).fill(0), new Array(7).fill(0)],
+  dd: Array.from({ length: 300 }, () => [0, 0, 0, 0, 0, 0, 0]),
+};
+const cW = [
+  [20000,2000,20000,5000,20000,2000,409,20000,90,1024,32,4,5,128,16,96,0,10,256,64],
+  [10000,2000,30000,5000,10000,2000,819,10000,90,1024,2,0,10,50,10,2,0,10,150,32],
+];
+window.__WT = WT;
+const GW = E * 1024, GH = F * 1024;                        // G/H (:300-301)
+const jS = idx => Math.sin(idx * Math.PI / 180) * 32768;   // j() 正弦表 Q15
+const lerp5 = (a1, b1, c1, d1, e1) => b1 - a1 === 0 ? 0 : (d1 - c1) * e1 / (b1 - a1) + c1;  // a(5参):2396
+function weatherInit() {                                   // :4025-4026 开局一次性掷骰
+  WT.cX = WT.cU >= iR(1024); WT.cY = WT.cV >= iR(1024);
+}
+function weatherClear() {                                  // C():2424
+  WT.dc[0].fill(0); WT.dc[1].fill(0);
+  for (const p of WT.dd) p.fill(0);
+}
+function weatherParams(kind) {                             // v():2373
+  const r = cW[kind === 1 ? 0 : 1];
+  WT.ds = r[0] + iR(r[1] + 1); WT.dt = r[2] + iR(r[3] + 1); WT.du = r[4] + iR(r[5] + 1);
+  WT.dh = WT.dg; WT.di = r[6]; WT.dj = r[7];
+  const n4 = r[8], n5 = iR(2) - 1;                         // 风向 ±1
+  const setL = (i, cnt, acc, wind, grav, r1, r2) => { const d = WT.dc[i]; d[0] = cnt; d[1] = acc; d[2] = 0; d[3] = wind; d[4] = grav; d[5] = r1; d[6] = r2; };
+  setL(0, 300 - n4, 0, n5 * r[10], r[13], r[11], r[11]);   // a():2465 前景层
+  setL(1, n4, 0, n5 * r[15], r[18], r[16], r[16]);         // 背景层
+}
+function weatherFill() {                                   // D():2442 全屏铺粒子
+  let off = 0;
+  for (const d of WT.dc) {
+    const n = d[1] >> 10, r1 = d[5] + 1, r2 = d[6] + 1;
+    for (let i = 0; i < n; i++) {
+      const p = WT.dd[i + off];
+      p[0] = 1; p[1] = iR(GW); p[2] = iR(GH); p[3] = iR(4); p[4] = iR(368640);
+      p[5] = (d[3] + iR(r1) - (r1 >> 1)) / (4 - p[3]); p[6] = (d[4] + iR(r2) - (r2 >> 1)) / (4 - p[3]);
+    }
+    d[2] = 0; off += d[0];
+  }
+}
+function weatherTick(dt) {                                 // u():2260
+  WT.dv = Math.min(WT.dv + dt, WT.dr);
+  switch (WT.dq) {
+    case 0: {
+      let kind = 0;
+      if (WT.cX && !WT.da && S.aW >= 0 && S.aW <= 3840) { WT.da = true; weatherClear(); weatherParams(1); kind = 1; }
+      else if (WT.cY && !WT.db && S.aW >= 10240 && S.aW <= 12800) { WT.db = true; weatherClear(); weatherParams(2); kind = 2; }
+      if (!kind) return;
+      WT.dw = kind; WT.de = true; WT.dg = 1024; WT.dk = 0; WT.dq = 1; WT.dr = WT.ds; WT.dv = 0;
+      return;
+    }
+    case 1: {
+      WT.dg = lerp5(0, WT.dj, 1024, WT.di, Math.min(WT.dv, WT.dj));
+      for (const d of WT.dc) d[1] = d[0] * lerp5(0, WT.dr, 0, 512, Math.min(WT.dv, WT.dr));
+      if (WT.dv === WT.dr) { WT.dq = 2; WT.dr = WT.dt; WT.dv = 0; }
+      break;
+    }
+    case 2: {
+      const h = WT.dr >> 1;
+      if (WT.dv < h) for (const d of WT.dc) d[1] = d[0] * lerp5(0, h, 512, 1024, Math.min(WT.dv, h) + 512);
+      else for (const d of WT.dc) d[1] = d[0] * lerp5(h, WT.dr, 1024, 512, Math.min(WT.dv - h, h) + 1024);
+      if (WT.dw === 1) {                                   // 闪电 (仅雨, :2334-2344)
+        WT.dn = Math.min(WT.dn + dt, WT.dO);
+        if (iR(100) === 7) { WT.dl = 512; WT.dm = 0; WT.dn = 0; WT.dk = WT.dl; }
+        if (WT.dk > 0) WT.dk = WT.dk >> Math.floor(WT.dn / WT.dO);  // a(3参):2403 n2>>n3/n4
+      }
+      if (WT.dv === WT.dr) { WT.dq = 3; WT.dh = WT.dg; WT.dr = WT.du; WT.dv = 0; }
+      break;
+    }
+    case 3: {
+      WT.dg = lerp5(0, WT.dj, WT.dh, 1024, Math.min(WT.dv, WT.dj));
+      for (const d of WT.dc) d[1] = d[0] * lerp5(0, WT.dr - 1000, 512, 0, Math.min(WT.dv, WT.dr - 1000));
+      if (WT.dv === WT.dr) { WT.dq = 0; weatherClear(); return; }
+      break;
+    }
+  }
+  weatherMove(dt);
+}
+function weatherMove(dt) {                                 // w():2477
+  const n6 = S.aW + 384;                                   // 256*aW>>8 = aW (:2490)
+  let off = 0;
+  for (const d of WT.dc) {
+    d[2] += d[1] * d[4] / 2 / GH * dt;                     // 生成节流累计器
+    for (let i = 0; i < d[0]; i++) {
+      const p = WT.dd[i + off];
+      if (p[0] === 1) {
+        p[1] += p[5] * dt; p[2] += p[6] * dt;
+        if (WT.dw === 2) {                                 // 雪: 相位推进 + 正弦水平飘 (:2498-2500)
+          p[4] += (90 + 90 * (3 - p[3])) * dt; p[4] %= 368640;
+          p[1] += (64 * p[3] * jS(p[4] >> 10)) >> 15;
+        }
+        if (p[2] > GH) { p[0] = 0; p[2] = 0; }
+        else if (n6 < 1024 && p[2] > n6 * GH / 1024) { p[0] = 0; p[2] = 0; }   // 地面截断
+        else if (p[1] < 0) p[1] = GW;
+        else if (p[1] > GW) p[1] = 0;
+      } else if (d[2] >= 1024) {                           // 补发 (:2521-2534)
+        d[2] -= 1024;
+        p[0] = 1; p[1] = iR(GW); p[2] = 0; p[3] = iR(4); p[4] = iR(368640);
+        p[5] = (d[3] + iR(d[5] + 1) - ((d[5] + 1) >> 1)) / (4 - p[3]);
+        p[6] = (d[4] + iR(d[6] + 1) - ((d[6] + 1) >> 1)) / (4 - p[3]);
+      }
+    }
+    off += d[0];
+  }
+}
+function wxCss(c, m) {                                     // a(int,int,boolean):2407 颜色调制
+  if (!WT.de || m === 1024) return '#' + c.toString(16).padStart(6, '0');
+  const ch = v => Math.max(0, Math.min(v * m >> 10, 255));
+  return 'rgb(' + ch((c >> 16) & 255) + ',' + ch((c >> 8) & 255) + ',' + ch(c & 255) + ')';
+}
+function drawWeather(ctx, fg) {                            // b(Graphics,boolean):2542
+  const d = WT.dc[fg ? 0 : 1], off = fg ? 0 : WT.dc[0][0];
+  if (WT.dq === 0 && !WT.de) return;
+  for (let i = 0; i < d[0]; i++) {
+    const p = WT.dd[i + off];
+    if (p[0] !== 1) continue;
+    const x = p[1] >> 10, y = p[2] >> 10;
+    if (WT.dw === 1) {                                     // 雨丝 a(g,5参):2574 — 沿速度画斜线
+      const vx = p[5] * 32 >> 10, vy = p[6] * 32 >> 10, t = fg ? p[3] : -1;
+      ctx.lineWidth = 1;
+      if (t < 0) { ctx.strokeStyle = wxCss(0xAAAACC, 512 + (WT.dg >> 1)); seg(x, y, x + vx, y + vy); }
+      if (t < 2) { ctx.strokeStyle = wxCss(0xAAAACC, 768 + (WT.dg >> 2)); seg(x, y, x + vx, y + vy); }
+      else {                                               // 前景亮雨丝: AAAACC 底 + FFFFFF 盖
+        ctx.strokeStyle = wxCss(0xAAAACC, 1024); seg(x, y, x + vx, y + vy);
+        ctx.strokeStyle = '#fff'; seg(x, y, x + vx, y + vy);
+      }
+    } else {                                               // 雪花 a(g,3参):2598
+      const s = p[3] >> (fg ? 0 : 1);
+      if (s > 1) {
+        ctx.fillStyle = '#DDDDFF'; ctx.fillRect(x + 1, y + 1, s - 1, s - 1);
+        ctx.fillRect(x, y, 1, 1); ctx.fillRect(x + s, y, 1, 1);
+        ctx.fillRect(x, y + s, 1, 1); ctx.fillRect(x + s, y + s, 1, 1);
+      } else { ctx.fillStyle = wxCss(0xAAAADD, 1024); ctx.fillRect(x, y, s + 1, s + 1); }
+    }
+    function seg(a, b, c2, d2) { ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c2, d2); ctx.stroke(); }
   }
 }
 const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: false, alpha: true, preserveDrawingBuffer: true });
@@ -629,7 +778,7 @@ function sky() {
     return (r << 16) | (g << 8) | b;
   };
   const bM = mix(bK, bL);
-  const col = c => '#' + c.toString(16).padStart(6, '0');
+  const col = c => wxCss(c, WT.dg + WT.dk);                // a(bK, dg+dk, bl2=true) :2759 天气变暗+闪电
   if (n3 < F) { bg2d.fillStyle = col(bK); bg2d.fillRect(0, n3, E, F - n3); }
   if (n3 > 0) { bg2d.fillStyle = col(bL); bg2d.fillRect(0, 0, E, n3); }
   // 中缝 bM 7px 阶梯 (bN 随机地平线 x)
@@ -755,6 +904,7 @@ function bigNum(rightX, y, val, minD) { drawDigits(tex2d.id16, 7, 12, val, right
 function smallNum(rightX, y, val, minD) { drawDigits(tex2d.id15, 7, 9, val, rightX, y, minD, false); }
 function drawHUD() {
   hud.clearRect(0, 0, E, F);
+  drawWeather(hud, true);                                  // b(g,true) :3270 — 前景天气画在 3D 之上
   // 惊慌人群 (k(Graphics):3624) — 3D→2D 投影, 两帧小人镜像
   for (const p of S.people) {
     if (!p) continue;
@@ -950,7 +1100,9 @@ function saveRS() {
   if (S.over) return;
   const d = { v: 2, bs: S.bs, bt: S.bt, ba: S.ba, bz: S.bz, bA: S.bA, bB: S.bB, bC: S.bC,
     bm: S.bm, bn: S.bn, bo: S.bo, bw: S.bw, aP: S.aP, aW: S.aW, aX: S.aX,
-    aF: S.aF, cF: S.cF, cj: S.cj, dE: S.dE, bw: S.bw };
+    aF: S.aF, cF: S.cF, cj: S.cj, dE: S.dE, bw: S.bw,
+    wx: (({ cX, cY, da, db, dq, dw, de, dv, dr, ds, dt, du, dh, dg, dk, dn }) =>
+      ({ cX, cY, da, db, dq, dw, de, dv, dr, ds, dt, du, dh, dg, dk, dn }))(WT) };
   try { localStorage.setItem(RS_KEY, JSON.stringify(d)); } catch (e) {}
 }
 function loadRS() {
@@ -960,6 +1112,8 @@ function loadRS() {
     Object.assign(S, { bs: 0, bt: d.bt, ba: d.ba, bz: d.bz, bA: d.bA, bB: d.bB, bC: d.bC,
       bm: d.bm, bn: d.bn, bo: d.bo, bw: d.bw, aP: d.aP, aW: d.aW, aX: d.aX });
     S.aF = d.aF || S.aF; S.cF = d.cF || S.cF; S.cj = d.cj || S.cj;
+    if (d.wx) Object.assign(WT, d.wx);                     // 天气跨存档持续 (RMS :577-600)
+    if (WT.dq > 0) { weatherParams(WT.dw); weatherFill(); WT.dc[0][1] = WT.dc[0][0] >> 1; WT.dc[1][1] = WT.dc[1][0] >> 1; }
     for (let i = 0; i < d.bs; i++) { S.bs = i; zFloor(1); }  // 逐层重建 (K()+塔数组)
     return true;
   } catch (e) { return false; }
@@ -1026,6 +1180,7 @@ function loop(now) {
     const cM = S.cM; S.cM = 0; S.cg += cM;
     if (!S.over) {
       camTick();                                           // z()
+      weatherTick(cM);                                     // u() (:1705, 无 bk/bl 门)
       // tick 门控勘误 (2026-10-05): 原文 :1700-1702 仅 f∈{4,5,6,8} 菜单态跳过, 运镜期 f=7
       // tick 照跑 (块随摆小幅动)。此前误用 aW!=aX 当运镜 → 盖楼后相机上升期也被冻结
       // (提钩停摆→块消失)。运镜特有语义只在 z(): bk==4 不更新 aJ (break block5)。
@@ -1061,6 +1216,7 @@ function bootDone() {
   document.getElementById('bootFill').style.width = '100%';
   setTimeout(() => document.getElementById('boot').style.display = 'none', 1400);
   initSkyline();                                           // L() 远景楼群
+  weatherInit();                                           // :4025-4026 雨/雪开局掷骰 (JAD 20%/30%)
   for (let t = 1; t <= 28; t++) {                          // dz = 8·max(图宽,高), 型6/11 减半 (:1319-1333)
     const img = tex2d['id' + FX_DCT[t - 1]];
     FX_DZ[t - 1] = (!img || FX_DCT[t - 1] === -1) ? 1 : 8 * Math.max(img.naturalWidth, img.naturalHeight) * (t === 6 || t === 12 ? 0.5 : 1);

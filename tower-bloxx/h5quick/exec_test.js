@@ -168,4 +168,19 @@ for (let i = 0; i < 400; i++) {
 ok(stuck === 0, '无 case1 悬空滞留小人 (stuck=' + stuck + ')');
 ok(S.bC >= 2, '连击可增长 bz 0→1→++ (:2848-2854), 最高纪录 bC=' + S.bC);
 ok(S.people.every(p => !p || (p.rx !== 0 || p.ry !== 0) || p.x === 0), '小人出生即有坐标 (无原点闪帧)');
+// 天气: 强制掷骰命中雨 → u() 状态机进入变暗, 天空暗度下降, 粒子激活 (v40)
+{
+  const W = globalThis.__WT;
+  ok(!!W, '天气模块导出');
+  W.cX = true; W.da = false; W.dq = 0; W.de = false; W.dg = 1024;
+  S.aW = 512; S.aX = 512;                                  // 落回低空带 (aW∈[0,3840])
+  for (let i = 0; i < 40 && W.dq === 0; i++) step(1);      // aW∈[0,3840] 低空带应立即触发
+  ok(W.dq >= 1 && W.de === true && W.dw === 1, '雨触发: dq=' + W.dq + ' dw=' + W.dw);
+  for (let i = 0; i < 80; i++) step(1);
+  ok(W.dg < 1024, '天空变暗 dg=' + W.dg.toFixed(0) + ' (雨终值 409)');
+  for (let i = 0; i < 600; i++) step(1);                   // ds 期渐进铺场 (生成节流 :2482)
+  const alive = W.dd.filter(p => p[0] === 1).length;
+  ok(alive > 50, '雨粒子激活 alive=' + alive + '/300');
+  ok(W.dq >= 1 && W.dq <= 3, '天气状态机在相内 dq=' + W.dq);
+}
 console.log('--- 完成: bs=' + S.bs + ' bt=' + S.bt + ' ba=' + S.ba + ' cg=' + S.cg);
