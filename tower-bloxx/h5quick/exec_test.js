@@ -156,9 +156,13 @@ if (S.bs >= 5) {
   const expect = 213 + S.bs * (384 - 213) / 60;
   ok(Math.abs(S.cQ - Math.min(384, expect)) < 5, '摆幅按 60 层线性递增 cQ=' + S.cQ.toFixed(1) + ' 期望≈' + Math.min(384, expect).toFixed(1));
 }
-// 摇摆语义 (Nokia q():1817): 相位分支不可达, cS 恒 0, br 恒 0, 塔身无周期摆动
-S.bw = 18000; S.bk = 0; S.cS = 1; step(1);
-ok(S.cS === 0 && S.br === 0, 'Nokia 摇摆: cS 清 0/br 恒 0 (无周期摆) cS=' + S.cS + ' br=' + S.br);
+// 摇摆语义 (Nokia q():1817 字节码复核): bk!=2 相位推进 (周期 3600ms), bk==2 停摆+bu 衰减
+S.bw = 18000; S.bk = 0; step(1);
+ok(Math.abs(S.cS) > 0.01 && Math.abs(S.br) > 0, '常态塔摆: 相位推进 cS=' + S.cS.toFixed(3) + ' br=' + S.br.toFixed(1));
+ok(S.bv >= 0, '晃幅 bv 随层数/歪斜增长 (当前 bv=' + S.bv.toFixed(1) + ')');
+S.bk = 2; S.bu = 5; S.cS = 1; step(1);
+ok(S.cS === 0 && S.bu === 4, '结算展示态: 相位停+bu 衰减 (cS=' + S.cS + ' bu=' + S.bu + ')');
+S.bk = 0;
 // 小人生命周期: 无人永久滞留 case1 (悬空 bug 的回归断言 — 转爬 |rx-bi|<128 在 cS=0 下必满足)
 let stuck = 0;
 for (let i = 0; i < 400; i++) {
