@@ -40,3 +40,7 @@ J2ME-Web-Core-main.zip
 freej2me-web-main.zip
 _archive/
 tower-bloxx/h5quick/assets/scene.glb.bak
+
+# simfarm: 反编译索引产物可从入库 jar 重建, 不入库
+games/simfarm/disasm/
+games/simfarm/jadx_src/

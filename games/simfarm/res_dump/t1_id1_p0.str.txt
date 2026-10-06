@@ -1,0 +1,20 @@
+[0] 发行： 
+[1] 数字鱼移动娱乐
+[2] www.digifun.cn
+[3] 出品:
+[4] 玖峰数码
+[5] (JofunDigiTech)
+[6] 网站
+[7] www.jofun.com
+[8] 策划
+[9] SALOU
+[10] 程式
+[11] Xjshy
+[12] 美术
+[13] Azhu
+[14] 制作人
+[15] Odin Ragnarok
+[16] 主管
+[17] Orc Child
+[18] 品管
+[19] Yuna
