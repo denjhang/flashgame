@@ -84,13 +84,22 @@
 </div>
 <div class="sidebar" id="rightBar">
   <h4>📁 本地目录</h4>
+  <div style="display:flex;gap:4px;margin-bottom:6px;">
+    <input id="pathInput" placeholder="输入本地目录路径…" style="flex:1;background:#2d3350;color:var(--txt);border:1px solid #556;border-radius:4px;padding:5px 8px;font-size:12px;" />
+    <button id="goPath" style="width:auto;padding:5px 10px;">进入</button>
+  </div>
+  <div style="display:flex;gap:4px;margin-bottom:6px;">
+    <button id="upDir" style="width:auto;flex:1;">⬆ 上级</button>
+    <button id="homeDir" style="width:auto;flex:1;">🏠 我的文档</button>
+  </div>
+  <div id="dirList"><div class="dirline">输入路径后进入浏览</div></div>
+  <h4>备选</h4>
   <div style="margin-bottom:6px;">
     <input type="file" id="dirInput" webkitdirectory multiple hidden />
-    <button id="openDir" style="width:100%;">📂 打开文件夹</button>
+    <button id="openDir" style="width:100%;">📂 选择文件夹(授权式)</button>
     <input type="file" id="multiInput" multiple hidden />
     <button id="openFiles" style="width:100%;">🖼 多选图片</button>
   </div>
-  <div id="dirList"><div class="dirline">未加载目录</div></div>
 </div>
 </div>
 
@@ -564,6 +573,46 @@ loadHist();
 let dirFiles = [];    // [{name, file}]
 let dirCursor = 0;
 $('openDir').onclick = () => $('dirInput').click();
+// ---- 真本地路径浏览(走 serve.py /api/ls) ----
+let browsePath = '';
+function lsPath(p) {
+  fetch('/api/ls?path=' + encodeURIComponent(p))
+    .then(r => r.json())
+    .then(d => {
+      if (d.error) { $('dirList').innerHTML = '<div class="dirline">错误: ' + d.error + '</div>'; return; }
+      browsePath = d.path;
+      $('pathInput').value = d.path;
+      const el = $('dirList');
+      el.innerHTML = '';
+      const dirs = d.entries.filter(e => e.dir), imgs = d.entries.filter(e => !e.dir);
+      for (const e of dirs) {
+        const it = document.createElement('div');
+        it.className = 'item';
+        it.textContent = '📂 ' + e.name;
+        it.onclick = () => lsPath(e.path);
+        el.appendChild(it);
+      }
+      if (dirs.length && imgs.length) {
+        const sp = document.createElement('div'); sp.className = 'dirline'; sp.textContent = '─────'; el.appendChild(sp);
+      }
+      for (const e of imgs) {
+        const it = document.createElement('div');
+        it.className = 'item';
+        it.textContent = e.name;
+        it.onclick = () => openLocalImage(e.path, e.name);
+        el.appendChild(it);
+      }
+    })
+    .catch(err => { $('dirList').innerHTML = '<div class="dirline">服务器不可达: ' + err.message + '</div>'; });
+}
+function openLocalImage(path, name) {
+  curName = name; window.__curName = name;
+  loadSrc('/local?path=' + encodeURIComponent(path), name);
+}
+$('goPath').onclick = () => { const v = $('pathInput').value.trim(); if (v) lsPath(v); };
+$('pathInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('goPath').click(); });
+$('upDir').onclick = () => { if (browsePath) lsPath(browsePath.replace(/\[^\]+\?$|\[^\]+$/, '')); };
+$('homeDir').onclick = () => lsPath('C:/Users/' + (navigator.userAgent.includes('Denjhang') ? 'Denjhang' : '') + '/Documents');
 $('openFiles').onclick = () => $('multiInput').click();
 $('dirInput').onchange = e => loadFileSet([...e.target.files], true);
 $('multiInput').onchange = e => loadFileSet([...e.target.files], false);
