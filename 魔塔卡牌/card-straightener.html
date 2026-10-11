@@ -31,9 +31,9 @@
   #topbar button:hover { border-color:var(--gold); }
   #topbar button.on { background:var(--gold); color:#201a08; font-weight:bold; }
   #topbar .tip { font-size:12px; color:#889; }
-  #main { flex:1; display:flex; min-height:0; }
+  #main { flex:1; display:flex; min-height:0; min-width:0; }
   .pane {
-    flex:1; overflow:auto; position:relative;
+    flex:1 1 0; min-width:0; min-height:0; overflow:auto; position:relative;
     display:flex; align-items:center; justify-content:center;
     background:repeating-conic-gradient(#3a3d46 0% 25%, #2e3138 0% 50%) 50%/20px 20px;  /* PS式灰棋盘 */
   }
@@ -85,7 +85,7 @@
     
     <canvas id="cvL"></canvas>
   </div>
-  <div class="pane">
+  <div class="pane" id="rightPane">
     <div id="pvWrap"><canvas id="cvP" width="300" height="400"></canvas></div>
   </div>
 </div>
@@ -487,8 +487,8 @@ function renderP() {
     }
     const out = perspective(src, quad);
     // 适配预览窗: 硬限制在容器内(超出只能滚轮缩放查看)
-    const wrap = $('pvWrap');
-    const fit = Math.min((wrap.clientWidth-30)/out.width, (wrap.clientHeight-30)/out.height, 1);
+    const paneR = document.getElementById('rightPane').getBoundingClientRect();
+    const fit = Math.min((paneR.width-30)/out.width, (paneR.height-30)/out.height, 1);
     cvP.width = Math.max(2, Math.round(out.width*fit));
     cvP.height = Math.max(2, Math.round(out.height*fit));
     ctxP.drawImage(out, 0, 0, cvP.width, cvP.height);
