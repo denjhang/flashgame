@@ -411,15 +411,23 @@ $('undo').onclick = () => {
 };
 $('redo').onclick = () => { if (redoPts.length) { baseHist.push(snapPts()); restorePts(redoPts.pop()); } else alert('没有可重做的操作'); };
 $('reset').onclick = () => { pushPts(); corners = []; edges = []; renderL(); renderP(); updateBtns(); };
-$('save') || 0;
+// 文件名输入框(常驻) + 保存按钮
 (function() {
+  const inp = document.createElement('input');
+  inp.id = 'saveName';
+  inp.placeholder = '文件名…';
+  inp.value = 'card';
+  inp.style.cssText = 'width:130px;background:#2d3350;color:var(--txt);border:1px solid #556;border-radius:6px;padding:6px 8px;font-size:13px;';
+  inp.title = '保存文件名(自动补 .png)';
+  $('topbar').appendChild(inp);
   const b = document.createElement('button');
   b.textContent = '💾 保存预览结果 PNG';
   b.onclick = () => {
     const src = curSource || cvL;
     const quad = quadNow();
     const out = quad ? perspective(src, quad) : src;
-    out.toBlob(bb => { const a = document.createElement('a'); a.href = URL.createObjectURL(bb); a.download = 'card_' + Date.now() + '.png'; a.click(); });
+    const name = ($('saveName').value.trim() || 'card') + '.png';
+    out.toBlob(bb => { const a = document.createElement('a'); a.href = URL.createObjectURL(bb); a.download = name; a.click(); });
   };
   $('topbar').appendChild(b);
 })();
