@@ -137,6 +137,12 @@ function loadSrc(src, name) {
     var sn = document.getElementById('saveName');
     if (sn) sn.value = String(name).replace(/\.[^.]+$/, '');
   }
+  // 图片级记忆: 记住 src 与名字(启动时自动恢复最后一张)
+  try {
+    const st = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+    st.lastImg = src; st.lastName = name || curName;
+    localStorage.setItem(STATE_KEY, JSON.stringify(st));
+  } catch(e) { /* dataURL过大时忽略 */ }
   const i = new Image();
   i.onload = () => {
     img = i; corners = []; edges = []; baseHist = [];
@@ -300,7 +306,14 @@ function hideMag() {
   const mag = document.getElementById('mag'), tip = document.getElementById('magTip');
   mag.style.display = 'none'; tip.style.display = 'none';
 }
-addEventListener('mouseup', () => { drag = null; hideMag(); });
+addEventListener('mouseup', () => {
+  drag = null; hideMag();
+  try {
+    const st = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+    st.pts = getState(); st.ts = Date.now();
+    localStorage.setItem(STATE_KEY, JSON.stringify(st));
+  } catch(e) {}
+});
 cvL.addEventListener('dblclick', e => {
   const [x, y] = toImg(e);
   const hit = hitPt(x, y, 18);
@@ -496,9 +509,12 @@ $('mPlace').onclick = () => { toolMode = 'place'; updateBtns(); };
 $('mMove').onclick = () => { toolMode = 'move'; updateBtns(); };
 addEventListener('resize', () => renderP());
 
+function getState() { return { c: corners.map(p=>p.slice()), e: edges.map(p=>p.slice()) }; }
+
 // ============ 历史记录(自动) ============
 let histItems = [];   // {name, dataURL, ts}
 const HIST_KEY = 'card_straightener_history';
+const STATE_KEY = 'card_straightener_state';   // 最后目录/最后图片/点状态
 function loadHist() {
   try { histItems = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch(e) { histItems = []; }
   renderHist();
@@ -571,6 +587,25 @@ addEventListener('beforeunload', () => {
     recordHist(curName, small.toDataURL('image/jpeg', 0.7), snapPts());
   } catch(e) {}
 });
+// 启动: 自动恢复最后一张图片与其点状态
+(function() {
+  try {
+    const st = JSON.parse(localStorage.getItem(STATE_KEY) || 'null');
+    if (!st || !st.lastImg) return;
+    const i = new Image();
+    i.onload = () => {
+      img = i;
+      if (st.lastName) { curName = st.lastName; window.__curName = st.lastName;
+        var sn = document.getElementById('saveName');
+        if (sn) sn.value = String(st.lastName).replace(/\.[^.]+$/, ''); }
+      if (st.pts) { corners = st.pts.c.map(p=>p.slice()); edges = st.pts.e.map(p=>p.slice()); }
+      cvL.width = i.width; cvL.height = i.height;
+      renderL(); renderP(); updateBtns();
+    };
+    i.src = st.lastImg;
+  } catch(e) {}
+})();
+
 loadHist();
 
 // ============ 本地目录浏览 ============
@@ -580,6 +615,7 @@ $('openDir').onclick = () => $('dirInput').click();
 // ---- 真本地路径浏览(走 serve.py /api/ls) ----
 let browsePath = '';
 function lsPath(p) {
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(Object.assign(getState(), { lastDir: p }))); } catch(e) {}
   fetch('/api/ls?path=' + encodeURIComponent(p))
     .then(r => r.json())
     .then(d => {
@@ -623,6 +659,13 @@ $('goPath').onclick = () => { const v = $('pathInput').value.trim(); if (v) lsPa
 $('pathInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('goPath').click(); });
 $('upDir').onclick = () => { if (browsePath) lsPath(browsePath.replace(/\[^\]+\?$|\[^\]+$/, '')); };
 $('homeDir').onclick = () => lsPath('C:/Users/' + (navigator.userAgent.includes('Denjhang') ? 'Denjhang' : '') + '/Documents');
+// 启动: 自动回到上次的目录
+(function() {
+  try {
+    const st = JSON.parse(localStorage.getItem(STATE_KEY) || 'null');
+    if (st && st.lastDir) { $('pathInput').value = st.lastDir; lsPath(st.lastDir); }
+  } catch(e) {}
+})();
 $('openFiles').onclick = () => $('multiInput').click();
 $('dirInput').onchange = e => loadFileSet([...e.target.files], true);
 $('multiInput').onchange = e => loadFileSet([...e.target.files], false);
