@@ -67,6 +67,7 @@ const ctxP = cvP.getContext('2d');
 const $ = id => document.getElementById(id);
 
 let img = null;                 // 原始图(Image/canvas)
+let cleanSrc = null;            // 干净源(无点线标注) — 透视/保存的唯一采样源
 let corners = [], edges = [];   // 点
 let pointType = 'corner';       // corner | edge
 let toolMode = 'place';         // place | move
@@ -90,6 +91,9 @@ function loadSrc(src) {
   i.onload = () => {
     img = i; corners = []; edges = []; baseHist = [];
     curSource = null;
+    cleanSrc = document.createElement('canvas');
+    cleanSrc.width = i.width; cleanSrc.height = i.height;
+    cleanSrc.getContext('2d').drawImage(i, 0, 0);
     cvL.width = i.width; cvL.height = i.height;
     updateBtns(); renderL(); renderP();
   };
@@ -362,7 +366,7 @@ let pvTimer = 0;
 function renderP() {
   clearTimeout(pvTimer);
   pvTimer = setTimeout(() => {
-    const src = curSource || cvL;
+    const src = curSource || cleanSrc || cvL;
     const quad = quadNow();
     if (!quad) {  // 不足4点: 显示源图缩略
       cvP.width = Math.max(2, Math.round(src.width * Math.min(360/src.width, 520/src.height, 1)));
@@ -384,10 +388,14 @@ function renderP() {
 function applyStraighten() {
   const quad = quadNow();
   if (!quad) { alert('角落点需要恰好 4 个'); return; }
-  pixelUndo.push({ corners: corners.slice(), edges: edges.slice(), img: curSource, w: cvL.width, h: cvL.height });
+  pixelUndo.push({ corners: corners.slice(), edges: edges.slice(), img: curSource || cleanSrc, w: cvL.width, h: cvL.height });
   if (pixelUndo.length > 40) pixelUndo.shift();
-  const out = perspective(curSource || cvL, quad);
+  const out = perspective(curSource || cleanSrc || cvL, quad);
   curSource = out;
+  // 干净源同步为新的拉直结果(无标注)
+  cleanSrc = document.createElement('canvas');
+  cleanSrc.width = out.width; cleanSrc.height = out.height;
+  cleanSrc.getContext('2d').drawImage(out, 0, 0);
   img = out;
   corners = []; edges = []; baseHist = []; redoPts = [];
   cvL.width = out.width; cvL.height = out.height;
@@ -400,6 +408,7 @@ $('undo').onclick = () => {
   if (pixelUndo.length) {   // 优先: 回退拉直(恢复上一张源图与点)
     const s = pixelUndo.pop();
     img = s.img; curSource = pixelUndo.length ? pixelUndo[pixelUndo.length-1].img : null;
+    cleanSrc = curSource;  // 干净源回退到上一轮(它本就无标注)
     corners = s.corners; edges = s.edges;
     cvL.width = s.w; cvL.height = s.h;
     gray = null; baseHist = []; redoPts = [];
@@ -423,7 +432,7 @@ $('reset').onclick = () => { pushPts(); corners = []; edges = []; renderL(); ren
   const b = document.createElement('button');
   b.textContent = '💾 保存预览结果 PNG';
   b.onclick = () => {
-    const src = curSource || cvL;
+    const src = curSource || cleanSrc || cvL;
     const quad = quadNow();
     const out = quad ? perspective(src, quad) : src;
     const name = ($('saveName').value.trim() || 'card') + '.png';
