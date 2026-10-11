@@ -44,3 +44,10 @@ tower-bloxx/h5quick/assets/scene.glb.bak
 # simfarm: 反编译索引产物可从入库 jar 重建, 不入库
 games/simfarm/disasm/
 games/simfarm/jadx_src/
+
+# 魔塔卡牌: 原始资料/考证产物/参考资料不入库(大体积+可重建), 只入一手成果
+魔塔卡牌/原始资料/
+魔塔卡牌/考证产物/
+魔塔卡牌/参考资料/
+魔塔卡牌/h5/
+魔塔卡牌/h5_port/mag_test/

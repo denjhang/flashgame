@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>魔塔卡牌 V0.1.6 (HTML5 移植版)</title>
+<style>
+  :root {
+    --gold: #E8C36A;
+    --ink: #171A26;
+    --ink2: #232838;
+    --red: #B04A4A;
+    --blue: #4A7AB0;
+    --txt: #E8E4D8;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #0C0E16; }
+  body { display: flex; align-items: center; justify-content: center; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+  #stage-wrap { width: 480px; height: 800px; max-width: 100vw; max-height: 100vh; }
+  @media (max-aspect-ratio: 3/5) { #stage-wrap { width: 100vw; height: auto; aspect-ratio: 480/800; } }
+  @media (min-aspect-ratio: 3/5) { #stage-wrap { height: 100vh; width: auto; aspect-ratio: 480/800; } }
+  #stage {
+    position: relative; width: 480px; height: 800px; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 20%, #2B3048 0%, var(--ink) 55%, #10121C 100%);
+    color: var(--txt);
+  }
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; }
+  .page { display: flex; flex-direction: column; flex: 1; min-height: 0; max-height: 100%; }
+  .screen.active { display: flex; }
+
+  /* ===== 通用按钮 ===== */
+  .btn {
+    display: inline-block; padding: 12px 34px; text-align: center;
+    font-size: 20px; letter-spacing: 6px; text-indent: 6px;
+    color: var(--txt); cursor: pointer; user-select: none;
+    background: linear-gradient(160deg, #3A4160, #262B40);
+    border: 1px solid #556; border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+    transition: transform .08s, box-shadow .12s, border-color .12s;
+  }
+  .btn:hover { border-color: var(--gold); box-shadow: 0 4px 18px rgba(232,195,106,.15); }
+  .btn:active { transform: translateY(2px); }
+  .btn.primary {
+    background: linear-gradient(160deg, #8A6A2F, #5E4720);
+    border-color: var(--gold); color: #FFEFC9; font-weight: bold;
+    box-shadow: 0 4px 18px rgba(232,195,106,.25);
+  }
+  .btn.small { padding: 7px 16px; font-size: 15px; letter-spacing: 2px; text-indent: 2px; }
+  .btn:disabled, .btn.off { opacity: .35; pointer-events: none; }
+
+  /* ===== 主菜单 ===== */
+  #f1 { align-items: center; }
+  .menu-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .menu-bg::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 85% 12%, rgba(232,195,106,.10), transparent 40%),
+      radial-gradient(circle at 10% 85%, rgba(176,74,74,.10), transparent 45%);
+  }
+  .title-block { position: relative; margin-top: 96px; text-align: center; }
+  .title-大 {
+    font-size: 74px; font-weight: 900; letter-spacing: 14px; text-indent: 14px;
+    background: linear-gradient(180deg, #F5E3B0 20%, var(--gold) 55%, #9A7432 90%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 6px 24px rgba(232,195,106,.25);
+  }
+  .title-sub { margin-top: 14px; font-size: 13px; letter-spacing: 3px; color: #8B8FA3; }
+  .title-line { width: 220px; height: 2px; margin: 22px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .menu-list { position: relative; display: flex; flex-direction: column; gap: 16px; margin-top: 56px; }
+  .menu-foot { position: absolute; bottom: 18px; right: 20px; font-size: 12px; color: #6A6E82; text-align: right; line-height: 1.6; }
+
+  /* ===== 二级页 ===== */
+  .page { padding: 18px 20px; }
+  .page-title { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .page-title::before { content: ""; width: 6px; height: 26px; background: var(--gold); border-radius: 3px; }
+  .page-title h2 { margin: 0; font-size: 26px; letter-spacing: 6px; color: #F0E6CC; }
+  .page-body {
+    flex: 1; min-height: 0; overflow-y: auto; font-size: 15px; line-height: 1.9; color: #C9C6BA; white-space: pre-wrap;
+    scrollbar-width: thin; scrollbar-color: #556 #1a1e2c;
+    background: rgba(255,255,255,.03); border: 1px solid #3A405A; border-radius: 12px; padding: 18px 20px;
+  }
+  .page-body::-webkit-scrollbar { width: 8px; }
+  .page-body::-webkit-scrollbar-thumb { background: #4a516e; border-radius: 4px; }
+  .page-body::-webkit-scrollbar-track { background: #1a1e2c; border-radius: 4px; }
+  .page-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; flex: none; }
+  .gallery { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+  .gallery .pic { text-align: center; }
+  .gallery img { height: auto; max-height: 170px; max-width: 130px; object-fit: contain; border-radius: 10px; border: 1px solid #4A5068; box-shadow: 0 6px 16px rgba(0,0,0,.5); display: block; background: #E9E4D5; }
+  .gallery .pic span { display: block; margin-top: 6px; font-size: 13px; color: #A8A493; }
+  /* 资料页: 统一规格卡牌按钮网格 (3x2) */
+  .move-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .mp-card {
+    background: #262B40; border: 2px solid #454C6A; border-radius: 10px;
+    cursor: pointer; padding: 5px 5px 3px; text-align: center;
+    transition: border-color .12s, transform .1s;
+  }
+  .mp-card img { width: 100%; aspect-ratio: 3/4; object-fit: contain; background: #E9E4D5; border-radius: 6px; display: block; }
+  .mp-card .mp-name { font-size: 13px; color: #E4DECC; margin-top: 4px; white-space: nowrap; }
+  .mp-card .mp-sub { font-size: 10px; color: #8B8FA3; margin-top: 1px; white-space: nowrap; }
+  .mp-card:hover { border-color: #7A819E; transform: translateY(-2px); }
+  .mp-card.sel { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(232,195,106,.3); }
+  .mp-card.sel .mp-name { color: var(--gold); }
+  .detail-panel {
+    flex: 1; min-height: 0; margin-top: 10px; padding: 12px 14px; overflow-y: auto; white-space: normal;
+    scrollbar-width: thin; scrollbar-color: #4a516e #1a1e2c;
+    background: rgba(255,255,255,.04); border: 1px solid #3A405A; border-radius: 10px;
+  }
+  .detail-panel .dp-head { display: flex; gap: 14px; align-items: flex-start; }
+  .detail-panel img { width: 78px; height: 104px; object-fit: contain; background: #E9E4D5; border-radius: 8px; border: 1px solid #4A5068; flex: none; }
+  .detail-panel .d-name { font-size: 19px; font-weight: bold; color: #F0E6CC; }
+  .detail-panel .d-row { line-height: 1.6; font-size: 14px; color: #C9C6BA; }
+  .detail-panel .d-row b { color: #E4DECC; font-weight: normal; }
+  .detail-panel .d-desc { color: #8B8FA3; font-size: 13px; margin-top: 4px; line-height: 1.55; }
+  .gallery .pic { border-radius: 10px; padding: 4px; border: 2px solid transparent; transition: border-color .12s; }
+  .gallery .pic:hover { border-color: var(--gold); }
+  .thanks { position: absolute; font-size: 20px; font-weight: bold; color: var(--gold); opacity: .85; text-shadow: 0 2px 8px rgba(232,195,106,.4); white-space: nowrap; }
+
+  /* ===== 选角页 ===== */
+  #f61 { padding: 22px 20px 18px; }
+  .sel-head { text-align: center; }
+  .sel-head .h { font-size: 26px; letter-spacing: 8px; text-indent: 8px; color: #F0E6CC; }
+  .sel-head .tip { margin-top: 6px; font-size: 13px; color: #8B8FA3; }
+  .sel-arena { flex: 1; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .role-card {
+    width: 168px; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative;
+    background: linear-gradient(180deg, #2E344E, #22273A);
+    border: 2px solid #454C6A;
+    box-shadow: 0 8px 22px rgba(0,0,0,.5);
+    transition: transform .12s, border-color .15s, box-shadow .15s;
+  }
+  .role-card img { width: 100%; height: auto; aspect-ratio: 154/245; object-fit: contain; display: block; background: #E9E4D5; }
+  .role-card .name { text-align: center; padding: 9px 0 11px; font-size: 20px; letter-spacing: 8px; text-indent: 8px; color: #DDD6C2; background: rgba(0,0,0,.25); }
+  .role-card:hover { transform: translateY(-4px); border-color: var(--gold); }
+  .role-card.picked { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(232,195,106,.35), 0 8px 26px rgba(232,195,106,.18); }
+  .role-card.picked .name { color: var(--gold); }
+  .role-card.ai-picked { border-color: var(--red); box-shadow: 0 0 0 2px rgba(176,74,74,.35), 0 8px 26px rgba(176,74,74,.18); }
+  .role-card.ai-picked .name { color: #E08A8A; }
+  .role-card .tag {
+    position: absolute; top: 8px; left: 8px; font-size: 12px; padding: 3px 10px; border-radius: 20px;
+    background: rgba(0,0,0,.55); color: #CCC; letter-spacing: 2px;
+  }
+  .role-card.picked .tag { background: var(--gold); color: #201A08; font-weight: bold; }
+  .role-card.ai-picked .tag { background: var(--red); color: #FFF; font-weight: bold; }
+  .vs-mark { font-size: 52px; font-weight: 900; font-style: italic; color: #C96A5A; text-shadow: 0 4px 18px rgba(201,106,90,.4); }
+  .sel-status { display: flex; justify-content: space-between; min-height: 24px; margin-top: 6px; font-size: 15px; }
+  .sel-status .p { color: var(--gold); } .sel-status .a { color: #E08A8A; }
+  .sel-foot { display: flex; justify-content: center; gap: 26px; padding-top: 14px; align-items: center; }
+
+  /* ===== 战斗页 ===== */
+  #f62 { padding: 14px 16px 14px; }
+  .bar { display: flex; justify-content: space-between; align-items: center; }
+  .bar .side { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+  .bar .side.r { text-align: right; }
+  .bar .nm { font-size: 15px; color: #F0E6CC; }
+  .bar .rol { color: #9A9EB2; }
+  .hp-row { display: flex; align-items: center; gap: 8px; }
+  .hp-track { width: 130px; height: 10px; border-radius: 6px; background: #10131F; border: 1px solid #3A405A; overflow: hidden; }
+  .hp-fill { height: 100%; background: linear-gradient(90deg, #D05A5A, #8FBF6A); transition: width .3s; }
+  .mp-track { width: 90px; height: 8px; }
+  .mp-fill { height: 100%; background: linear-gradient(90deg, #5A8AD0, #7AC0C9); transition: width .3s; }
+  .num { min-width: 30px; font-size: 13px; color: #C9C6BA; }
+
+  .battle-mid { flex: 1; display: flex; flex-direction: column; margin-top: 10px; gap: 8px; position: relative; }
+  .log {
+    border-radius: 10px; padding: 10px 12px; font-size: 13.5px; line-height: 1.7;
+    background: rgba(255,255,255,.04); border: 1px solid #3A405A;
+    color: #CFCBBD; white-space: pre-wrap; overflow: hidden;
+  }
+  .log.ai { height: 128px; border-left: 3px solid var(--red); }
+  .log.me { height: 128px; border-left: 3px solid var(--blue); align-self: flex-end; width: 92%; }
+  .round-line { text-align: center; font-size: 14px; color: #8B8FA3; letter-spacing: 2px; }
+  .round-line b { color: var(--gold); font-size: 17px; }
+
+  .moves { display: flex; gap: 10px; justify-content: center; margin-top: 4px; }
+  .move-card {
+    width: 104px; border-radius: 10px; overflow: hidden; cursor: pointer;
+    background: #262B40; border: 2px solid #454C6A;
+    transition: transform .1s, border-color .12s, box-shadow .12s;
+  }
+  .move-card img { width: 100%; height: auto; aspect-ratio: 3/4; object-fit: contain; display: block; background: #E9E4D5; }
+  .move-card .mi { padding: 6px 8px 8px; text-align: center; }
+  .move-card .mn { font-size: 15px; color: #E4DECC; }
+  .move-card .mc { font-size: 11.5px; margin-top: 2px; color: #8B8FA3; }
+  .move-card:hover { transform: translateY(-3px); border-color: #7A819E; }
+  .move-card.sel { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(232,195,106,.3); transform: translateY(-4px); }
+  .move-card.sel .mn { color: var(--gold); }
+  .battle-foot { display: flex; justify-content: center; padding-top: 12px; }
+  .corner-nav { position: absolute; top: 12px; right: 14px; z-index: 5; }
+
+  .flash-dmg { position: absolute; font-weight: 900; font-size: 26px; color: #E86A5A; text-shadow: 0 2px 10px rgba(232,106,90,.5); pointer-events: none; animation: rise .8s forwards; }
+  @keyframes rise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-46px); } }
+
+  /* 静态文本兼容(保留旧类) */
+  .static-text, .dyn-text { position: absolute; }
+  .pick-card { position: absolute; width: 123px; height: 196px; background: #E9E4D5; border: 2px solid #6A7188; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,.45); }
+  .pick-card img { width: 100%; height: 172px; object-fit: contain; display: block; }
+  .pick-name { text-align: center; font-size: 14px; color: #000; line-height: 22px; background: #E8E0C8; }
+  .ai-zone, .me-zone { color: #000; }
+  #f61, #f62 { background: #FFF; }
+  /* 对比度规则: 功能页面(选角/战斗)白底, 文字一律黑或深色, 禁止浅字浅底 */
+  #f61 .static-text, #f61 .dyn-text { color: #000; }
+  /* 战斗页按钮(原版灰底黑字按钮观感) */
+  .fbtn {
+    position: absolute; box-sizing: border-box; padding: 3px 8px;
+    text-align: center; font-size: 14px; color: #222;
+    background: linear-gradient(#FDFDFD, #DCDCDC);
+    border: 2px solid #888; border-radius: 6px;
+    cursor: pointer; user-select: none; font-family: inherit;
+  }
+  .fbtn:active { background: #C4C4C4; }
+  /* 原版文本框观感: 细边框黑字白底(Flash border=true 的 TextField) */
+  .tbox { position: absolute; box-sizing: border-box; border: 1px solid #000;
+          color: #000; font-size: 15px; line-height: 1.5; padding: 2px 4px;
+          background: #FFF; white-space: pre-wrap; overflow: hidden; }
+  img.card[src=""], img[src=""] { display: none; }
+  .roleframe { position: absolute; box-sizing: border-box; border: 3px solid #3a7ec2; background: #EAF3FC; }
+  .roleframe .card { position: absolute; }
+  .vsart { position: absolute; display: flex; align-items: center; justify-content: center;
+           font-size: 56px; font-weight: 900; font-style: italic; color: #C0392B; }
+
+  .selcard { position: absolute; cursor: pointer; border: 2px solid #888; }
+  .selcard:hover { border-color: #B02020; }
+</style>
+</head>
+<body>
+<div id="stage-wrap"><div id="stage">
+
+  <!-- ===== F1 主菜单 ===== -->
+  <div class="screen active" id="f1">
+    <div class="menu-bg"></div>
+    <div class="title-block">
+      <div class="title-大">魔塔卡牌</div>
+      <div class="title-line"></div>
+      <div class="title-sub">原作 刘天健 · 2010 · HTML5 重制版</div>
+    </div>
+    <div class="menu-list">
+      <div class="btn primary" data-nav="61">开始游戏</div>
+      <div class="btn" data-nav="3">游戏介绍</div>
+      <div class="btn" data-nav="4">游戏资料</div>
+      <div class="btn" data-nav="2">联系作者</div>
+      <div class="btn" data-nav="20">更新日志</div>
+      <div class="btn" data-nav="60">退出游戏</div>
+    </div>
+    <div class="menu-foot">Version:0.1.6<br/>2020.2<br/>by denjhang</div>
+  </div>
+
+  <!-- ===== F2 联系作者 ===== -->
+  <div class="screen" id="f2">
+    <div class="page" style="display:flex;flex-direction:column;flex:1;">
+      <div class="page-title"><h2>联系作者</h2></div>
+      <div class="page-body" style="font-size:17px;">QQ：3377016404
+微信：Denjhang
+
+原作：魔塔卡牌 mota_as3（Flash ActionScript 3.0，2020）
+本版本：HTML5 原生移植</div>
+      <div class="page-foot"><span></span><div class="btn small" data-nav="1">返 回</div></div>
+    </div>
+  </div>
+
+  <!-- ===== F3 游戏介绍 ===== -->
+  <div class="screen" id="f3">
+    <div class="page" style="display:flex;flex-direction:column;flex:1;">
+      <div class="page-title"><h2>游戏介绍</h2></div>
+      <div class="page-body" style="font-size:14px;line-height:1.9;">本作原型是 2010 年小学操场上真实流传的拍手游戏——原作刘天健（小学五年级开发），刘述鹏负责增加新角色、碎片、抽卡、强化等内容。当年上课传纸条讨论细节，下课就拉着同学们一起玩，巅峰时有 20 人左右同玩。
+
+【游戏来源】
+拍手游戏起源于"你拍一，我拍一"。2005–2015 年间，某位小学高年级学生（姓名不可考）把《梦幻西游》《天龙八部》等武侠游戏元素融入其中，发明了多样化的出招表与等速回合制核心玩法，从此风靡中小学生：下课围成圈圈就开局，校车上、操场上、课间都能玩，2 人、3 人、10 人大圈皆可——只是没有审计，加气出招全靠自觉计数。
+前作出招表：2009 年的《气火电幻风闪》（6 角色、花哨招式、属性克制）与双人向的《石头》。
+2011 年上初一，作者与小区邻居小朋友坐在地上玩卡牌版：所有牌手写裁剪成小纸片，每个角色的招数分装进折纸包里。屏幕上的手绘卡牌，正是对那批实体纸牌的复刻。
+
+【统一动作口令】
+· 加气——合拢手掌，喊"气"
+· 防御——双手握拳护胸，喊"抵"
+· 其他招式——直接喊招式名，用手砍或模仿招式动作
+
+【游戏机制】
+模仿当年风靡全国的《梦幻西游》回合制战斗，去掉速度要素：所有角色等速、同回合同时出招。
+· 元气经济：招式攻击=消耗（攻i耗i），伤害靠"运气"一回合一回合攒出来
+· 防御：免耗元气、防御值5，可完全格挡攻≤5的招式
+· 克制体系：翔云箭破防、火焰箭受防转群攻、毒箭穿防禁气、破云剑可命中隐身角色
+
+电子版把这些喊声与动作变成屏幕上的卡牌。手绘卡牌，是刻意保留的"小学生创作"风格。
+
+【创作历史】
+原作刘天健自小学二年级起玩拍手游戏，一路玩到五年级，期间不断推出新出招表、迭代游戏内容（手稿以文字为主，尚可找到）。2020 年大学期间，因小学时想学 ActionScript 却无人带入门，才重新捡起编程，用 Flash CS5.5 + AS3 开发电子版《魔塔卡牌》，做了一个多月完成 V0.1.6—— AI 生命值即为当年为平衡性而设为玩家 3 倍。2026 年，借 vibe coding 之势将 Flash 版复刻为原生 HTML5，二十年前小学操场的出招表终于跑进了浏览器。
+
+【2011 · 最早电子版】
+初一那年，拍手游戏第一次搬进 Flash——《魔塔 flash版0.1》（73 帧、双场景、17 个按钮）。自述："这个游戏可不是网上流行的魔塔，而是我和我的同班同学创作的。我们学校很早就流行了'嘿气'的拍手游戏，有了规则就有了出招表。我五年级创的，先创作，然后教同学来玩，就发展成了魔塔这个游戏。"
+那时血 5、加气上限 5，出招表是双截棍套：唰 −1、冲击波 −2、黑旋风 −3、狼牙棒 −5——攻等于耗的等值规律，2011 年就成形了。当年还写下最早攻略："对手右上方出现招就要防御，但有些招看不到，要留心防御。"
+
+【其他的梦】
+小学时期的创作不止这一个：画过大量迷宫（家里有扫描仪，当年就梦想"把迷宫扫描进电脑变成 Flash 游戏"）、游戏棋、类飞行器、大富翁。画迷宫甚至组过制作组"至上迷尊"，每个成员都有化名/代号。这些项目被小学生的能力限制住了，但创意是真的——时隔二十年，游戏棋盘天然适合做成小游戏，扫描迷宫进电脑也终于可以实现了。</div>
+      <div class="page-foot"><span></span><div class="btn small" data-nav="1">返 回</div></div>
+    </div>
+  </div>
+
+  <!-- ===== F4 游戏资料·剑客 ===== -->
+  <div class="screen" id="f4">
+    <div class="page" style="display:flex;flex-direction:column;flex:1;">
+      <div class="page-title"><h2>游戏资料 · 剑客</h2></div>
+      <div class="page-body" style="display:flex;flex-direction:column;">
+        <div class="move-grid">
+          <div class="mp-card" data-move="剑客"><img src="assets/jianke.jpg" /><div class="mp-name">剑客</div><div class="mp-sub">角色</div></div>
+          <div class="mp-card" data-move="运气"><img src="assets/luck.jpg" /><div class="mp-name">运气</div><div class="mp-sub">元气+1</div></div>
+          <div class="mp-card" data-move="防御"><img src="assets/defend.jpg" /><div class="mp-name">防御</div><div class="mp-sub">免气·防5</div></div>
+          <div class="mp-card" data-move="砍"><img src="assets/kan.jpg" /><div class="mp-name">砍</div><div class="mp-sub">攻1耗1</div></div>
+          <div class="mp-card" data-move="飞镖"><img src="assets/feibiao.jpg" /><div class="mp-name">飞镖</div><div class="mp-sub">攻2耗2</div></div>
+          <div class="mp-card" data-move="三连击"><img src="assets/sanlianji.jpg" /><div class="mp-name">三连击</div><div class="mp-sub">攻3耗3</div></div>
+          <div class="mp-card" data-move="破云剑"><img src="assets/poyunjian.jpg" /><div class="mp-name">破云剑</div><div class="mp-sub">攻5耗5·反隐</div></div>
+          <div class="mp-card" data-move="龙抬头"><img src="assets/longtaitou.jpg" /><div class="mp-name">龙抬头</div><div class="mp-sub">攻4耗4</div></div>
+        </div>
+        <div class="detail-panel" id="资料详情">
+          <div class="dp-head" style="display:flex;gap:12px;align-items:flex-start;"><img src="assets/jianke.jpg" id="详情图" style="width:78px;height:104px;object-fit:contain;background:#E9E4D5;border-radius:8px;border:1px solid #4A5068;flex:none;" />
+          <div style="flex:1;min-width:0;">
+            <div class="d-name" id="详情名">剑客</div>
+            <div class="d-row">耗元气：<b id="详情耗">—</b>　攻击力：<b id="详情攻">—</b>　防御值：<b id="详情防">—</b></div>
+          </div></div>
+          <div class="d-desc" id="详情述">近战角色，以剑法招式为主。</div>
+          <div class="d-desc" id="详情效" style="color:#E8C36A;"></div>
+        </div>
+      <div class="page-foot">
+        <div class="btn small" data-nav="5">下一页 ›</div>
+        <div class="btn small" data-nav="1">返 回</div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ===== F5 游戏资料·射手 ===== -->
+  <div class="screen" id="f5">
+    <div class="page" style="display:flex;flex-direction:column;flex:1;">
+      <div class="page-title"><h2>游戏资料 · 射手</h2></div>
+      <div class="page-body" style="display:flex;flex-direction:column;">
+        <div class="move-grid">
+          <div class="mp-card" data-move="射手"><img src="assets/sheshou.jpg" /><div class="mp-name">射手</div><div class="mp-sub">角色</div></div>
+          <div class="mp-card" data-move="运气"><img src="assets/luck.jpg" /><div class="mp-name">运气</div><div class="mp-sub">元气+1</div></div>
+          <div class="mp-card" data-move="防御"><img src="assets/defend.jpg" /><div class="mp-name">防御</div><div class="mp-sub">免气·防5</div></div>
+          <div class="mp-card" data-move="射箭"><img src="assets/shejian.jpg" /><div class="mp-name">射箭</div><div class="mp-sub">攻1耗1</div></div>
+          <div class="mp-card" data-move="翔云箭"><img src="assets/xiangyun.jpg" /><div class="mp-name">翔云箭</div><div class="mp-sub">破防 攻2 耗3</div></div>
+          <div class="mp-card" data-move="火焰箭"><img src="assets/huoyan.jpg" /><div class="mp-name">火焰箭</div><div class="mp-sub">攻4 耗4·受防转群攻</div></div>
+          <div class="mp-card" data-move="四连射"><img src="assets/silianshe.jpg" /><div class="mp-name">四连射</div><div class="mp-sub">攻4 耗4</div></div>
+          <div class="mp-card" data-move="毒箭"><img src="assets/dujian.jpg" /><div class="mp-name">毒箭</div><div class="mp-sub">攻2 耗5·中毒</div></div>
+        </div>
+        <div class="detail-panel" id="资料详情2">
+          <div class="dp-head" style="display:flex;gap:12px;align-items:flex-start;"><img src="assets/sheshou.jpg" id="详情图2" style="width:78px;height:104px;object-fit:contain;background:#E9E4D5;border-radius:8px;border:1px solid #4A5068;flex:none;" />
+          <div style="flex:1;min-width:0;">
+            <div class="d-name" id="详情名2">射手</div>
+            <div class="d-row">耗元气：<b id="详情耗2">—</b>　攻击力：<b id="详情攻2">—</b>　防御值：<b id="详情防2">—</b></div>
+          </div></div>
+          <div class="d-desc" id="详情述2">远程角色，以箭术招式为主。</div>
+          <div class="d-desc" id="详情效2" style="color:#E8C36A;"></div>
+        </div>
+      <div class="page-foot">
+        <div class="btn small" data-nav="4">‹ 上一页</div>
+        <div class="btn small" data-nav="1">返 回</div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ===== F20 更新日志 ===== -->
+  <div class="screen" id="f20">
+    <div class="page" style="display:flex;flex-direction:column;flex:1;">
+      <div class="page-title"><h2>更新日志</h2></div>
+      <div class="page-body" style="font-size:14px;line-height:1.9;">【2009】前作出招表：《气火电幻风闪》（6 角色·属性克制）、《石头》（双人向）。
+
+【2010.5】拍手游戏正式发行（小学操场），巅峰约 20 人同玩。
+
+【2011】初一卡牌版：手写裁剪小纸片 + 折纸包，与小区邻居坐地同玩。
+
+【2020.2.3 · V0.1.2】
+1、添加更新日志页面。
+2、主体游戏框架基本成型。
+3、继续构建战斗系统类，出招类，玩家类。并继续添加一些属性。
+
+【2020.2.4 · V0.1.3】
+1、继续完善战斗系统，连接与调试战斗系统类内的各函数。
+
+【V0.1.4】
+1、已完成各模块的构建，战斗系统此时可以正常运行。游戏主体功能已完善。
+2、发现战斗系统还存在许多BUG，比如防御时还有攻击效果。
+
+【V0.1.5】
+1、已修复战斗系统的攻防判定BUG，但是好像还是有点小BUG。
+2、取消了双方同时攻击时，招式伤害互相抵消的效果。
+
+【V0.1.6】
+1、由于AI过于弱智，故将AI的生命值调为玩家的3倍。
+
+【2026.10.7 · HTML5 移植版】
+1、原生 HTML5/JS 移植，脱离 Flash 运行。
+2、实装完整出招表：剑客（砍1/飞镖2/三连击3/破云剑5·反隐/龙抬头4），射手（射箭1/翔云箭破防/火焰箭受防转群攻/四连射4/毒箭·中毒禁气）。
+3、防御改为免气防5。
+4、资料页卡牌按钮化，点击显示招式详情。
+5、补齐原作署名与操场玩法史料。</div>
+      <div class="page-foot"><span></span><div class="btn small" data-nav="1">返 回</div></div>
+    </div>
+  </div>
+
+  <!-- ===== F60 退出页 ===== -->
+  <div class="screen" id="f60">
+    <div class="page" style="display:flex;flex-direction:column;flex:1;">
+      <div class="page-title"><h2>退出游戏</h2></div>
+      <div class="page-body" style="display:flex;align-items:center;justify-content:center;font-size:18px;">感谢游玩！
+网页版无需退出，点击返回即可。</div>
+      <div class="page-foot"><span></span><div class="btn small" data-nav="1">返 回</div></div>
+    </div>
+    <div class="thanks" id="thinks_mc" style="left:86px;top:444px;">THANKS! THANKS! THANKS!</div>
+  </div>
+
+  <!-- ===== F61 选角 — 逐元素照抄 DOMDocument.xml index=60 (坐标/宽高/边框 1:1, 空框为原版占位) ===== -->
+  <div class="screen" id="f61">
+    <div class="tbox" style="left:50px;top:2.85px;width:359.95px;height:44.9px;font-size:22px;font-weight:bold;text-align:center;">请选择角色</div>
+    <!-- 角色展示框: 玩家 mc(61,122) / AI mc(413.95,123), 帧内位图负偏移×1(无缩放) -->
+    <div class="roleframe" style="left:12px;top:65px;width:106px;height:115px;"><img class="card" id="玩家_character" style="left:0px;top:0px;" src="" alt="" /></div>
+    <div class="roleframe" style="left:362px;top:65px;width:106px;height:115px;"><img class="card" id="AI_character" style="left:0px;top:0px;" src="" alt="" /></div>
+    <!-- vs 按钮 (160.45,77.6) 152x88 -->
+    <div class="vsart" style="left:160.45px;top:77.6px;width:152px;height:88px;">VS</div>
+    <!-- (4,221) 提示语 w377.95 h51.1 -->
+    <div class="tbox" style="left:4px;top:221px;width:377.95px;height:51.1px;color:#1a6ec8;font-weight:bold;">点击左侧图标选择角色</div>
+    <!-- 剑客缩略图 (0,288.35) 143x110 -->
+    <img class="selcard" id="剑客_CharacterSelect" src="assets/jianke.jpg" style="left:0px;top:288.35px;width:130px;height:100px;object-fit:contain;" />
+    <!-- (166.95,293.2) 空占位框 w312 h44.9 -->
+    <div class="tbox" style="left:166.95px;top:293.2px;width:312px;height:44.9px;">特点：用剑攻击</div>
+    <!-- 射手缩略图 (3.85,429.35) 119x92 -->
+    <img class="selcard" id="射手_CharacterSelect" src="assets/sheshou.jpg" style="left:0px;top:429.35px;width:130px;height:100px;object-fit:contain;" />
+    <!-- (166.95,439) 空占位框 w312 h44.9 -->
+    <div class="tbox" style="left:166.95px;top:439px;width:312px;height:44.9px;">特点：弓箭射击</div>
+    <!-- 状态文本: 玩家(3,555) / AI(4,630.45) w472.95 h44.9 带边框, 青底由脚本设 -->
+    <div class="tbox" id="玩家已选择的角色_txt" style="left:3px;top:555px;width:472.95px;height:44.9px;background:#00D7EC;">还没选定</div>
+    <div class="tbox" id="AI已选择的角色_txt" style="left:4px;top:630.45px;width:472.95px;height:44.9px;">还没选定</div>
+    <div class="fbtn" id="进入战斗_btn" data-nav="62" style="left:233.2px;top:729.95px;width:120px;min-width:120px;display:none;color:#C00;font-weight:bold;">进入战斗</div>
+  </div>
+
+  <!-- ===== F62  <!-- ===== F62  <!-- ===== F62 战斗（布局=原版主场景 index=61 各元素坐标 1:1） ===== -->
+  <div class="screen" id="f62">
+    <div class="static-text" style="left:244.3px;top:26.45px;font-size:26px;font-weight:bold;color:#000;">战斗画面</div>
+
+    <!-- AI 区（上）：原版 AI对手名称(4.3,56.25)/AI生命值(4.3,93.5)/AI元气数(174.75,93.5)/AI角色名(2.6,132.3)/AI招式名(175.85,132.3) -->
+    <div class="dyn-text ai-zone" style="left:4.3px;top:56.25px;" id="AI对手名称_txt"></div>
+    <div class="dyn-text ai-zone" style="left:4.3px;top:93.5px;" id="AI生命值_txt"></div>
+    <div class="dyn-text ai-zone" style="left:174.75px;top:93.5px;" id="AI元气数_txt"></div>
+    <div class="dyn-text ai-zone" style="left:2.6px;top:132.3px;" id="AI角色名_txt"></div>
+    <div class="dyn-text ai-zone" style="left:175.85px;top:132.3px;" id="AI招式名_txt"></div>
+    <div class="static-text" style="left:11.05px;top:180px;color:#000;font-size:14px;">AI消息框：</div>
+    <div class="dyn-text msgbox" style="left:11.05px;top:197.95px;width:230px;height:150px;" id="AI消息框_txt"></div>
+    <!-- AI 选招卡 (409,269.45)×0.8 -->
+    <div class="pick-card" style="left:350.9px;top:176.9px;" id="AI选招mc">
+      <div class="pick-title" id="AI选招标题">射手选招</div>
+      <img id="AI选招图" src="assets/defend.jpg" alt="" />
+      <div class="pick-name" id="AI选招名"></div>
+    </div>
+
+    <!-- 回合数 (197,390.1) -->
+    <div class="dyn-text" style="left:197px;top:390.1px;color:#000;" id="回合数_txt">回合数：0</div>
+
+    <!-- 用户消息框 (204,458) -->
+    <div class="static-text" style="left:204px;top:440px;color:#000;font-size:14px;">用户消息框：</div>
+    <div class="dyn-text msgbox" style="left:204px;top:458px;width:230px;height:150px;" id="用户消息框_txt"></div>
+
+    <!-- 用户选招卡 (78.95,544.4)×0.8 -->
+    <div class="pick-card" style="left:20.8px;top:451.9px;" id="用户选招mc">
+      <div class="pick-title" id="用户选招标题">剑客选招</div>
+      <img id="用户选招图" src="assets/kan.jpg" alt="" />
+      <div class="pick-name" id="用户选招名"></div>
+    </div>
+
+    <!-- 玩家区（下）：玩家招式名(4.6,695.45)/玩家生命值(2,724.65)/玩家元气数(173.45,724.65)/玩家角色名(282.45,695.45)/玩家名称(2.8,758.6) -->
+    <div class="dyn-text me-zone" style="left:4.6px;top:695.45px;" id="玩家招式名_txt"></div>
+    <div class="dyn-text me-zone" style="left:2px;top:724.65px;" id="玩家生命值_txt"></div>
+    <div class="dyn-text me-zone" style="left:173.45px;top:724.65px;" id="玩家元气数_txt"></div>
+    <div class="dyn-text me-zone" style="left:282.45px;top:695.45px;" id="玩家角色名_txt"></div>
+    <div class="dyn-text me-zone" style="left:2.8px;top:758.6px;" id="玩家名称_txt"></div>
+
+    <!-- 控制按钮：上一招(237.35,668.5)×1.25 / 下一招(340.35,668.5)×1.25 / 出招(432.75,665.4)×1.25 -->
+    <div class="fbtn" id="上一招_btn" style="left:237.35px;top:666px;width:92px;min-width:92px;font-size:14px;">上一招</div>
+    <div class="fbtn" id="下一招_btn" style="left:340.35px;top:666px;width:92px;min-width:92px;font-size:14px;">下一招</div>
+    <div class="fbtn" id="出招_btn" style="left:432.75px;top:666px;width:46px;min-width:46px;font-size:14px;">出招</div>
+    <div class="fbtn" data-nav="1" style="left:446.9px;top:774.25px;width:32px;min-width:32px;height:24px;padding:1px 4px;">返回</div>
+  </div>
+
+</div></div>
+<script src="main.js?v=2"></script>
+</body>
+</html>

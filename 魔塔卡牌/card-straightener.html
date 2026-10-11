@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>卡片拉直 — 角点透视实时预览</title>
+<style>
+  :root { --bg:#1a1d29; --panel:#242838; --txt:#e8e4d8; --gold:#e8c36a; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--txt); font-family:"Microsoft YaHei",sans-serif; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+  #topbar { display:flex; align-items:center; gap:12px; padding:8px 14px; background:var(--panel); flex:none; }
+  #topbar h1 { font-size:15px; color:var(--gold); }
+  #topbar button { background:#3a4160; border:1px solid #556; color:var(--txt); border-radius:6px; padding:6px 12px; cursor:pointer; font-size:13px; }
+  #topbar button:hover { border-color:var(--gold); }
+  #topbar button.on { background:var(--gold); color:#201a08; font-weight:bold; }
+  #topbar .tip { font-size:12px; color:#889; }
+  #main { flex:1; display:flex; min-height:0; }
+  .pane { flex:1; overflow:auto; background:#111; position:relative; display:flex; align-items:flex-start; justify-content:center; }
+  .pane canvas { max-width:100%; box-shadow:0 0 24px #000; }
+  #leftPane { border-right:2px solid #333a4e; }
+  #cvL { cursor:crosshair; }
+  #mag {
+    position:fixed; width:150px; height:150px; border-radius:50%;
+    border:2px solid var(--gold); box-shadow:0 4px 18px rgba(0,0,0,.6), inset 0 0 0 1px #0008;
+    pointer-events:none; display:none; z-index:50; overflow:hidden; background:#000;
+  }
+  #magC { width:150px; height:150px; }
+  #magTip {
+    position:fixed; background:rgba(10,12,20,.9); color:#ffe8b0; font-size:12px;
+    padding:3px 8px; border-radius:6px; pointer-events:none; display:none; z-index:51; white-space:nowrap;
+  }
+  #pvWrap { display:flex; align-items:center; justify-content:center; width:100%; height:100%; }
+  #pvWrap canvas { background:#0d0f16; }
+</style>
+</head>
+<body>
+<div id="topbar">
+  <h1>🎴 卡片拉直</h1>
+  <button id="tCorner" class="on">◈ 角落点 (0/4)</button>
+  <button id="tEdge">— 边框点</button>
+  <span style="width:14px;"></span>
+  <button id="mPlace" class="on">✚ 放置</button>
+  <button id="mMove">✥ 移动</button>
+  <span style="width:14px;"></span>
+  <button id="undo">↩ 撤销</button>
+  <button id="redo">↪ 重做</button>
+  <button id="reset">🗑 清空点</button>
+  <span class="tip">双击点=删除 | 拖入/粘贴图片 | 角点放满4个后右侧实时预览</span>
+</div>
+<div id="mag"><canvas id="magC" width="150" height="150"></canvas></div>
+<div id="magTip"></div>
+<div id="main">
+  <div class="pane" id="leftPane">
+    
+    <canvas id="cvL"></canvas>
+  </div>
+  <div class="pane">
+    <div id="pvWrap"><canvas id="cvP" width="300" height="400"></canvas></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const cvL = document.getElementById('cvL');
+const cvP = document.getElementById('cvP');
+const ctxL = cvL.getContext('2d');
+const ctxP = cvP.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let img = null;                 // 原始图(Image/canvas)
+let corners = [], edges = [];   // 点
+let pointType = 'corner';       // corner | edge
+let toolMode = 'place';         // place | move
+let drag = null;                // {arr, i}
+let hover = null;
+let baseHist = [];              // 点操作历史(角/边点快照)
+
+// 拉直后的状态栈(像素级): 用于拉直后再撤销回原图
+let pixelUndo = [];             // [{corners, edges, imgCanvas}]
+let curSource = null;           // 当前"源图"画布(拉直后=上一轮结果)
+
+function baseCanvas() {
+  const c = document.createElement('canvas');
+  c.width = cvL.width; c.height = cvL.height;
+  return c;
+}
+
+// ---------- 载图 ----------
+function loadSrc(src) {
+  const i = new Image();
+  i.onload = () => {
+    img = i; corners = []; edges = []; baseHist = [];
+    curSource = null;
+    cvL.width = i.width; cvL.height = i.height;
+    updateBtns(); renderL(); renderP();
+  };
+  i.src = src;
+}
+$('fileInput') || 0;
+addEventListener('paste', e => {
+  for (const it of (e.clipboardData ? e.clipboardData.items : [])) {
+    if (it.type.startsWith('image/')) {
+      const r = new FileReader(); r.onload = () => loadSrc(r.result); r.readAsDataURL(it.getAsFile()); break;
+    }
+  }
+});
+['dragenter','dragover'].forEach(ev => document.body.addEventListener(ev, e => e.preventDefault()));
+document.body.addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) { const r = new FileReader(); r.onload = () => loadSrc(r.result); r.readAsDataURL(f); }
+});
+// 文件输入动态创建
+(function() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true; inp.id = 'fileInput';
+  document.body.appendChild(inp);
+  inp.onchange = () => { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => loadSrc(r.result); r.readAsDataURL(f); };
+})();
+
+// ---------- 吸附 ----------
+let gray = null, gw = 0, gh = 0, grayOf = null;
+function buildGray(srcCanvas) {
+  const s = Math.min(1, 1100/Math.max(srcCanvas.width, srcCanvas.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(srcCanvas.width*s); c.height = Math.round(srcCanvas.height*s);
+  const cc = c.getContext('2d');
+  cc.drawImage(srcCanvas, 0, 0, c.width, c.height);
+  const px = cc.getImageData(0, 0, c.width, c.height).data;
+  gw = c.width; gh = c.height; grayOf = srcCanvas;
+  gray = new Float32Array(gw*gh);
+  for (let i = 0; i < gray.length; i++) gray[i] = (px[i*4]+px[i*4+1]+px[i*4+2])/3;
+}
+function snapEdge(srcCanvas, px, py) {
+  if (!gray || grayOf !== srcCanvas) buildGray(srcCanvas);
+  const sx = px*gw/srcCanvas.width, sy = py*gh/srcCanvas.height;
+  let best = null;
+  for (let dy = -16; dy <= 16; dy++) for (let dx = -16; dx <= 16; dx++) {
+    const x = Math.round(sx+dx), y = Math.round(sy+dy);
+    if (x<2||y<2||x>=gw-2||y>=gh-2) continue;
+    const gx = gray[y*gw+x+1]-gray[y*gw+x-1];
+    const gy = gray[(y+1)*gw+x]-gray[(y-1)*gw+x];
+    const m = gx*gx+gy*gy;
+    if (!best || m > best.m) best = { x, y, m };
+  }
+  return best ? [best.x*srcCanvas.width/gw, best.y*srcCanvas.height/gh] : [px, py];
+}
+
+function toImg(e) {
+  const r = cvL.getBoundingClientRect();
+  return [ (e.clientX-r.left)*(cvL.width/r.width), (e.clientY-r.top)*(cvL.height/r.height) ];
+}
+function hitPt(x, y, r=18) {
+  let best = null, bd = r;
+  const all = [...corners.map((p,i)=>({p, arr:'c', i})), ...edges.map((p,i)=>({p, arr:'e', i}))];
+  for (const it of all) {
+    const d = Math.hypot(it.p[0]-x, it.p[1]-y);
+    if (d < bd) { bd = d; best = it; }
+  }
+  return best;
+}
+function updateBtns() {
+  $('tCorner').textContent = '◈ 角落点 (' + corners.length + '/4)';
+  $('tCorner').classList.toggle('on', pointType === 'corner');
+  $('tEdge').classList.toggle('on', pointType === 'edge');
+  $('mPlace').classList.toggle('on', toolMode === 'place');
+  $('mMove').classList.toggle('on', toolMode === 'move');
+}
+
+// ---------- 历史(点级) ----------
+const snapPts = () => ({ c: corners.map(p=>p.slice()), e: edges.map(p=>p.slice()) });
+function pushPts() { baseHist.push(snapPts()); if (baseHist.length > 200) baseHist.shift(); redoPts.length = 0; }
+let redoPts = [];
+function restorePts(s) { corners = s.c.map(p=>p.slice()); edges = s.e.map(p=>p.slice()); renderL(); renderP(); updateBtns(); }
+
+// ---------- 事件(cvL) ----------
+cvL.addEventListener('mousedown', e => {
+  if (!img || e.button !== 0) return;
+  const [x, y] = toImg(e);
+  const hit = hitPt(x, y);
+  if (hit) { drag = hit; return; }
+  if (toolMode !== 'place') return;
+  pushPts();
+  const p = [x, y];
+  if (pointType === 'corner') {
+    if (corners.length >= 4) { alert('角落点最多 4 个（双击可删除）；边框点不限。'); return; }
+    corners.push(p);
+  } else edges.push(p);
+  updateBtns(); renderL(); renderP();
+});
+addEventListener('mousemove', e => {
+  if (drag) {
+    const [x, y] = toImg(e);
+    const p = [x, y];
+    if (drag.arr === 'c') corners[drag.i] = p; else edges[drag.i] = p;
+    renderL(); renderP();   // 实时预览
+    showMag(e, p);
+    return;
+  }
+  hideMag();
+  const [x, y] = toImg(e);
+  const h = img ? hitPt(x, y) : null;
+  const hs = h ? h.arr + h.i : null;
+  if (hs !== hover) { hover = hs; renderL(); }
+  cvL.style.cursor = (toolMode === 'move' && h) ? 'move' : (toolMode === 'place' ? 'crosshair' : 'default');
+});
+function showMag(e, pt) {
+  const mag = document.getElementById('mag'), mc = document.getElementById('magC'), tip = document.getElementById('magTip');
+  mag.style.display = 'block'; tip.style.display = 'block';
+  // 放大倍数: 源像素→镜内 3x
+  const ZOOM = 3, R = 75;
+  const mctx = mc.getContext('2d');
+  mctx.fillStyle = '#111'; mctx.fillRect(0, 0, 150, 150);
+  // 从 cvL(当前源) 截取 pt 周围区域 — 裁剪源矩形防越界(越界部分整体不绘制的浏览器怪癖)
+  let sw = R*2/ZOOM, sh = R*2/ZOOM;
+  let sx0 = pt[0]-sw/2, sy0 = pt[1]-sh/2;
+  // 与图边界求交
+  const ix0 = Math.max(0, sx0), iy0 = Math.max(0, sy0);
+  const ix1 = Math.min(cvL.width, sx0+sw), iy1 = Math.min(cvL.height, sy0+sh);
+  if (ix1 > ix0 && iy1 > iy0) {
+    // 目标区对应缩放
+    const dx0 = (ix0-sx0)*ZOOM, dy0 = (iy0-sy0)*ZOOM;
+    const dw = (ix1-ix0)*ZOOM, dh = (iy1-iy0)*ZOOM;
+    mctx.imageSmoothingEnabled = false;
+    mctx.drawImage(img, ix0, iy0, ix1-ix0, iy1-iy0, dx0, dy0, dw, dh);
+    mctx.imageSmoothingEnabled = true;
+  }
+  // 中心十字
+  mctx.strokeStyle = '#e8c36a'; mctx.lineWidth = 1;
+  mctx.beginPath(); mctx.moveTo(75, 0); mctx.lineTo(75, 150);
+  mctx.moveTo(0, 75); mctx.lineTo(150, 75); mctx.stroke();
+  // 点位标记
+  mctx.fillStyle = '#ffd54a';
+  mctx.beginPath(); mctx.arc(75, 75, 4, 0, 7); mctx.fill();
+  // 位置: 鼠标右侧 24px; 靠右边缘时弹到左侧
+  const side = e.clientX + 190 > innerWidth ? -170 : 24;
+  mag.style.left = (e.clientX + side) + 'px';
+  mag.style.top = (e.clientY - 75) + 'px';
+  // 气泡: 显示当前点类型与坐标
+  const label = drag.arr === 'c' ? '◈ 角落点 ' + (drag.i+1) : '— 边框点 ' + (drag.i+1);
+  tip.textContent = label + '  (' + Math.round(pt[0]) + ', ' + Math.round(pt[1]) + ')';
+  const tipSide = side > 0 ? 24 : -170;
+  tip.style.left = (e.clientX + tipSide) + 'px';
+  tip.style.top = (e.clientY - 105) + 'px';
+}
+function hideMag() {
+  const mag = document.getElementById('mag'), tip = document.getElementById('magTip');
+  mag.style.display = 'none'; tip.style.display = 'none';
+}
+addEventListener('mouseup', () => { drag = null; hideMag(); });
+cvL.addEventListener('dblclick', e => {
+  const [x, y] = toImg(e);
+  const hit = hitPt(x, y, 18);
+  if (hit) {
+    pushPts();
+    if (hit.arr === 'c') corners.splice(hit.i, 1); else edges.splice(hit.i, 1);
+    updateBtns(); renderL(); renderP();
+  }
+});
+
+// ---------- 渲染左 ----------
+function renderL() {
+  if (img) {
+    if (cvL.width !== img.width) { cvL.width = img.width; cvL.height = img.height; gray = null; }
+    ctxL.drawImage(img, 0, 0);
+  }
+  // 边点
+  ctxL.font = 'bold 20px sans-serif';
+  edges.forEach((p, i) => {
+    ctxL.fillStyle = '#b7f27a';
+    ctxL.beginPath(); ctxL.arc(p[0], p[1], 6, 0, 7); ctxL.fill();
+    ctxL.strokeStyle = '#2c6e1e'; ctxL.lineWidth = 2; ctxL.stroke();
+  });
+  // 角点四边形(≥2时连线)
+  if (corners.length >= 2) {
+    ctxL.strokeStyle = 'rgba(90,208,255,.85)';
+    ctxL.lineWidth = 2;
+    ctxL.beginPath();
+    const cx = corners.reduce((s,p)=>s+p[0],0)/corners.length;
+    const cy = corners.reduce((s,p)=>s+p[1],0)/corners.length;
+    const sorted = corners.map(p => ({p, a: Math.atan2(p[1]-cy, p[0]-cx)})).sort((a,b)=>a.a-b.a);
+    ctxL.moveTo(...sorted[0].p);
+    for (let i = 1; i < sorted.length; i++) ctxL.lineTo(...sorted[i].p);
+    if (corners.length >= 3) ctxL.closePath();
+    ctxL.stroke();
+    ctxL.fillStyle = 'rgba(90,208,255,.10)'; ctxL.fill();
+  }
+  // 角点
+  corners.forEach((p, i) => {
+    const isHov = hover === 'c'+i, isDrag = drag && drag.arr==='c' && drag.i===i;
+    ctxL.fillStyle = '#ffd54a';
+    ctxL.beginPath(); ctxL.arc(p[0], p[1], isHov||isDrag ? 11 : 9, 0, 7); ctxL.fill();
+    ctxL.strokeStyle = '#b07800'; ctxL.lineWidth = 2; ctxL.stroke();
+    ctxL.fillStyle = '#000'; ctxL.fillText(i+1, p[0]-6, p[1]-12);
+  });
+}
+
+// ---------- 单应: 解 src四角→dst矩形, 返回 dst→src 逆映射 ----------
+function homoInv(quad, W, H) {
+  const dst = [[0,0],[W,0],[W,H],[0,H]];
+  const A = [], b = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = dst[i], [u, v] = quad[i];
+    A.push([x, y, 1, 0, 0, 0, -u*x, -u*y]); b.push(u);
+    A.push([0, 0, 0, x, y, 1, -v*x, -v*y]); b.push(v);
+  }
+  const n = 8;
+  for (let i = 0; i < n; i++) {
+    let piv = i;
+    for (let r = i+1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[piv][i])) piv = r;
+    [A[i], A[piv]] = [A[piv], A[i]]; [b[i], b[piv]] = [b[piv], b[i]];
+    const d = A[i][i] || 1e-9;
+    for (let c = i; c < n; c++) A[i][c] /= d;
+    b[i] /= d;
+    for (let r = 0; r < n; r++) if (r !== i && A[r][i]) {
+      const f = A[r][i];
+      for (let c = i; c < n; c++) A[r][c] -= f*A[i][c];
+      b[r] -= f*b[i];
+    }
+  }
+  return b;  // h..: dst(x,y) → src(u,v)
+}
+
+// ---------- 实时透视矫正: 输出画布 ----------
+function perspective(srcCanvas, quad) {
+  const [TL, TR, BR, BL] = quad;
+  const W = Math.max(2, Math.round((Math.hypot(TR[0]-TL[0], TR[1]-TL[1]) + Math.hypot(BL[0]-BR[0], BL[1]-BR[1]))/2));
+  const H = Math.max(2, Math.round((Math.hypot(BL[0]-TL[0], BL[1]-TL[1]) + Math.hypot(BR[0]-TR[0], BR[1]-TR[1]))/2));
+  const Hi = homoInv(quad, W, H);
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  const oc = out.getContext('2d');
+  const sd = srcCanvas.getContext('2d').getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+  const dd = oc.createImageData(W, H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const w = Hi[6]*x + Hi[7]*y + 1;
+    const sx = Math.round((Hi[0]*x + Hi[1]*y + Hi[2])/w);
+    const sy = Math.round((Hi[3]*x + Hi[4]*y + Hi[5])/w);
+    const di = (y*W + x)*4;
+    if (sx >= 0 && sy >= 0 && sx < srcCanvas.width && sy < srcCanvas.height) {
+      const si = (sy*srcCanvas.width + sx)*4;
+      dd.data[di] = sd.data[si]; dd.data[di+1] = sd.data[si+1];
+      dd.data[di+2] = sd.data[si+2]; dd.data[di+3] = 255;
+    }
+  }
+  oc.putImageData(dd, 0, 0);
+  return out;
+}
+function quadNow() {
+  if (corners.length < 4) return null;
+  const cx = corners.reduce((s,p)=>s+p[0],0)/4;
+  const cy = corners.reduce((s,p)=>s+p[1],0)/4;
+  let q = corners.map(p => ({p, a: Math.atan2(p[1]-cy, p[0]-cx)})).sort((a,b)=>a.a-b.a).map(o=>o.p);
+  const area2 = q.reduce((s,p,i) => { const r = q[(i+1)%4]; return s + (p[0]*r[1]-r[0]*p[1]); }, 0);
+  if (area2 < 0) q = [q[0], q[3], q[2], q[1]];
+  let st = 0, bs = 1e18;
+  q.forEach((p,i) => { const s = p[0]+p[1]; if (s < bs) { bs = s; st = i; } });
+  return q.slice(st).concat(q.slice(0, st));  // TL TR BR BL
+}
+
+// ---------- 实时预览 ----------
+let pvTimer = 0;
+function renderP() {
+  clearTimeout(pvTimer);
+  pvTimer = setTimeout(() => {
+    const src = curSource || cvL;
+    const quad = quadNow();
+    if (!quad) {  // 不足4点: 显示源图缩略
+      cvP.width = Math.max(2, Math.round(src.width * Math.min(360/src.width, 520/src.height, 1)));
+      cvP.height = Math.max(2, Math.round(src.height * Math.min(360/src.width, 520/src.height, 1)));
+      ctxP.drawImage(src, 0, 0, cvP.width, cvP.height);
+      return;
+    }
+    const out = perspective(src, quad);
+    // 适配预览窗
+    const wrap = $('pvWrap');
+    const s = Math.min((wrap.clientWidth-30)/out.width, (wrap.clientHeight-30)/out.height, 1.5);
+    cvP.width = Math.max(2, Math.round(out.width*s));
+    cvP.height = Math.max(2, Math.round(out.height*s));
+    ctxP.drawImage(out, 0, 0, cvP.width, cvP.height);
+  }, 40);
+}
+
+// ---------- 拉直落地: 输出成为新的操作区源图(像素级可撤销) ----------
+function applyStraighten() {
+  const quad = quadNow();
+  if (!quad) { alert('角落点需要恰好 4 个'); return; }
+  pixelUndo.push({ corners: corners.slice(), edges: edges.slice(), img: curSource, w: cvL.width, h: cvL.height });
+  if (pixelUndo.length > 40) pixelUndo.shift();
+  const out = perspective(curSource || cvL, quad);
+  curSource = out;
+  img = out;
+  corners = []; edges = []; baseHist = []; redoPts = [];
+  cvL.width = out.width; cvL.height = out.height;
+  gray = null;
+  updateBtns(); renderL(); renderP();
+}
+
+// ---------- 撤销/重做 ----------
+$('undo').onclick = () => {
+  if (pixelUndo.length) {   // 优先: 回退拉直(恢复上一张源图与点)
+    const s = pixelUndo.pop();
+    img = s.img; curSource = pixelUndo.length ? pixelUndo[pixelUndo.length-1].img : null;
+    corners = s.corners; edges = s.edges;
+    cvL.width = s.w; cvL.height = s.h;
+    gray = null; baseHist = []; redoPts = [];
+    updateBtns(); renderL(); renderP();
+    return;
+  }
+  if (baseHist.length) { redoPts.push(snapPts()); restorePts(baseHist.pop()); }
+  else alert('没有可撤销的操作');
+};
+$('redo').onclick = () => { if (redoPts.length) { baseHist.push(snapPts()); restorePts(redoPts.pop()); } else alert('没有可重做的操作'); };
+$('reset').onclick = () => { pushPts(); corners = []; edges = []; renderL(); renderP(); updateBtns(); };
+$('save') || 0;
+(function() {
+  const b = document.createElement('button');
+  b.textContent = '💾 保存预览结果 PNG';
+  b.onclick = () => {
+    const src = curSource || cvL;
+    const quad = quadNow();
+    const out = quad ? perspective(src, quad) : src;
+    out.toBlob(bb => { const a = document.createElement('a'); a.href = URL.createObjectURL(bb); a.download = 'card_' + Date.now() + '.png'; a.click(); });
+  };
+  $('topbar').appendChild(b);
+})();
+$('tCorner').onclick = () => { pointType = 'corner'; updateBtns(); };
+$('tEdge').onclick = () => { pointType = 'edge'; updateBtns(); };
+$('mPlace').onclick = () => { toolMode = 'place'; updateBtns(); };
+$('mMove').onclick = () => { toolMode = 'move'; updateBtns(); };
+addEventListener('resize', () => renderP());
+updateBtns();
+</script>
+</body>
+</html>
