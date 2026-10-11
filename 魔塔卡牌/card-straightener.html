@@ -13,6 +13,10 @@
   #leftBar { border-right:1px solid #333a4e; }
   #rightBar { border-left:1px solid #333a4e; }
   .sidebar h4 { font-size:13px; color:var(--gold); margin:6px 0; }
+  #rightBar { display:flex; flex-direction:column; }
+  #rightBar .fixedHead { position:sticky; top:-10px; background:var(--panel); z-index:2; padding-bottom:6px; border-bottom:1px solid #3a4160; margin-bottom:6px; }
+  #dirList { overflow-y:auto; }
+  .item.sel { border-color:var(--gold) !important; color:var(--gold) !important; background:#3a3320 !important; }
   .sidebar .item { font-size:12px; padding:6px 8px; margin:3px 0; background:#2d3350; border-radius:5px; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sidebar .item:hover { background:#3a4160; }
   .sidebar .item.cur { border-color:var(--gold); color:var(--gold); }
@@ -21,6 +25,7 @@
   #edge:hover { background:var(--panel); color:var(--gold); }
   .dirline { font-size:12px; color:#99a; margin:4px 0; }
   #topbar { display:flex; align-items:center; gap:12px; padding:8px 14px; background:var(--panel); flex:none; }
+  #statusMsg { font-size:13px; color:#ffb0a0; min-width:100px; }
   #topbar h1 { font-size:15px; color:var(--gold); }
   #topbar button { background:#3a4160; border:1px solid #556; color:var(--txt); border-radius:6px; padding:6px 12px; cursor:pointer; font-size:13px; }
   #topbar button:hover { border-color:var(--gold); }
@@ -32,7 +37,8 @@
     display:flex; align-items:center; justify-content:center;
     background:repeating-conic-gradient(#3a3d46 0% 25%, #2e3138 0% 50%) 50%/20px 20px;  /* PS式灰棋盘 */
   }
-  .pane canvas { max-width:100%; box-shadow:0 0 24px #000; }
+  .pane canvas { box-shadow:0 0 24px #000; outline:1px solid #000; }
+  #zoomBar { position:absolute; bottom:10px; right:12px; background:rgba(0,0,0,.6); color:#ccd; font-size:12px; padding:3px 8px; border-radius:10px; z-index:5; }
   #leftPane { border-right:2px solid #333a4e; }
   #cvL { cursor:crosshair; box-shadow:0 0 24px rgba(0,0,0,.5); outline:1px solid #000; }
   #cvP { box-shadow:0 0 24px rgba(0,0,0,.5); outline:1px solid #000; }
@@ -51,8 +57,9 @@
 </style>
 </head>
 <body>
-<div id="topbar">
+<span id="statusMsg"></span><div id="topbar">
   <h1>🎴 卡片拉直</h1>
+  <button id="autoCorners" class="primary" style="width:auto;">⚡ 自动四角</button>
   <button id="tCorner" class="on">◈ 角落点 (0/4)</button>
   <button id="tEdge">— 边框点</button>
   <span style="width:14px;"></span>
@@ -83,15 +90,13 @@
   </div>
 </div>
 <div class="sidebar" id="rightBar">
-  <h4>📁 本地目录</h4>
-  <div style="display:flex;gap:4px;margin-bottom:6px;">
-    <input id="pathInput" placeholder="输入本地目录路径…" style="flex:1;background:#2d3350;color:var(--txt);border:1px solid #556;border-radius:4px;padding:5px 8px;font-size:12px;" />
-    <button id="goPath" style="width:auto;padding:5px 10px;">进入</button>
-  </div>
-  <div style="display:flex;gap:4px;margin-bottom:6px;">
+  <div class="fixedHead"><h4 style="margin-bottom:2px;">📁 本地目录</h4>
+  <input id="pathInput" placeholder="输入本地目录路径…" style="width:100%;background:#2d3350;color:var(--txt);border:1px solid #556;border-radius:4px;padding:5px 8px;font-size:12px;margin-bottom:4px;" />
+  <div style="display:flex;gap:4px;">
+    <button id="goPath" style="width:auto;flex:1;">进入</button>
     <button id="upDir" style="width:auto;flex:1;">⬆ 上级</button>
-    <button id="homeDir" style="width:auto;flex:1;">🏠 我的文档</button>
-  </div>
+    <button id="homeDir" style="width:auto;flex:1;">🏠 文档</button>
+  </div></div>
   <div id="dirList"><div class="dirline">输入路径后进入浏览</div></div>
   <h4>备选</h4>
   <div style="margin-bottom:6px;">
@@ -116,7 +121,8 @@ let cleanSrc = null;            // 干净源(无点线标注) — 透视/保存�
 let corners = [], edges = [];   // 点
 let pointType = 'corner';       // corner | edge
 let toolMode = 'place';         // place | move
-let drag = null;                // {arr, i}
+let drag = null;
+let zoomL = 1;                // {arr, i}
 let hover = null;
 let baseHist = [];              // 点操作历史(角/边点快照)
 
@@ -242,7 +248,7 @@ cvL.addEventListener('mousedown', e => {
   pushPts();
   const p = [x, y];
   if (pointType === 'corner') {
-    if (corners.length >= 4) { alert('角落点最多 4 个（双击可删除）；边框点不限。'); return; }
+    if (corners.length >= 4) { corners = []; }  // 上限4: 重放自动清
     corners.push(p);
   } else edges.push(p);
   updateBtns(); renderL(); renderP();
@@ -314,6 +320,37 @@ addEventListener('mouseup', () => {
     localStorage.setItem(STATE_KEY, JSON.stringify(st));
   } catch(e) {}
 });
+cvL.addEventListener('wheel', e => {
+  if (!img) return;
+  e.preventDefault();
+  const f = e.deltaY < 0 ? 1.15 : 1/1.15;
+  zoomL = Math.max(0.05, Math.min(12, zoomL*f));
+  applyZoom(e);
+}, { passive:false });
+function applyZoom(e) {
+  // 用 style 尺寸放大 canvas(CSS 像素), 坐标换算已按 rect 实时补偿
+  cvL.style.width = (cvL.width * zoomL) + 'px';
+  cvL.style.height = (cvL.height * zoomL) + 'px';
+  const pv = document.getElementById('cvP');
+  pv.style.width = (pv.width * zoomL) + 'px';
+  pv.style.height = (pv.height * zoomL) + 'px';
+  // 缩放指示
+  let zb = document.getElementById('zoomBar');
+  if (!zb) { zb = document.createElement('div'); zb.id = 'zoomBar'; $('leftPane').appendChild(zb); }
+  zb.textContent = Math.round(zoomL*100) + '%';
+  clearTimeout(zb._t); zb._t = setTimeout(() => zb.textContent = Math.round(zoomL*100) + '%', 800);
+  // 围绕鼠标保持注视点
+  if (e) {
+    const lp = document.getElementById('leftPane').getBoundingClientRect();
+    $('canvasWrap') && 0;
+    const target = e.clientX !== undefined ? null : null;
+    // 滚动修正: 让鼠标下的点尽量留在原地
+    const r = cvL.getBoundingClientRect();
+    // 简化: 交给浏览器 scrollIntoView 附近的鼠标位置
+    const mx = e.clientX, my = e.clientY;
+    window.scrollTo(0, 0);
+  }
+}
 cvL.addEventListener('dblclick', e => {
   const [x, y] = toImg(e);
   const hit = hitPt(x, y, 18);
@@ -450,7 +487,7 @@ function renderP() {
 // ---------- 拉直落地: 输出成为新的操作区源图(像素级可撤销) ----------
 function applyStraighten() {
   const quad = quadNow();
-  if (!quad) { alert('角落点需要恰好 4 个'); return; }
+  if (!quad) { flashMsg('角落点需要恰好 4 个'); return; }
   pixelUndo.push({ corners: corners.slice(), edges: edges.slice(), img: curSource || cleanSrc, w: cvL.width, h: cvL.height });
   if (pixelUndo.length > 40) pixelUndo.shift();
   const out = perspective(curSource || cleanSrc || cvL, quad);
@@ -466,6 +503,15 @@ function applyStraighten() {
   updateBtns(); renderL(); renderP();
 }
 
+// ---------- 消息提示(替代弹窗) ----------
+let msgTimer = 0;
+function flashMsg(t) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = t;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => el.textContent = '', 2500);
+}
+
 // ---------- 撤销/重做 ----------
 $('undo').onclick = () => {
   if (pixelUndo.length) {   // 优先: 回退拉直(恢复上一张源图与点)
@@ -479,10 +525,110 @@ $('undo').onclick = () => {
     return;
   }
   if (baseHist.length) { redoPts.push(snapPts()); restorePts(baseHist.pop()); }
-  else alert('没有可撤销的操作');
+  else flashMsg('没有可撤销的操作');
 };
-$('redo').onclick = () => { if (redoPts.length) { baseHist.push(snapPts()); restorePts(redoPts.pop()); } else alert('没有可重做的操作'); };
+$('redo').onclick = () => { if (redoPts.length) { baseHist.push(snapPts()); restorePts(redoPts.pop()); } else flashMsg('没有可重做的操作'); };
 $('reset').onclick = () => { pushPts(); corners = []; edges = []; renderL(); renderP(); updateBtns(); };
+// ============ 自动四角: 亮度阈值 + 四方向扫描 ============
+function autoCorners() {
+  if (!img) { flashMsg('请先载入图片'); return; }
+  const W = cvL.width, H = cvL.height;
+  // 降采样灰度
+  const s = Math.min(1, 800/Math.max(W, H));
+  const c = document.createElement('canvas');
+  c.width = Math.round(W*s); c.height = Math.round(H*s);
+  const cc = c.getContext('2d');
+  cc.drawImage(img, 0, 0, c.width, c.height);
+  const px = cc.getImageData(0, 0, c.width, c.height).data;
+  const w = c.width, h = c.height;
+  const lum = i => (px[i*4]+px[i*4+1]+px[i*4+2])/3;
+  // 自适应阈值: 直方图取 60% 分位(纸白 vs 桌面暗, 纸占比小)
+  const hist = new Array(256).fill(0);
+  for (let i = 0; i < w*h; i++) hist[Math.round(lum(i))]++;
+  const total = w*h, sumAll = hist.reduce((acc2, cnt, v) => acc2 + cnt*v, 0);
+  let wB = 0, sumB = 0, bestVar = 0;
+  let thr = 160;
+  for (let v = 0; v < 256; v++) {
+    wB += hist[v];
+    if (!wB) continue;
+    const wF = total - wB;
+    if (!wF) break;
+    sumB += v*hist[v];
+    const mB = sumB/wB, mF = (sumAll-sumB)/wF;
+    const varBetween = wB*wF*(mB-mF)*(mB-mF);
+    if (varBetween > bestVar) { bestVar = varBetween; thr = v; }
+  }
+  thr = Math.max(100, Math.min(230, thr));
+  const isCard = (x, y) => lum(y*w+x) >= thr;
+  // 从中心向四方扫最大行程: 找每条射线上"连续卡片色"的最远点(允许少量暗噪点穿越)
+  const shoot = (dx, dy) => {
+    let bestEnd = null, missRun = 0, missMax = Math.round(Math.min(w,h)*0.07);
+    const cx = Math.round(w/2), cy = Math.round(h/2);
+    let x = cx, y = cy;
+    while (x >= 2 && y >= 2 && x < w-2 && y < h-2) {
+      x += dx; y += dy;
+      if (isCard(x, y)) { bestEnd = [x, y]; missRun = 0; }
+      else { missRun++; if (missRun > missMax) break; }
+    }
+    return bestEnd;
+  };
+  // 每方向3条平行射线(±15%), 取最外端命中 → 每边3个候选点
+  const edgesPts = [];
+  const dirs = [
+    { name:'top',    base:[0,-1],  perps:[[1,0],[1,0],[1,0]] },
+    { name:'right',  base:[1,0],   perps:[[0,1],[0,1],[0,1]] },
+    { name:'bottom', base:[0,1],   perps:[[1,0],[1,0],[1,0]] },
+    { name:'left',   base:[-1,0],  perps:[[0,1],[0,1],[0,1]] },
+  ];
+  for (const e of dirs) {
+    const cand = [];
+    for (const off of [-0.18, 0, 0.18]) {
+      // 起点从中心沿垂直方向偏移
+      let sx = w/2 + e.perps[0][0]*(w*off), sy = h/2 + e.perps[0][1]*(h*off);
+      // 归一回中心线
+      const hit = shoot2(Math.round(sx), Math.round(sy), e.base[0], e.base[1], isCard, w, h);
+      if (hit) cand.push(hit);
+    }
+    if (cand.length >= 2) edgesPts.push(cand);
+  }
+  if (edgesPts.length < 4) { flashMsg('自动检测失败：分界不够明显，请手动放置角落点'); return; }
+  // 四角 = 相邻两边候选点的交点(用各自最外端点连线的交点)
+  const P = edgesPts.map(c => c.reduce((a, b) => (b[2]||0) > (a[2]||0) ? b : a, c[0]));  // 每边最远点
+  // 用两条边最外点连线的交点求四角
+  const inter = (l1a, l1d, l2a, l2d) => {
+    const den = l1d[0]*l2d[1] - l1d[1]*l2d[0];
+    if (Math.abs(den) < 1e-9) return null;
+    const t = ((l2a[0]-l1a[0])*l2d[1] - (l2a[1]-l1a[1])*l2d[0]) / den;
+    return [l1a[0] + l1d[0]*t, l1a[1] + l1d[1]*t];
+  };
+  // 每边拟合方向(两点连线)
+  const dirOf = pts => { const a = pts[0], b = pts[pts.length-1]; const l = Math.hypot(b[0]-a[0], b[1]-a[1])||1; return [(b[0]-a[0])/l, (b[1]-a[1])/l]; };
+  const corners2 = [];
+  for (let i = 0; i < 4; i++) {
+    const A = edgesPts[i], B = edgesPts[(i+1)%4];
+    const p = inter(A[0], dirOf(A), B[0], dirOf(B));
+    corners2.push(p ? [p[0]/s, p[1]/s] : [ (A[0][0]+B[0][0])/2/s, (A[0][1]+B[0][1])/2/s ]);
+  }
+  // 应用
+  pushPts();
+  corners = corners2; edges = [];
+  pointType = 'corner';
+  renderL(); renderP(); updateBtns();
+}
+function shoot2(x, y, dx, dy, isCard, w, h) {
+  let bestEnd = null, missRun = 0;
+  const missMax = Math.round(Math.min(w,h)*0.07);
+  while (x >= 2 && y >= 2 && x < w-2 && y < h-2) {
+    x += dx; y += dy;
+    if (isCard(x, y)) { bestEnd = [x, y]; missRun = 0; }
+    else { missRun++; if (missRun > missMax) break; }
+  }
+  // 附带行程长度用于选最外
+  if (bestEnd) bestEnd.push(Math.hypot(bestEnd[0]-x, bestEnd[1]-y));
+  return bestEnd;
+}
+$('autoCorners').onclick = autoCorners;
+
 // 文件名输入框(常驻) + 保存按钮
 (function() {
   const inp = document.createElement('input');
@@ -647,6 +793,10 @@ function lsPath(p) {
 }
 function openLocalImage(path, name) {
   curName = name; window.__curName = name;
+  // 目录树高亮当前文件
+  document.querySelectorAll('#dirList .item').forEach(it => {
+    it.classList.toggle('sel', it.textContent === name || it.textContent === name.split('/').pop());
+  });
   // 保存文件名框同步: 图片名去扩展名
   var sn = document.getElementById('saveName');
   if (sn) sn.value = name.replace(/\.[^.]+$/, '');
