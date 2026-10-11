@@ -240,6 +240,16 @@ function restorePts(s) { corners = s.c.map(p=>p.slice()); edges = s.e.map(p=>p.s
 
 // ---------- 事件(cvL) ----------
 cvL.addEventListener('mousedown', e => {
+  if (e.button === 1) {  // 按住滚轮拖动画面
+    e.preventDefault();
+    const pane = document.getElementById('leftPane');
+    const sx = e.clientX, sy = e.clientY, sl = pane.scrollLeft, st = pane.scrollTop;
+    const mv = ev => { pane.scrollLeft = sl - (ev.clientX - sx); pane.scrollTop = st - (ev.clientY - sy); };
+    const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', mv);
+    window.addEventListener('mouseup', up);
+    return;
+  }
   if (!img || e.button !== 0) return;
   const [x, y] = toImg(e);
   const hit = hitPt(x, y);
