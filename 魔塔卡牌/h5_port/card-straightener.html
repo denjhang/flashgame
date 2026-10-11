@@ -466,7 +466,12 @@ let pvTimer = 0;
 function renderP() {
   clearTimeout(pvTimer);
   pvTimer = setTimeout(() => {
-    const src = curSource || cleanSrc || cvL;
+    let src = curSource || cleanSrc || cvL;
+    if (src === cvL && img) {  // 防标注污染: 无标注重绘副本
+      src = document.createElement('canvas');
+      src.width = cvL.width; src.height = cvL.height;
+      src.getContext('2d').drawImage(img, 0, 0);
+    }
     const quad = quadNow();
     if (!quad) {  // 不足4点: 显示源图缩略
       cvP.width = Math.max(2, Math.round(src.width * Math.min(360/src.width, 520/src.height, 1)));
@@ -490,7 +495,13 @@ function applyStraighten() {
   if (!quad) { flashMsg('角落点需要恰好 4 个'); return; }
   pixelUndo.push({ corners: corners.slice(), edges: edges.slice(), img: curSource || cleanSrc, w: cvL.width, h: cvL.height });
   if (pixelUndo.length > 40) pixelUndo.shift();
-  const out = perspective(curSource || cleanSrc || cvL, quad);
+  let psrc = curSource || cleanSrc || cvL;
+  if (psrc === cvL && img) {
+    psrc = document.createElement('canvas');
+    psrc.width = cvL.width; psrc.height = cvL.height;
+    psrc.getContext('2d').drawImage(img, 0, 0);
+  }
+  const out = perspective(psrc, quad);
   curSource = out;
   // 干净源同步为新的拉直结果(无标注)
   cleanSrc = document.createElement('canvas');
@@ -647,7 +658,12 @@ $('autoCorners').onclick = autoCorners;
   const b = document.createElement('button');
   b.textContent = '💾 保存预览结果 PNG';
   b.onclick = () => {
-    const src = curSource || cleanSrc || cvL;
+    let src = curSource || cleanSrc || cvL;
+    if (src === cvL && img) {
+      src = document.createElement('canvas');
+      src.width = cvL.width; src.height = cvL.height;
+      src.getContext('2d').drawImage(img, 0, 0);
+    }
     const quad = quadNow();
     const out = quad ? perspective(src, quad) : src;
     const name = ($('saveName').value.trim() || 'card') + '.png';  // 保留用户输入
@@ -725,7 +741,7 @@ setInterval(() => {
     const small = document.createElement('canvas');
     const s = Math.min(1, 480/Math.max(cvL.width, cvL.height));
     small.width = Math.round(cvL.width*s); small.height = Math.round(cvL.height*s);
-    small.getContext('2d').drawImage(cvL, 0, 0, small.width, small.height);
+    small.getContext('2d').drawImage(cleanSrc || img, 0, 0, small.width, small.height);  // 干净源(无点线)
     recordHist(curName, small.toDataURL('image/jpeg', 0.7), snapPts());
   } catch(e) {}
 }, 30000);
@@ -735,7 +751,7 @@ addEventListener('beforeunload', () => {
     const small = document.createElement('canvas');
     const s = Math.min(1, 480/Math.max(cvL.width, cvL.height));
     small.width = Math.round(cvL.width*s); small.height = Math.round(cvL.height*s);
-    small.getContext('2d').drawImage(cvL, 0, 0, small.width, small.height);
+    small.getContext('2d').drawImage(cleanSrc || img, 0, 0, small.width, small.height);  // 干净源
     recordHist(curName, small.toDataURL('image/jpeg', 0.7), snapPts());
   } catch(e) {}
 });
