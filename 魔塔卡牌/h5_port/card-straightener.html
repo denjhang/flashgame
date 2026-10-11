@@ -331,9 +331,15 @@ function applyZoom(e) {
   // 用 style 尺寸放大 canvas(CSS 像素), 坐标换算已按 rect 实时补偿
   cvL.style.width = (cvL.width * zoomL) + 'px';
   cvL.style.height = (cvL.height * zoomL) + 'px';
+  // 预览区: 只在容器内放大, 不超过容器(防止挤掉侧栏)
   const pv = document.getElementById('cvP');
-  pv.style.width = (pv.width * zoomL) + 'px';
-  pv.style.height = (pv.height * zoomL) + 'px';
+  const pwrap = document.getElementById('pvWrap');
+  const maxW = pwrap.clientWidth - 20, maxH = pwrap.clientHeight - 20;
+  let pw = pv.width * zoomL, ph = pv.height * zoomL;
+  const cap = Math.min(maxW / pv.width, maxH / pv.height, 4);
+  if (zoomL > 1) { pw = Math.min(pw, pv.width * cap); ph = Math.min(ph, pv.height * cap); }
+  pv.style.width = Math.round(pw) + 'px';
+  pv.style.height = Math.round(ph) + 'px';
   // 缩放指示
   let zb = document.getElementById('zoomBar');
   if (!zb) { zb = document.createElement('div'); zb.id = 'zoomBar'; $('leftPane').appendChild(zb); }
@@ -480,11 +486,11 @@ function renderP() {
       return;
     }
     const out = perspective(src, quad);
-    // 适配预览窗
+    // 适配预览窗: 硬限制在容器内(超出只能滚轮缩放查看)
     const wrap = $('pvWrap');
-    const s = Math.min((wrap.clientWidth-30)/out.width, (wrap.clientHeight-30)/out.height, 1.5);
-    cvP.width = Math.max(2, Math.round(out.width*s));
-    cvP.height = Math.max(2, Math.round(out.height*s));
+    const fit = Math.min((wrap.clientWidth-30)/out.width, (wrap.clientHeight-30)/out.height, 1);
+    cvP.width = Math.max(2, Math.round(out.width*fit));
+    cvP.height = Math.max(2, Math.round(out.height*fit));
     ctxP.drawImage(out, 0, 0, cvP.width, cvP.height);
   }, 40);
 }
