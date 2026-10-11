@@ -7,6 +7,19 @@
   :root { --bg:#1a1d29; --panel:#242838; --txt:#e8e4d8; --gold:#e8c36a; }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--txt); font-family:"Microsoft YaHei",sans-serif; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+  #workspace { flex:1; display:flex; min-height:0; }
+  .sidebar { width:230px; background:var(--panel); flex:none; overflow-y:auto; padding:10px; }
+  .sidebar.collapsed { display:none; }
+  #leftBar { border-right:1px solid #333a4e; }
+  #rightBar { border-left:1px solid #333a4e; }
+  .sidebar h4 { font-size:13px; color:var(--gold); margin:6px 0; }
+  .sidebar .item { font-size:12px; padding:6px 8px; margin:3px 0; background:#2d3350; border-radius:5px; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sidebar .item:hover { background:#3a4160; }
+  .sidebar .item.cur { border-color:var(--gold); color:var(--gold); }
+  .sidebar .thumb { width:100%; border-radius:4px; margin:4px 0; display:block; border:1px solid #454c6a; }
+  #edge { width:14px; background:#14161f; cursor:col-resize; flex:none; display:flex; align-items:center; justify-content:center; color:#556; font-size:11px; }
+  #edge:hover { background:var(--panel); color:var(--gold); }
+  .dirline { font-size:12px; color:#99a; margin:4px 0; }
   #topbar { display:flex; align-items:center; gap:12px; padding:8px 14px; background:var(--panel); flex:none; }
   #topbar h1 { font-size:15px; color:var(--gold); }
   #topbar button { background:#3a4160; border:1px solid #556; color:var(--txt); border-radius:6px; padding:6px 12px; cursor:pointer; font-size:13px; }
@@ -44,10 +57,17 @@
   <button id="undo">↩ 撤销</button>
   <button id="redo">↪ 重做</button>
   <button id="reset">🗑 清空点</button>
+  <button id="tglL">🕘 历史</button><button id="tglR">📁 目录</button>
   <span class="tip">双击点=删除 | 拖入/粘贴图片 | 角点放满4个后右侧实时预览</span>
 </div>
 <div id="mag"><canvas id="magC" width="150" height="150"></canvas></div>
 <div id="magTip"></div>
+<div id="workspace">
+<div class="sidebar" id="leftBar">
+  <h4>🕘 历史记录</h4>
+  <div id="histList"><div class="dirline">尚无记录</div></div>
+</div>
+<div id="edge">‖</div>
 <div id="main">
   <div class="pane" id="leftPane">
     
@@ -56,6 +76,17 @@
   <div class="pane">
     <div id="pvWrap"><canvas id="cvP" width="300" height="400"></canvas></div>
   </div>
+</div>
+<div class="sidebar" id="rightBar">
+  <h4>📁 本地目录</h4>
+  <div style="margin-bottom:6px;">
+    <input type="file" id="dirInput" webkitdirectory multiple hidden />
+    <button id="openDir" style="width:100%;">📂 打开文件夹</button>
+    <input type="file" id="multiInput" multiple hidden />
+    <button id="openFiles" style="width:100%;">🖼 多选图片</button>
+  </div>
+  <div id="dirList"><div class="dirline">未加载目录</div></div>
+</div>
 </div>
 
 <script>
@@ -86,7 +117,8 @@ function baseCanvas() {
 }
 
 // ---------- 载图 ----------
-function loadSrc(src) {
+function loadSrc(src, name) {
+  if (name) { curName = name; window.__curName = name; }
   const i = new Image();
   i.onload = () => {
     img = i; corners = []; edges = []; baseHist = [];
@@ -99,11 +131,11 @@ function loadSrc(src) {
   };
   i.src = src;
 }
-$('fileInput') || 0;
+
 addEventListener('paste', e => {
   for (const it of (e.clipboardData ? e.clipboardData.items : [])) {
     if (it.type.startsWith('image/')) {
-      const r = new FileReader(); r.onload = () => loadSrc(r.result); r.readAsDataURL(it.getAsFile()); break;
+      const r = new FileReader(); r.onload = () => loadSrc(r.result, it.getAsFile().name); r.readAsDataURL(it.getAsFile()); break;
     }
   }
 });
@@ -111,14 +143,14 @@ addEventListener('paste', e => {
 document.body.addEventListener('drop', e => {
   e.preventDefault();
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f && f.type.startsWith('image/')) { const r = new FileReader(); r.onload = () => loadSrc(r.result); r.readAsDataURL(f); }
+  if (f && f.type.startsWith('image/')) { curName = f.name; window.__curName = f.name; const r = new FileReader(); r.onload = () => loadSrc(r.result, f.name); r.readAsDataURL(f); }
 });
 // 文件输入动态创建
 (function() {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true; inp.id = 'fileInput';
   document.body.appendChild(inp);
-  inp.onchange = () => { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => loadSrc(r.result); r.readAsDataURL(f); };
+  inp.onchange = () => { const f = inp.files[0]; if (!f) return; curName = f.name; window.__curName = f.name; const r = new FileReader(); r.onload = () => loadSrc(r.result, f.name); r.readAsDataURL(f); };
 })();
 
 // ---------- 吸附 ----------
@@ -445,6 +477,131 @@ $('tEdge').onclick = () => { pointType = 'edge'; updateBtns(); };
 $('mPlace').onclick = () => { toolMode = 'place'; updateBtns(); };
 $('mMove').onclick = () => { toolMode = 'move'; updateBtns(); };
 addEventListener('resize', () => renderP());
+
+// ============ 历史记录(自动) ============
+let histItems = [];   // {name, dataURL, ts}
+const HIST_KEY = 'card_straightener_history';
+function loadHist() {
+  try { histItems = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch(e) { histItems = []; }
+  renderHist();
+}
+function saveHist() { try { localStorage.setItem(HIST_KEY, JSON.stringify(histItems.slice(0, 40))); } catch(e) { /* 超限忽略 */ } }
+function renderHist() {
+  const el = $('histList');
+  if (!histItems.length) { el.innerHTML = '<div class="dirline">尚无记录</div>'; return; }
+  el.innerHTML = '';
+  histItems.forEach((h, i) => {
+    const d = document.createElement('div');
+    d.className = 'item' + (h.name === (window.__curName || '') ? ' cur' : '');
+    d.textContent = h.name + '  (' + new Date(h.ts).toLocaleString() + ')';
+    d.title = '点击载入此图与上次的点';
+    d.onclick = () => openHistItem(i);
+    el.appendChild(d);
+  });
+}
+// 收集: 载图时记 name; 拉直落地/点变动时更新存储(点+拉直后的图缩略)
+let curName = '(未命名)';
+window.__curName = curName;
+function recordHist(name, dataURL, state) {
+  const idx = histItems.findIndex(h => h.name === name);
+  const item = { name, dataURL, ts: Date.now(), state };
+  if (idx >= 0) histItems[idx] = item; else histItems.unshift(item);
+  if (histItems.length > 40) histItems.length = 40;
+  saveHist(); renderHist();
+}
+function openHistItem(i) {
+  const h = histItems[i];
+  loadSrc(h.dataURL, h.name);
+  if (h.state) {
+    setTimeout(() => {
+      corners = h.state.c.map(p => p.slice());
+      edges = h.state.e.map(p => p.slice());
+      if (h.state.output) {
+        const i2 = new Image();
+        i2.onload = () => {
+          img = i2; curSource = i2;
+          cleanSrc = document.createElement('canvas');
+          cleanSrc.width = i2.width; cleanSrc.height = i2.height;
+          cleanSrc.getContext('2d').drawImage(i2, 0, 0);
+          cvL.width = i2.width; cvL.height = i2.height;
+          renderL(); renderP(); updateBtns();
+        };
+        i2.src = h.state.output;
+      } else { renderL(); renderP(); }
+      updateBtns();
+    }, 100);
+  }
+}
+// 定时把当前状态写进历史(拉直落地时/关页前/每30s)
+setInterval(() => {
+  if (!img) return;
+  try {
+    const small = document.createElement('canvas');
+    const s = Math.min(1, 480/Math.max(cvL.width, cvL.height));
+    small.width = Math.round(cvL.width*s); small.height = Math.round(cvL.height*s);
+    small.getContext('2d').drawImage(cvL, 0, 0, small.width, small.height);
+    recordHist(curName, small.toDataURL('image/jpeg', 0.7), snapPts());
+  } catch(e) {}
+}, 30000);
+addEventListener('beforeunload', () => {
+  if (!img) return;
+  try {
+    const small = document.createElement('canvas');
+    const s = Math.min(1, 480/Math.max(cvL.width, cvL.height));
+    small.width = Math.round(cvL.width*s); small.height = Math.round(cvL.height*s);
+    small.getContext('2d').drawImage(cvL, 0, 0, small.width, small.height);
+    recordHist(curName, small.toDataURL('image/jpeg', 0.7), snapPts());
+  } catch(e) {}
+});
+loadHist();
+
+// ============ 本地目录浏览 ============
+let dirFiles = [];    // [{name, file}]
+let dirCursor = 0;
+$('openDir').onclick = () => $('dirInput').click();
+$('openFiles').onclick = () => $('multiInput').click();
+$('dirInput').onchange = e => loadFileSet([...e.target.files], true);
+$('multiInput').onchange = e => loadFileSet([...e.target.files], false);
+function loadFileSet(files, isDir) {
+  dirFiles = files.filter(f => f.type.startsWith('image/')).map(f => ({ name: f.webkitRelativePath || f.name, file: f }));
+  const el = $('dirList');
+  if (!dirFiles.length) { el.innerHTML = '<div class="dirline">未找到图片</div>'; return; }
+  el.innerHTML = '';
+  // 目录分组(仅 webkitRelativePath 有层级时)
+  const groups = {};
+  dirFiles.forEach((f, i) => {
+    const parts = f.name.split('/');
+    const dir = parts.length > 1 ? parts.slice(0, -1).join('/') : '(根)';
+    (groups[dir] = groups[dir] || []).push((Object.assign({}, f, { idx: i })));
+  });
+  Object.keys(groups).sort().forEach(dir => {
+    const dl = document.createElement('div');
+    dl.className = 'dirline';
+    dl.textContent = '📂 ' + dir + ' (' + groups[dir].length + ')';
+    el.appendChild(dl);
+    groups[dir].forEach(f => {
+      const d = document.createElement('div');
+      d.className = 'item';
+      d.textContent = f.name.split('/').pop();
+      d.onclick = () => quickOpen(f.idx);
+      el.appendChild(d);
+    });
+  });
+}
+function quickOpen(idx) {
+  const f = dirFiles[idx].file;
+  curName = dirFiles[idx].name.split('/').pop();
+  window.__curName = curName;
+  const r = new FileReader();
+  r.onload = () => loadSrc(r.result);
+  r.readAsDataURL(f);
+}
+// 收展
+$('tglL').onclick = () => $('leftBar').classList.toggle('collapsed');
+$('tglR').onclick = () => $('rightBar').classList.toggle('collapsed');
+
+// 载图时接入文件名: 包装 loadSrc 的调用点
+const _origQuickName = null;
 updateBtns();
 </script>
 </body>
