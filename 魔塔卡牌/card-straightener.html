@@ -607,6 +607,9 @@ function lsPath(p) {
 }
 function openLocalImage(path, name) {
   curName = name; window.__curName = name;
+  // 目录输入框同步为该图所在目录(不含文件名), 便于直接浏览同级
+  var pi = document.getElementById('pathInput');
+  if (pi) pi.value = path.replace(/[\/][^\/]*$/, '');
   loadSrc('/local?path=' + encodeURIComponent(path), name);
 }
 $('goPath').onclick = () => { const v = $('pathInput').value.trim(); if (v) lsPath(v); };
