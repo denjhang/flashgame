@@ -215,7 +215,7 @@ function toImg(e) {
   const r = cvL.getBoundingClientRect();
   return [ (e.clientX-r.left)*(cvL.width/r.width), (e.clientY-r.top)*(cvL.height/r.height) ];
 }
-function hitPt(x, y, r=18) {
+function hitPt(x, y, r=28) {
   let best = null, bd = r;
   const all = [...corners.map((p,i)=>({p, arr:'c', i})), ...edges.map((p,i)=>({p, arr:'e', i}))];
   for (const it of all) {
@@ -353,7 +353,7 @@ function applyZoom(e) {
 }
 cvL.addEventListener('dblclick', e => {
   const [x, y] = toImg(e);
-  const hit = hitPt(x, y, 18);
+  const hit = hitPt(x, y, 28);
   if (hit) {
     pushPts();
     if (hit.arr === 'c') corners.splice(hit.i, 1); else edges.splice(hit.i, 1);
@@ -611,7 +611,13 @@ function autoCorners() {
   }
   // 应用
   pushPts();
-  corners = corners2; edges = [];
+  // 钳制在画面内(留8px边距), 保证点永远可见可拖
+  const M = 8;
+  corners = corners2.map(p => [
+    Math.max(M, Math.min(W - M, p[0])),
+    Math.max(M, Math.min(H - M, p[1])),
+  ]);
+  edges = [];
   pointType = 'corner';
   renderL(); renderP(); updateBtns();
 }
