@@ -324,22 +324,17 @@ cvL.addEventListener('wheel', e => {
   if (!img) return;
   e.preventDefault();
   const f = e.deltaY < 0 ? 1.15 : 1/1.15;
-  zoomL = Math.max(0.05, Math.min(12, zoomL*f));
+  zoomL = Math.max(0.02, Math.min(30, zoomL*f));
   applyZoom(e);
 }, { passive:false });
 function applyZoom(e) {
   // 用 style 尺寸放大 canvas(CSS 像素), 坐标换算已按 rect 实时补偿
   cvL.style.width = (cvL.width * zoomL) + 'px';
   cvL.style.height = (cvL.height * zoomL) + 'px';
-  // 预览区: 只在容器内放大, 不超过容器(防止挤掉侧栏)
+  // 预览区: 等比缩放(超尺寸由 pane 双轴滚动条承接, pane 已锁死不会被撑破)
   const pv = document.getElementById('cvP');
-  const pwrap = document.getElementById('pvWrap');
-  const maxW = pwrap.clientWidth - 20, maxH = pwrap.clientHeight - 20;
-  let pw = pv.width * zoomL, ph = pv.height * zoomL;
-  const cap = Math.min(maxW / pv.width, maxH / pv.height, 4);
-  if (zoomL > 1) { pw = Math.min(pw, pv.width * cap); ph = Math.min(ph, pv.height * cap); }
-  pv.style.width = Math.round(pw) + 'px';
-  pv.style.height = Math.round(ph) + 'px';
+  pv.style.width = (pv.width * zoomL) + 'px';
+  pv.style.height = (pv.height * zoomL) + 'px';
   // 缩放指示
   let zb = document.getElementById('zoomBar');
   if (!zb) { zb = document.createElement('div'); zb.id = 'zoomBar'; $('leftPane').appendChild(zb); }
@@ -480,8 +475,10 @@ function renderP() {
     }
     const quad = quadNow();
     if (!quad) {  // 不足4点: 显示源图缩略
-      cvP.width = Math.max(2, Math.round(src.width * Math.min(360/src.width, 520/src.height, 1)));
-      cvP.height = Math.max(2, Math.round(src.height * Math.min(360/src.width, 520/src.height, 1)));
+      cvP.width = Math.max(2, Math.round(src.width));
+      cvP.height = Math.max(2, Math.round(src.height));
+      cvP.style.width = (cvP.width * zoomL) + 'px';
+      cvP.style.height = (cvP.height * zoomL) + 'px';
       ctxP.drawImage(src, 0, 0, cvP.width, cvP.height);
       return;
     }
@@ -491,6 +488,8 @@ function renderP() {
     const fit = Math.min((paneR.width-30)/out.width, (paneR.height-30)/out.height, 1);
     cvP.width = Math.max(2, Math.round(out.width*fit));
     cvP.height = Math.max(2, Math.round(out.height*fit));
+    cvP.style.width = (cvP.width * zoomL) + 'px';
+    cvP.style.height = (cvP.height * zoomL) + 'px';
     ctxP.drawImage(out, 0, 0, cvP.width, cvP.height);
   }, 40);
 }
