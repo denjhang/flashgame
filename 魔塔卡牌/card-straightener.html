@@ -132,7 +132,11 @@ function baseCanvas() {
 
 // ---------- 载图 ----------
 function loadSrc(src, name) {
-  if (name) { curName = name; window.__curName = name; }
+  if (name) {
+    curName = name; window.__curName = name;
+    var sn = document.getElementById('saveName');
+    if (sn) sn.value = String(name).replace(/\.[^.]+$/, '');
+  }
   const i = new Image();
   i.onload = () => {
     img = i; corners = []; edges = []; baseHist = [];
@@ -481,7 +485,7 @@ $('reset').onclick = () => { pushPts(); corners = []; edges = []; renderL(); ren
     const src = curSource || cleanSrc || cvL;
     const quad = quadNow();
     const out = quad ? perspective(src, quad) : src;
-    const name = ($('saveName').value.trim() || 'card') + '.png';
+    const name = ($('saveName').value.trim() || 'card') + '.png';  // 保留用户输入
     out.toBlob(bb => { const a = document.createElement('a'); a.href = URL.createObjectURL(bb); a.download = name; a.click(); });
   };
   $('topbar').appendChild(b);
@@ -607,6 +611,9 @@ function lsPath(p) {
 }
 function openLocalImage(path, name) {
   curName = name; window.__curName = name;
+  // 保存文件名框同步: 图片名去扩展名
+  var sn = document.getElementById('saveName');
+  if (sn) sn.value = name.replace(/\.[^.]+$/, '');
   // 目录输入框同步为该图所在目录(不含文件名), 便于直接浏览同级
   var pi = document.getElementById('pathInput');
   if (pi) pi.value = path.replace(/[\/][^\/]*$/, '');
